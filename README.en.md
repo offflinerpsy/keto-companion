@@ -17,3 +17,9 @@ An Instagram URL does not authorize reading private posts. A user may supply per
 Use `docs/CURRENT_STATUS.json` and linked GitHub issues, not outdated report version numbers. Source implementation, local tests, deployed endpoints, actual Google sign-in and clinical assessment are separate acceptance stages. Synthetic identity tests do not constitute a real person's login.
 
 See [development](docs/en/DEVELOPMENT.md), [deployment](docs/en/DEPLOYMENT.md), and [continuation](docs/en/CONTINUATION.md). Do not introduce personal data until identity and consent behavior are verified. The assistant does not prescribe medication, provide continuous clinical monitoring, or guarantee error-free model output.
+
+## First sign-in to the live pilot
+
+Site: https://keto-companion-saas-staging.offflinerpsy.workers.dev/ . The owner signs in with `offflinerpsy@gmail.com`; administrator role is granted only after that identity is verified. Use the Administrator section to create an email-bound invitation and copy its link. Each member signs in with their own Google account and separately accepts the invitation and consents. First acceptance requires only owner login and seeing the dashboard, not real health data.
+
+The deployed Cloudflare → Azure Terra path passed 20 end-to-end checks using two synthetic members; fixtures and images were removed. This does not verify an actual Google login or clinical suitability. Native ChatGPT voice, Gmail/Calendar synchronization, and closed Instagram access are not enabled.

@@ -5,13 +5,22 @@ const nonce=()=>b64(crypto.getRandomValues(new Uint8Array(32)));
 const hex=b=>Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('');
 const hash=async x=>hex(await crypto.subtle.digest('SHA-256',typeof x==='string'?te.encode(x):x));
 export const OPS={keto_open:'open',keto_recipes:'recipes',keto_consent:'consent',keto_propose_change:'propose',keto_apply_proposal:'apply',keto_menu:'menu',keto_chat:'chat',keto_export:'export',keto_import_menu:'import_menu'};
+export const bridgeConfigured=env=>Boolean(env.KETO_EDGE_BRIDGE_URL&&((typeof env.KETO_EDGE_SIGNING_JWK==='string'&&env.KETO_EDGE_SIGNING_JWK.length>50)||(typeof env.KETO_EDGE_BRIDGE_SECRET==='string'&&env.KETO_EDGE_BRIDGE_SECRET.length>=32)));
 export async function bridgeCall(env,subject,operation,state,args){
- if(typeof env.KETO_EDGE_BRIDGE_SECRET!=='string'||env.KETO_EDGE_BRIDGE_SECRET.length<32||typeof env.KETO_EDGE_BRIDGE_URL!=='string')throw Error('BRIDGE_NOT_CONFIGURED');
+ if(!bridgeConfigured(env))throw Error('BRIDGE_NOT_CONFIGURED');
  let url;try{url=new URL(env.KETO_EDGE_BRIDGE_URL)}catch{throw Error('BRIDGE_NOT_CONFIGURED')};
  if(url.protocol!=='https:'||url.pathname!=='/internal/keto/compute'||url.search||url.hash||url.username||url.password)throw Error('BRIDGE_NOT_CONFIGURED');
  const body=te.encode(JSON.stringify({subject,operation,state,arguments:args}));if(body.length>1500000)throw Error('PAYLOAD_TOO_LARGE');
  const stamp=String(now()),n=nonce(),message=['POST',url.pathname,stamp,n,await hash(body)].join('\n');
- const key=await crypto.subtle.importKey('raw',te.encode(env.KETO_EDGE_BRIDGE_SECRET),{name:'HMAC',hash:'SHA-256'},false,['sign']);const signature=hex(await crypto.subtle.sign('HMAC',key,te.encode(message)));
+ let signature;
+ if(env.KETO_EDGE_SIGNING_JWK){
+  if(env.KETO_EDGE_BRIDGE_SECRET)throw Error('BRIDGE_NOT_CONFIGURED');
+  let jwk;try{jwk=JSON.parse(env.KETO_EDGE_SIGNING_JWK)}catch{throw Error('BRIDGE_NOT_CONFIGURED')}
+  if(jwk.kty!=='OKP'||jwk.crv!=='Ed25519'||typeof jwk.d!=='string'||typeof jwk.x!=='string')throw Error('BRIDGE_NOT_CONFIGURED');
+  const key=await crypto.subtle.importKey('jwk',jwk,{name:'Ed25519'},false,['sign']);signature=hex(await crypto.subtle.sign('Ed25519',key,te.encode(message)));
+ }else{
+  const key=await crypto.subtle.importKey('raw',te.encode(env.KETO_EDGE_BRIDGE_SECRET),{name:'HMAC',hash:'SHA-256'},false,['sign']);signature=hex(await crypto.subtle.sign('HMAC',key,te.encode(message)));
+ }
  const r=await fetch(url.href,{method:'POST',headers:{'content-type':'application/json','x-keto-timestamp':stamp,'x-keto-nonce':n,'x-keto-signature':signature},body,signal:AbortSignal.timeout(70000)});
  if(!r.ok)throw Error(r.status===422?'BRIDGE_REJECTED':'BRIDGE_UNAVAILABLE');
  const reader=r.body?.getReader();let nbytes=0,parts=[];if(!reader)throw Error('BRIDGE_UNAVAILABLE');while(true){let {done,value}=await reader.read();if(done)break;nbytes+=value.length;if(nbytes>2000000){await reader.cancel();throw Error('BRIDGE_UNAVAILABLE')}parts.push(value)}const bytes=new Uint8Array(nbytes);let pos=0;for(const p of parts){bytes.set(p,pos);pos+=p.length}

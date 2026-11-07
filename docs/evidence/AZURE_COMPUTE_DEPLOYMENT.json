@@ -1,0 +1,12 @@
+{
+  "task": "KETO-COMPUTE-004",
+  "source_commit": "5c48f40d939d22c535674c9455e21003d36b2b15",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "2f8cced8049dbe583b27b4229746489c3b62d41a3dd2ac5f989dfcf1921349f0",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "status": 4,
+  "complete": true,
+  "deployment_id": "4c363fab-406a-439b-86e6-c679172bb9f8",
+  "checked_at": "2026-11-07T21:23:35.831425+00:00"
+}
