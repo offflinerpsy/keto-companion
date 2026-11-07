@@ -1,0 +1,2358 @@
+{
+  "synthetic_only": true,
+  "not_deployed": true,
+  "open": {
+    "state": {
+      "version": "0.2.1",
+      "revision": 4,
+      "subject_kind": "demo",
+      "profile": {
+        "schema_version": 1,
+        "subject_id": "synthetic-one",
+        "owner_account_id": "synthetic-one",
+        "subject_kind": "demo",
+        "profile_revision": 3,
+        "display_name": null,
+        "timezone": "Europe/Minsk",
+        "goal": null,
+        "consent": {
+          "storage": true,
+          "health_data": true,
+          "media_storage": false,
+          "recorded_at": "2026-11-07T22:19:35+00:00"
+        },
+        "screening": {
+          "adult": true,
+          "pregnant": false,
+          "breastfeeding": false,
+          "type1_diabetes": false,
+          "sglt2": false,
+          "hypoglycemia_medication": false,
+          "kidney_disease": false,
+          "liver_pancreas_gallbladder_disease": false,
+          "metabolic_contraindication": false,
+          "eating_disorder_risk": false,
+          "other_clinical_restrictions": false,
+          "medications_reviewed": true,
+          "allergies_reviewed": true
+        },
+        "medications": [],
+        "allergies": [],
+        "settings": {
+          "language": "ru",
+          "theme": "ivory-plum",
+          "meals_per_day": 3,
+          "max_active_minutes": 30,
+          "budget_level": "balanced",
+          "max_recipe_repeats_per_week": 2,
+          "favorites": [],
+          "disliked_food_ids": [],
+          "excluded_food_ids": [],
+          "favorite_cuisines": [],
+          "weight_tracking": "off",
+          "show_calories": true,
+          "display_units": "metric",
+          "photo_storage": false,
+          "email_enabled": false,
+          "reminders_enabled": false,
+          "preferred_checkin": "weekly",
+          "remote_images": false,
+          "adaptive_preferences": true
+        },
+        "targets": {
+          "status": "agreed",
+          "agreed_at": "2026-11-07T00:00:00Z",
+          "basis_note": "SYNTHETIC ONLY",
+          "energy_min_kcal": 1700.0,
+          "energy_max_kcal": 1900.0,
+          "protein_min_g": 85.0,
+          "protein_max_g": 180.0,
+          "carb_basis": "net_estimate",
+          "carb_max_g": 40.0,
+          "fiber_min_g": 25.0,
+          "saturated_fat_max_pct": 10.0
+        },
+        "last_screened_at": "2026-11-07T22:19:35+00:00",
+        "baseline": {}
+      },
+      "ui": {
+        "theme": "ivory-plum",
+        "text_size": "normal",
+        "density": "comfortable",
+        "simple_mode": false,
+        "home": "chat",
+        "show_nutrition": true
+      },
+      "processing_consent": true,
+      "screening": {
+        "status": "screened_no_reported_flags",
+        "can_plan": true,
+        "reasons": [],
+        "message_ru": "Это проверка сообщённых данных, не медицинское разрешение и не диагноз."
+      },
+      "holds": [],
+      "diary": [],
+      "plans": [
+        {
+          "schema_version": 1,
+          "kind": "meal_plan",
+          "subject_id": "synthetic-one",
+          "subject_kind": "demo",
+          "created_at": "2026-11-07T22:19:35+00:00",
+          "status": "user_accepted",
+          "profile_revision": 3,
+          "profile_hash": "c64d3dc8854eb7fc87b9c500f58d22c97bcc324aff2342544feed6a6f2a2866e",
+          "catalog_hash": "f267e7e648ed98aaf58edd063e6016061a0bcf78580fdd923510f15879397eb6",
+          "engine_version": "0.1.0",
+          "days": [
+            {
+              "nutrition": {
+                "energy_kcal": 1800.117,
+                "protein_g": 124.155,
+                "fat_g": 121.1238,
+                "carbohydrate_total_g": 73.4751,
+                "fiber_g": 39.4605,
+                "saturated_fat_g": 18.87741,
+                "calcium_mg": 1332.8244,
+                "iron_mg": 15.207318,
+                "magnesium_mg": 619.5636,
+                "potassium_mg": 3804.5268,
+                "sodium_mg": 777.321,
+                "vitamin_d_ug": 5.301,
+                "folate_dfe_ug": 502.29,
+                "vitamin_b12_ug": 11.5506,
+                "vitamin_c_mg": 193.833,
+                "net_carbohydrate_g": 34.0146
+              },
+              "coverage": {
+                "energy_kcal": {
+                  "complete": true,
+                  "known_subtotal": 1800.117
+                },
+                "protein_g": {
+                  "complete": true,
+                  "known_subtotal": 124.155
+                },
+                "fat_g": {
+                  "complete": true,
+                  "known_subtotal": 121.1238
+                },
+                "carbohydrate_total_g": {
+                  "complete": true,
+                  "known_subtotal": 73.4751
+                },
+                "fiber_g": {
+                  "complete": true,
+                  "known_subtotal": 39.4605
+                },
+                "saturated_fat_g": {
+                  "complete": true,
+                  "known_subtotal": 18.87741
+                },
+                "calcium_mg": {
+                  "complete": true,
+                  "known_subtotal": 1332.8244
+                },
+                "iron_mg": {
+                  "complete": true,
+                  "known_subtotal": 15.207318
+                },
+                "magnesium_mg": {
+                  "complete": true,
+                  "known_subtotal": 619.5636
+                },
+                "potassium_mg": {
+                  "complete": true,
+                  "known_subtotal": 3804.5268
+                },
+                "sodium_mg": {
+                  "complete": true,
+                  "known_subtotal": 777.321
+                },
+                "vitamin_d_ug": {
+                  "complete": true,
+                  "known_subtotal": 5.301
+                },
+                "folate_dfe_ug": {
+                  "complete": true,
+                  "known_subtotal": 502.29
+                },
+                "vitamin_b12_ug": {
+                  "complete": true,
+                  "known_subtotal": 11.5506
+                },
+                "vitamin_c_mg": {
+                  "complete": true,
+                  "known_subtotal": 193.833
+                },
+                "net_carbohydrate_g": {
+                  "complete": true,
+                  "known_subtotal": 34.0146
+                }
+              },
+              "date": "2026-11-08",
+              "meals": [
+                {
+                  "nutrition": {
+                    "energy_kcal": 415.89,
+                    "protein_g": 27.063,
+                    "fat_g": 26.4186,
+                    "carbohydrate_total_g": 22.5117,
+                    "fiber_g": 9.9315,
+                    "saturated_fat_g": 4.48371,
+                    "calcium_mg": 309.15,
+                    "iron_mg": 2.13795,
+                    "magnesium_mg": 139.77,
+                    "potassium_mg": 606.285,
+                    "sodium_mg": 73.71,
+                    "vitamin_d_ug": 0.0,
+                    "folate_dfe_ug": 72.81,
+                    "vitamin_b12_ug": 1.0296,
+                    "vitamin_c_mg": 16.1325,
+                    "net_carbohydrate_g": 12.5802
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 415.89,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 27.063,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 26.4186,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 22.5117,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 9.9315,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 4.48371,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 309.15,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 2.13795,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 139.77,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 606.285,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 73.71,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.0,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 72.81,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 1.0296,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 16.1325,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 12.5802,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "milk",
+                    "tree_nut"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F170903",
+                      "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+                      "grams_edible": 198.0,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+                    },
+                    {
+                      "food_id": "F167755",
+                      "name_ru": "Малина",
+                      "grams_edible": 54.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167755/nutrients"
+                    },
+                    {
+                      "food_id": "F169414",
+                      "name_ru": "Семена льна",
+                      "grams_edible": 18.0,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169414/nutrients"
+                    },
+                    {
+                      "food_id": "F170187",
+                      "name_ru": "Грецкий орех",
+                      "grams_edible": 22.5,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170187/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "B02",
+                  "name_ru": "Йогурт с малиной, льном и грецким орехом",
+                  "portions": 0.9,
+                  "steps_ru": "Измельчить лён непосредственно перед едой. Смешать йогурт со льном, добавить малину и нарубленный орех. Подать сразу.",
+                  "active_minutes": 5,
+                  "category": "breakfast",
+                  "protein_family": "yogurt",
+                  "kitchen_tested": false,
+                  "slot": "breakfast"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 551.25,
+                    "protein_g": 45.396,
+                    "fat_g": 35.6499,
+                    "carbohydrate_total_g": 17.5086,
+                    "fiber_g": 9.954,
+                    "saturated_fat_g": 5.97492,
+                    "calcium_mg": 85.5864,
+                    "iron_mg": 4.583988,
+                    "magnesium_mg": 192.3336,
+                    "potassium_mg": 1261.1988,
+                    "sodium_mg": 243.36,
+                    "vitamin_d_ug": 0.117,
+                    "folate_dfe_ug": 218.7,
+                    "vitamin_b12_ug": 0.3978,
+                    "vitamin_c_mg": 25.002,
+                    "net_carbohydrate_g": 7.5546
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 551.25,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 45.396,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 35.6499,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 17.5086,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 9.954,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 5.97492,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 85.5864,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 4.583988,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 192.3336,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 1261.1988,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 243.36,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.117,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 218.7,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.3978,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 25.002,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 7.5546,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [],
+                  "ingredients": [
+                    {
+                      "food_id": "F171477",
+                      "name_ru": "Куриная грудка без кожи, запечённая",
+                      "grams_edible": 117.0,
+                      "state": "cooked_roasted",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171477/nutrients"
+                    },
+                    {
+                      "food_id": "F171705",
+                      "name_ru": "Авокадо, мякоть",
+                      "grams_edible": 90.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171705/nutrients"
+                    },
+                    {
+                      "food_id": "F169247",
+                      "name_ru": "Салат ромэн",
+                      "grams_edible": 90.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169247/nutrients"
+                    },
+                    {
+                      "food_id": "F168409",
+                      "name_ru": "Огурец с кожурой",
+                      "grams_edible": 90.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/168409/nutrients"
+                    },
+                    {
+                      "food_id": "F170556",
+                      "name_ru": "Семена тыквы, очищенные сухие",
+                      "grams_edible": 18.0,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170556/nutrients"
+                    },
+                    {
+                      "food_id": "F171413",
+                      "name_ru": "Оливковое масло",
+                      "grams_edible": 9.0,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171413/nutrients"
+                    },
+                    {
+                      "food_id": "F167746",
+                      "name_ru": "Лимон, мякоть без кожуры",
+                      "grams_edible": 18.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167746/nutrients"
+                    },
+                    {
+                      "food_id": "F173468",
+                      "name_ru": "Соль поваренная; содержание йода не известно",
+                      "grams_edible": 0.36,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/173468/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "M03",
+                  "name_ru": "Куриный салат с авокадо и тыквенными семенами",
+                  "portions": 0.9,
+                  "steps_ru": "Готовую грудку нарезать; вес готовый. Смешать листья, огурец и авокадо. Добавить курицу, семена, масло и измельчённую мякоть лимона; без неучтённой заправки.",
+                  "active_minutes": 12,
+                  "category": "main",
+                  "protein_family": "chicken",
+                  "kitchen_tested": false,
+                  "slot": "lunch"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 582.867,
+                    "protein_g": 36.369,
+                    "fat_g": 43.5033,
+                    "carbohydrate_total_g": 17.6508,
+                    "fiber_g": 12.69,
+                    "saturated_fat_g": 6.27552,
+                    "calcium_mg": 748.458,
+                    "iron_mg": 7.07508,
+                    "magnesium_mg": 192.78,
+                    "potassium_mg": 1530.693,
+                    "sodium_mg": 428.841,
+                    "vitamin_d_ug": 5.184,
+                    "folate_dfe_ug": 176.76,
+                    "vitamin_b12_ug": 9.6552,
+                    "vitamin_c_mg": 137.8305,
+                    "net_carbohydrate_g": 4.9608
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 582.867,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 36.369,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 43.5033,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 17.6508,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 12.69,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 6.27552,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 748.458,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 7.07508,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 192.78,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 1530.693,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 428.841,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 5.184,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 176.76,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 9.6552,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 137.8305,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 4.9608,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "fish"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F175139",
+                      "name_ru": "Сардины с косточками в масле, после слива",
+                      "grams_edible": 108.0,
+                      "state": "canned_drained",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/175139/nutrients"
+                    },
+                    {
+                      "food_id": "F168421",
+                      "name_ru": "Капуста кейл",
+                      "grams_edible": 117.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/168421/nutrients"
+                    },
+                    {
+                      "food_id": "F171705",
+                      "name_ru": "Авокадо, мякоть",
+                      "grams_edible": 81.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171705/nutrients"
+                    },
+                    {
+                      "food_id": "F169276",
+                      "name_ru": "Редис",
+                      "grams_edible": 72.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169276/nutrients"
+                    },
+                    {
+                      "food_id": "F171413",
+                      "name_ru": "Оливковое масло",
+                      "grams_edible": 10.8,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171413/nutrients"
+                    },
+                    {
+                      "food_id": "F167746",
+                      "name_ru": "Лимон, мякоть без кожуры",
+                      "grams_edible": 18.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167746/nutrients"
+                    },
+                    {
+                      "food_id": "F170556",
+                      "name_ru": "Семена тыквы, очищенные сухие",
+                      "grams_edible": 13.5,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170556/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "M14",
+                  "name_ru": "Тёплый салат из сардин, кейла и авокадо",
+                  "portions": 0.9,
+                  "steps_ru": "Кейл мелко нашинковать и слегка прогреть. Смешать с авокадо, редисом и отцеженными сардинами с косточками. Добавить масло, лимонную мякоть и семена.",
+                  "active_minutes": 15,
+                  "category": "main",
+                  "protein_family": "sardine",
+                  "kitchen_tested": false,
+                  "slot": "dinner"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 250.11,
+                    "protein_g": 15.327,
+                    "fat_g": 15.552,
+                    "carbohydrate_total_g": 15.804,
+                    "fiber_g": 6.885,
+                    "saturated_fat_g": 2.14326,
+                    "calcium_mg": 189.63,
+                    "iron_mg": 1.4103,
+                    "magnesium_mg": 94.68,
+                    "potassium_mg": 406.35,
+                    "sodium_mg": 31.41,
+                    "vitamin_d_ug": 0.0,
+                    "folate_dfe_ug": 34.02,
+                    "vitamin_b12_ug": 0.468,
+                    "vitamin_c_mg": 14.868,
+                    "net_carbohydrate_g": 8.919
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 250.11,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 15.327,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 15.552,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 15.804,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 6.885,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 2.14326,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 189.63,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 1.4103,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 94.68,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 406.35,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 31.41,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.0,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 34.02,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.468,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 14.868,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 8.919,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "milk",
+                    "tree_nut"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F170567",
+                      "name_ru": "Миндаль",
+                      "grams_edible": 27.0,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170567/nutrients"
+                    },
+                    {
+                      "food_id": "F167755",
+                      "name_ru": "Малина",
+                      "grams_edible": 54.0,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167755/nutrients"
+                    },
+                    {
+                      "food_id": "F170903",
+                      "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+                      "grams_edible": 90.0,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "S03",
+                  "name_ru": "Миндаль с малиной и натуральным йогуртом",
+                  "portions": 0.9,
+                  "steps_ru": "Взвесить миндаль и ягоды, подать с натуральным йогуртом без сахара.",
+                  "active_minutes": 5,
+                  "category": "component",
+                  "protein_family": "yogurt",
+                  "kitchen_tested": false,
+                  "slot": "dinner"
+                }
+              ],
+              "issues": [],
+              "status": "calculated_draft",
+              "profile_revision": 3,
+              "profile_hash": "c64d3dc8854eb7fc87b9c500f58d22c97bcc324aff2342544feed6a6f2a2866e",
+              "catalog_hash": "f267e7e648ed98aaf58edd063e6016061a0bcf78580fdd923510f15879397eb6",
+              "engine_version": "0.1.0",
+              "caveats": [
+                "Расчёт по справочным данным, не анализ готового блюда.",
+                "Кухонное тестирование рецептов не проводилось.",
+                "Не доказательство кетоза или полной обеспеченности микронутриентами."
+              ]
+            },
+            {
+              "nutrition": {
+                "energy_kcal": 1800.117,
+                "protein_g": 134.138123,
+                "fat_g": 117.25736,
+                "carbohydrate_total_g": 70.229016,
+                "fiber_g": 33.772728,
+                "saturated_fat_g": 16.833253,
+                "calcium_mg": 699.116704,
+                "iron_mg": 14.08696,
+                "magnesium_mg": 475.927276,
+                "potassium_mg": 3171.406128,
+                "sodium_mg": 714.62116,
+                "vitamin_d_ug": 0.51832,
+                "folate_dfe_ug": 497.89652,
+                "vitamin_b12_ug": 2.528064,
+                "vitamin_c_mg": 168.461524,
+                "net_carbohydrate_g": 36.456288
+              },
+              "coverage": {
+                "energy_kcal": {
+                  "complete": true,
+                  "known_subtotal": 1800.117
+                },
+                "protein_g": {
+                  "complete": true,
+                  "known_subtotal": 134.138123
+                },
+                "fat_g": {
+                  "complete": true,
+                  "known_subtotal": 117.25736
+                },
+                "carbohydrate_total_g": {
+                  "complete": true,
+                  "known_subtotal": 70.229016
+                },
+                "fiber_g": {
+                  "complete": true,
+                  "known_subtotal": 33.772728
+                },
+                "saturated_fat_g": {
+                  "complete": true,
+                  "known_subtotal": 16.833253
+                },
+                "calcium_mg": {
+                  "complete": true,
+                  "known_subtotal": 699.116704
+                },
+                "iron_mg": {
+                  "complete": true,
+                  "known_subtotal": 14.08696
+                },
+                "magnesium_mg": {
+                  "complete": true,
+                  "known_subtotal": 475.927276
+                },
+                "potassium_mg": {
+                  "complete": true,
+                  "known_subtotal": 3171.406128
+                },
+                "sodium_mg": {
+                  "complete": true,
+                  "known_subtotal": 714.62116
+                },
+                "vitamin_d_ug": {
+                  "complete": true,
+                  "known_subtotal": 0.51832
+                },
+                "folate_dfe_ug": {
+                  "complete": true,
+                  "known_subtotal": 497.89652
+                },
+                "vitamin_b12_ug": {
+                  "complete": true,
+                  "known_subtotal": 2.528064
+                },
+                "vitamin_c_mg": {
+                  "complete": true,
+                  "known_subtotal": 168.461524
+                },
+                "net_carbohydrate_g": {
+                  "complete": true,
+                  "known_subtotal": 36.456288
+                }
+              },
+              "date": "2026-11-09",
+              "meals": [
+                {
+                  "nutrition": {
+                    "energy_kcal": 471.5458,
+                    "protein_g": 27.988862,
+                    "fat_g": 32.953448,
+                    "carbohydrate_total_g": 21.630664,
+                    "fiber_g": 7.87094,
+                    "saturated_fat_g": 4.971692,
+                    "calcium_mg": 298.4102,
+                    "iron_mg": 2.411024,
+                    "magnesium_mg": 157.377,
+                    "potassium_mg": 655.1314,
+                    "sodium_mg": 73.986,
+                    "vitamin_d_ug": 0.0,
+                    "folate_dfe_ug": 89.5774,
+                    "vitamin_b12_ug": 1.043328,
+                    "vitamin_c_mg": 31.63842,
+                    "net_carbohydrate_g": 13.759724
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 471.5458,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 27.988862,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 32.953448,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 21.630664,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 7.87094,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 4.971692,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 298.4102,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 2.411024,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 157.377,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 655.1314,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 73.986,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.0,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 89.5774,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 1.043328,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 31.63842,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 13.759724,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "milk",
+                    "tree_nut"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F170903",
+                      "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+                      "grams_edible": 200.64,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+                    },
+                    {
+                      "food_id": "F167762",
+                      "name_ru": "Клубника",
+                      "grams_edible": 50.16,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167762/nutrients"
+                    },
+                    {
+                      "food_id": "F170182",
+                      "name_ru": "Пекан",
+                      "grams_edible": 20.9,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170182/nutrients"
+                    },
+                    {
+                      "food_id": "F170562",
+                      "name_ru": "Семена подсолнечника, очищенные сухие",
+                      "grams_edible": 16.72,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170562/nutrients"
+                    },
+                    {
+                      "food_id": "F169414",
+                      "name_ru": "Семена льна",
+                      "grams_edible": 12.54,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169414/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "B15",
+                  "name_ru": "Йогурт с пеканом, клубникой и семенами",
+                  "portions": 0.836,
+                  "steps_ru": "Измельчить лён и пекан. Смешать йогурт со льном, сверху выложить клубнику, орехи и семена. Проверить, что йогурт без добавленного сахара.",
+                  "active_minutes": 5,
+                  "category": "breakfast",
+                  "protein_family": "yogurt",
+                  "kitchen_tested": false,
+                  "slot": "breakfast"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 460.5106,
+                    "protein_g": 40.234172,
+                    "fat_g": 27.32884,
+                    "carbohydrate_total_g": 17.041024,
+                    "fiber_g": 9.960104,
+                    "saturated_fat_g": 4.460227,
+                    "calcium_mg": 80.79104,
+                    "iron_mg": 3.827083,
+                    "magnesium_mg": 85.81122,
+                    "potassium_mg": 1145.20296,
+                    "sodium_mg": 267.8544,
+                    "vitamin_d_ug": 0.11704,
+                    "folate_dfe_ug": 241.42844,
+                    "vitamin_b12_ug": 0.397936,
+                    "vitamin_c_mg": 102.916616,
+                    "net_carbohydrate_g": 7.08092
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 460.5106,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 40.234172,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 27.32884,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 17.041024,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 9.960104,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 4.460227,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 80.79104,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 3.827083,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 85.81122,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 1145.20296,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 267.8544,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.11704,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 241.42844,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.397936,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 102.916616,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 7.08092,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [],
+                  "ingredients": [
+                    {
+                      "food_id": "F171477",
+                      "name_ru": "Куриная грудка без кожи, запечённая",
+                      "grams_edible": 117.04,
+                      "state": "cooked_roasted",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171477/nutrients"
+                    },
+                    {
+                      "food_id": "F169247",
+                      "name_ru": "Салат ромэн",
+                      "grams_edible": 100.32,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169247/nutrients"
+                    },
+                    {
+                      "food_id": "F171705",
+                      "name_ru": "Авокадо, мякоть",
+                      "grams_edible": 83.6,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171705/nutrients"
+                    },
+                    {
+                      "food_id": "F170108",
+                      "name_ru": "Перец сладкий красный",
+                      "grams_edible": 66.88,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170108/nutrients"
+                    },
+                    {
+                      "food_id": "F168155",
+                      "name_ru": "Лайм, съедобная часть",
+                      "grams_edible": 16.72,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/168155/nutrients"
+                    },
+                    {
+                      "food_id": "F171413",
+                      "name_ru": "Оливковое масло",
+                      "grams_edible": 10.032,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171413/nutrients"
+                    },
+                    {
+                      "food_id": "F170923",
+                      "name_ru": "Кумин",
+                      "grams_edible": 0.836,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170923/nutrients"
+                    },
+                    {
+                      "food_id": "F171329",
+                      "name_ru": "Паприка",
+                      "grams_edible": 0.836,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171329/nutrients"
+                    },
+                    {
+                      "food_id": "F173468",
+                      "name_ru": "Соль поваренная; содержание йода не известно",
+                      "grams_edible": 0.418,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/173468/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "M10",
+                  "name_ru": "Курица в листьях ромэна с лаймом",
+                  "portions": 0.836,
+                  "steps_ru": "Готовую курицу прогреть с маслом, кумином и паприкой до 74 °C. Авокадо размять с мякотью лайма. Разложить курицу, перец и авокадо по листьям ромэна.",
+                  "active_minutes": 15,
+                  "category": "main",
+                  "protein_family": "chicken",
+                  "kitchen_tested": false,
+                  "slot": "lunch"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 536.68692,
+                    "protein_g": 50.152309,
+                    "fat_g": 32.310564,
+                    "carbohydrate_total_g": 15.266196,
+                    "fiber_g": 7.693708,
+                    "saturated_fat_g": 4.139262,
+                    "calcium_mg": 134.825064,
+                    "iron_mg": 6.233199,
+                    "magnesium_mg": 139.408016,
+                    "potassium_mg": 938.642408,
+                    "sodium_mg": 332.23476,
+                    "vitamin_d_ug": 0.40128,
+                    "folate_dfe_ug": 124.97364,
+                    "vitamin_b12_ug": 0.521664,
+                    "vitamin_c_mg": 20.411776,
+                    "net_carbohydrate_g": 7.572488
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 536.68692,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 50.152309,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 32.310564,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 15.266196,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 7.693708,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 4.139262,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 134.825064,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 6.233199,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 139.408016,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 938.642408,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 332.23476,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.40128,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 124.97364,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.521664,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 20.411776,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 7.572488,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "tree_nut"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F171496",
+                      "name_ru": "Грудка индейки без кожи, запечённая",
+                      "grams_edible": 133.76,
+                      "state": "cooked_roasted",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171496/nutrients"
+                    },
+                    {
+                      "food_id": "F168389",
+                      "name_ru": "Спаржа",
+                      "grams_edible": 192.28,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/168389/nutrients"
+                    },
+                    {
+                      "food_id": "F170567",
+                      "name_ru": "Миндаль",
+                      "grams_edible": 25.08,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170567/nutrients"
+                    },
+                    {
+                      "food_id": "F171413",
+                      "name_ru": "Оливковое масло",
+                      "grams_edible": 16.72,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171413/nutrients"
+                    },
+                    {
+                      "food_id": "F167746",
+                      "name_ru": "Лимон, мякоть без кожуры",
+                      "grams_edible": 16.72,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167746/nutrients"
+                    },
+                    {
+                      "food_id": "F169230",
+                      "name_ru": "Чеснок",
+                      "grams_edible": 2.508,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169230/nutrients"
+                    },
+                    {
+                      "food_id": "F173468",
+                      "name_ru": "Соль поваренная; содержание йода не известно",
+                      "grams_edible": 0.5016,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/173468/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "M26",
+                  "name_ru": "Индейка со спаржей и миндалём",
+                  "portions": 0.836,
+                  "steps_ru": "Спаржу приготовить с чесноком и частью масла. Добавить готовую индейку и прогреть до 74 °C. Подать с миндалём, лимонной мякотью и оставшимся маслом.",
+                  "active_minutes": 20,
+                  "category": "main",
+                  "protein_family": "turkey",
+                  "kitchen_tested": false,
+                  "slot": "dinner"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 331.37368,
+                    "protein_g": 15.76278,
+                    "fat_g": 24.664508,
+                    "carbohydrate_total_g": 16.291132,
+                    "fiber_g": 8.247976,
+                    "saturated_fat_g": 3.262072,
+                    "calcium_mg": 185.0904,
+                    "iron_mg": 1.615654,
+                    "magnesium_mg": 93.33104,
+                    "potassium_mg": 432.42936,
+                    "sodium_mg": 40.546,
+                    "vitamin_d_ug": 0.0,
+                    "folate_dfe_ug": 41.91704,
+                    "vitamin_b12_ug": 0.565136,
+                    "vitamin_c_mg": 13.494712,
+                    "net_carbohydrate_g": 8.043156
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 331.37368,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 15.76278,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 24.664508,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 16.291132,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 8.247976,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 3.262072,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 185.0904,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 1.615654,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 93.33104,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 432.42936,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 40.546,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.0,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 41.91704,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.565136,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 13.494712,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 8.043156,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "milk",
+                    "tree_nut"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F170182",
+                      "name_ru": "Пекан",
+                      "grams_edible": 25.08,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170182/nutrients"
+                    },
+                    {
+                      "food_id": "F173946",
+                      "name_ru": "Ежевика",
+                      "grams_edible": 58.52,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/173946/nutrients"
+                    },
+                    {
+                      "food_id": "F170903",
+                      "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+                      "grams_edible": 108.68,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+                    },
+                    {
+                      "food_id": "F169414",
+                      "name_ru": "Семена льна",
+                      "grams_edible": 10.032,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169414/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "S08",
+                  "name_ru": "Пекан и ежевика с йогуртом",
+                  "portions": 0.836,
+                  "steps_ru": "Смешать йогурт с молотым льном, добавить ягоды и измельчённый пекан.",
+                  "active_minutes": 5,
+                  "category": "component",
+                  "protein_family": "yogurt",
+                  "kitchen_tested": false,
+                  "slot": "dinner"
+                }
+              ],
+              "issues": [],
+              "status": "calculated_draft",
+              "profile_revision": 3,
+              "profile_hash": "c64d3dc8854eb7fc87b9c500f58d22c97bcc324aff2342544feed6a6f2a2866e",
+              "catalog_hash": "f267e7e648ed98aaf58edd063e6016061a0bcf78580fdd923510f15879397eb6",
+              "engine_version": "0.1.0",
+              "caveats": [
+                "Расчёт по справочным данным, не анализ готового блюда.",
+                "Кухонное тестирование рецептов не проводилось.",
+                "Не доказательство кетоза или полной обеспеченности микронутриентами."
+              ]
+            },
+            {
+              "nutrition": {
+                "energy_kcal": 1800.93915,
+                "protein_g": 112.746693,
+                "fat_g": 126.494253,
+                "carbohydrate_total_g": 81.369909,
+                "fiber_g": 41.690091,
+                "saturated_fat_g": 19.132973,
+                "calcium_mg": 1047.63615,
+                "iron_mg": 19.098912,
+                "magnesium_mg": 694.87587,
+                "potassium_mg": 3929.52555,
+                "sodium_mg": 864.4965,
+                "vitamin_d_ug": 7.27812,
+                "folate_dfe_ug": 457.80078,
+                "vitamin_b12_ug": 15.031779,
+                "vitamin_c_mg": 172.304217,
+                "net_carbohydrate_g": 39.679818
+              },
+              "coverage": {
+                "energy_kcal": {
+                  "complete": true,
+                  "known_subtotal": 1800.93915
+                },
+                "protein_g": {
+                  "complete": true,
+                  "known_subtotal": 112.746693
+                },
+                "fat_g": {
+                  "complete": true,
+                  "known_subtotal": 126.494253
+                },
+                "carbohydrate_total_g": {
+                  "complete": true,
+                  "known_subtotal": 81.369909
+                },
+                "fiber_g": {
+                  "complete": true,
+                  "known_subtotal": 41.690091
+                },
+                "saturated_fat_g": {
+                  "complete": true,
+                  "known_subtotal": 19.132973
+                },
+                "calcium_mg": {
+                  "complete": true,
+                  "known_subtotal": 1047.63615
+                },
+                "iron_mg": {
+                  "complete": true,
+                  "known_subtotal": 19.098912
+                },
+                "magnesium_mg": {
+                  "complete": true,
+                  "known_subtotal": 694.87587
+                },
+                "potassium_mg": {
+                  "complete": true,
+                  "known_subtotal": 3929.52555
+                },
+                "sodium_mg": {
+                  "complete": true,
+                  "known_subtotal": 864.4965
+                },
+                "vitamin_d_ug": {
+                  "complete": true,
+                  "known_subtotal": 7.27812
+                },
+                "folate_dfe_ug": {
+                  "complete": true,
+                  "known_subtotal": 457.80078
+                },
+                "vitamin_b12_ug": {
+                  "complete": true,
+                  "known_subtotal": 15.031779
+                },
+                "vitamin_c_mg": {
+                  "complete": true,
+                  "known_subtotal": 172.304217
+                },
+                "net_carbohydrate_g": {
+                  "complete": true,
+                  "known_subtotal": 39.679818
+                }
+              },
+              "date": "2026-11-10",
+              "meals": [
+                {
+                  "nutrition": {
+                    "energy_kcal": 406.15074,
+                    "protein_g": 27.666525,
+                    "fat_g": 25.015461,
+                    "carbohydrate_total_g": 25.846116,
+                    "fiber_g": 12.313911,
+                    "saturated_fat_g": 4.513841,
+                    "calcium_mg": 314.62926,
+                    "iron_mg": 3.375712,
+                    "magnesium_mg": 166.50897,
+                    "potassium_mg": 757.29366,
+                    "sodium_mg": 72.58782,
+                    "vitamin_d_ug": 0.0,
+                    "folate_dfe_ug": 79.43523,
+                    "vitamin_b12_ug": 1.005576,
+                    "vitamin_c_mg": 15.947697,
+                    "net_carbohydrate_g": 13.532205
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 406.15074,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 27.666525,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 25.015461,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 25.846116,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 12.313911,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 4.513841,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 314.62926,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 3.375712,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 166.50897,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 757.29366,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 72.58782,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.0,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 79.43523,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 1.005576,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 15.947697,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 13.532205,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "milk",
+                    "tree_nut"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F170903",
+                      "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+                      "grams_edible": 193.38,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+                    },
+                    {
+                      "food_id": "F173946",
+                      "name_ru": "Ежевика",
+                      "grams_edible": 61.53,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/173946/nutrients"
+                    },
+                    {
+                      "food_id": "F169593",
+                      "name_ru": "Какао-порошок без сахара",
+                      "grams_edible": 7.032,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169593/nutrients"
+                    },
+                    {
+                      "food_id": "F169414",
+                      "name_ru": "Семена льна",
+                      "grams_edible": 15.822,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169414/nutrients"
+                    },
+                    {
+                      "food_id": "F170581",
+                      "name_ru": "Фундук",
+                      "grams_edible": 21.975,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170581/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "B09",
+                  "name_ru": "Какао-йогурт с ежевикой и фундуком",
+                  "portions": 0.879,
+                  "steps_ru": "Смешать йогурт с какао и свежемолотым льном без сахара. Добавить ежевику и измельчённый фундук. Это не сладкий десерт: подсластитель в расчёт не включён.",
+                  "active_minutes": 5,
+                  "category": "breakfast",
+                  "protein_family": "yogurt",
+                  "kitchen_tested": false,
+                  "slot": "breakfast"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 519.06708,
+                    "protein_g": 36.282483,
+                    "fat_g": 33.910941,
+                    "carbohydrate_total_g": 21.664713,
+                    "fiber_g": 8.78121,
+                    "saturated_fat_g": 4.124268,
+                    "calcium_mg": 574.45287,
+                    "iron_mg": 6.751423,
+                    "magnesium_mg": 151.4517,
+                    "potassium_mg": 1234.84557,
+                    "sodium_mg": 371.43024,
+                    "vitamin_d_ug": 5.48496,
+                    "folate_dfe_ug": 105.6558,
+                    "vitamin_b12_ug": 10.215738,
+                    "vitamin_c_mg": 54.498,
+                    "net_carbohydrate_g": 12.883503
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 519.06708,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 36.282483,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 33.910941,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 21.664713,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 8.78121,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 4.124268,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 574.45287,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 6.751423,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 151.4517,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 1234.84557,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 371.43024,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 5.48496,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 105.6558,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 10.215738,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 54.498,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 12.883503,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "fish",
+                    "tree_nut"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F175139",
+                      "name_ru": "Сардины с косточками в масле, после слива",
+                      "grams_edible": 114.27,
+                      "state": "canned_drained",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/175139/nutrients"
+                    },
+                    {
+                      "food_id": "F169961",
+                      "name_ru": "Фасоль стручковая зелёная",
+                      "grams_edible": 175.8,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169961/nutrients"
+                    },
+                    {
+                      "food_id": "F170457",
+                      "name_ru": "Помидоры красные",
+                      "grams_edible": 87.9,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170457/nutrients"
+                    },
+                    {
+                      "food_id": "F171413",
+                      "name_ru": "Оливковое масло",
+                      "grams_edible": 11.427,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171413/nutrients"
+                    },
+                    {
+                      "food_id": "F170567",
+                      "name_ru": "Миндаль",
+                      "grams_edible": 17.58,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170567/nutrients"
+                    },
+                    {
+                      "food_id": "F167746",
+                      "name_ru": "Лимон, мякоть без кожуры",
+                      "grams_edible": 17.58,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167746/nutrients"
+                    },
+                    {
+                      "food_id": "F170416",
+                      "name_ru": "Петрушка свежая",
+                      "grams_edible": 8.79,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170416/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "M06",
+                  "name_ru": "Сардины с тёплой стручковой фасолью",
+                  "portions": 0.879,
+                  "steps_ru": "Фасоль приготовить до мягкости. Сардины отцедить; сохранить съедобные косточки. Соединить с томатами, миндалём и лимонной мякотью, заправить взвешенным маслом.",
+                  "active_minutes": 20,
+                  "category": "main",
+                  "protein_family": "sardine",
+                  "kitchen_tested": false,
+                  "slot": "lunch"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 608.41743,
+                    "protein_g": 40.2582,
+                    "fat_g": 43.839246,
+                    "carbohydrate_total_g": 22.781043,
+                    "fiber_g": 13.01799,
+                    "saturated_fat_g": 6.714417,
+                    "calcium_mg": 134.46942,
+                    "iron_mg": 6.471022,
+                    "magnesium_mg": 220.2774,
+                    "potassium_mg": 1315.09827,
+                    "sodium_mg": 412.52349,
+                    "vitamin_d_ug": 1.79316,
+                    "folate_dfe_ug": 187.3149,
+                    "vitamin_b12_ug": 3.810465,
+                    "vitamin_c_mg": 85.662945,
+                    "net_carbohydrate_g": 9.763053
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 608.41743,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 40.2582,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 43.839246,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 22.781043,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 13.01799,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 6.714417,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 134.46942,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 6.471022,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 220.2774,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 1315.09827,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 412.52349,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 1.79316,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 187.3149,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 3.810465,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 85.662945,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 9.763053,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [
+                    "fish"
+                  ],
+                  "ingredients": [
+                    {
+                      "food_id": "F173709",
+                      "name_ru": "Тунец light в воде, после слива",
+                      "grams_edible": 149.43,
+                      "state": "canned_drained",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/173709/nutrients"
+                    },
+                    {
+                      "food_id": "F169975",
+                      "name_ru": "Капуста белокочанная",
+                      "grams_edible": 158.22,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/169975/nutrients"
+                    },
+                    {
+                      "food_id": "F171705",
+                      "name_ru": "Авокадо, мякоть",
+                      "grams_edible": 105.48,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171705/nutrients"
+                    },
+                    {
+                      "food_id": "F170556",
+                      "name_ru": "Семена тыквы, очищенные сухие",
+                      "grams_edible": 21.975,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170556/nutrients"
+                    },
+                    {
+                      "food_id": "F171413",
+                      "name_ru": "Оливковое масло",
+                      "grams_edible": 15.822,
+                      "state": "ready_to_eat",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171413/nutrients"
+                    },
+                    {
+                      "food_id": "F167746",
+                      "name_ru": "Лимон, мякоть без кожуры",
+                      "grams_edible": 17.58,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167746/nutrients"
+                    },
+                    {
+                      "food_id": "F172233",
+                      "name_ru": "Укроп свежий",
+                      "grams_edible": 8.79,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/172233/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "M29",
+                  "name_ru": "Тунец с капустным салатом и авокадо",
+                  "portions": 0.879,
+                  "steps_ru": "Тунец отцедить, капусту нашинковать. Добавить авокадо, семена и укроп. Заправить маслом и измельчённой мякотью лимона; проверять вид тунца по этикетке.",
+                  "active_minutes": 12,
+                  "category": "main",
+                  "protein_family": "tuna",
+                  "kitchen_tested": false,
+                  "slot": "dinner"
+                },
+                {
+                  "nutrition": {
+                    "energy_kcal": 267.3039,
+                    "protein_g": 8.539485,
+                    "fat_g": 23.728605,
+                    "carbohydrate_total_g": 11.078037,
+                    "fiber_g": 7.57698,
+                    "saturated_fat_g": 3.780447,
+                    "calcium_mg": 24.0846,
+                    "iron_mg": 2.500755,
+                    "magnesium_mg": 156.6378,
+                    "potassium_mg": 622.28805,
+                    "sodium_mg": 7.95495,
+                    "vitamin_d_ug": 0.0,
+                    "folate_dfe_ug": 85.39485,
+                    "vitamin_b12_ug": 0.0,
+                    "vitamin_c_mg": 16.195575,
+                    "net_carbohydrate_g": 3.501057
+                  },
+                  "coverage": {
+                    "energy_kcal": {
+                      "complete": true,
+                      "known_subtotal": 267.3039,
+                      "missing_food_ids": []
+                    },
+                    "protein_g": {
+                      "complete": true,
+                      "known_subtotal": 8.539485,
+                      "missing_food_ids": []
+                    },
+                    "fat_g": {
+                      "complete": true,
+                      "known_subtotal": 23.728605,
+                      "missing_food_ids": []
+                    },
+                    "carbohydrate_total_g": {
+                      "complete": true,
+                      "known_subtotal": 11.078037,
+                      "missing_food_ids": []
+                    },
+                    "fiber_g": {
+                      "complete": true,
+                      "known_subtotal": 7.57698,
+                      "missing_food_ids": []
+                    },
+                    "saturated_fat_g": {
+                      "complete": true,
+                      "known_subtotal": 3.780447,
+                      "missing_food_ids": []
+                    },
+                    "calcium_mg": {
+                      "complete": true,
+                      "known_subtotal": 24.0846,
+                      "missing_food_ids": []
+                    },
+                    "iron_mg": {
+                      "complete": true,
+                      "known_subtotal": 2.500755,
+                      "missing_food_ids": []
+                    },
+                    "magnesium_mg": {
+                      "complete": true,
+                      "known_subtotal": 156.6378,
+                      "missing_food_ids": []
+                    },
+                    "potassium_mg": {
+                      "complete": true,
+                      "known_subtotal": 622.28805,
+                      "missing_food_ids": []
+                    },
+                    "sodium_mg": {
+                      "complete": true,
+                      "known_subtotal": 7.95495,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_d_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.0,
+                      "missing_food_ids": []
+                    },
+                    "folate_dfe_ug": {
+                      "complete": true,
+                      "known_subtotal": 85.39485,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_b12_ug": {
+                      "complete": true,
+                      "known_subtotal": 0.0,
+                      "missing_food_ids": []
+                    },
+                    "vitamin_c_mg": {
+                      "complete": true,
+                      "known_subtotal": 16.195575,
+                      "missing_food_ids": []
+                    },
+                    "net_carbohydrate_g": {
+                      "complete": true,
+                      "known_subtotal": 3.501057,
+                      "missing_food_ids": []
+                    }
+                  },
+                  "allergens": [],
+                  "ingredients": [
+                    {
+                      "food_id": "F171705",
+                      "name_ru": "Авокадо, мякоть",
+                      "grams_edible": 87.9,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/171705/nutrients"
+                    },
+                    {
+                      "food_id": "F170556",
+                      "name_ru": "Семена тыквы, очищенные сухие",
+                      "grams_edible": 21.975,
+                      "state": "dry",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/170556/nutrients"
+                    },
+                    {
+                      "food_id": "F167746",
+                      "name_ru": "Лимон, мякоть без кожуры",
+                      "grams_edible": 13.185,
+                      "state": "raw",
+                      "source_url": "https://fdc.nal.usda.gov/food-details/167746/nutrients"
+                    }
+                  ],
+                  "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+                  "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+                  "recipe_id": "S02",
+                  "name_ru": "Авокадо с тыквенными семенами",
+                  "portions": 0.879,
+                  "steps_ru": "Авокадо нарезать, добавить семена и мякоть лимона; без дополнительного масла.",
+                  "active_minutes": 5,
+                  "category": "component",
+                  "protein_family": "plant",
+                  "kitchen_tested": false,
+                  "slot": "dinner"
+                }
+              ],
+              "issues": [],
+              "status": "calculated_draft",
+              "profile_revision": 3,
+              "profile_hash": "c64d3dc8854eb7fc87b9c500f58d22c97bcc324aff2342544feed6a6f2a2866e",
+              "catalog_hash": "f267e7e648ed98aaf58edd063e6016061a0bcf78580fdd923510f15879397eb6",
+              "engine_version": "0.1.0",
+              "caveats": [
+                "Расчёт по справочным данным, не анализ готового блюда.",
+                "Кухонное тестирование рецептов не проводилось.",
+                "Не доказательство кетоза или полной обеспеченности микронутриентами."
+              ]
+            }
+          ],
+          "plan_id": "plan_d63762a7b281a6cefaf7",
+          "accepted_at": "2026-11-07T22:19:35+00:00"
+        }
+      ],
+      "checklists": {},
+      "pending": [],
+      "chat": [
+        {
+          "role": "user",
+          "text": "Хочу быстрый завтрак",
+          "at": "2026-11-07T12:00:00Z"
+        },
+        {
+          "role": "assistant",
+          "text": "Подберём блюда из каталога. Изменения сначала покажу для подтверждения.",
+          "at": "2026-11-07T12:00:01Z"
+        }
+      ],
+      "active_thread": "main",
+      "topics": [
+        {
+          "id": "main",
+          "title": "Основной разговор",
+          "messages": 2
+        }
+      ],
+      "reminders": [],
+      "mobile_version": "0.4.0-mobile-pilot",
+      "ui_history": [],
+      "catalog": {
+        "foods": 78,
+        "recipes": 72
+      },
+      "capabilities": {
+        "model": "Azure GPT-6.1 Terra",
+        "native_voice": "ChatGPT host only; not Terra audio",
+        "storage": "local SQLite",
+        "google_sync": "explicit exports through connected Google tools; no automatic two-way sync",
+        "background_monitoring": false,
+        "self_modification": "validated preferences only, never arbitrary code"
+      },
+      "usage": {}
+    },
+    "message": "Я помогу подобрать еду под ваш день, составить покупки и вести дневник — без строгих команд. Сначала познакомимся и уточним ограничения. Затем вы сможете попросить меню, заменить блюдо или сказать, что было неудобно. Изменения показываются отдельно: вы подтверждаете их или отменяете. В разделе «Рецепты» — блюда с граммовками; в «Дневнике» — ваши записи; в «Настройках» — оформление и время на готовку. Google автоматически не подключён и двусторонняя синхронизация не настроена; доступны собственные выгрузки. Голос зависит от возможностей приложения, здесь он не проверен. С чего удобнее начать: посмотреть блюда или познакомиться?"
+  },
+  "pdf": {
+    "filename": "keto-menu-2026-11-08.pdf",
+    "mime": "application/pdf",
+    "base64": "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiswIDE0IDAgUiAvRjMrMCAxOCAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YxIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKMyAwIG9iago8PAovQ29udGVudHMgMjIgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjggODQxLjg5IF0gL1BhcmVudCAyMSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNCAwIG9iago8PAovQ29udGVudHMgMjMgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjggODQxLjg5IF0gL1BhcmVudCAyMSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNSAwIG9iago8PAovQ29udGVudHMgMjQgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjggODQxLjg5IF0gL1BhcmVudCAyMSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNiAwIG9iago8PAovQ29udGVudHMgMjUgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjggODQxLjg5IF0gL1BhcmVudCAyMSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNyAwIG9iago8PAovQ29udGVudHMgMjYgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjggODQxLjg5IF0gL1BhcmVudCAyMSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKOCAwIG9iago8PAovQ29udGVudHMgMjcgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjggODQxLjg5IF0gL1BhcmVudCAyMSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKOSAwIG9iago8PAovQ29udGVudHMgMjggMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjggODQxLjg5IF0gL1BhcmVudCAyMSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKMTAgMCBvYmoKPDwKL0NvbnRlbnRzIDI5IDAgUiAvTWVkaWFCb3ggWyAwIDAgNTk1LjI4IDg0MS44OSBdIC9QYXJlbnQgMjEgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFu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cyA0IC9Gb250QkJveCBbIC02MjEgLTM4OSAyODAwIDEwNjcgXSAvRm9udEZpbGUyIDEyIDAgUiAKICAvRm9udE5hbWUgL0FBQUFBQStOb3RvU2Fucy1SZWd1bGFyIC9JdGFsaWNBbmdsZSAwIC9NaXNzaW5nV2lkdGggNjAwIC9TdGVtViA4NyAvVHlwZSAvRm9udERlc2NyaXB0b3IKPj4KZW5kb2JqCjE0IDAgb2JqCjw8Ci9CYXNlRm9udCAvQUFBQUFBK05vdG9TYW5zLVJlZ3VsYXIgL0ZpcnN0Q2hhciAwIC9Gb250RGVzY3JpcHRvciAxMyAwIFIgL0xhc3RDaGFyIDE1MyAvTmFtZSAvRjIrMCAvU3VidHlwZSAvVHJ1ZVR5cGUgCiAgL1RvVW5pY29kZSAxMSAwIFIgL1R5cGUgL0ZvbnQgL1dpZHRocyBbIDAgNjA1IDU2MSA0ODAgNjEzIDU2NCA0NzYgNjM3IDc3OCA2NDMgCiAgNjI0IDU3OCA1NjQgNzQ2IDU4MSA2NDMgNjMyIDUyOSA2MDUgNDkwIAogIDYzMiA5MDcgNjk2IDU5OSA1NzYgNDMzIDYxNSA1MjkgNTU5IDUxMCAKICA3MzEgMjY4IDI2MCAyNjkgNDA4IDY0NiA1NzIgODMxIDczMiAyMjUgCiAgMzAwIDMwMCA1NTEgNTcyIDI2OCAzMjIgMjY4IDM3MiA1NzIgNTcyIAogIDU3MiA1NzIgNTcyIDU3MiA1NzIgNTcyIDU3MiA1NzIgMjY4IDI2OCAKICA1NzIgNTcyIDU3MiA0MzQgODk5IDYzOSA2NTAgNjMyIDczMCA1NTYgCiAgNTE5IDcyOCA3NDEgMzM5IDI3MyA2MTkgNTI0IDkwNyA3NjAgNzgxIAogIDYwNSA3ODEgNjIyIDU0OSA1NTYgNzMxIDYwMCA5MzAgNTg2IDU2NiAKICA1NzIgMzI5IDM3MiAzMjkgNTcyIDQ0NCAyODEgNTYxIDYxNSA0ODAgCiAgNjE1IDU2NCAzNDQgNjE1IDYxOCAyNTggMjU4IDUzNCAyNTggOTM1IAogIDYxOCA2MDUgNjE1IDYxNSA0MTMgNDc5IDM2MSA2MTggNTA4IDc4NiAKICA1MjkgNTEwIDQ3MCAzODAgNTUxIDM4MCA1NzIgNjAwIDM3NiA3NjggCiAgNTk0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IDYzMyA1NTMgNTE0IDYwNCA2NDUgNzIwIDcyMCA2MTQgCiAgNjg4IDYxOSA1NzggNjcyIDg1MCA2MjkgNjY0IDU3OSA2NTIgNTU1IAogIDYyMiA1OTMgMjYwIDI4NiA0NzIgNjQ2IDU3MiA5MDEgNzUwIDI2NiAKICAzMzkgMzM5IDU0NSA1NzIgMjg1IDMyMiAyODUgNDEzIDU3MiA1NzIgCiAgNTcyIDU3MiA1NzIgNTcyIDU3MiA1NzIgNTcyIDU3MiAyODUgMjg1IAogIDU3MiA1NzIgNTcyIDQ3NyA4OTcgNjkwIDY3MiA2MzcgNzQwIDU2MCAKICA1NDkgNzI0IDc2NSAzODkgMzMxIDY2NCA1NjUgOTQzIDgxMyA3OTYgCiAgNjI4IDc5NiA2NjAgNTUxIDU3OSA3NTYgNjUwIDk2NyA2NjcgNjI0IAogIDU3OSAzMzEgNDEzIDMzMSA1NzIgNDExIDM2MiA2MDQgNjMzIDUxNCAKICA2MzMgNTkxIDM4NyA2MzMgNjU3IDMwNSAzMDUgNjIwIDMwNSA5ODIgCiAgNjU3IDYxOSA2MzMgNjMzIDQ1NCA0OTcgNDM0IDY1NyA1NjkgODU2IAogIDU3OCA1NjkgNDg4IDM5NCA1NTEgMzk0IDU3MiA2MDAgNTEyIDgyMyAKICA4NzMgNzQ1IDgxNCA2MzcgNjU2IDY5MCBdCj4+CmVuZG9iagoxOSAwIG9iago8PAovUGFnZU1vZGUgL1VzZU5vbmUgL1BhZ2VzIDIxIDAgUiAvVHlwZSAvQ2F0YWxvZwo+PgplbmRvYmoKMjAgMCBvYmoKPDwKL0F1dGhvciAoS0VUTyBDb21wYW5pb24pIC9DcmVhdGlvbkRhdGUgKEQ6MjAyNjExMDcxNzE5MzUtMDUnMDAnKSAvQ3JlYXRvciAoXCh1bnNwZWNpZmllZFwpKSAvS2V5d29yZHMgKCkgL01vZERhdGUgKEQ6MjAyNjExMDcxNzE5MzUtMDUnMDAnKSAvUHJvZHVjZXIgKFJlcG9ydExhYiBQREYgTGlicmFyeSAtIFwob3BlbnNvdXJjZVwpKSAKICAvU3ViamVjdCAoXCh1bnNwZWNpZmllZFwpKSAvVGl0bGUgKFwzNzZcMzc3XDAwNFwwMzRcMDA0PlwwMDRRXDAwMCBcMDA0PFwwMDQ1XDAwND1cMDA0TlwwMDAgXDAwMEtcMDAwRVwwMDBUXDAwME8pIC9UcmFwcGVkIC9GYWxzZQo+PgplbmRvYmoKMjEgMCBvYmoKPDwKL0NvdW50IDggL0tpZHMgWyAzIDAgUiA0IDAgUiA1IDAgUiA2IDAgUiA3IDAgUiA4IDAgUiA5IDAgUiAxMCAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjIyIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDE2NjkKPj4Kc3RyZWFtCkdiITtlOTVjJTYlKTFuK2thNjUjO2l1Q1pScDFnPFYkMl9YbU9ibUwvUG9nY21KZkNNVWUkPXVaL25FbzYqTFg3RUFXIjJxPTEzXWNJWC9yY1RmMChwWidzKm4yISRoR1EsY08+Ylg9W2w5OmdebDhabDcnXVg0LWtWMFI9UVQ/KSNwWzV1S3JHbl51Tzc5dVZzKUk1akJdNl06XGg2SFI4dEMiJiNNITgvX3VLW1BcK1p1MzRbXCQ9NGAtKDFbc1tsamxAXGE5WSgiPWNWIycwS1BXQWckclVUZF5SbFU5PHFRaUBKaEUhYk43XSErWkBdZjIvIU9oMT9uYXVwR1VKPz1eJz9lNTZsVVwybElBcCJKIipHMCdxYjdgOzpUWEY8YiUpUXBJcGEsTmt0cClhR048Ji1sOWExIzAjZjRKOE8rSVlORy1RM1oyY0g+MHRaVmg1TClKVklvcl9sUiNISUciQVRaUzZaTHRma1k+U0RbXGczPGxkV2MvbChjclhAIWcpalA7Pk9NZGBwI3RxQXJaQSZzKEJUSHMzJ1Q7RFUyQk5eVzQ5Q0A3ZC8+OGBDZE9IdTxeby5mJlRINiopbmBNM0ctQ2lIXUI3dD9bIjM4SGZRPTcva10oLT4tRVo6Ymc1LiNTVG0uWWk6P0JhUztqJTpkbk9BWylLUUEtN1VHPipHYDZeP2VMaiRLPyYsZS02P2EqIWxpPWFuYiRkaENLazhDLlBPXDJyU0VwTDBtUE5wQC5YakdVKEVyXFlLUFdZcyRYYWhbNUxGTD9ORFpUR09qbTVFYih1MkA3OmwuOio6aTFnOmY5bl8oIV07MVRZYSVGR1lwJWBHTSZIREEyS2o3XTRnRyVJNTVQZ1daRCFgJGU0LTIqUDdAVTRbYyVQSkh1JF1wLV1LSFY6IVRNSUFVVl4oVzxIY0opTyMucS4+UUQyY2NEO2JycF5fRFsnSnVAJzwiSFQjQGBkJV0rZiZzJT4qJmo9Kk85RipFLlchMU1MaTJObF5CbjVrREwqMGUnLFleXG1oL1VpRks8Siw5Xz0kbWo9YURBUG9scXAiSGZhPFczMG0yVU5CW0pvRVtlcDAlWjgyWFNqVlElOzplK0RJJnQ7KChIXVoncDhfKDFJUltJJkNkYE4tRj90REEycGhGNWkmYkVvMFNIQGBuLTZPTnMhOzA1YzlzXz5IdEpWYmBIUkMtVFxUXWUoJ0skIy9cJTJhOEZZQ15EOXJbJm06dElEbzMyWFY6TXJqJmdkXmtmUD5Nak5LVkxiVkNEaUdXIlpNTTFqIyRYYzRkKCRtai1CTjxNciwtbHVvKF9xWnE6cjEsLkI5JDNrS0I7bGdqdFpFZDpTT1syLzpZNGkpdD9DP2NWX3JSUDNoclhwWW51QlkvbzMzX0xgbHRMczpAU2ZwNiZrTSZdYy9SRDFqbj1zTGJxJV5TV2VQbStyXm1FVm9VPy5xOUkmXFE7bU1lJURDWHVQSVFOOk1oQyItZk5UWTY1clRDVDFCbjU3NmUtLT9GaFouUyhoXE09MXNVJyVkTk9rbT0lYkFTaWVBW2xqMTFARSJpJFw0VTxuYCxUOi9XR0hpNzg7XTVOZWJjIUdjRlU1aWVMaGFLLGhVZy5cQUIjbyE1RS1oWl0uaXVCJkJPZmNCUyw4SUYsQDc2aSRcIjBgKW8vUlBmVyxfLVNKZS5cUVFiQk0iaWVLSDJaOFgpZlpsSkxeN15GUG5rNEEmUig/R0ReT2lCSFFoIi9gbGNFNCMzS21MZTtkNG9YX1Q/dWJwNmxvXTJCYy85Ki1AOjRXdS0hbGJzP1gral5MbmU2YixNN0VQbGFXYyNVJGZdakVbI2AnJUBWU2dLWytlInJxXyZzaHM5WC9XNDUpK1sjKjUmSEtpcWwtNjEzM05rWHEvJVJGMkA+PkQyOUtOLiNkOnJfQ2ZRKWc4VUJCQVVYNm9eai5MTEAlPmJSQFBwJiYiQ08+cXRbREE0W1FiVXEuaTlSVDcrUkpQJjNfOWA+XVtPcz9MMGghYltDdTlpVzU6PDE+ZlwoRVglVSZnbEhDPmI0MigrUVtdOSNcYj1MR3MxMSxzLyg2dDZCW2BQUyEuQiZvTF4oZClAKXQpKmZRcU0/bW09J21EUlBNRCJtcjU3NVxtcEZZbTtGXCVvTSVpIyltL10xQXFVLGdCKWFVSmA+JlJGLUY4J28rKjI6IjIjfj5lbmRzdHJlYW0KZW5kb2JqCjIzIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDkwNQo+PgpzdHJlYW0KR2F1YFI5b21kWCUpKSw1bjhYIlpaKDdcKVFRJFItXDAxSCgyXkZKY2cmcTlRIjBpam9SMUQ+L2JsU2dWLnM1KzNrQF0sSVlsJSY8aGpzajREWGRXXSFBU0VKSmA3QVBxWjxDdV08WTJeMXJWRitNMUg9VmNjKUAxK2ZvRj1kaiFyS3IhJ1NXZlxYY2pUNkoiJjdgWXMzYj9AKS9RO051dXI+OGZiVWhUPSUqJSNlalg0bV8kX0xYLVdPP3R0dSE8WEMpVz5vMTNiRVg5OTtgWiVlIzdQNGc+XXNTYChsS3RvZCdOLFRcVSxHWiNmTmlJJ0s8dGQuXUVDPFM4L1BwKmpgbCdRajIyTWJPNjlvPiRfNytDcDQpNkw2TmMwZWRzblQsdUAnYylQdChQZCwpJl4sLVZhZzxgWUxtKV80TXVSWHQjWTZqTyo5QDVcWVUmYSpISCtsKlBGMz5yNlVsJFAhRDhJLztzPVIoUEtBS1kvS05qZSM7Z2ZROVwjdXNMJFcnbDpPXys5NHUpJWgzdGtCNExqUSJeSVM5cC9rYDp1clVnQG9gbyJhZ19zW1hPMldka0hQOzNlLFgoRDw/U0dEb01kN1pkamQiVWhtUnJScCs2WE1pL3IpRihpY0s7RikySXRRPzlXLFFTKD1lYWIrQERNIlZQbChRcCpXQT5mSWFnZ0NUKlxeJ20uV1BPPV8uUkdlMU4nak9ZWG1HM1gsJ1FsS1tySF1FPDQpUi42YGhkKC4rMFAtQEJWa0FEVS48K203TTVVPS83YURjQFk3Mk1UUWQ8VV8jXWZoVGA+XFk8QVVuWW5gPiU8X01NUjRtZStkWmx0YzlwSlpLdTxoY0xZOWtsTG08P2dIVWJjb3NQNFlWK2JrOi8oalIydUMsPEo2ZEBGcmRAKCc/b0pWaUQua0BFSCspRGI1RVEwYzpzTTcjakdPPUdZKkMkVDxfP1ssP2NCPzRjVCdbaCNIS1c5NUFibUZRaC5lNztnMUVyJlxDPUFcPEZsVU5eODZvK2tzdWwqR05AQEk8TTFkR0VuOCIyO0FuRyVjaiwhKDRJXzAuL0AkcTYxW0ddJCYtUjs3X21vXSZOYjw5P10/QVhvbTA4OnIoQkI9VVk3Lll1ajQjWihvbWxKZzgxSWtAPV8wMWdBWlAvZGMqVU1GVzBOZzdUQWhoWURESF1BRWhWUV9Gfj5lbmRzdHJlYW0KZW5kb2JqCjI0IDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDE1NTkKPj4Kc3RyZWFtCkdiITtkOWxKZkYmQUBzQm5FOzNaM1prMCk4b0cwbTtfQTdJa1pgVFIuJC1nbnJzcEY9Szs6JyVBNjxsMl50PyVIOzpOZ1pSNV0mPyFWLWNEcFJnPjBxIjVQU3JaKSk9XEdkM3MlUF81J0w+VC5YcSlbNlgnXVguKCdJXFwkXCVKLm42Qzs9RSUlIjl0U3BxKyFKJjprR0gxOV1RSWtKX3A6IisnTG84RTBOT05bXCZoLzxhMmUzLGhcTTZVa2grQm9LKnBeLUkoYmhfLSpqSWJRNTB0aFctN21NRylUX3VFTDMuR0U6VWxgQDJyNUpJcjg8NiUzSzJfYnJlQz4qUEptS2JNa0JQTGdLUjE+NSt0QUxJMlVkKWlwKyVZKV5LOzdmcUY3Xkw+OGspL2pCczU+YiVVYmhdLXVGTkFAPjdQa0tiPT9iMlZAb2JaSltuRUYmcDc1KyhrPEZOUCk2J0QyUyljSHFZJyYnNWRNazkobS5EVVhvNGoxTF4jUm0lSE1hQnJPWzBvcU5lJGZXPXVtODxEPmhsSTs8KUY0ZjtGL2hGKy43JiFmLzFjaEBLPkJpUWgnTTo/WUlKI0Ypaj4sTzJwKnVdXGgmWHQnaydwI0lnSidcImdfKklXTC1gcihuNUcjWGw7VS0ySz5BS0VTTzFmOEhDKG9fLEVWaU06QktJIicjajgnPG1FUFRQQikjImNJcURqSkUiYyVtKG1LLDU8I2g1YE5yQF5KQHRxRW5pMSZjPUw5cjtPPiFeOFNpbV9maylQOU4xaiZnPW4tJWcoTCkyazcjUyxcJW0oLklPdU5zIyw1Zi9HX25WJDNsciFYJy9AdC0/PlhdUloudWQ5YFw3NylLTDomdVQkT1o3VUNvbyYoZzRAPV5mMmJlQmBROT05OV1YJFxmP0w2XmIjbHFJXE9Ec1UpLERAZiJPX3FfIXJCTSEkayNoKFdzXSo0Jm4kLDREOXJHNjpHamRIYnA3O1VKXE8sSj1pR0hkPic6aEttOyImKXAhRi5tJE5kVmMrTFZKXDxnISczVmJQTHI7NF1JcF5sU1RmTCwqU0ImK0BwOUQmTGcvTihCJURecCtGYikiPTtQPFlDQExgUGtWbTVyMSdZOUMjPFBKNlhsaSFVLlsjMmRsVk4nYXFgXFpHYXBtV1A+WltISFAzcjZqVWguW1JhYUM+PGNFVS0iMS5uO0Vpa0I+M0dNLFpJRTUoPl9nYy5RMGU0OWU6K2xgYi9pYk0yMGAnIiwwbWYkYi01bCRkWzd1ZV5QMCVOblc8MUkhKmNha0IuSCErNEJTSiNYPi1kcj1vPmpNVls6W2skXWRzSldnS2cpIUI2MCcrKyY5LWZIYD1uVDIrWmhET2c8JlxCRkldJEoxInI7N2ExNk9iJ2IjJSIvLlhbY0QiNT0pLXFNP2AycG5RcVZPIjpBKkU3LzY2WF9icWgyTVRaLFFnYW5KY1kqMDJXNGIvVU9hVylyKSpqKW9bMGtsZ1AhU3BhbTNsWSE3I2slLVxyJDxwRkxQZTZhQ1RhQD50LSMlZTtbQFpBSS1maFM0W0gxL1hCZCFcUTxKI2VMQmkxTSk8PTFdTm5RaDxARys3RnVWTGBgKERtaEA3ZmgmVDglZzQ1ckhpQC07SV5mWGdJXlktKWhJb21xSV5eQ1ZTa0kzcUA0SklZK3VCUz8lJUdLcVstJDtBJW1PanRcbStrb1xGMT1JXHBuOUAhOjJXJClHSl5xcUoiOVVoNF5tclJrQUNqS3VVJG0mWkAmWWs/P08pYzNfRjk3Ijk4UU9BZG8xQ0g6I3VZPjgwZj5DQilsTS1iYGshMmRnKTVTSk9qKjEpSjxPLjUvcWNLUUVtNE9DVVFCS1gpUkU/UyM5bTpsXmxSV1JPJ0lSRlMnUkgiPGhmM0Y+cyM8M2RWZTJsOFxtNEhtRGJpIm9HQWY8b3U1ck1ZRkw5QCgjZ09XaVFuNkonaWlZYTZBT0UwXEZuYjctUjUhcStGYWU4L1E5TyQhJW0vakVHI01zVyMoZiheZGo8Vk8jPU5RPC5WWycwKDJgb2duJWloVzpZNX4+ZW5kc3RyZWFtCmVuZG9iagoyNSAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCA4NjIKPj4Kc3RyZWFtCkdhdWBSNGBCKzAlLExNKjM7K1M5OFA2OjlhayEyV1xlT1hZPkNjdSxPSjJYUTZocW5KbmZfdVM+XzFnQGs5PCZkalBxSjEiPVBAdHBXbD9bY1JYRD43Ui5DSjA7KEY9PU1NYypvZ1tOMzV0Zk1QO0FjcFpxQyQlVkxpPisvOjVkIUhqbkgiWUxAcDA/cixXUDdFZV8wUFslLTIkPVtsV3BxXzRJLi4rO1IoJGwxV11TKFRTQl9BUEFXX2U1YmokUzJcKF42JWlDVy4vcWc1WmxkOUNcXzp1Uitmc0AmVj1QITtoUT5kVDwnQVIiNTRkSkdOOSxaXldcPVhqMEpoaU9HaygsRCpjT15eIm5pXF9GYDEyMV9iQTdaQSJzTUUxYTJNZkwoZGopOVk7NCYsR1NWYzI3WFY5RihMRGVDW2M+KU5kS2IuWkoiXFhaZEN0W0pyQjlSLlFYS01RLm1dTGMoQyhUb0IhY2s7PnJoL19eSjRQL0tTXjBHS0FXXV9YKTdLXTZVTThLbjpGSCk/RCUlVW4nZylUMz9gYW05QWRPVTlEXWRoaCp1YyhmIytsLU9bcHFpUClmXG1COUpBXDEhZEduW0Y4VWgxaDROUSIlZmw5OSxbIyFHWWlSQy4vIS1lUypmOVNgMmUhXkRxJG0rUCgzWGZUWlNONjYhZ0VmX3UxcjM5PzRbW1VHXSorYFlOOV5KYThLJztYYyxFTSNhPmdtVjs2OzgkLSwyR2hBMDFlPCItSyQ0ZFY7LXExTFRLVWg8Nmk1IWpuZydfU1I7cTtTNm1jQj03ayJsbEc7STZqYHI2NjE9O1N1WjhuSllOZiNqLW4+dDBMb1FjKjI/ITJuT0QqWm02aFs9PmMjJFM+T1RdYzB1SCgocFwqYmY6U2BTSWJ1ZmxhLWJgTiE4dDp0WG5PY0dTbTExZzpfSEdJUEhtbUM9KlQyKVpUN1c2SlQnW2k5KE4rXkNvQC1ERHJlb1JEPHI3IzEiSDBeUGJIImMzUUAuRUsjWkciUlA4ZXNFdTRPZ0VmREZ1UVBGbXEqJW1WazYvM2c1aTEtXVZWSDA3LVxqUFtMXipJYWRdYl1nT1I3LDw4M0oyaTNaalFeJGdhJVxoR05oZC8yNVBBOmc7I0ZhW0xOfj5lbmRzdHJlYW0KZW5kb2JqCjI2IDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDE3NDUKPj4Kc3RyZWFtCkdiIWt1OW9nTVYmQT9Ebm44V3VTV0BIWmlvUGQwTCcsUkdha0QkblZATGpTLHJdWUxSZl5AJVw0IzlIT0coaUNXQWZTOWMrMFQhNkhkRyhYNiU4anFVTj48N2g3I1ZDNlpVNFMqSlBgSWolbyl1aiRPa1hTSmpqNCVacWAiR1BtaEBkbDYyM1NkclozOVJpIi5cYDRlInBpVWxPWTZURCwiSUUiKSVURDQ0JWcqQEJyTG1SOmdhSHQ3XUkmQj0taWt0bTVpV28qTzNrJC1GOGhUMis2IjZrSWcvTmtKR0RXMjUoV0cnJWs+P1RKYiZDLSglTmxkciYzW3JMc0smN2MoRW9LY1VOMm1OIk5UVWk6O2dMY2JjJl5rckxeMV9RI1sjKXQoWTw5MSJZZ2o/L0NkT3JxWXFaN0NMOUwlc2EiV2JLVzxxO2clLSdfQkhNVC1sc2cjQlBePkdJQlQ0UVIlYz9BUz8mYSUzVUJRYSElYFJWRFRJOUJhWVFTNHFeKmVaJ25cOm8yM19jT3Moa2hbNGdhQShQYTpUOiguQU1XXWkia1A0WSZzYERQRSkzL0ZUSCJKLEVJRE9icFMwcitGR0dSSD4xX3I5WzNeaWsxaWM5ckp1Yig6b3RZOFQpUWhcYSN0NDpvSF1cPk86b2dyVk1UXWBPLnQ3LG0nWjZgZi83NnI1XlRPPUliYjVpWE0yPlciXylvdTg1ImkrRV9zL1wjTy8nbl8/InFBZVQwRDZOQWxhMVFndW8vZEM4Ri42JWdjMFxOV2tdIXFCNWYmaGZLNGEpOyptblJNQiQsTSVaKjZbK1FYRDVfUTQyTiohM3FOXiRmbjRlTl08JTxTZTgtOEw0YSYnMTtHU0FNQlUqWzNROy1oM18zOmIzb0xLPSZCTFUoPkZOWVBNbjcyYk0yUlZpVWoqYz1MSmY7bCRuNEpHTSlSKiliT3Q9TGtLPFtfcU1mRVRYQ19XTVQ+bUlnOmIhTFYnR2VZOylAWmVraDsialolLyQ6O1QudF4yMF48OlQzRConZlMhUCNrJnJpal9aZUFaJ2BoOSxGVktqb2ktQydDayk8SkVdcWA6ZmZjWWtRMD1WOFIrP3RyRz9AcVVeJlpda1NITGs5O2wjLVckL1NbJDlOaHIuRShOK041bT1kN0Y9cFw+KkQoVE0kUC9mJDglWVhLS0laRkFALSk/ZFQtSEAiZioiREsicz8mNWBpPC9fOWJpbm1HTGVCdEZUQ0AmI2xqSEcrdDZzUjJzbzg1Oi1ZXlojIm9HNGh0VVJzJCJYRCRjUEJmNFY+Xko0VTFrWU4iQlkxXlVeYD43Q2cxTEdgJzdgMnM4MUIhQWdRXi9aYzdPZmc+WCxbRjoyUUo+MTMtS0dhTGEtL0RTUmteVDQvPztyTWcnRHVLN1cuJyE4VCQsT2khaFhXMXM5XlsoMmczZkIySD9nSlBBMD5AOUlNbilJXWJLbTZbLjIha0JaVmpbMF9TUTtGPicwUStDPE8mVCQ1RGRNbGRIbmFbRk0wVU5kcUQ7Xy4hanI4OzI3OkQqVVo5XUlePzRyLmNwN0FdXDBII0BhbTYuVHFHYDZiVzpWUW88VSRXRD9AdUhBJiIuW08mUmk4Qy5vIlZHZ2I2MVcnXClVY2RiZE45ZFcmXWFbP01wOkE4aklTUCFadXIoSUFzLTgvMHRHOnRzNSxoSTpJUHVvRTJuOCxMdG8mIi5jWyZZdGpkUmhgc0MuQUBYNj1aL3MuKGAwQUYqJjooZV49JE9iPTlVVGg6XCdsOmJfaWFbLUZkIlcsKjY3PypgV3NKdVZZTGY2cCxkTDFqVmhbTm5AV2VZUGZEVy8qcDNpR1IxO10nPylhWjdeOj83bT80SjVDYF8mZ0hZQidBY2RLNW9fIWVxOVYiKjo+UWYlMVplYiVRJHItSiIpPiZALDkhSSJjays5aWlEYGVHTU80SnI9KXNEZTxlNmtGKDBwcFBxIm9BSm41LkAiQGhFXVxiXWBZWHIra0g8O282LjhfWixqRS0sQ1ImZERbMC1YM0RRYUE/P18qWnJuVVMnSWxkSWszay0wMHMqJE1LXHEwUmEnXEQvSlAubCw2Rz1VbzBmby9aJG1VPTJGZDchRXRuIVhZS205KlkuRk9zZTYwKyIrJEA/bGQ/PUlGXERnZ1w/JihMP2YmPSZsLzdmakA6cnM2bCVTJFlpPT1nIV1XR1Q5RypiWDIhPS4xUi1QK2loSDVNJ21pW1hvLDQzVk44ZFRZSVRYWnFDJCFXXFU6WiVITDZSUCFHJ0kkZUhIcWAzUVU5OmVyITMwcXEydH4+ZW5kc3RyZWFtCmVuZG9iagoyNyAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCA1NjcKPj4Kc3RyZWFtCkdhdTErXFcuQFkmO0tlJU1AKUBFVlghcCtaXlcrKDciV29zQjFPL0laaVJnaDVUVFBuY1Vdbi9KNkxESF0/XkYsW3RScCtuYjlML1U1cGdRcGFkXGBvZkdgOkwiN3BMQmcoXnAlK2VaVD10MGZDZWVlIyFIYCItXUYnP2ZkOW1dUCExVGcqc25FNE4qUHNXMVlbJStPY0RSNDldcVFXaUBlMDhQVlM1TG1lZk1jXEdeMl1IdSkmbz5nL0BMOzg4SmZXWFxza15dbV0kNkFpYi8tbmUwYVRITjkwJjBsLCRsXHIpXDxMIl1ZQ2c1WVg8azh1K005KCpZX1IscDQqMjdvYltBO0tEYDtTYE5VNlRqNj1CaEtvQVQnUmJyTDE2QGxTQjRmPlVicVhnXzZAI0BmITRnQyhXIkozPjFrTSxSYUNrYFUkTmBFWjBJS2w7MTdGIUMmUjkjNmFbc1I7VGVJY1RHWmJDLGFpREpqbGY8MTpNcWQnbihhWzZhYVsrUGlUWy9MaiVqKGhBOj1pTWQzaihlcUdsJzxsVUlpT1A6K0pSME02QjA8Vlo6XzRbNFYxck4sVGIkQ1lYWDlVWDpmQmtYMjRLLnBndT1ROHMlWTpBPm41RE40KXIvYTtjU2RbXiFXaV4uLHEiPE02ZiJxJHNaQGMmcCJyLmo7V3I8VE9kZ0lZTiJkazEycD83KjcyXEg7XFYoPmY1U0VoQztDMG9FUmRPJEtLW2ZRP3MhTylBJ1N+PmVuZHN0cmVhbQplbmRvYmoKMjggMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMTI5Mgo+PgpzdHJlYW0KR2F1YFVdNUhGWSUsTExpKVoqJzJNTCp0PjxoUSJwJ1kqMlokRkUnTCUuNCcqJ2hNOSJEaiRSbVE7W3AzZnM4Z2huclNYPGhFaCwycjpAdCJGLlo3cmomYlwzXSRqSTxpdFU+NlMsNzY7V1JsUSZSVVZmTEtGWDItaDo6J04qbytXVUBAQ3ArUys+LiRJXzQmakhMVDc/NHI5dEVWKFBwOU1zPW0zYkM+I3BYaGJiKjFYblEiQk4kSXBqVl01NCtpSDEwNUQuOXAhM0NZdC1QdG06SDZfKUJOPl5YPmZASDJdUFVVPCUhJVlMcihwZlMzITpHZVZMRy8+NF4pSDtmVSJoXik6RyhcL1xRWSdlIzE/RFwmUjwpLzVVT3FuRmV1ITEra0YtdWFWLU4yV1cmXC4qYjVIQWtOUzomRiE4XkJabUZlNlcuIT9ZUk41KjQtPishPFRQbWZRazZbMFE0PjFcPl1SM0E3LGYoVkgjbSVmVCtcNDxHK1RSQkFQQW9sNyFnN0dqS3BYMGlrVW1hLDRYY1BOWyY/aVIoMkdnS1suNzArXyZESjtCYm9oJys9OGQ+XSY9I2xpPU8wZSU+W24tYjcoTTBvPiQpRTZAPzIwWVVzZipLKWlxR0xfQz9dWzRTLj1sQzJeO2E+QFtwV1lPXC4zMm5KK2lGJVFSX15MTC0vSWpiOjZnUlFuJG9iTnIxVTQ4QltcT2ZoIyxHZFxBJnNnImZGSi1CQmoqMERROGYkWWFyQSsxbk9tX1ZkY3JpQj1wcS1WKzojaldgI0EtVDYsS102TVdDNTJFU2ZUVjQoaEU/aXMwUUZYcSFralklSV03VydKUDJUWUdLI0cwMCtmK05qbGAzTFtbOlc4OlVGWmUzRTNiL2dnZlZERFtwSllXUCFbVltkRDknbGpSVWddMyxqTTk7XD5aUE5vN1pPTHRhb2NWM0kjUm9ZSVhpVUo6JDVkUmU/b15qITppakpxcHBsMilZJGAvT25STSFWclwyb0BHKjpZM2FDZEtmKDU3PGxiWVxub14jVjM2PiFOKmZyZ2snRCtnKV5ZbV1NT0E2aFcoInQ1OmUkI2diOD5dNUFKI2diS2g9K3FVZi51WU47O2lSVShbWk5yIi1MYDVHVjcrY2s1LFMjViokQE82bVY1LEtRVkk4NSlZWHFOM0pgIzk1YT1JY2kkalspNT1yUm5cKDRQT1dtKWFtbzs0Z1phLW41RlxrbmpBbiJNY2AuVj1ZLjlvQmBjWiN1NVMjZWV0L3BFbjwpcGBeLy5nWCVhOTUmPyFzQGE5bjpta3AiOEwtXiw3VV9URjNXZ0RFPWRvRUUqKToyQV9nbVBFT0wqRkNkInRlNF9RWWtKUykkSlZUaCc2aUxfbF1WJExNLFExJjFJW1UtJFIvdEwuWDtbUlgobU1nJksvQjVPWHFMWD9iSTdjNVY8PChTMG1mMiJsM1ZGUiReW2NoQHFGRypqKDlTPiVpQ2NILStBZDZzIT9nK2ZvLDo9OFBfQHRISDc8PjNAXzMtIkpDVF4xUVZTJlVcb0NpX0tZbC1ZXTljUjgsdGVvOkInUGcwZiIzKWlIIzZNSnVuaWxjK0Q9blpWW1slbG1qW3IiUVtaNmtpUFhBYU1OOFtbRylBXFNAOERbPCRdT0dNK3IrMHRCZCdHKCRPK3E9PWs4R1YtInJtMjRMU1NARiVpLDhNcCdOWV9ofj5lbmRzdHJlYW0KZW5kb2JqCjI5IDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDQ4Mgo+PgpzdHJlYW0KR2F1YE9hX0phSiUpJ3Rna2gkPkdQLihqQC8kdTNcJDlANkxrWE9hXmRmNjRLaWwiMm1UUUhoMDQtJmtfXiVaJU5US0hjVml1WyxqS14xXSRATWtfZjtGaUx1X3NPc3IzNmZnPztBXy5rQixMQXBrIkNCMF8oYz8qNTklbVZJIlVyVTJoI1NzXjZHOSMnU2BfKE90Xik3bz03WVZPQCxANyZuWGRBL0ZBK0gwSGhlXTQ8X1wjT1gzOVpKVlxwKVwsSSdRZXAxcFttMCY4Y2hIQ21COENqLlAnTTE/S1ZQRnI/Mi9yQDkkXVxRO01XamNuISM/aGkhWF9lZE9gaVgwLUguZylVaztYKDosL3BiJ1wyRGcyMyFNLldRXl9rQ0VNVXRabzhNRltbNEQnO0tCYEMiNic0T3E7azg7LC5OMFJfbE0oNFtERTU7cEpHLilBb0gqVVVyPT9sbWFRTjsyb1QoJl5AIzRbPi5RY0k9QFZkXD1wbXVpSDB1M25VWCRpKyFwQVE6K2Z0ZzFgWmdzLmkkLiE9XDRTUzxgKkskXCw6bDhEYitBQWJmNHFpWmBTJWxSN01eR1ZDP3NBKyQ7cUNURDxGPSVuREk6RHFRKUFsR0VgJHJYTUVzO2ZIVlI4fj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCAzMAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDExOCAwMDAwMCBuIAowMDAwMDAwMjI1IDAwMDAwIG4gCjAwMDAwMDA0MjYgMDAwMDAgbiAKMDAwMDAwMDYyNyAwMDAwMCBuIAowMDAwMDAwODI4IDAwMDAwIG4gCjAwMDAwMDEwMjkgMDAwMDAgbiAKMDAwMDAwMTIzMCAwMDAwMCBuIAowMDAwMDAxNDMxIDAwMDAwIG4gCjAwMDAwMDE2MzIgMDAwMDAgbiAKMDAwMDAwMTgzNCAwMDAwMCBuIAowMDAwMDAyNzgwIDAwMDAwIG4gCjAwMDAwMTg4NDEgMDAwMDAgbiAKMDAwMDAxOTA2OSAwMDAwMCBuIAowMDAwMDE5OTEyIDAwMDAwIG4gCjAwMDAwMjA3NzMgMDAwMDAgbiAKMDAwMDAzNTU1MyAwMDAwMCBuIAowMDAwMDM1Nzg0IDAwMDAwIG4gCjAwMDAwMzY1NDUgMDAwMDAgbiAKMDAwMDAzNjYxNSAwMDAwMCBuIAowMDAwMDM2OTYwIDAwMDAwIG4gCjAwMDAwMzcwNjMgMDAwMDAgbiAKMDAwMDAzODgyNCAwMDAwMCBuIAowMDAwMDM5ODIwIDAwMDAwIG4gCjAwMDAwNDE0NzEgMDAwMDAgbiAKMDAwMDA0MjQyNCAwMDAwMCBuIAowMDAwMDQ0MjYxIDAwMDAwIG4gCjAwMDAwNDQ5MTkgMDAwMDAgbiAKMDAwMDA0NjMwMyAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9JRCAKWzw1ZDU5YmI3NDIxNzUyMTU3YzNiMTkzNmRlMzg1MjhkMj48NWQ1OWJiNzQyMTc1MjE1N2MzYjE5MzZkZTM4NTI4ZDI+XQolIFJlcG9ydExhYiBnZW5lcmF0ZWQgUERGIGRvY3VtZW50IC0tIGRpZ2VzdCAob3BlbnNvdXJjZSkKCi9JbmZvIDIwIDAgUgovUm9vdCAxOSAwIFIKL1NpemUgMzAKPj4Kc3RhcnR4cmVmCjQ2ODc2CiUlRU9GCg=="
+  }
+}

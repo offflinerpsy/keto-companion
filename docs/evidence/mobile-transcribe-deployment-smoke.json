@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "status": 200,
+  "route": "deployment-api-2025-03-01-preview",
+  "seconds": 3.02,
+  "synthetic": true,
+  "response": {
+    "text": "Мне надоела курица, хочу быстрый ужин с яйцами и кабачком, предложи три варианта.",
+    "languages": [
+      {
+        "code": "ru"
+      }
+    ],
+    "usage": {
+      "type": "duration",
+      "seconds": 7
+    }
+  }
+}

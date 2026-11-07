@@ -6,6 +6,7 @@ from cryptography.exceptions import InvalidSignature
 from .store import Conflict,safe_key,encode
 from .domain import Service,k,new_document,literal_guard
 from .brain import AzureBrain
+from .speech import AudioTranscriber,SpeechError,speech_message
 from jsonschema import Draft202012Validator,ValidationError
 
 PATH='/internal/keto/compute';LIMIT=1_500_000
@@ -23,8 +24,8 @@ class MemoryStore:
   self.doc=None;self.version=None
 
 class EdgeBridge:
- def __init__(self,secret,replay_store,brain,tool_map,image_clean,clock=None,public_jwk=None):
-  self.verify_key=None;self.secret=None
+ def __init__(self,secret,replay_store,brain,tool_map,image_clean,clock=None,public_jwk=None,transcriber=None):
+  self.transcriber=transcriber or AudioTranscriber();self.verify_key=None;self.secret=None
   if public_jwk:
    if secret:raise RuntimeError('Choose exactly one bridge authentication mode')
    try:
@@ -66,7 +67,13 @@ class EdgeBridge:
    if op=='sanitize_image':
     if set(args)!={'image_data_url'} or doc is not None:raise ValueError()
     return {'response':{'image_data_url':self.image_clean(args['image_data_url'])},'state':None}
-   names={'open':'keto_open','recipes':'keto_recipes','consent':'keto_consent','propose':'keto_propose_change','apply':'keto_apply_proposal','menu':'keto_menu','chat':'keto_chat','export':'keto_export','import_menu':'keto_import_menu','delete':'keto_delete_profile'}
+   if op=='transcribe':
+    if doc is not None:raise ValueError()
+    Draft202012Validator(self.tool_map['keto_transcribe']['inputSchema']).validate(args)
+    try:response={'text':self.transcriber.transcribe(args['audio_base64'],args['mime']),'model_called':True}
+    except SpeechError as e:response={'error_code':e.code,'message':speech_message(e.code),'model_called':e.paid}
+    return {'response':response,'state':None}
+   names={'topics':'keto_topics','reminders':'keto_reminders','open':'keto_open','recipes':'keto_recipes','consent':'keto_consent','propose':'keto_propose_change','apply':'keto_apply_proposal','menu':'keto_menu','chat':'keto_chat','export':'keto_export','import_menu':'keto_import_menu','delete':'keto_delete_profile'}
    if op not in names:raise ValueError()
    schema=copy.deepcopy(self.tool_map[names[op]]['inputSchema']);schema['properties'].pop('ui_confirmation',None);schema['required']=[x for x in schema['required'] if x!='ui_confirmation'];Draft202012Validator(schema).validate(args)
    if doc is not None:
@@ -77,20 +84,26 @@ class EdgeBridge:
     if not set(template)<=set(doc) or type(doc.get('revision')) is not int or type(doc.get('processing_consent')) is not bool:raise ValueError()
    store=MemoryStore(subject,doc);svc=Service(store,self.brain)
    if op=='open':result=svc.opened(subject)
-   elif op=='recipes':result=svc.catalog(subject,args.get('query',''),args.get('limit',12))
+   elif op=='recipes':result=svc.catalog(subject,args.get('query',''),args.get('limit',12),include_food_ids=args.get('include_food_ids'),exclude_food_ids=args.get('exclude_food_ids'),max_minutes=args.get('max_minutes'))
    elif op=='consent':result=svc.consent(subject,args['processing'],args['storage'],args['health'],args['confirmed'])
    elif op=='propose':result=svc.propose(subject,args['event_type'],args['payload'],args['expected_revision'])
    elif op=='apply':result=svc.apply(subject,args['proposal_id'],args['expected_revision'],args['approved'])
    elif op=='menu':result=svc.menu(subject,args['start'],args['days'])
    elif op=='chat':
     if isinstance(self.brain,AzureBrain) and os.getenv('KETO_AZURE_AUTH')=='cli':raise BridgeError('model unavailable')
-    result=svc.chat(subject,args['message'],args['request_id'],image=None if literal_guard(args['message'])=='urgent' else self.image_clean(args.get('image_data_url')),source=source)
-   elif op=='export':result=svc.export(subject,args['format'])
+    result=svc.chat(subject,args['message'],args['request_id'],image=None if literal_guard(args['message'])=='urgent' else self.image_clean(args.get('image_data_url')),source=source,thread_id=args.get('thread_id'))
+   elif op=='topics':result=svc.topics(subject,**args)
+   elif op=='reminders':result=svc.reminders(subject,**args)
+   elif op=='export':
+    try:result=svc.export(subject,args['format'])
+    except (ValueError,ImportError) as exc:
+     if args['format']=='pdf' and (isinstance(exc,ImportError) or str(exc).startswith('PDF_')):result={'error_code':'PDF_UNAVAILABLE','message':'PDF сейчас недоступен: не подготовлены шрифты или превышен размер документа. Скачайте CSV или попробуйте позже.','model_called':False}
+     else:raise
    elif op=='import_menu':result=svc.import_menu(subject,args['content'],args['format'],args['expected_revision'])
    else:result=svc.delete_profile(subject,args['expected_revision'],args['confirmation'])
    if isinstance(result.get('state'),dict):
-    snapshot=result['state'];snapshot['capabilities']['storage']='Cloudflare D1'
+    snapshot=result['state'];snapshot['capabilities']['storage']='Cloudflare D1';snapshot['capabilities']['native_voice']='Microphone dictation via Azure; editable transcript, not a voice conversation';snapshot['capabilities']['dictation']=True
     if not snapshot['holds'] and snapshot['plans'] and snapshot['plans'][-1].get('status')=='user_accepted':result['shopping']=k.shopping_list(snapshot['plans'][-1])
    if result.get('requires_consent'):result['message']='Для личного диалога нужны ваши разрешения на обработку Azure и хранение в Cloudflare.'
-   return {'response':result,'state':copy.deepcopy(store.doc)}
+   return {'response':result,'state':None if op=='export' and args.get('format')=='pdf' else copy.deepcopy(store.doc)}
   except (ValueError,TypeError,KeyError,ValidationError,k.KetoError,Conflict) as e:raise BridgeError(str(e)) from None

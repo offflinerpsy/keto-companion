@@ -1,12 +1,12 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-07T21:36:25.502353+00:00",
-  "source_version": "0.3.0-internal-pilot",
+  "updated_at": "2026-11-07T22:30:21.102399+00:00",
+  "source_version": "0.4.0-mobile-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
-  "active_task": null,
+  "active_task": "KETO-MOBILE-006",
   "last_completed": "KETO-COMPUTE-004",
-  "next_task": "KETO-ACCEPTANCE-005",
+  "next_task": null,
   "staging": {
     "deployed": true,
     "compute_connected": true,
@@ -52,5 +52,17 @@
     "release_merge_commit": "4661687931e263a9fd002239a4ec473aaaa8356e",
     "next_acceptance_issue": 5,
     "current_canonical_branch": "main"
-  }
+  },
+  "mobile_acceptance": "User requested mobile revision; actual device validation still pending",
+  "mobile_source": {
+    "task": "KETO-MOBILE-006",
+    "status": "completed_locally",
+    "release_status": "parent_acceptance_pending",
+    "python_tests": 380,
+    "node_tests": 74,
+    "container_browser_run": false,
+    "real_device_audio_tested": false,
+    "cloud_changes": false
+  },
+  "mobile_stage": "implementation-tested_pending-cloud-and-visual"
 }

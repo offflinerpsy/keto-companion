@@ -1,0 +1,34 @@
+{
+  "task": "KETO-MOBILE-006",
+  "stage": "pre-cloud-QA",
+  "source_version": "0.4.0-mobile-pilot",
+  "single_source_writer_completed": true,
+  "agent_frozen_python_tests": 380,
+  "agent_frozen_node_tests": 74,
+  "parent_route_tests": 3,
+  "parent_full_regression": "qa/mobile-parent-regression.log",
+  "speech_provider_verified": {
+    "passed": true,
+    "synthetic_audio": true,
+    "actual_service_decoder_and_provider": true,
+    "text": "Мне надоела курица, хочу быстрый ужин с яйцами и кабачком, предложи три варианта.",
+    "seconds": 5.87,
+    "real_iPhone_microphone": false,
+    "platform": "macOS WAV; Linux full MP4 cloud test pending"
+  },
+  "remaining_gates": [
+    "latest rendered mobile layouts in isolated Cloudflare browser",
+    "actual cloud MP4 dictation/PDF/thread/reminder API checks",
+    "physical iPhone microphone/share and calendar notifications not yet verified"
+  ],
+  "no_browser_on_owner_mac": true,
+  "new_model_deployed": false,
+  "fonts_are_runtime_only": true,
+  "known_limitations": [
+    "Separate web app, not native UIKit",
+    "No real-time voice conversation, dictation only",
+    "ICS Calendar import; no closed-page push or automatic synchronization",
+    "Bounded topic history and explicit shared profile, not unlimited memory",
+    "No private Instagram scraping"
+  ]
+}

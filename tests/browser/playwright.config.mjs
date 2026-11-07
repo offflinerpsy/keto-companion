@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'.',testMatch:'mobile.spec.mjs',workers:1,use:{baseURL:'http://127.0.0.1:8899',viewport:{width:440,height:956},deviceScaleFactor:3,isMobile:true,hasTouch:true},webServer:{command:'node tests/browser/serve.mjs',url:'http://127.0.0.1:8899',reuseExistingServer:false},outputDir:'qa/mobile-browser/results',reporter:[['list'],['json',{outputFile:'qa/mobile-browser/results.json'}]]});

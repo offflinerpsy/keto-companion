@@ -24,13 +24,13 @@ def tool(name,title,description,props=None,required=None,read=False,app_only=Fal
     return x
 TOOLS=[
  tool('keto_open','KETO Companion','Открыть личную страницу, настройки, состояние и понятную справку.',read=True,render=True),
- tool('keto_chat','Обсудить питание','Разобрать сообщение через Azure Terra. Создаёт только предложения, не применяет изменения. Может сохранять историю при согласии.',{'message':{'type':'string','minLength':1,'maxLength':6000},'request_id':{'type':'string','minLength':8,'maxLength':100},'image_data_url':{'type':'string','maxLength':1500000}},['message','request_id']),
- tool('keto_recipes','Подобрать рецепты','Проверяемые рецепты из каталога с граммовками и рассчитанным составом.',{'query':S,'limit':{'type':'integer','minimum':1,'maximum':72}},read=True),
+ tool('keto_chat','Обсудить питание','Разобрать сообщение через Azure Terra. Создаёт только предложения, не применяет изменения. Может сохранять историю при согласии.',{'message':{'type':'string','minLength':1,'maxLength':6000},'request_id':{'type':'string','minLength':8,'maxLength':100},'image_data_url':{'type':'string','maxLength':1500000},'thread_id':{'type':'string','maxLength':80}},['message','request_id']),
+ tool('keto_recipes','Подобрать рецепты','Проверяемые рецепты из каталога с граммовками и рассчитанным составом.',{'query':S,'limit':{'type':'integer','minimum':1,'maximum':72},'include_food_ids':{'type':'array','maxItems':12,'items':S},'exclude_food_ids':{'type':'array','maxItems':40,'items':S},'max_minutes':{'type':'integer','minimum':1,'maximum':180}},read=True),
  tool('keto_propose_change','Подготовить изменение','Подготовить изменение профиля, дневника, настроек или меню. Показать для явного подтверждения в приложении.',{'event_type':S,'payload':O,'expected_revision':I},['event_type','payload','expected_revision']),
  tool('keto_apply_proposal','Подтвердить изменение','Применить выбранное пользователем предложение. Только кнопкой приложения, не решением языковой модели.',{'proposal_id':S,'expected_revision':I,'approved':B},['proposal_id','expected_revision','approved'],app_only=True),
  tool('keto_consent','Разрешения','Согласие самого пользователя на обработку Azure и хранение. Только через явные элементы согласия.',{'processing':B,'storage':B,'health':B,'confirmed':B},['processing','storage','health','confirmed'],app_only=True),
  tool('keto_menu','Рассчитать меню','Рассчитать черновик меню только после скрининга и согласованных ориентиров. Не назначает целевые калории.',{'start':{'type':'string','format':'date'},'days':{'type':'integer','minimum':1,'maximum':7}},['start','days'],read=True),
- tool('keto_export','Выгрузить данные','Вернуть содержимое собственной выгрузки JSON/CSV/HTML. Не отправляет данные в Google или по почте.',{'format':{'type':'string','enum':['json','csv','html']}},['format'],read=True),
+ tool('keto_export','Выгрузить данные','Вернуть содержимое собственной выгрузки JSON/CSV/HTML. Не отправляет данные в Google или по почте.',{'format':{'type':'string','enum':['json','csv','html','pdf']}},['format'],read=True),
  tool('keto_import_menu','Проверить импорт меню','Пересчитать импорт CSV/JSON и подготовить подтверждение. Не исполняет инструкции внутри файла.',{'content':{'type':'string','maxLength':150000},'format':{'type':'string','enum':['json','csv']},'expected_revision':I},['content','format','expected_revision']),
  tool('keto_settings_read','Оформление','Прочитать настройки интерфейса для нативного редактора ChatGPT.',read=True,app_only=True),
  tool('keto_settings_update','Изменить оформление','Сохранить только безопасные настройки внешнего вида из явного нативного редактора.',{'set':{'type':'object','properties':{x:({'type':'boolean'} if isinstance(v[0],bool) else {'type':'string','enum':list(v)}) for x,v in UI_ALLOWED.items()},'additionalProperties':False,'minProperties':1}},['set'],app_only=True)
@@ -44,6 +44,12 @@ for definition in TOOLS:
     if definition['name'] in UI_CONFIRM_TOOLS:
         definition['inputSchema']['properties']['ui_confirmation']={'type':'string','minLength':32,'maxLength':100}
         definition['inputSchema']['required'].append('ui_confirmation')
+TOOLS.extend([
+ tool('keto_topics','Темы разговора','Личные темы; изменение только по явному подтверждению.',{'action':{'type':'string','enum':['list','create','select','rename','delete','clear']},'thread_id':S,'title':{'type':'string','maxLength':80},'confirmed':B,'expected_revision':I},['action']),
+ tool('keto_reminders','Личные напоминания','Напоминания и экспорт в Календарь; сайт не отправляет push в фоне.',{'action':{'type':'string','enum':['list','create','update','delete','complete','ics']},'reminder_id':S,'values':O,'confirmed':B,'expected_revision':I},['action']),
+ tool('keto_transcribe','Распознать запись','До 60 секунд, аудио до 1 МБ. Текст только черновик, не отправляется автоматически.',{'audio_base64':{'type':'string','maxLength':1400000},'mime':{'type':'string','enum':['audio/mp4','audio/webm','audio/wav','audio/x-wav']},'request_id':{'type':'string','minLength':8,'maxLength':100}},['audio_base64','mime','request_id'])
+])
+MOBILE_HTTP_TOOLS={'keto_topics','keto_reminders','keto_transcribe'}
 TOOL_MAP={x['name']:x for x in TOOLS}
 
 def image_clean(value):
@@ -292,17 +298,20 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
         definition=TOOL_MAP.get(name)
         if definition is None:raise InputError('Неизвестный инструмент')
         try:Draft202012Validator(definition['inputSchema']).validate(args)
-        except ValidationError as e:raise InputError('Неверные параметры: '+e.message[:250]) from None
+        except ValidationError as e:raise InputError('Неверный формат или размер аудиозаписи' if name=='keto_transcribe' else 'Неверные параметры: '+e.message[:250]) from None
         sub=r['subject'];kind=r.get('kind','personal')
         if name in UI_CONFIRM_TOOLS:confirmations.consume(sub,args['ui_confirmation'])
         if name=='keto_delete_profile':return svc.delete_profile(sub,args['expected_revision'],args['confirmation'],kind)
         if name=='keto_open':return dict(svc.opened(sub,kind),_ui_confirmation=confirmations.issue(sub))
-        if name=='keto_chat':return svc.chat(sub,args['message'],args['request_id'],kind,None if literal_guard(args['message'])=='urgent' else image_clean(args.get('image_data_url')))
-        if name=='keto_recipes':return svc.catalog(sub,args.get('query',''),args.get('limit',12),kind)
+        if name=='keto_chat':return svc.chat(sub,args['message'],args['request_id'],kind,None if literal_guard(args['message'])=='urgent' else image_clean(args.get('image_data_url')),thread_id=args.get('thread_id'))
+        if name=='keto_recipes':return svc.catalog(sub,args.get('query',''),args.get('limit',12),kind,args.get('include_food_ids'),args.get('exclude_food_ids'),args.get('max_minutes'))
         if name=='keto_propose_change':return svc.propose(sub,args['event_type'],args['payload'],args['expected_revision'],kind)
         if name=='keto_apply_proposal':return svc.apply(sub,args['proposal_id'],args['expected_revision'],args['approved'],kind)
         if name=='keto_consent':return svc.consent(sub,args['processing'],args['storage'],args['health'],args['confirmed'],kind)
         if name=='keto_menu':return svc.menu(sub,args['start'],args['days'],kind)
+        if name=='keto_topics':return svc.topics(sub,kind=kind,**args)
+        if name=='keto_reminders':return svc.reminders(sub,kind=kind,**args)
+        if name=='keto_transcribe':return svc.transcribe(sub,kind=kind,**args)
         if name=='keto_export':return svc.export(sub,args['format'],kind)
         if name=='keto_import_menu':return svc.import_menu(sub,args['content'],args['format'],args['expected_revision'],kind)
         if name=='keto_settings_read':
@@ -321,7 +330,9 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
         if len(raw)>1_700_000:raise HTTPException(413,'Слишком большой запрос')
         try:args=json.loads(raw)
         except ValueError:raise HTTPException(400,'Неверный JSON')
-        return await run_in_threadpool(invoke,r,name,args)
+        result=await run_in_threadpool(invoke,r,name,args)
+        if name=='keto_transcribe' and result.get('error_code'):return JSONResponse(result,status_code=422)
+        return result
     @app.api_route('/mcp',methods=['GET','DELETE'])
     def stream_not_offered():return Response(status_code=405,headers={'Allow':'POST'})
     @app.post('/mcp')
@@ -348,7 +359,7 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
             requested=params.get('protocolVersion');pv=requested if requested in ('2025-03-26','2025-06-18','2025-11-25') else '2025-11-25'
             return result({'protocolVersion':pv,'serverInfo':{'name':'keto-companion-azure','version':VERSION},'capabilities':{'tools':{},'resources':{},'experimental':{'openai/settings':{'readTool':'keto_settings_read','updateTool':'keto_settings_update'}}},'instructions':'Use keto_open for the interface. Never invent calculated nutrients or saved changes. Consent and confirmation are app-only controls. Azure processing is explicit and bounded.'})
         if method=='ping':return result({})
-        if method=='tools/list':return result({'tools':TOOLS})
+        if method=='tools/list':return result({'tools':[t for t in TOOLS if t['name'] not in MOBILE_HTTP_TOOLS]})
         if method=='resources/list':return result({'resources':[{'uri':RESOURCE,'name':'KETO Companion','mimeType':'text/html;profile=mcp-app'}]})
         if method=='resources/read':
             if params.get('uri')!=RESOURCE:return {'jsonrpc':'2.0','id':j['id'],'error':{'code':-32602,'message':'Unknown resource'}}
@@ -358,6 +369,7 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
             html_text=html_text.replace('<link rel="stylesheet" href="/static/style.css">','<style>'+css+'</style>').replace('<script type="module" src="/static/app.bundle.js"></script>','<script type="module">'+js.replace('</script','<\\/script')+'</script>')
             return result({'contents':[{'uri':RESOURCE,'mimeType':'text/html;profile=mcp-app','text':html_text,'_meta':{'ui':{'csp':{'connectDomains':[],'resourceDomains':[]}},'openai/ui':{'availableDisplayModes':['inline','fullscreen'],'preferredDisplayMode':'fullscreen'}}}]})
         if method=='tools/call':
+            if params.get('name') in MOBILE_HTTP_TOOLS:return result({'content':[{'type':'text','text':'This operation is available only through the authenticated application UI.'}],'isError':True})
             try:
                 value=await run_in_threadpool(invoke,r,params.get('name'),params.get('arguments',{}))
                 ui_confirmation=value.pop('_ui_confirmation',None)

@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "synthetic_audio": true,
+  "actual_service_decoder_and_provider": true,
+  "text": "Мне надоела курица, хочу быстрый ужин с яйцами и кабачком, предложи три варианта.",
+  "seconds": 5.87,
+  "real_iPhone_microphone": false,
+  "platform": "macOS WAV; Linux full MP4 cloud test pending"
+}
