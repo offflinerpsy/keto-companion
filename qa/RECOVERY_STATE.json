@@ -1,26 +1,14 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-07T22:24:23.859652+00:00",
+  "updated_at": "2026-11-07T22:54:15.267889+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.4.0-mobile-pilot",
-  "active_task": {
-    "id": "KETO-MOBILE-006",
-    "github_issue": 6,
-    "stage": "completed",
-    "status": "completed",
-    "acceptance_scope": "source implementation and local synthetic verification; external release acceptance pending"
-  },
-  "last_completed": {
-    "id": "KETO-MOBILE-006",
-    "status": "completed",
-    "scope": "source_and_local_tests",
-    "evidence": "qa/MOBILE_IMPLEMENTATION_RESULT.json",
-    "github_issue": 6
-  },
+  "active_task": null,
+  "last_completed": "KETO-MOBILE-006",
   "next_task": {
-    "id": "KETO-MOBILE-006",
-    "stage": "parent_runtime_container_device_acceptance",
-    "action": "Validate the exact current artifacts with permitted runtime and container DOM tests, then real speech/share/Calendar on device and release through existing parent contour."
+    "id": "KETO-MOBILE-ACCEPTANCE",
+    "status": "requires_owner_device",
+    "action": "Reload the app on iPhone, tap microphone, speak, stop, confirm text appears without sending."
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",

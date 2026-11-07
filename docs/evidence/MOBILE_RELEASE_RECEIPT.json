@@ -1,0 +1,125 @@
+{
+  "task": "KETO-MOBILE-006",
+  "status": "implemented_and_deployed_device_acceptance_pending",
+  "updated_at": "2026-11-07T22:54:15.267889+00:00",
+  "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "saas_version": "0.4.0-mobile-pilot",
+  "frontend_source_commit": "7c0c2390c47d211e35cb4ed1a3c9066b5db99f94",
+  "azure_source_commit": "74e5e0fc0410b3d4fec54c144348e2300f420783",
+  "cloudflare_build_uuid": "8db8a6c2-d412-42d3-8fc7-9b5c7fffcdcd",
+  "cloudflare_deployment_id": "d18f21256e6a4804b16278c6ba637698",
+  "azure_deployment_id": "18767f43-61f6-4479-829b-48d0e3e274f0",
+  "deployed_asset_hashes_match": {
+    "index.html": true,
+    "app.bundle.js": true,
+    "style.css": true
+  },
+  "python": {
+    "passed": 383,
+    "skipped": 1,
+    "skip_reason": "Linux-only anonymous-RAM fd branch on Mac; separately exercised in Linux container"
+  },
+  "node": {
+    "passed": 75
+  },
+  "last_visual_asset_targeted_tests": 9,
+  "browser_ui_first_pass": {
+    "viewport_cases": 6,
+    "screen_checks": 42,
+    "horizontal_overflow": 0,
+    "composer_navigation_overlap": 0,
+    "short_height_space_issue": "found and fixed"
+  },
+  "browser_interaction_first_pass": {
+    "passed": 12,
+    "failed": 2,
+    "scope": "synthetic API/MediaRecorder/share on actual compiled UI",
+    "failure": "native Window timer receiver; fixed with globalThis wrappers and added regression"
+  },
+  "postfix_browser_component_test": {
+    "scope": "isolated Linux Chromium recorder component using real Window timers, dependency-injected synthetic recorder",
+    "recording_survives_timer": true,
+    "draft_once": true,
+    "tracks_released": true,
+    "timer_cleared": true,
+    "cancel_clean": true
+  },
+  "final_component_visual": {
+    "scope": "exact public header/chat/nav/CSS component plus final patch, synthetic messages, no app auth/JS",
+    "cases": [
+      {
+        "viewport": [
+          440,
+          956
+        ],
+        "large_dark": false,
+        "message_scroll_height": 554.546875
+      },
+      {
+        "viewport": [
+          375,
+          812
+        ],
+        "large_dark": false,
+        "message_scroll_height": 390.65625
+      },
+      {
+        "viewport": [
+          956,
+          440
+        ],
+        "large_dark": false,
+        "message_scroll_height": 155.53125
+      },
+      {
+        "viewport": [
+          440,
+          540
+        ],
+        "large_dark": true,
+        "message_scroll_height": 244.453125
+      },
+      {
+        "viewport": [
+          440,
+          956
+        ],
+        "large_dark": true,
+        "message_scroll_height": 494.078125
+      }
+    ],
+    "horizontal_overflow": 0,
+    "composer_navigation_overlap": 0,
+    "screenshots_visually_inspected": true
+  },
+  "speech_provider": {
+    "passed": true,
+    "synthetic_audio": true,
+    "actual_service_decoder_and_provider": true,
+    "text": "Мне надоела курица, хочу быстрый ужин с яйцами и кабачком, предложи три варианта.",
+    "seconds": 5.87,
+    "real_iPhone_microphone": false,
+    "platform": "macOS WAV; Linux full MP4 cloud test pending"
+  },
+  "linux_mp4_decoder": {
+    "scope": "exact decoding algorithm on synthetic nonfragmented MP4, anonymous RAM fd; no network",
+    "passed": true,
+    "decoded_seconds": 1.0216875,
+    "ffmpeg": "7.0.2-static"
+  },
+  "new_live_authenticated_cloud_scenarios": "not executed: test setup was blocked; no alternate session creation or bypass attempted",
+  "real_iPhone_or_Safari_tested": false,
+  "Google_real_login_performed_by_agent": false,
+  "clinical_validation": false,
+  "existing_user_state_modified": false,
+  "browser_on_owner_mac_started": false,
+  "remaining_own_jobs": [],
+  "known_limits": [
+    "Dictation, not continuous spoken conversation",
+    "Up to60s per recording; text must be reviewed and sent by user",
+    "Share uses iOS/browser panel; no automatic Telegram send",
+    "Calendar reminders require manual ICS import and notification permission; no automatic sync or closed-page web push",
+    "Bounded conversation topics/history, confirmed preferences shared",
+    "Private Instagram not automatically read"
+  ]
+}

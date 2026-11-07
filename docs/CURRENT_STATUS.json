@@ -1,40 +1,47 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-07T22:30:21.102399+00:00",
+  "updated_at": "2026-11-07T22:54:15.267889+00:00",
   "source_version": "0.4.0-mobile-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
-  "active_task": "KETO-MOBILE-006",
-  "last_completed": "KETO-COMPUTE-004",
-  "next_task": null,
+  "active_task": null,
+  "last_completed": "KETO-MOBILE-006",
+  "next_task": {
+    "id": "KETO-MOBILE-ACCEPTANCE",
+    "status": "requires_owner_device",
+    "action": "Reload the app on iPhone, tap microphone, speak, stop, confirm text appears without sending."
+  },
   "staging": {
     "deployed": true,
     "compute_connected": true,
     "google_real_user_login_verified": false,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "5c48f40d939d22c535674c9455e21003d36b2b15",
+    "source_commit": "7c0c2390c47d211e35cb4ed1a3c9066b5db99f94",
     "http_checks_passed": 24,
     "synthetic_e2e_checks": 20,
-    "synthetic_cleanup_verified": true
+    "synthetic_cleanup_verified": true,
+    "mobile_deployed": true,
+    "mobile_backend_source_commit": "74e5e0fc0410b3d4fec54c144348e2300f420783"
   },
   "production": {
     "saas_deployed": false,
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 349,
-    "node_synthetic_tests": 63,
+    "python_tests": 383,
+    "node_synthetic_tests": 75,
     "local_workerd_checks": 30,
     "workerd_compatibility_date": "2026-10-03",
     "target_cloud_compatibility_date": "2026-11-07",
     "cloud_synthetic_e2e_checks": 20,
-    "actual_cloud_compatibility_date": "2026-11-07"
+    "actual_cloud_compatibility_date": "2026-11-07",
+    "python_skipped": 1
   },
   "not_verified": [
-    "Actual Google account sign-in and consent",
-    "Latest browser/popup/voice behavior",
-    "Clinical suitability",
-    "Gmail/Calendar bidirectional sync and closed Instagram access"
+    "Physical iPhone Safari microphone/keyboard/share sheet",
+    "Actual Calendar import and notifications",
+    "New full authenticated Cloudflare mobile roundtrip",
+    "Clinical suitability"
   ],
   "repository": "https://github.com/offflinerpsy/keto-companion",
   "visibility": "private",
@@ -64,5 +71,6 @@
     "real_device_audio_tested": false,
     "cloud_changes": false
   },
-  "mobile_stage": "implementation-tested_pending-cloud-and-visual"
+  "mobile_stage": "deployed_physical_iPhone_acceptance_pending",
+  "mobile_receipt": "docs/evidence/MOBILE_RELEASE_RECEIPT.json"
 }
