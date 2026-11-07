@@ -1,6 +1,6 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-07T21:32:01.068035+00:00",
+  "updated_at": "2026-11-07T21:36:25.503843+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.3.0-internal-pilot",
   "active_task": null,
@@ -14,7 +14,9 @@
     "id": "KETO-ACCEPTANCE-005",
     "status": "requires_owner_signin",
     "action": "Open staging site and sign in with owner Google account; no health data needed",
-    "scope": "Verify owner login and admin invitation UI; no new features"
+    "scope": "Verify owner login and admin invitation UI; no new features",
+    "github_issue": 5,
+    "url": "https://github.com/offflinerpsy/keto-companion/issues/5"
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",

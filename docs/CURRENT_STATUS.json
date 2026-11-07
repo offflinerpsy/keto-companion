@@ -1,6 +1,6 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-07T21:32:01.068035+00:00",
+  "updated_at": "2026-11-07T21:36:25.502353+00:00",
   "source_version": "0.3.0-internal-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
@@ -47,6 +47,10 @@
       42410047614,
       42410148697
     ],
-    "native_cloudflare_build": "success"
+    "native_cloudflare_build": "success",
+    "release_pull_request": 4,
+    "release_merge_commit": "4661687931e263a9fd002239a4ec473aaaa8356e",
+    "next_acceptance_issue": 5,
+    "current_canonical_branch": "main"
   }
 }
