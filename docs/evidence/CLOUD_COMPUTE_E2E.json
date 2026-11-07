@@ -1,0 +1,124 @@
+{
+  "task": "KETO-COMPUTE-004",
+  "scope": "Live staging HTTP and real Azure Terra. Synthetic membership/session fixtures; NOT actual Google login, browser, voice or clinical validation",
+  "source_commit": "5c48f40d939d22c535674c9455e21003d36b2b15",
+  "checks": [
+    {
+      "name": "two_synthetic_member_sessions",
+      "passed": true
+    },
+    {
+      "name": "Cloudflare_signed_Azure_open",
+      "passed": true
+    },
+    {
+      "name": "explicit_consent_saved",
+      "passed": true
+    },
+    {
+      "name": "incomplete_profile_blocks_menu",
+      "passed": true
+    },
+    {
+      "name": "real_Azure_Terra_response",
+      "passed": true,
+      "seconds": 3.51
+    },
+    {
+      "name": "duplicate_returns_saved_reply",
+      "passed": true
+    },
+    {
+      "name": "reused_id_with_different_payload_refused",
+      "passed": true
+    },
+    {
+      "name": "confirmed_UI_preferences_persist",
+      "passed": true
+    },
+    {
+      "name": "diary_saved",
+      "passed": true
+    },
+    {
+      "name": "second_user_cannot_see_diary",
+      "passed": true
+    },
+    {
+      "name": "catalog_recipes_available",
+      "passed": true
+    },
+    {
+      "name": "calculated_synthetic_menu_and_shopping",
+      "passed": true
+    },
+    {
+      "name": "accepted_menu_persists",
+      "passed": true
+    },
+    {
+      "name": "export_json",
+      "passed": true
+    },
+    {
+      "name": "export_csv",
+      "passed": true
+    },
+    {
+      "name": "export_html",
+      "passed": true
+    },
+    {
+      "name": "Instagram_link_not_falsely_read",
+      "passed": true
+    },
+    {
+      "name": "source_private_between_users",
+      "passed": true
+    },
+    {
+      "name": "R2_upload_sanitized_without_EXIF",
+      "passed": true
+    },
+    {
+      "name": "other_member_cannot_download_image",
+      "passed": true
+    }
+  ],
+  "synthetic_help_reply": "Я помогу подобрать еду под ваш день, составить покупки и вести дневник — без строгих команд. Сначала познакомимся и уточним ограничения. Затем вы сможете попросить меню, заменить блюдо или сказать, что было неудобно. Изменения показываются отдельно: вы подтверждаете их или отменяете. В разделе «Рецепты» — блюда с граммовками; в «Дневнике» — ваши записи; в «Настройках» — оформление и время на готовку. Google автоматически не подключён и двусторонняя синхронизация не настроена; доступны собственные выгрузки. Голос зависит от возможностей приложения, здесь он не проверен. С чего удобнее начать: посмотреть блюда или познакомиться?",
+  "model_usage": {
+    "input_tokens": 1742,
+    "input_tokens_details": {
+      "cache_write_tokens": 1739,
+      "cached_tokens": 0
+    },
+    "output_tokens": 101,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1843
+  },
+  "source_cleanup": [
+    {
+      "id": "549425ef-3ee0-4141-bf27-8af0c7f904eb",
+      "removed": true
+    },
+    {
+      "id": "5b4e8dd2-95f1-4a17-b5ce-08f0d33ea921",
+      "removed": true
+    }
+  ],
+  "passed": true,
+  "completed_at": "2026-11-07T21:27:12.668300+00:00",
+  "total_checks": 20,
+  "fixture_database_cleanup_pending": false,
+  "cleanup_verified": {
+    "sources_removed_through_app": true,
+    "fixture_users_remaining": 0,
+    "fixture_sessions_remaining": 0,
+    "real_users_created": 0,
+    "paid_model_requests_recorded": 1,
+    "global_cost_counter_retained": true,
+    "local_synthetic_token_file_removed": true
+  }
+}

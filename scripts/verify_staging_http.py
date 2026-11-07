@@ -3,11 +3,13 @@ from pathlib import Path
 import hashlib,json,datetime,sys
 import httpx
 BASE="https://keto-companion-saas-staging.offflinerpsy.workers.dev"
+current=json.loads(Path("docs/CURRENT_STATUS.json").read_text())
+expected_compute=current["staging"]["compute_connected"]
 checks=[]
 def check(name,ok,**detail):
  checks.append({"name":name,"passed":bool(ok),**detail})
  if not ok:raise AssertionError(name)
-report={"task":"KETO-RELEASE-002","scope":"Real Cloudflare HTTP; no browser, real Google login, clinical validation or paid model call","checks":checks,"source_commit":"040f0278ea8bb2c6995ab4bf7456d6a71cc4bf6f"}
+report={"task":"KETO-RELEASE-002","scope":"Real Cloudflare HTTP; no browser, real Google login, clinical validation or paid model call","checks":checks,"source_commit":current["staging"]["source_commit"]}
 try:
  with httpx.Client(timeout=25,follow_redirects=False) as client:
   manifest=json.loads(Path("artifacts/files_manifest.json").read_text())
@@ -17,7 +19,7 @@ try:
    r=client.get(BASE+routes[f["module_name"]]);check("served_"+f["module_name"],r.status_code==200 and hashlib.sha256(r.content).hexdigest()==f["sha256"],status=r.status_code,sha256=hashlib.sha256(r.content).hexdigest())
   r=client.get(BASE+"/");check("CSP_and_no_store",r.headers.get("cache-control")=="no-store" and "frame-ancestors 'none'" in r.headers.get("content-security-policy","") and r.headers.get("x-content-type-options")=="nosniff")
   r=client.get(BASE+"/health");d=r.json();check("health_firebase_and_private_storage",r.status_code==200 and d["capabilities"]["firebase_google"] is True and d["capabilities"]["storage"] is True);report["health"]=d
-  check("compute_status_honest",d["capabilities"]["compute"] is False)
+  check("compute_status_honest",d["capabilities"]["compute"] is expected_compute)
   r=client.get(BASE+"/auth/config");d=r.json();check("Google_public_config",r.status_code==200 and d["provider"]=="firebase_google" and d["firebase"]["projectId"]=="keto-companion-auth-261107" and "clientSecret" not in json.dumps(d))
   for path in ["/api/session","/api/admin/summary","/api/sources","/api/export"]:
    r=client.get(BASE+path);check("unauthenticated_"+path,r.status_code==401,status=r.status_code)
@@ -32,6 +34,6 @@ try:
   r=client.get(BASE+"/api/session");check("failed_login_created_no_session",r.status_code==401)
 except Exception as e:report["error"]=type(e).__name__+": "+str(e)[:250]
 report.update({"checked_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"passed":all(x["passed"] for x in checks) and "error" not in report,"total":len(checks)})
-Path("docs/evidence/STAGING_HTTP_VERIFICATION.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+Path("docs/evidence/STAGING_HTTP_LATEST.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
 print(json.dumps({"passed":report["passed"],"checks":len(checks),"error":report.get("error"),"health":report.get("health")},ensure_ascii=False))
 if not report["passed"]:sys.exit(1)

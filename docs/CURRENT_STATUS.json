@@ -1,36 +1,40 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-07T21:18:13.976201+00:00",
+  "updated_at": "2026-11-07T21:32:01.068035+00:00",
   "source_version": "0.3.0-internal-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
   "active_task": null,
-  "last_completed": "KETO-RELEASE-002",
-  "next_task": "KETO-COMPUTE-004",
+  "last_completed": "KETO-COMPUTE-004",
+  "next_task": "KETO-ACCEPTANCE-005",
   "staging": {
     "deployed": true,
-    "compute_connected": false,
+    "compute_connected": true,
     "google_real_user_login_verified": false,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "040f0278ea8bb2c6995ab4bf7456d6a71cc4bf6f",
-    "http_checks_passed": 24
+    "source_commit": "5c48f40d939d22c535674c9455e21003d36b2b15",
+    "http_checks_passed": 24,
+    "synthetic_e2e_checks": 20,
+    "synthetic_cleanup_verified": true
   },
   "production": {
     "saas_deployed": false,
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 341,
-    "node_synthetic_tests": 62,
+    "python_tests": 349,
+    "node_synthetic_tests": 63,
     "local_workerd_checks": 30,
     "workerd_compatibility_date": "2026-10-03",
-    "target_cloud_compatibility_date": "2026-11-07"
+    "target_cloud_compatibility_date": "2026-11-07",
+    "cloud_synthetic_e2e_checks": 20,
+    "actual_cloud_compatibility_date": "2026-11-07"
   },
   "not_verified": [
-    "Real Google user sign-in",
-    "Latest visual/popup/voice behavior",
+    "Actual Google account sign-in and consent",
+    "Latest browser/popup/voice behavior",
     "Clinical suitability",
-    "New SaaS Azure compute bridge in cloud"
+    "Gmail/Calendar bidirectional sync and closed Instagram access"
   ],
   "repository": "https://github.com/offflinerpsy/keto-companion",
   "visibility": "private",
@@ -42,6 +46,7 @@
     "ci_run_ids": [
       42410047614,
       42410148697
-    ]
+    ],
+    "native_cloudflare_build": "success"
   }
 }

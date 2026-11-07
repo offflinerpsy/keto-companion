@@ -21,7 +21,7 @@
 - Research and food data: `0.1.1`, in `library/`; 78 foods, 72 recipes, 47 source records. This is not a new scientific review.
 - Canonical Python service: `service/`. Do not restore historical plugin source over it.
 
-Recent verification: 341 Python tests; 62 Node synthetic tests; 30 exact-build local workerd checks. These cover different scopes and must not be added together as a clinical or browser acceptance score. The local runtime checked compatibility date `2026-10-03`, not cloud `2026-11-07`.
+Current staged release: [Open KETO Companion](https://keto-companion-saas-staging.offflinerpsy.workers.dev/). Cloudflare and Azure are connected. Verification: 349 Python tests, 63 synthetic Node tests, 24 initial cloud HTTP assertions and 20 end-to-end cloud checks on synthetic members. These are different scopes, not a clinical/browser acceptance score. Real owner Google login is the next acceptance gate. See [release receipt](docs/evidence/COMPUTE_RELEASE_RECEIPT.json). The legacy private ChatGPT plugin is a separate client and has not been published or migrated to Google-family accounts.
 
 Read [AGENTS.md](AGENTS.md) before changing the project. Work one task at a time. No browser automation, Computer Use or automatic production deployment. Tests must not call paid AI or external user accounts by default.
 
