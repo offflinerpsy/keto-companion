@@ -23,3 +23,10 @@ body:not(:has(#app)){overflow:auto;height:auto;min-height:100dvh;padding:24px}bo
  #nav{padding-top:4px;padding-bottom:calc(4px + env(safe-area-inset-bottom))}
  #nav button{min-height:44px;padding-top:7px;padding-bottom:7px}
 }
+
+/* Icon controls remain legible at narrow widths and large text. */
+.head-actions button,#mic-button,#topic-edit{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.composer-bottom #mic-button{flex:0 0 48px;min-width:48px;padding:10px}
+.composer-bottom #send,.composer-bottom .photo-button{white-space:nowrap}
+#topic-edit{flex:0 0 48px;min-width:48px;font-size:1.5em;padding:3px 8px}
+@media(max-width:600px){.head-actions #connection{display:none}.head-actions #refresh{min-width:44px;width:44px;padding:8px}.brand small{white-space:nowrap}}
