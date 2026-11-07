@@ -1,12 +1,12 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-07T20:12:10.040343+00:00",
+  "updated_at": "2026-11-07T20:16:35.234526+00:00",
   "source_version": "0.3.0-internal-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
-  "active_task": "KETO-GIT-003",
-  "last_completed": "KETO-RECOVERY-001",
-  "next_task": "KETO-RELEASE-002",
+  "active_task": "KETO-RELEASE-002",
+  "last_completed": "KETO-GIT-003",
+  "next_task": null,
   "staging": {
     "deployed": false,
     "compute_connected": false,
@@ -28,5 +28,17 @@
     "Latest visual/popup/voice behavior",
     "Clinical suitability",
     "New SaaS Azure compute bridge in cloud"
-  ]
+  ],
+  "repository": "https://github.com/offflinerpsy/keto-companion",
+  "visibility": "private",
+  "github": {
+    "checkpoint_commit": "33cfab4e9991e4c8c15877934dcc8f43f96cb741",
+    "checkpoint_issue": 1,
+    "staging_issue": 2,
+    "ci_status": "startup_failure_before_tests",
+    "ci_run_ids": [
+      42410047614,
+      42410148697
+    ]
+  }
 }

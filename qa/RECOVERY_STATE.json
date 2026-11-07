@@ -1,17 +1,18 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-07T19:57:43.557511+00:00",
+  "updated_at": "2026-11-07T20:16:35.235687+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.3.0-internal-pilot",
-  "active_task": null,
+  "active_task": {
+    "id": "KETO-RELEASE-002",
+    "stage": "staging-preflight",
+    "github_issue": 2
+  },
   "last_completed": {
-    "id": "KETO-RECOVERY-001",
-    "title": "Безопасное восстановление и проверка актуальной Firebase-сборки",
+    "id": "KETO-GIT-003",
     "status": "completed",
-    "checks_passed": 30,
-    "checks_total": 30,
-    "evidence": "qa/recovery-firebase-runtime.json",
-    "report": "qa/RECOVERY_REPORT_2026-11-07.md"
+    "commit": "33cfab4e9991e4c8c15877934dcc8f43f96cb741",
+    "github_issue": 1
   },
   "next_task": {
     "id": "KETO-RELEASE-002",
