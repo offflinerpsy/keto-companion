@@ -6,3 +6,20 @@ body[data-view="chat"] #content{display:flex;flex-direction:column;overflow:hidd
 html,body{height:100%;overflow:hidden}.check:has(.field-help){flex-wrap:wrap}.check>.field-help{flex-basis:100%;margin:0 0 4px}.photo-button:focus-within{outline:3px solid var(--accent);outline-offset:3px}
 
 body:not(:has(#app)){overflow:auto;height:auto;min-height:100dvh;padding:24px}body:not(:has(#app)) main{max-width:760px;margin:0 auto}
+
+/* Short mobile viewports: reserve useful message space instead of clipping it. */
+#voice-status:empty,#photo-status:empty{display:none}
+@media(max-height:650px){
+ .top{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:4px}
+ .brand small,.head-actions #connection{display:none}
+ .topic-bar{padding-top:4px;padding-bottom:4px;flex-wrap:nowrap}
+ .topic-bar select{min-height:44px;padding-top:6px;padding-bottom:6px}
+ .topic-bar button{min-height:44px;padding-top:6px;padding-bottom:6px}
+ .composer{padding-top:7px;padding-bottom:max(7px,env(safe-area-inset-bottom))}
+ .composer textarea{min-height:44px;height:52px;max-height:90px;padding-top:7px;padding-bottom:7px}
+ .composer .footnote{display:none}
+ .composer-bottom{margin-top:5px}
+ .composer-bottom button,.composer-bottom .photo-button{min-height:44px;padding-top:6px;padding-bottom:6px}
+ #nav{padding-top:4px;padding-bottom:calc(4px + env(safe-area-inset-bottom))}
+ #nav button{min-height:44px;padding-top:7px;padding-bottom:7px}
+}

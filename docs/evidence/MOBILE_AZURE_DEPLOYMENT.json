@@ -1,0 +1,12 @@
+{
+  "task": "KETO-MOBILE-006",
+  "source_commit": "74e5e0fc0410b3d4fec54c144348e2300f420783",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "d1a8da7d68706fcf923b78d13daa8be291527eecce2546f89a153044e52764ec",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "status": 4,
+  "complete": true,
+  "deployment_id": "18767f43-61f6-4479-829b-48d0e3e274f0",
+  "checked_at": "2026-11-07T22:35:55.124031+00:00"
+}

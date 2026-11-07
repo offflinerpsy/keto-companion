@@ -30,5 +30,7 @@
     "ICS Calendar import; no closed-page push or automatic synchronization",
     "Bounded topic history and explicit shared profile, not unlimited memory",
     "No private Instagram scraping"
-  ]
+  ],
+  "new_cloud_user_fixture_creation": "not performed; blocked attempt not retried",
+  "azure_new_mobile_authenticated_live_tests": "not performed; blocked test-script write not retried"
 }

@@ -1,0 +1,68 @@
+{
+  "source_commit": "74e5e0fc0410b3d4fec54c144348e2300f420783",
+  "runtime": "remote Cloudflare Chromium; actual deployed HTML CSS JS with synthetic API/local-storage adapters; not owner Mac or Safari",
+  "cases": [
+    {
+      "width": 440,
+      "height": 956,
+      "large_dark": false,
+      "views": 7,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_js_errors": 0,
+      "chat_scroll_height": 500
+    },
+    {
+      "width": 375,
+      "height": 812,
+      "large_dark": false,
+      "views": 7,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_js_errors": 0,
+      "chat_scroll_height": 374.3125
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "large_dark": false,
+      "views": 7,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_js_errors": 0,
+      "chat_scroll_height": 424.65625
+    },
+    {
+      "width": 956,
+      "height": 440,
+      "large_dark": false,
+      "views": 7,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_js_errors": 0,
+      "chat_scroll_height": 39.546875
+    },
+    {
+      "width": 440,
+      "height": 540,
+      "large_dark": true,
+      "views": 7,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_js_errors": 0,
+      "chat_scroll_height": 30.5625
+    },
+    {
+      "width": 440,
+      "height": 956,
+      "large_dark": true,
+      "views": 7,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_js_errors": 0,
+      "chat_scroll_height": 446.5625
+    }
+  ],
+  "issue_found": "Short-height landscape/large-text had only30-40px message scroll area despite no overlap. Fixed with compact chrome at max-height650px; retest pending.",
+  "small_target_note": "Only visually-hidden file input and legacy sr-only onboarding control flagged; visible label/control tap targets adequate."
+}
