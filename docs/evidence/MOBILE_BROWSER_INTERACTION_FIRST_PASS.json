@@ -1,0 +1,24 @@
+{
+  "source_commit": "c9f201a4d456ef9feab0a4de708f2a9b5f84fd94",
+  "scope": "actual deployed JS in isolated Cloudflare Chromium; synthetic media/API/share adapters",
+  "passed_checks": [
+    "boot",
+    "mic denial explanation",
+    "no auto-send",
+    "mic release",
+    "clipboard image preview",
+    "remove image",
+    "prepare PDF without share",
+    "explicit share",
+    "settings descriptions",
+    "create topic",
+    "no composer overlap",
+    "no horizontal overflow"
+  ],
+  "failed_checks": [
+    "recording_visible",
+    "dictation_editable_draft"
+  ],
+  "errors": [],
+  "suspected_cause": "Native timer functions were retained as object methods, losing the Window receiver; fix binds via globalThis wrappers. Reverification required."
+}

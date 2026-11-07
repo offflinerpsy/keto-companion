@@ -1,6 +1,6 @@
 // cloudflare-saas/public/media.js
 var RecorderController = class {
-  constructor({ mediaDevices, Recorder, onState, onAudio, clock = () => Date.now(), interval = setInterval, clear = clearInterval }) {
+  constructor({ mediaDevices, Recorder, onState, onAudio, clock = () => Date.now(), interval = (fn, ms) => globalThis.setInterval(fn, ms), clear = (id) => globalThis.clearInterval(id) }) {
     Object.assign(this, { mediaDevices, Recorder, onState, onAudio, clock, interval, clear });
     this.generation = 0;
     this.mode = "idle";

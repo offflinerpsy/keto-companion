@@ -1,5 +1,5 @@
 export class RecorderController{
- constructor({mediaDevices,Recorder,onState,onAudio,clock=()=>Date.now(),interval=setInterval,clear=clearInterval}){Object.assign(this,{mediaDevices,Recorder,onState,onAudio,clock,interval,clear});this.generation=0;this.mode='idle'}
+ constructor({mediaDevices,Recorder,onState,onAudio,clock=()=>Date.now(),interval=(fn,ms)=>globalThis.setInterval(fn,ms),clear=id=>globalThis.clearInterval(id)}){Object.assign(this,{mediaDevices,Recorder,onState,onAudio,clock,interval,clear});this.generation=0;this.mode='idle'}
  emit(mode,message=''){this.mode=mode;this.onState({mode,message,seconds:Math.min(60,Math.floor((this.clock()-(this.started??this.clock()))/1000))})}
  release(){if(this.timer)this.clear(this.timer);this.timer=null;for(const track of this.stream?.getTracks()||[]){track.onended=null;track.stop();}this.stream=null}
  async start(){if(this.mode!=='idle')return;const generation=++this.generation;this.emit('permission','Разрешите микрофон для этой записи.');try{
