@@ -1,0 +1,54 @@
+{
+  "schema": "keto-continuation-state-v1",
+  "updated_at": "2026-11-07T19:57:43.557511+00:00",
+  "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
+  "version": "0.3.0-internal-pilot",
+  "active_task": null,
+  "last_completed": {
+    "id": "KETO-RECOVERY-001",
+    "title": "Безопасное восстановление и проверка актуальной Firebase-сборки",
+    "status": "completed",
+    "checks_passed": 30,
+    "checks_total": 30,
+    "evidence": "qa/recovery-firebase-runtime.json",
+    "report": "qa/RECOVERY_REPORT_2026-11-07.md"
+  },
+  "next_task": {
+    "id": "KETO-RELEASE-002",
+    "title": "Развёртывание зафиксированной сборки в Cloudflare staging",
+    "status": "ready_not_started",
+    "scope": "Только staging release и проверка точной сборки; без новых функций/платежей/публикации плагина",
+    "existing_database_id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+    "existing_bucket": "keto-companion-private-staging",
+    "worker_name": "keto-companion-saas-staging",
+    "expected_worker_sha256": "54acd16c33970ec1763e747188bf7b42c9e00a2d20b48201fa6e6547d28add00",
+    "acceptance": [
+      "Deployment receipt for verified existing staging resources",
+      "Served bundle hash matches manifest",
+      "Public landing/health/auth-config verified",
+      "Private routes reject anonymous access",
+      "Azure compute is not claimed connected without separate verified bridge call"
+    ]
+  },
+  "source_archive": {
+    "path": "deliverables/saas-identity-source.tar.gz",
+    "sha256": "4c881831908438751fa4a0277754f430d18cf4d85804a81e468347a26d69a2ff"
+  },
+  "test_boundaries": {
+    "runtime": "5.20260926.0-alpha",
+    "compatibility_date_tested": "2026-10-03",
+    "production_compatibility_date_unverified": "2026-11-07",
+    "real_google_signin_verified": false,
+    "browser_or_voice_verified": false,
+    "clinical_validation": false,
+    "cloud_changes_this_recovery": false
+  },
+  "processes": {
+    "codex_started_this_recovery": false,
+    "browser_started_this_recovery": false,
+    "runtime_disposed": true,
+    "recorded_prior_jobs_running": []
+  },
+  "operating_rules": "AGENTS.md",
+  "platform_failure_exact_cause": "not determined; no server-side chat telemetry"
+}

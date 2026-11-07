@@ -1,0 +1,59 @@
+{
+  "version": "0.3.0-internal-pilot",
+  "status": "implemented_locally_not_deployed",
+  "ready_for_parent_review": true,
+  "ready_for_family_use": false,
+  "identity": {
+    "provider": "firebase_google",
+    "firebase_sdk": "13.2.0 vendored official ESM; source hashes checked",
+    "jose": "6.2.15 vendored local bundle, MIT",
+    "real_google_login": "not tested",
+    "direct_google": "explicit only; parent callback returned redirect_uri_mismatch"
+  },
+  "checks": [
+    {
+      "command": "node cloudflare-saas/build.cjs",
+      "result": "passed; standalone 431203 bytes, modular 62872 bytes"
+    },
+    {
+      "command": "node --test cloudflare-saas/tests/*.test.mjs",
+      "result": "62 passed; synthetic signed identity, SQLite adapter, mock R2 and bridge"
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_service.py tests/test_oauth_bridge.py tests/test_edge_candidate.py tests/test_edge_bridge.py library/skills/keto-companion/tests/test_core.py",
+      "result": "341 passed; Python unchanged since test"
+    },
+    {
+      "command": "node tests/test_ui_no_browser.cjs && node tests/test_oauth_ui.cjs",
+      "result": "passed; no browser"
+    },
+    {
+      "command": "local SQLite migration backfill check",
+      "result": "passed"
+    },
+    {
+      "command": "vendor source SHA256 verification",
+      "result": "passed"
+    }
+  ],
+  "parent_prior_runtime": {
+    "evidence": "qa/parent-workerd-check.json",
+    "result": "passed on earlier build with D1/R2 and synthetic seeded direct identity",
+    "compatibility_date": "2026-10-03",
+    "production_date_in_brief": "2026-11-07",
+    "current_firebase_build_tested": false
+  },
+  "limitations": [
+    "Actual Firebase/Google user login and popup/CSP/COOP behavior not tested in browser",
+    "New Worker and migrations not yet tested in workerd or deployed; parent owns runtime and staging verification",
+    "Direct Google callback not configured: redirect_uri_mismatch",
+    "Independent security, clinical and visual review and Azure bridge/logging verification outstanding",
+    "R2 versions/backups, job and nonce retention, and budgets need policy",
+    "Previously deleted users historical daily usage cannot be reconstructed for global quota backfill"
+  ],
+  "cloud_writes": false,
+  "browser_gui_used": false,
+  "subagents_used": false,
+  "deployment_guide": "cloudflare-saas/DEPLOYMENT_GUIDE_RU.md",
+  "artifact_manifest": "artifacts/files_manifest.json"
+}

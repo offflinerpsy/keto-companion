@@ -1,0 +1,14 @@
+PRAGMA foreign_keys=ON;
+CREATE TABLE users (id TEXT PRIMARY KEY, google_sub TEXT NOT NULL UNIQUE, email TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('admin','member')), status TEXT NOT NULL CHECK(status IN ('pending','active','suspended')), joined_at INTEGER NOT NULL, last_active INTEGER NOT NULL);
+CREATE TABLE oauth_attempts (state_hash TEXT PRIMARY KEY, verifier TEXT NOT NULL, nonce_hash TEXT NOT NULL, invite_hash TEXT, expires_at INTEGER NOT NULL);
+CREATE TABLE sessions (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL, created_at INTEGER NOT NULL);
+CREATE TABLE invites (id TEXT PRIMARY KEY, token_hash TEXT NOT NULL UNIQUE, email TEXT NOT NULL, expires_at INTEGER NOT NULL, created_at INTEGER NOT NULL, created_by TEXT NOT NULL REFERENCES users(id), revoked_at INTEGER, claimed_by TEXT REFERENCES users(id), claimed_at INTEGER);
+CREATE TABLE consents (user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, storage INTEGER NOT NULL CHECK(storage IN(0,1)), health INTEGER NOT NULL CHECK(health IN(0,1)), processing INTEGER NOT NULL CHECK(processing IN(0,1)), updated_at INTEGER NOT NULL);
+CREATE TABLE private_state (user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, revision INTEGER NOT NULL DEFAULT 0, payload TEXT NOT NULL DEFAULT '{}', updated_at INTEGER NOT NULL);
+CREATE TABLE usage (user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, day TEXT NOT NULL, requests INTEGER NOT NULL DEFAULT 0 CHECK(requests>=0), PRIMARY KEY(user_id,day));
+CREATE TABLE jobs (user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, request_id TEXT NOT NULL, request_hash TEXT NOT NULL, status TEXT NOT NULL, revision INTEGER NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY(user_id,request_id));
+CREATE TABLE sources (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, title TEXT NOT NULL, author TEXT NOT NULL, source_url TEXT NOT NULL, access_method TEXT NOT NULL, content_hash TEXT, excerpt TEXT NOT NULL, object_key TEXT, mime TEXT, status TEXT NOT NULL CHECK(status IN ('needs_content','draft','reviewed','personal_recipe')), rights_attested INTEGER NOT NULL CHECK(rights_attested=1), created_at INTEGER NOT NULL);
+CREATE INDEX sources_owner ON sources(user_id,created_at);
+CREATE INDEX sessions_owner ON sessions(user_id);
+CREATE INDEX invites_status ON invites(expires_at,revoked_at,claimed_by);
+CREATE TABLE audit (id TEXT PRIMARY KEY, actor_id TEXT NOT NULL, action TEXT NOT NULL, target_id TEXT, created_at INTEGER NOT NULL);

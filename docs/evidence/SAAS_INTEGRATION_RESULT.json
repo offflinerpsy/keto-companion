@@ -1,0 +1,18 @@
+{
+  "version":"0.3.0-internal-pilot",
+  "legacy_service_version":"0.2.1",
+  "status":"implemented_locally_not_deployed",
+  "ready_for_parent_review":true,
+  "ready_for_family_use":false,
+  "changed_files":["service/app.py","service/brain.py","service/domain.py","service/store.py","service/edge_bridge.py","cloudflare-saas/src/worker.mjs","cloudflare-saas/src/compute.mjs","cloudflare-saas/src/deletion.mjs","cloudflare-saas/src/standalone.mjs","cloudflare-saas/src/embedded-assets.mjs","cloudflare-saas/migrations/0002_integration.sql","cloudflare-saas/public/index.html","cloudflare-saas/public/app.js","cloudflare-saas/public/app.bundle.js","cloudflare-saas/public/style.css","cloudflare-saas/public/help.html","cloudflare-saas/public/delete.html","cloudflare-saas/build.cjs","cloudflare-saas/dist/worker.mjs","cloudflare-saas/tests/worker.test.mjs","cloudflare-saas/tests/static.test.mjs","cloudflare-saas/tests/local_bridge.py","cloudflare-saas/README.md","cloudflare-saas/DEPLOYMENT_GUIDE_RU.md","tests/test_edge_bridge.py"],
+  "tests":[
+    {"command":".venv/bin/python -m pytest -q tests/test_service.py tests/test_oauth_bridge.py tests/test_edge_candidate.py tests/test_edge_bridge.py library/skills/keto-companion/tests/test_core.py","result":"341 passed"},
+    {"command":"node --test cloudflare-saas/tests/*.test.mjs","result":"37 passed","scope":"SQLite adapter, synthetic signed Worker-to-Python requests and mock identity/R2; no real Cloudflare"},
+    {"command":"node --test cloudflare-saas/tests/static.test.mjs","result":"2 passed after last UI change","scope":"minimal DOM and embedded assets; no browser"},
+    {"command":"node tests/test_ui_no_browser.cjs && node tests/test_oauth_ui.cjs","result":"passed"},
+    {"command":"node cloudflare-saas/build.cjs","result":"standalone Worker built"},
+    {"command":"local Miniflare/workerd launch","result":"blocked by listen EPERM 127.0.0.1; no runtime result"}
+  ],
+  "capabilities":{"chat_diary_menu_shopping":"implemented, synthetic local tests only","source_discussion_and_personal_recipe":"implemented, synthetic local tests only","image_sanitization":"implemented, synthetic local tests only","deletion":"implemented as resumable receipt-based cleanup; indeterminate upload stays pending","shared_replay":"Blob atomic create implemented, mock verified only","real_cloud_or_google":"not tested","cloudflare_mcp":"not implemented"},
+  "release_blockers":["Real Azure/Cloudflare/Google deployment and exact target verification not performed", "Independent security, clinical and visual review outstanding", "Local workerd launch rejected with EPERM; D1/R2 validation used SQLite and mock objects", "Unknown in-flight upload can require explicit reconciliation before deletion completes", "D1 jobs retention, Blob nonce lifecycle, R2 versions/backups and cost budgets require owner policy", "Expired lease cannot prove an unknown external model request has stopped; old request ID is not replayed"]
+}

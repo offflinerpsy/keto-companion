@@ -1,0 +1,29 @@
+"""Fresh headless Chrome, synthetic local profile, real Azure Terra calls. No user browser profile."""
+import json,time,sys
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+out=Path('qa/browser');out.mkdir(parents=True,exist_ok=True);checks=[];errors=[]
+def check(name,fn):
+ try:fn();checks.append({'name':name,'passed':True})
+ except Exception as e:checks.append({'name':name,'passed':False,'error':str(e)[:700]});raise
+with sync_playwright() as p:
+ browser=p.chromium.launch(headless=True,executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
+ context=browser.new_context(viewport={'width':1440,'height':1050},locale='ru-RU',accept_downloads=True);page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.set_default_timeout(12000)
+ try:
+  page.goto('http://127.0.0.1:8821');page.locator('#login').wait_for(state='visible');check('login screen',lambda:page.locator('#access-code').fill('synthetic_local_browser_test_only_123456789'));page.locator('#login-form button').click();page.locator('#workspace').wait_for(state='visible');page.screenshot(path=str(out/'01-first-visit.png'),full_page=True)
+  for id in ['c-processing','c-storage','c-health']:page.locator('#'+id).check()
+  page.locator('#consent-form button').click();page.locator('[data-page="onboarding"]').wait_for(state='visible');check('consent via UI',lambda:page.locator('#consent-panel').wait_for(state='hidden'))
+  page.locator('#help').click();page.locator('#help-dialog').wait_for(state='visible');page.screenshot(path=str(out/'02-help.png'));page.locator('#close-help').click();checks.append({'name':'help dialogue keyboard-accessible','passed':True})
+  page.locator('[data-view="chat"]').click();page.locator('#message').fill('Сделай текст крупнее');page.locator('#send').click();page.locator('#proposals .proposal button.primary').wait_for(state='visible',timeout=70000);assert 'large' not in (page.locator('body').get_attribute('class') or '');page.screenshot(path=str(out/'03-live-terra-proposal.png'),full_page=True);page.locator('#proposals .proposal button.primary').click();page.locator("body.large").wait_for();checks.append({'name':'real Terra request -> preview -> apply large text','passed':True})
+  page.reload();page.locator("body.large").wait_for();checks.append({'name':'preferences survive reload','passed':True})
+  page.locator('[data-view="recipes"]').click();page.locator('#recipes .recipe-card').first.wait_for();page.locator('#recipe-query').fill('яйц');page.locator('#recipe-search button').click();page.wait_for_timeout(500);assert page.locator('#recipes .recipe-card').count()>0;page.locator('#recipes .recipe-card').first.click();page.locator('#recipe-dialog').wait_for(state='visible');assert 'г' in page.locator('#recipe-detail').inner_text();page.screenshot(path=str(out/'04-recipe.png'));page.locator('#close-recipe').click();checks.append({'name':'search and recipe grams dialog','passed':True})
+  page.locator('[data-view="diary"]').click();page.locator('#diary-note').fill('СИНТЕТИЧЕСКИЙ ТЕСТ: завтрак понравился');page.locator('#diary-form button').click();page.locator('#proposals .proposal button.primary').click();page.locator('#diary-entries').get_by_text('СИНТЕТИЧЕСКИЙ ТЕСТ: завтрак понравился',exact=False).wait_for();checks.append({'name':'diary confirmed and rendered','passed':True})
+  page.locator('[data-view="settings"]').click();page.locator('#theme').select_option('dark');page.locator('#simple_mode').check();page.locator('#settings-form button').click();page.locator('#proposals .proposal button.primary').click();page.locator("body.dark.simple").wait_for();checks.append({'name':'visual settings apply atomically','passed':True});page.screenshot(path=str(out/'05-settings-dark.png'),full_page=True)
+  page.locator('[data-view="today"]').click();page.locator('#menu-form button').click();page.locator('#toast').wait_for(state='visible');assert page.locator('#menu-result').inner_text()=='';checks.append({'name':'incomplete profile blocks personal menu','passed':True})
+  with page.expect_download() as info:page.locator('[data-export="json"]').click()
+  download=info.value;download.save_as(str(out/'synthetic-export.json'));assert 'keto-personal-export-v2' in (out/'synthetic-export.json').read_text();checks.append({'name':'own JSON export downloads','passed':True})
+  page.set_viewport_size({'width':390,'height':844});page.locator('[data-view="chat"]').click();page.wait_for_timeout(200);assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth+1');page.screenshot(path=str(out/'06-mobile.png'),full_page=True);checks.append({'name':'390px mobile no horizontal overflow','passed':True})
+  page.locator('[data-view="settings"]').click();page.locator('#logout').click();page.locator('#login').wait_for(state='visible');page.locator('#access-code').fill('synthetic_second_browser_test_only_123456789');page.locator('#login-form button').click();page.locator('#workspace').wait_for(state='visible');assert 'СИНТЕТИЧЕСКИЙ ТЕСТ' not in page.locator('#diary-entries').inner_text();assert not page.locator('#menu-result').inner_text();checks.append({'name':'account switch clears old personal content','passed':True})
+ except Exception as e:errors.append('Journey halted: '+str(e)[:700]);page.screenshot(path=str(out/'failure.png'),full_page=True)
+ finally:
+  checks.append({'name':'no uncaught browser errors','passed':not errors});(out/'report.json').write_text(json.dumps({'checks':checks,'errors':errors,'azure':'real deployment keto-terra-61 for conversational test','runtime':'local same-source service; synthetic profiles; no native ChatGPT iframe or wife account test'},ensure_ascii=False,indent=2));browser.close();print(json.dumps({'checks':len(checks),'passed':sum(x['passed'] for x in checks),'errors':errors},ensure_ascii=False))

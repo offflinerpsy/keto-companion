@@ -1,0 +1,156 @@
+{
+  "plugin": "keto-companion",
+  "version": "0.2.1",
+  "scope": "packaged skill source and research/calculation library; cloud service separately deployed and verified",
+  "date": "2026-11-07",
+  "algorithm": "sha256",
+  "files": [
+    {
+      "path": "skills/keto-companion/SKILL.md",
+      "sha256": "b7f8b95543a843a8fccd73f8d884e2b272d0d3c33f60407289bf25090bb85787",
+      "bytes": 8839
+    },
+    {
+      "path": "skills/keto-companion/references/capability-contract.md",
+      "sha256": "52c3f9c34c26ffaa1ec6c93fddebcdecdc78e7ec2f79b3b6771d0c43b3e6e634",
+      "bytes": 4678
+    },
+    {
+      "path": "skills/keto-companion/references/clinical-launch-checklist.md",
+      "sha256": "b5293009b8a4810b2df201242cc5140c3bbbb887782ba5cbec68dd0877084fce",
+      "bytes": 2545
+    },
+    {
+      "path": "skills/keto-companion/references/google-state.md",
+      "sha256": "1b205b1fe8d130be5dd7ed47430f522870a9aa07454639ddcaeabe30119db181",
+      "bytes": 1686
+    },
+    {
+      "path": "skills/keto-companion/references/onboarding.md",
+      "sha256": "44db6ab8c0b6c02d91cff716bf43b1858d984586516686ad6a562b30ddc645ac",
+      "bytes": 4990
+    },
+    {
+      "path": "skills/keto-companion/references/runtime.md",
+      "sha256": "aac39e84a7f7311a2d738ccd91976203836a072a333e46190cd5d87d0ebe1061",
+      "bytes": 3312
+    },
+    {
+      "path": "skills/keto-companion/scripts/keto_core.py",
+      "sha256": "bd135da6960419c9e3375b47d73bc691d3f666712d055f36705b34dfc4c747d4",
+      "bytes": 60647
+    },
+    {
+      "path": "skills/keto-companion/scripts/keto_export.py",
+      "sha256": "cd32b088782918f8ea00f99d50be53a3e0fe69f8432241e2516dc08b71dccc2a",
+      "bytes": 30498
+    },
+    {
+      "path": "skills/keto-companion/scripts/self_check.py",
+      "sha256": "27786018141dc6520cc22142352ee57c866cb24a0741272d03c3f4f11cc1b054",
+      "bytes": 1203
+    },
+    {
+      "path": "skills/keto-companion/templates/blank_state.json",
+      "sha256": "5f4da1f4a874662858d230e7dae8b79247e4ad408cc310d8136b8368ed01e7f2",
+      "bytes": 2021
+    },
+    {
+      "path": "skills/keto-companion/templates/default_settings.json",
+      "sha256": "b268e4009096b367fddc93dc5fada691f9655a847838f938d9e11d78ee4f76a0",
+      "bytes": 518
+    },
+    {
+      "path": "skills/keto-companion/templates/profile.example.empty.json",
+      "sha256": "7ad0732ac1ce7b34dd733362c24e4f9f7d73c3107ee7fe36c34b3c2758ebda07",
+      "bytes": 1469
+    },
+    {
+      "path": "skills/keto-companion/templates/settings.schema.json",
+      "sha256": "fc73a4b5df76a2f0689153aa4fcd54c1a7939a4ba470e07dbc5fd268fb1be795",
+      "bytes": 2622
+    },
+    {
+      "path": "skills/keto-companion/tests/behavior_cases_50_not_executed.json",
+      "sha256": "540b65a898a0877327da63cd4d84f9abc4885e8180a98a4a5538631084ea50ae",
+      "bytes": 16751
+    },
+    {
+      "path": "skills/keto-companion/tests/test_core.py",
+      "sha256": "a6d1251219ecd5587710891f385057b03e156e8dfce7bb767fffca933312391d",
+      "bytes": 17174
+    },
+    {
+      "path": "skills/keto-diary/SKILL.md",
+      "sha256": "5108c3bf713a9da836188b533c1994da71180989f4f25bb83c72f766984bae1e",
+      "bytes": 3196
+    },
+    {
+      "path": "skills/keto-evidence/SKILL.md",
+      "sha256": "4911b55dd156a9ad1df4ac8b7f0fdf0b32b1a261f1e9b1e372dea7ffd0349e64",
+      "bytes": 3315
+    },
+    {
+      "path": "skills/keto-evidence/references/ANNOTATED_BIBLIOGRAPHY_RU.md",
+      "sha256": "137b2d4d505e85f71102edf2b04eddb8556fa6eeace165808a89006933ec243c",
+      "bytes": 50309
+    },
+    {
+      "path": "skills/keto-evidence/references/RESEARCH_REPORT_RU.md",
+      "sha256": "12a2718143c9b1158adc1f44a093a0d69048b225890eab6866d70e790d379ca4",
+      "bytes": 42219
+    },
+    {
+      "path": "skills/keto-evidence/references/calculation_sources.json",
+      "sha256": "c58dc276de4fd0a4f74c99eab7b69191c6450ab2c44f37a672bd2acabf105135",
+      "bytes": 497
+    },
+    {
+      "path": "skills/keto-evidence/references/evidence_matrix.json",
+      "sha256": "426c3bb766ea0eb1b9b2e9644f1dc2d595a529ccddc5a222676488609b5301f7",
+      "bytes": 12370
+    },
+    {
+      "path": "skills/keto-evidence/references/sources.json",
+      "sha256": "51c30a82cf3f8d4176708f5b086fc34beeac75b1dcf9b02aebebdf4b76ba9294",
+      "bytes": 67009
+    },
+    {
+      "path": "skills/keto-export/SKILL.md",
+      "sha256": "f2008ab19fb78ae09e80e4f4c77ae8d71177db328b205c745eaefb30020460d9",
+      "bytes": 4907
+    },
+    {
+      "path": "skills/keto-menu/SKILL.md",
+      "sha256": "67e8f8061908875a243f1e1c29d939bb688683d3d06f6d0d34ff3ed352ffbd86",
+      "bytes": 3635
+    },
+    {
+      "path": "skills/keto-menu/data/foods.json",
+      "sha256": "ecc5a02f033409b40e3fca7f8b33608ce3bf1e25c4004e8d1a4d777a9bd4cd6c",
+      "bytes": 58477
+    },
+    {
+      "path": "skills/keto-menu/data/recipes.json",
+      "sha256": "b876aa1ac0bdc0b6a35c896b3b62de7aac8a852cc2317f586f26f74fb4e049c3",
+      "bytes": 137525
+    },
+    {
+      "path": "skills/keto-safety/SKILL.md",
+      "sha256": "20dcdae8fa20afb4aa051d35dad219f9ac63f605195fce4589747a8604b392ea",
+      "bytes": 5040
+    },
+    {
+      "path": "skills/keto-safety/references/safety_rules.json",
+      "sha256": "8e7d34d6494702d38e4757c2bf3f868cab46bee584218da3f82fd87c4d120757",
+      "bytes": 8399
+    },
+    {
+      "path": "skills/keto-settings/SKILL.md",
+      "sha256": "c631dd2cc3d7e32d26a5e755e3e4164a70c605e50fe103ce03f63cc2563819f1",
+      "bytes": 3494
+    }
+  ],
+  "cloud_service_version": "0.2.1",
+  "nutrition_library_version": "0.1.1"
+}

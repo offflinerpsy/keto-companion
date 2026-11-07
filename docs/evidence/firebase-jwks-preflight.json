@@ -1,0 +1,9 @@
+{
+  "url": "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+  "status": 200,
+  "key_count": 2,
+  "key_types": [
+    "RSA"
+  ],
+  "cache_control": "public, max-age=20735, must-revalidate, no-transform"
+}

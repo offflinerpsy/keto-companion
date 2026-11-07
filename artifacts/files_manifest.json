@@ -1,0 +1,110 @@
+{
+  "status": "candidate; runtime and real login unverified",
+  "main_module": "worker-modules.mjs",
+  "files": [
+    {
+      "path": "cloudflare-saas/dist/worker.mjs",
+      "sha256": "1bab41ef0ac82026e9c5fc92d6cfd1988ed4452ae34522ee27f6f2f37603c938",
+      "bytes": 431203,
+      "mime": "application/javascript+module",
+      "module_name": "worker.mjs",
+      "module_type": "esm"
+    },
+    {
+      "path": "cloudflare-saas/dist/worker-modules.mjs",
+      "sha256": "54acd16c33970ec1763e747188bf7b42c9e00a2d20b48201fa6e6547d28add00",
+      "bytes": 62872,
+      "mime": "application/javascript+module",
+      "module_name": "worker-modules.mjs",
+      "module_type": "esm"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/app.bundle.js",
+      "sha256": "f0668ac8f268d89567af8001e12ab9fda7ef063abe39e6da1b3a2acc93a84105",
+      "bytes": 265282,
+      "mime": "text/plain",
+      "module_name": "assets/app.bundle.js",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/delete.html",
+      "sha256": "82b6cde59cb0fdf7ed78391ab84e47a010948f520d89966057ed7a9080d07179",
+      "bytes": 979,
+      "mime": "text/plain",
+      "module_name": "assets/delete.html",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/firebase-public-config.json",
+      "sha256": "272875fccf3720d922d7ef00a12484401f657a5a8d507d3db60c7e693295e00b",
+      "bytes": 259,
+      "mime": "text/plain",
+      "module_name": "assets/firebase-public-config.json",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/help.html",
+      "sha256": "78bb8aef0841c0fce8d25dd234a430ce5922812eefa73dee01e6ba5a9c56eb14",
+      "bytes": 1172,
+      "mime": "text/plain",
+      "module_name": "assets/help.html",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/index.html",
+      "sha256": "0fd3cd8aab908a44996ace657689f769f5304863f8203fa04e965f546c129c08",
+      "bytes": 22530,
+      "mime": "text/plain",
+      "module_name": "assets/index.html",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/privacy.html",
+      "sha256": "74ca6f6dd2db4bad44495754eead5ae1e92c9553b5104daa904203f8a7b99f96",
+      "bytes": 1290,
+      "mime": "text/plain",
+      "module_name": "assets/privacy.html",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/style.css",
+      "sha256": "1d73f3f8fa727c3771b5e3a3a8692cd0a871a6f6b8c50f327dc3a3db3674ec91",
+      "bytes": 11695,
+      "mime": "text/plain",
+      "module_name": "assets/style.css",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/migrations/0001_initial.sql",
+      "sha256": "8c15dea11cf267fe91b4919e28d0d92101d4827ba3b5625a927354b8f78eb177",
+      "bytes": 2582,
+      "mime": "application/sql",
+      "module_name": null,
+      "module_type": null
+    },
+    {
+      "path": "cloudflare-saas/migrations/0002_integration.sql",
+      "sha256": "919b82dd0b9bab3cf7a0db57fab985b1e2af99c7632cf40fe03aa07f27ba1c7f",
+      "bytes": 884,
+      "mime": "application/sql",
+      "module_name": null,
+      "module_type": null
+    },
+    {
+      "path": "cloudflare-saas/migrations/0003_global_usage.sql",
+      "sha256": "b6c5e324da480634aea369ac11aa3fe2585618c7c75b77a9b8fd2d48c70bb148",
+      "bytes": 195,
+      "mime": "application/sql",
+      "module_name": null,
+      "module_type": null
+    },
+    {
+      "path": "cloudflare-saas/migrations/0004_firebase_challenges.sql",
+      "sha256": "8792013359128e7759237dff78d2a321ceaba5114a78ea9d0729d52aa5ee9811",
+      "bytes": 373,
+      "mime": "application/sql",
+      "module_name": null,
+      "module_type": null
+    }
+  ]
+}

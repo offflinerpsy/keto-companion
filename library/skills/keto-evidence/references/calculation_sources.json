@@ -1,0 +1,13 @@
+[
+  {
+    "source_id": "ENGINE01",
+    "title": "A new predictive equation for resting energy expenditure in healthy individuals",
+    "year": 1990,
+    "pmid": "2305711",
+    "doi": "10.1093/ajcn/51.2.241",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/2305711/",
+    "verification_level": "PubMed abstract, checked 2026-11-07",
+    "scope": "resting energy estimate only; 498 healthy adults19–78; activity multiplier separate assumption; no deficit prescription",
+    "status": "included"
+  }
+]

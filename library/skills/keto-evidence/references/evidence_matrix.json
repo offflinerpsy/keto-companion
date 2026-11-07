@@ -1,0 +1,182 @@
+[
+  {
+    "topic": "weight",
+    "question_ru": "Лучше ли кето для похудения через 1–2 года?",
+    "source_ids": "S01;S04;S07;S10",
+    "conclusion_ru": "Устойчивое крупное превосходство не установлено; небольшое краткосрочное преимущество возможно.",
+    "confidence_editorial": "умеренная для сравнений, низкая для долгосрочного strict keto",
+    "assistant_implication_ru": "Обсуждать предпочтения, энергию и приверженность.",
+    "prohibited_inference_ru": "Кето автоматически худит независимо от калорий.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "type2_diabetes",
+    "question_ru": "Может ли низкоуглеводное питание улучшать T2D?",
+    "source_ids": "S02;S03;S07;S08;S11",
+    "conclusion_ru": "У некоторых людей улучшает контроль и позволяет уменьшить терапию под наблюдением.",
+    "confidence_editorial": "исход-специфичная",
+    "assistant_implication_ru": "Согласовать лекарственный план до существенного ограничения углеводов.",
+    "prohibited_inference_ru": "Диабет навсегда вылечен; лекарства можно отменить.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "lipids",
+    "question_ru": "Можно ли игнорировать высокий LDL при низких TG?",
+    "source_ids": "S03;S06;S17;S19",
+    "conclusion_ru": "Нет; благоприятные TG/HDL не отменяют атерогенный риск.",
+    "confidence_editorial": "высокая для необходимости оценки, индивидуальный эффект вариабелен",
+    "assistant_implication_ru": "Обсудить изменение качества жиров/степени ограничений и врача.",
+    "prohibited_inference_ru": "ApoB безвреден у худых людей на кето.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "sglt2",
+    "question_ru": "Можно ли самостоятельно сочетать SGLT2 и кето?",
+    "source_ids": "S11;S12;S13",
+    "conclusion_ru": "Не выдавать автоматический кетогенный план; риск кетоацидоза.",
+    "confidence_editorial": "сильное регуляторное/клиническое предупреждение",
+    "assistant_implication_ru": "Блок назначения плана и связь с лечащим врачом.",
+    "prohibited_inference_ru": "Нормальная глюкоза исключает кетоацидоз.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "therapeutic",
+    "question_ru": "Можно ли применять соотношение 4:1 дома для веса?",
+    "source_ids": "S14;S15",
+    "conclusion_ru": "Нет оснований переносить лечебный протокол в бытовое меню.",
+    "confidence_editorial": "клинический консенсус",
+    "assistant_implication_ru": "Лечебную кетотерапию вести только профильной командой.",
+    "prohibited_inference_ru": "Чем выше кетоны, тем лучше похудение.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "kidney",
+    "question_ru": "Безопасно ли кето при ХБП или камнях?",
+    "source_ids": "S20;S21;S11",
+    "conclusion_ru": "Риски и ограничения индивидуальны; автоматический высокобелковый план неприемлем.",
+    "confidence_editorial": "умеренная/ограниченная по исходам",
+    "assistant_implication_ru": "Врач/ренальный диетолог до плана.",
+    "prohibited_inference_ru": "Камни возникают у 7.9% здоровых людей каждый год.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "liver",
+    "question_ru": "Доказано ли преимущество кето при MASLD?",
+    "source_ids": "S22",
+    "conclusion_ru": "Специфическое преимущество и безопасность недостаточно установлены.",
+    "confidence_editorial": "guideline with evidence gaps",
+    "assistant_implication_ru": "Приоритет устойчивого питания и клинического ведения.",
+    "prohibited_inference_ru": "Жировую болезнь печени лечит только кето.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "pcos",
+    "question_ru": "Является ли кето обязательным при PCOS?",
+    "source_ids": "S23;S24",
+    "conclusion_ru": "Нет; новые малые РКИ не доказывают универсальное превосходство.",
+    "confidence_editorial": "ограниченная для keto-specific",
+    "assistant_implication_ru": "Выбор устойчивого рациона с учётом репродуктивных целей.",
+    "prohibited_inference_ru": "Нормализация цикла доказывает фертильность/живорождение.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "pregnancy",
+    "question_ru": "Можно ли начать keto при беременности/ГВ?",
+    "source_ids": "S11;S14",
+    "conclusion_ru": "Не предлагать самостоятельное строгое кето.",
+    "confidence_editorial": "предупредительный клинический подход",
+    "assistant_implication_ru": "Передать акушеру/лечащей команде.",
+    "prohibited_inference_ru": "Потеря веса и высокий кетоз — цель беременности.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "exercise",
+    "question_ru": "Нужно ли кето для спорта?",
+    "source_ids": "S25",
+    "conclusion_ru": "Не показано универсального выигрыша в результативности.",
+    "confidence_editorial": "зависит от спорта",
+    "assistant_implication_ru": "Отслеживать восстановление и доступность энергии.",
+    "prohibited_inference_ru": "Больше окисления жира = лучший результат.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "microbiome",
+    "question_ru": "Доказывают ли изменения микробиоты пользу/вред?",
+    "source_ids": "S26",
+    "conclusion_ru": "Нет; это механистические данные, не диагноз.",
+    "confidence_editorial": "низкая для клинического переноса",
+    "assistant_implication_ru": "Подбирать переносимую клетчатку, оценивать симптомы.",
+    "prohibited_inference_ru": "Кето лечит дисбиоз/воспаление всем.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "longterm",
+    "question_ru": "Что известно о 5-летней устойчивости?",
+    "source_ids": "S08;S01",
+    "conclusion_ru": "Есть обнадёживающие наблюдения, но высокое выбывание и отсутствие рандомизированного контроля.",
+    "confidence_editorial": "низкая для причинности",
+    "assistant_implication_ru": "Нужна возможность сменить подход без чувства провала.",
+    "prohibited_inference_ru": "Наблюдательные 5-летние результаты доказывают снижение смертности.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "net_carbs",
+    "question_ru": "Равны ли net carbs метаболически усвоенным углеводам?",
+    "source_ids": "S_NET;S_LABEL;S_USDA",
+    "conclusion_ru": "Это упрощённая расчётная величина, а не физиологическое измерение.",
+    "confidence_editorial": "сильная методологическая оговорка",
+    "assistant_implication_ru": "Хранить total/fiber/net отдельно, учитывать маркировку.",
+    "prohibited_inference_ru": "По net можно автоматически дозировать инсулин.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "nutrients",
+    "question_ru": "Достаточно ли проверки калорий и БЖУ?",
+    "source_ids": "S_CA;S_FE;S_D;S_FOL;S_B12",
+    "conclusion_ru": "Нет; возможны недостатки/избытки и неполнота данных.",
+    "confidence_editorial": "базовые нормы питания",
+    "assistant_implication_ru": "Проверять средние, покрытие данных, реальную марку.",
+    "prohibited_inference_ru": "Ниже нормы один день = клинический дефицит.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "salt",
+    "question_ru": "Нужны ли всем большие дозы соли/калия?",
+    "source_ids": "S_K;S21;S13",
+    "conclusion_ru": "Нет универсальной безопасной добавочной дозы.",
+    "confidence_editorial": "сильный принцип безопасности",
+    "assistant_implication_ru": "Учесть давление, почки, лекарства и медицинский план.",
+    "prohibited_inference_ru": "Любая слабость — повод пить соль.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "intake",
+    "question_ru": "Нужно ли добирать жир до фиксированных 75%?",
+    "source_ids": "S01;S05;S11",
+    "conclusion_ru": "Такой универсальный клинический алгоритм не обоснован.",
+    "confidence_editorial": "редакционный вывод из индивидуализации",
+    "assistant_implication_ru": "Сначала цели, переносимость, питание и энергия.",
+    "prohibited_inference_ru": "Масло без ограничения полезно, потому что нет углеводов.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "record_integrity",
+    "question_ru": "Можно ли включать отозванные статьи в ответы?",
+    "source_ids": "S18;S19",
+    "conclusion_ru": "Только как явно помеченную историю ошибки, не поддерживающее доказательство.",
+    "confidence_editorial": "однозначно по статусу публикации",
+    "assistant_implication_ru": "Фильтровать retracted до генерации.",
+    "prohibited_inference_ru": "Высокая цитируемость отменяет отзыв.",
+    "formal_grade_performed": false
+  },
+  {
+    "topic": "personalization",
+    "question_ru": "Достаточно ли чат-памяти для сопровождения?",
+    "source_ids": "S_OPENAI2;S_OPENAI3",
+    "conclusion_ru": "Нет; жизненно важные параметры должны храниться структурированно и подтверждаться.",
+    "confidence_editorial": "проектное решение",
+    "assistant_implication_ru": "Версионируемая анкета и согласие, детерминированный расчёт.",
+    "prohibited_inference_ru": "Модель точно помнит лекарства из любого старого чата.",
+    "formal_grade_performed": false
+  }
+]

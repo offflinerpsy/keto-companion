@@ -1,0 +1,8 @@
+{
+  "version": "0.3.0-internal-pilot",
+  "entrypoints": ["dist/worker.mjs", "dist/worker-modules.mjs"],
+  "bindings": {"DB": "D1 database", "UPLOADS": "private R2 bucket"},
+  "required_environment_names": ["AUTH_PROVIDER", "FIREBASE_PUBLIC_CONFIG_JSON", "PUBLIC_ORIGIN", "OWNER_GOOGLE_EMAIL", "SESSION_HMAC_KEY", "KETO_EDGE_BRIDGE_URL", "KETO_EDGE_BRIDGE_SECRET"],
+  "identity": "firebase_google; direct_google only by explicit configuration and independently verified callback",
+  "deployment": "candidate; parent performs runtime, live login and security checks"
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "file": "cloudflare-saas/vendor/firebase-13.2.0/firebase-app.js",
+    "source": "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js",
+    "sha256": "a67a49aeb0937561e6405f721cf486dc3085e73763716e8233082417be769d40",
+    "bytes": 106680,
+    "import_urls": [
+      "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js",
+      "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js');"
+    ]
+  },
+  {
+    "file": "cloudflare-saas/vendor/firebase-13.2.0/firebase-auth.js",
+    "source": "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js",
+    "sha256": "f29ff093124d9173c0fce1882d595ebfd4edfb84615fd8d6a55f4579acf3756b",
+    "bytes": 157265,
+    "import_urls": [
+      "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js"
+    ]
+  }
+]

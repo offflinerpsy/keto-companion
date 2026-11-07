@@ -1,0 +1,8 @@
+{
+  "name": "jose",
+  "version": "6.2.15",
+  "license": "MIT",
+  "source": "Installed ui-sdk/node_modules/jose as resolved in ui-sdk/package-lock.json; bundled locally with esbuild; exports importX509 and jwtVerify only.",
+  "bundle_sha256": "9fead6fdccb5f84ffa94921eaef2feeb2eebad4f6ccda0db60d88086d37d4442",
+  "npm_integrity": "sha512-qdF6ewcZARtef63fJ9AKKZPgxw+t7USH6HLXYcD4CrdmSvDp79rpJSPFEKc90QBeGS63u1KQtN2MZQHC0yDIzA=="
+}

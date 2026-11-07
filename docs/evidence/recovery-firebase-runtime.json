@@ -1,0 +1,142 @@
+{
+  "task_id": "KETO-RECOVERY-001",
+  "date": "2026-11-07T19:54:46.890Z",
+  "status": "passed",
+  "scope": "Latest exact modular build on local workerd with D1/R2. Firebase signature verification uses synthetic signed identities and certificate mock only. No browser, real Google sign-in, Azure inference, cloud release or clinical validation.",
+  "runtime_version": "5.20260926.0-alpha",
+  "compatibility_date": "2026-10-03",
+  "production_date_not_tested": "2026-11-07",
+  "worker_sha256": "54acd16c33970ec1763e747188bf7b42c9e00a2d20b48201fa6e6547d28add00",
+  "checks": [
+    {
+      "name": "latest_artifact_manifest_verified",
+      "passed": true,
+      "details": {
+        "files": 13
+      }
+    },
+    {
+      "name": "current_four_migrations_in_real_D1_runtime",
+      "passed": true
+    },
+    {
+      "name": "modular_static_page_served",
+      "passed": true
+    },
+    {
+      "name": "served_client_matches_manifest",
+      "passed": true
+    },
+    {
+      "name": "firebase_enabled_compute_unconfigured_truthfully",
+      "passed": true
+    },
+    {
+      "name": "public_config_whitelisted",
+      "passed": true
+    },
+    {
+      "name": "anonymous_session_refused",
+      "passed": true
+    },
+    {
+      "name": "legacy_direct_login_not_implicitly_enabled",
+      "passed": true
+    },
+    {
+      "name": "signed_Firebase_owner_exchange",
+      "passed": true
+    },
+    {
+      "name": "owner_admin_from_verified_identity",
+      "passed": true
+    },
+    {
+      "name": "challenge_single_use",
+      "passed": true
+    },
+    {
+      "name": "foreign_audience_refused",
+      "passed": true
+    },
+    {
+      "name": "invalid_signature_refused",
+      "passed": true
+    },
+    {
+      "name": "foreign_origin_refused",
+      "passed": true
+    },
+    {
+      "name": "uninvited_identity_refused",
+      "passed": true
+    },
+    {
+      "name": "admin_write_requires_csrf",
+      "passed": true
+    },
+    {
+      "name": "admin_invite_created_in_D1",
+      "passed": true
+    },
+    {
+      "name": "invite_email_binding_enforced",
+      "passed": true
+    },
+    {
+      "name": "invited_Firebase_exchange",
+      "passed": true
+    },
+    {
+      "name": "invite_requires_explicit_acceptance",
+      "passed": true
+    },
+    {
+      "name": "invite_acceptance_atomic",
+      "passed": true
+    },
+    {
+      "name": "invited_member_active",
+      "passed": true
+    },
+    {
+      "name": "invite_reuse_refused",
+      "passed": true
+    },
+    {
+      "name": "member_cannot_open_admin",
+      "passed": true
+    },
+    {
+      "name": "admin_does_not_inherit_member_private_file_access",
+      "passed": true
+    },
+    {
+      "name": "member_reads_own_R2_object",
+      "passed": true
+    },
+    {
+      "name": "admin_summary_counts_not_content",
+      "passed": true
+    },
+    {
+      "name": "admin_can_suspend_member",
+      "passed": true
+    },
+    {
+      "name": "suspension_revokes_existing_session",
+      "passed": true
+    },
+    {
+      "name": "no_unapproved_network_egress",
+      "passed": true,
+      "details": {
+        "certificate_fixture_requests": 1
+      }
+    }
+  ],
+  "total_checks": 30,
+  "passed_checks": 30,
+  "temporary_keys_removed": true,
+  "runtime_disposed": true
+}

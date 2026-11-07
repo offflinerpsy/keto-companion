@@ -1,0 +1,19 @@
+# KETO Companion — English guide
+
+This private project provides personal nutrition planning. The primary product is an invitation-only family web app. The owner invites members; each signs in with their own Google identity, provides separate consent, and accesses only their own records. The standalone website does not require a ChatGPT subscription; infrastructure and inference costs belong to the operator. The existing private plugin is a separate client.
+
+## Repository map
+
+`cloudflare-saas/`: website, Cloudflare server, D1 migrations, tests and pinned deployment artifacts. `service/`: existing Azure Python service and stateless compute bridge. `library/`: foods, recipes, scientific references and deterministic nutrition calculations. `plugin/`: current private plugin export without its obsolete nested server snapshot. `docs/evidence/`: selected reports without credentials or personal diaries. `scripts/`: repository hygiene and build-manifest verification.
+
+## Implemented in source
+
+Google/Firebase sign-in, administrator/member roles, single-use email-bound invitations; chat, diary, menu and shopping calculations; explicit change approval; private recipe inspiration; image sanitization; export and resumable deletion. Administrative membership and usage access does not grant access to another member's private diary.
+
+An Instagram URL does not authorize reading private posts. A user may supply permitted text or images. Such material remains a private inspiration source; it does not silently become clinical evidence or part of a shared knowledge base.
+
+## Current state
+
+Use `docs/CURRENT_STATUS.json` and linked GitHub issues, not outdated report version numbers. Source implementation, local tests, deployed endpoints, actual Google sign-in and clinical assessment are separate acceptance stages. Synthetic identity tests do not constitute a real person's login.
+
+See [development](docs/en/DEVELOPMENT.md), [deployment](docs/en/DEPLOYMENT.md), and [continuation](docs/en/CONTINUATION.md). Do not introduce personal data until identity and consent behavior are verified. The assistant does not prescribe medication, provide continuous clinical monitoring, or guarantee error-free model output.

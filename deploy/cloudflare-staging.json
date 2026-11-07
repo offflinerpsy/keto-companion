@@ -1,0 +1,18 @@
+{
+  "environment": "staging",
+  "account_id": "0609100baf768271ea2811c9a9ee2b16",
+  "worker_name": "keto-companion-saas-staging",
+  "public_origin": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "compatibility_date": "2026-11-07",
+  "main_module": "worker-modules.mjs",
+  "database_id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+  "bucket_name": "keto-companion-private-staging",
+  "auth_provider": "firebase_google",
+  "source_manifest": "artifacts/files_manifest.json",
+  "compute_status": "not_configured_in_this_stage",
+  "secret_names": [
+    "SESSION_HMAC_KEY"
+  ],
+  "public_config_path": "qa/firebase-public-config.json",
+  "production_changes_allowed": false
+}

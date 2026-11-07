@@ -1,0 +1,203 @@
+[
+  {
+    "rule_id": "SAFE01",
+    "severity": "emergency",
+    "trigger_ru": "Рвота/боль в животе/затруднённое дыхание, особенно при диабете или SGLT2",
+    "required_response_ru": "Прекратить обычный диалог о меню; рекомендовать срочную медицинскую помощь. Нормальная глюкоза не исключает кетоацидоз.",
+    "source_ids": [
+      "S12",
+      "S13"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE02",
+    "severity": "block_keto",
+    "trigger_ru": "Приём SGLT2 или неизвестный класс сахароснижающего лекарства",
+    "required_response_ru": "Не выдавать план строгого кето; уточнить препарат и направить к лечащему врачу.",
+    "source_ids": [
+      "S11",
+      "S12",
+      "S13"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE03",
+    "severity": "clinician_required",
+    "trigger_ru": "Инсулин/сульфонилмочевина/другой риск гипогликемии",
+    "required_response_ru": "До существенного снижения углеводов нужен согласованный план; не менять дозы.",
+    "source_ids": [
+      "S11",
+      "S12"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE04",
+    "severity": "block_autonomous",
+    "trigger_ru": "Диабет 1 типа",
+    "required_response_ru": "Только профильное клиническое сопровождение, не бытовой автоматический кетогенный план.",
+    "source_ids": [
+      "S11",
+      "S12",
+      "S14"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE05",
+    "severity": "block_autonomous",
+    "trigger_ru": "Беременность или кормление грудью",
+    "required_response_ru": "Не предлагать самостоятельное строгое кето или похудение; акушерская/диетологическая команда.",
+    "source_ids": [
+      "S11",
+      "S14"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE06",
+    "severity": "block_autonomous",
+    "trigger_ru": "Возраст менее 18 лет",
+    "required_response_ru": "Не использовать взрослую библиотеку как детский лечебный протокол.",
+    "source_ids": [
+      "S11",
+      "S15"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE07",
+    "severity": "clinician_required",
+    "trigger_ru": "ХБП, диализ, нарушение калия",
+    "required_response_ru": "Не выдавать высокобелковые или электролитные схемы; согласованный ренальный план.",
+    "source_ids": [
+      "S21",
+      "S_K"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE08",
+    "severity": "clinician_required",
+    "trigger_ru": "Камни в почках/подагра/значимые болезни печени, желчного или поджелудочной",
+    "required_response_ru": "Уточнить медицинские ограничения до плана; не универсальный запрет по одному слову.",
+    "source_ids": [
+      "S14",
+      "S20",
+      "S22"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE09",
+    "severity": "block_autonomous",
+    "trigger_ru": "Известное нарушение окисления жирных кислот, порфирия и другие абсолютные противопоказания кетотерапии",
+    "required_response_ru": "Отказ от автономного кетогенного плана; профильный специалист.",
+    "source_ids": [
+      "S14"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE10",
+    "severity": "safety_support",
+    "trigger_ru": "Активное РПП, чрезмерная рестрикция, страх еды или компульсивный контроль",
+    "required_response_ru": "Не усиливать ограничение и подсчёт; предложить поддержку специалиста и нейтральное питание.",
+    "source_ids": [
+      "S11",
+      "S23"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE11",
+    "severity": "hard_constraint",
+    "trigger_ru": "Аллергия на ингредиент или риск перекрёстного загрязнения",
+    "required_response_ru": "Исключить рецепт и проверить всю замену, а не только название блюда.",
+    "source_ids": [
+      "S_ALLERGY"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE12",
+    "severity": "review",
+    "trigger_ru": "Значимый рост LDL/non-HDL/ApoB или высокий исходный риск",
+    "required_response_ru": "Не объяснять как безопасную адаптацию. Обсудить насыщенные жиры, менее строгий рацион и врача.",
+    "source_ids": [
+      "S06",
+      "S17"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE13",
+    "severity": "review",
+    "trigger_ru": "Длительная слабость, сердцебиение, головокружение, потеря работоспособности",
+    "required_response_ru": "Не списывать автоматически на keto flu; оценка симптомов и медицинская помощь по тяжести.",
+    "source_ids": [
+      "S13",
+      "S14"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE14",
+    "severity": "no_automatic_supplement",
+    "trigger_ru": "Запрос универсальных доз соли, калия, магния",
+    "required_response_ru": "Не назначать без учёта почек, давления, лекарств и врачебных ограничений.",
+    "source_ids": [
+      "S_K",
+      "S_MG",
+      "S21"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE15",
+    "severity": "data_block",
+    "trigger_ru": "Нет сведений о лекарствах/беременности/аллергиях",
+    "required_response_ru": "Разрешена образовательная информация, но не индивидуальный строгий план.",
+    "source_ids": [
+      "S11",
+      "S14"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE16",
+    "severity": "integrity",
+    "trigger_ru": "Источник отозван или исправление не проверено",
+    "required_response_ru": "Отозванный исключить из поддержки; непроверенное исправление показать редактору.",
+    "source_ids": [
+      "S18",
+      "S19",
+      "S03E"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE17",
+    "severity": "calculation",
+    "trigger_ru": "Неизвестный состав продукта, единицы или сырой/готовый вес",
+    "required_response_ru": "Не выдавать точные нутриенты; запросить маркировку или явно оценить диапазон.",
+    "source_ids": [
+      "S_USDA",
+      "S_LABEL"
+    ],
+    "implemented_in_running_app": false
+  },
+  {
+    "rule_id": "SAFE18",
+    "severity": "privacy",
+    "trigger_ru": "Кто-то просит медицинские данные супруги без её разрешения",
+    "required_response_ru": "Не раскрывать; требовать отдельное согласие самой пользовательницы.",
+    "source_ids": [
+      "S_OPENAI4",
+      "S_OPENAI5"
+    ],
+    "implemented_in_running_app": false
+  }
+]

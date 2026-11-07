@@ -1,0 +1,42 @@
+# Local secrets, user state and generated operational traces
+.private/
+.env
+.env.*
+!.env.example
+local.settings.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.log
+*.pid
+.DS_Store
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+# Old workspaces and binary delivery copies are not canonical source
+plugin-source/
+plugin-source-v012.tar.gz
+deliverables/
+CONTINUE_*.md
+upgrade_entra.py
+RELEASE_HANDOFF_RU.md
+OAUTH_BRIDGE_HELP_RU.md
+candidate/
+# Operational QA is excluded except exact public build input/runtime harness
+qa/*
+!qa/firebase-public-config.json
+!qa/recovery-firebase-runtime.cjs
+!qa/RECOVERY_STATE.json
+# Historical one-off patches and credentials/configuration
+/deploy/*
+!/deploy/cloudflare-staging.json
+!/deploy/README.md
+!/deploy/verify-staging.mjs

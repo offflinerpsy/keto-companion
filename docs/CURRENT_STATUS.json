@@ -1,0 +1,32 @@
+{
+  "schema": "keto-project-status-v1",
+  "updated_at": "2026-11-07T20:12:10.040343+00:00",
+  "source_version": "0.3.0-internal-pilot",
+  "plugin_version": "0.2.1",
+  "data_version": "0.1.1",
+  "active_task": "KETO-GIT-003",
+  "last_completed": "KETO-RECOVERY-001",
+  "next_task": "KETO-RELEASE-002",
+  "staging": {
+    "deployed": false,
+    "compute_connected": false,
+    "google_real_user_login_verified": false
+  },
+  "production": {
+    "saas_deployed": false,
+    "legacy_azure_plugin_preserved": true
+  },
+  "evidence": {
+    "python_tests": 341,
+    "node_synthetic_tests": 62,
+    "local_workerd_checks": 30,
+    "workerd_compatibility_date": "2026-10-03",
+    "target_cloud_compatibility_date": "2026-11-07"
+  },
+  "not_verified": [
+    "Real Google user sign-in",
+    "Latest visual/popup/voice behavior",
+    "Clinical suitability",
+    "New SaaS Azure compute bridge in cloud"
+  ]
+}

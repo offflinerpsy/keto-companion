@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KETO editable nonclinical settings",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "language": {
+      "type": "string",
+      "default": "ru",
+      "enum": [
+        "ru",
+        "en"
+      ]
+    },
+    "theme": {
+      "type": "string",
+      "default": "ivory-plum",
+      "enum": [
+        "ivory-plum",
+        "light",
+        "dark"
+      ]
+    },
+    "meals_per_day": {
+      "type": "integer",
+      "default": 3,
+      "minimum": 2,
+      "maximum": 4
+    },
+    "max_active_minutes": {
+      "type": "integer",
+      "default": 30,
+      "minimum": 5,
+      "maximum": 180
+    },
+    "budget_level": {
+      "type": "string",
+      "default": "balanced",
+      "enum": [
+        "economy",
+        "balanced",
+        "flexible"
+      ]
+    },
+    "max_recipe_repeats_per_week": {
+      "type": "integer",
+      "default": 2,
+      "minimum": 1,
+      "maximum": 7
+    },
+    "favorites": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100,
+      "default": []
+    },
+    "disliked_food_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100,
+      "default": []
+    },
+    "excluded_food_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100,
+      "default": []
+    },
+    "favorite_cuisines": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100,
+      "default": []
+    },
+    "weight_tracking": {
+      "type": "string",
+      "default": "off",
+      "enum": [
+        "off",
+        "weekly",
+        "custom"
+      ]
+    },
+    "show_calories": {
+      "type": "boolean",
+      "default": true
+    },
+    "display_units": {
+      "type": "string",
+      "default": "metric",
+      "enum": [
+        "metric"
+      ]
+    },
+    "photo_storage": {
+      "type": "boolean",
+      "default": false
+    },
+    "email_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "reminders_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "preferred_checkin": {
+      "type": "string",
+      "default": "weekly",
+      "enum": [
+        "off",
+        "weekly",
+        "custom"
+      ]
+    },
+    "remote_images": {
+      "type": "boolean",
+      "default": false
+    },
+    "adaptive_preferences": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "description": "Changes are proposals until confirmed, validated and persisted. Medical fields are not allowed here."
+}

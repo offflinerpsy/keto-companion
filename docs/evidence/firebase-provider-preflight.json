@@ -1,0 +1,18 @@
+[
+  {
+    "domain": "keto-companion-saas.offflinerpsy.workers.dev",
+    "status": 200,
+    "provider": "google.com",
+    "authorization_uri_returned": true,
+    "error": null,
+    "real_user_signin": false
+  },
+  {
+    "domain": "keto-companion-saas-staging.offflinerpsy.workers.dev",
+    "status": 200,
+    "provider": "google.com",
+    "authorization_uri_returned": true,
+    "error": null,
+    "real_user_signin": false
+  }
+]

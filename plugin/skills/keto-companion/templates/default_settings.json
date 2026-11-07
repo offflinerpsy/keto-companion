@@ -1,0 +1,21 @@
+{
+  "language": "ru",
+  "theme": "ivory-plum",
+  "meals_per_day": 3,
+  "max_active_minutes": 30,
+  "budget_level": "balanced",
+  "max_recipe_repeats_per_week": 2,
+  "favorites": [],
+  "disliked_food_ids": [],
+  "excluded_food_ids": [],
+  "favorite_cuisines": [],
+  "weight_tracking": "off",
+  "show_calories": true,
+  "display_units": "metric",
+  "photo_storage": false,
+  "email_enabled": false,
+  "reminders_enabled": false,
+  "preferred_checkin": "weekly",
+  "remote_images": false,
+  "adaptive_preferences": true
+}

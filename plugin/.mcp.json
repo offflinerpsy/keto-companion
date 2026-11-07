@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "keto-companion": {
+      "type": "streamable-http",
+      "url": "https://keto-companion-ay-20261107.azurewebsites.net/mcp",
+      "headers": {},
+      "extensions": {
+        "com.openai": {
+          "auth": {
+            "type": "oauth",
+            "client": {
+              "mode": "provided",
+              "clientId": "keto-companion-chatgpt",
+              "tokenEndpointAuthMethod": "none"
+            },
+            "resource": "https://keto-companion-ay-20261107.azurewebsites.net/mcp",
+            "baseScopes": [
+              "keto:use"
+            ],
+            "oidcEnabled": false
+          }
+        }
+      }
+    }
+  }
+}
