@@ -3,33 +3,16 @@
   "updated_at": "2026-11-07T20:16:35.235687+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.3.0-internal-pilot",
-  "active_task": {
-    "id": "KETO-RELEASE-002",
-    "stage": "staging-preflight",
-    "github_issue": 2
-  },
+  "active_task": null,
   "last_completed": {
-    "id": "KETO-GIT-003",
+    "id": "KETO-RELEASE-002",
     "status": "completed",
-    "commit": "33cfab4e9991e4c8c15877934dcc8f43f96cb741",
-    "github_issue": 1
+    "evidence": "docs/evidence/STAGING_DEPLOYMENT_RECEIPT.json"
   },
   "next_task": {
-    "id": "KETO-RELEASE-002",
-    "title": "Развёртывание зафиксированной сборки в Cloudflare staging",
-    "status": "ready_not_started",
-    "scope": "Только staging release и проверка точной сборки; без новых функций/платежей/публикации плагина",
-    "existing_database_id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
-    "existing_bucket": "keto-companion-private-staging",
-    "worker_name": "keto-companion-saas-staging",
-    "expected_worker_sha256": "54acd16c33970ec1763e747188bf7b42c9e00a2d20b48201fa6e6547d28add00",
-    "acceptance": [
-      "Deployment receipt for verified existing staging resources",
-      "Served bundle hash matches manifest",
-      "Public landing/health/auth-config verified",
-      "Private routes reject anonymous access",
-      "Azure compute is not claimed connected without separate verified bridge call"
-    ]
+    "id": "KETO-COMPUTE-004",
+    "title": "Connect existing Azure compute to staging with non-exported signing key",
+    "status": "ready"
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",

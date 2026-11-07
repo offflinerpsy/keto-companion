@@ -1,16 +1,19 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-07T20:16:35.234526+00:00",
+  "updated_at": "2026-11-07T21:18:13.976201+00:00",
   "source_version": "0.3.0-internal-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
-  "active_task": "KETO-RELEASE-002",
-  "last_completed": "KETO-GIT-003",
-  "next_task": null,
+  "active_task": null,
+  "last_completed": "KETO-RELEASE-002",
+  "next_task": "KETO-COMPUTE-004",
   "staging": {
-    "deployed": false,
+    "deployed": true,
     "compute_connected": false,
-    "google_real_user_login_verified": false
+    "google_real_user_login_verified": false,
+    "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+    "source_commit": "040f0278ea8bb2c6995ab4bf7456d6a71cc4bf6f",
+    "http_checks_passed": 24
   },
   "production": {
     "saas_deployed": false,

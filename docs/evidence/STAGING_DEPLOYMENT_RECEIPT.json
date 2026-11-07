@@ -1,0 +1,29 @@
+{
+  "task": "KETO-RELEASE-002",
+  "status": "completed",
+  "checked_at": "2026-11-07T21:18:13.976201+00:00",
+  "source_commit": "040f0278ea8bb2c6995ab4bf7456d6a71cc4bf6f",
+  "build_uuid": "7034c368-cc80-4b0a-8973-80191b109bbb",
+  "build_outcome": "success",
+  "worker": "keto-companion-saas-staging",
+  "worker_tag": "35d20e3e19a74997aa077809e9839e38",
+  "deployment_id": "1b65fbb6b09746a4b6023165410b177c",
+  "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "compatibility_date": "2026-11-07",
+  "main_module_sha256": "54acd16c33970ec1763e747188bf7b42c9e00a2d20b48201fa6e6547d28add00",
+  "http_checks_passed": 24,
+  "staging_d1_id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+  "staging_r2_bucket": "keto-companion-private-staging",
+  "r2_public": false,
+  "users_created": 0,
+  "compute_connected": false,
+  "real_google_login_tested": false,
+  "browser_used": false,
+  "source_repository_private": true,
+  "production_changed": false,
+  "failed_build_preserved": {
+    "uuid": "c7781a8b-a720-4cea-8171-87b94b1265ff",
+    "reason": "Unneeded automatic Python dependency installation used incompatible Python",
+    "fix": "SKIP_DEPENDENCY_INSTALL=1; deploy pinned artifacts only"
+  }
+}
