@@ -9,7 +9,8 @@ if(process.env.CLOUDFLARE_ACCOUNT_ID&&process.env.CLOUDFLARE_ACCOUNT_ID!==accoun
 const commit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 const manifest=JSON.parse(readFileSync('artifacts/files_manifest.json','utf8'));
 const modules=manifest.files.filter(f=>f.module_name&&f.module_name!=='worker.mjs');
-if(modules.length!==8)throw Error('Unexpected release module count');
+const names=modules.map(f=>f.module_name);if(new Set(names).size!==names.length||names.filter(n=>n==='worker-modules.mjs').length!==1||names.some(n=>n.includes('..')||!/^worker-modules\.mjs$|^assets\/[A-Za-z0-9_.-]+$/.test(n)))throw Error('Invalid release module inventory');
+const main=modules.find(f=>f.module_name==='worker-modules.mjs');const imports=[...readFileSync(main.path,'utf8').matchAll(/\bfrom\s*["'](\.\/assets\/[^"']+)["']/g)].map(x=>x[1].slice(2));if(imports.length+1!==modules.length||imports.some(n=>!names.includes(n)))throw Error('Release manifest does not match Worker text imports');
 for(const file of modules){const bytes=readFileSync(file.path);if(bytes.length!==file.bytes||createHash('sha256').update(bytes).digest('hex')!==file.sha256)throw Error('Release checksum mismatch: '+file.path)}
 const auth=JSON.parse(readFileSync('qa/firebase-public-config.json','utf8'));
 if(auth.projectId!=='keto-companion-auth-261107')throw Error('Unexpected identity project');
@@ -20,4 +21,4 @@ const metadata={main_module:'worker-modules.mjs',compatibility_date:'2026-11-07'
 if(secrets.some(x=>x.name==='KETO_EDGE_SIGNING_JWK'))metadata.bindings.push({type:'plain_text',name:'KETO_EDGE_BRIDGE_URL',text:'https://keto-companion-ay-20261107.azurewebsites.net/internal/keto/compute'});
 const form=new FormData();form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));for(const f of modules)form.append(f.module_name,new Blob([readFileSync(f.path)],{type:f.mime}),f.module_name);
 const deployed=await api('PUT',path,form);await api('POST',path+'/subdomain',{enabled:true,previews_enabled:false});
-console.log(JSON.stringify({task:'KETO-RELEASE-002',worker,account,commit,version_id:deployed.deployment_id,tag:deployed.tag,main_module_sha256:modules.find(x=>x.module_name==='worker-modules.mjs').sha256,modules:modules.length,compute_configured:secrets.some(x=>x.name==='KETO_EDGE_SIGNING_JWK'),private_source:true}));
+console.log(JSON.stringify({task:'KETO-MOBILE-006',worker,account,commit,version_id:deployed.deployment_id,tag:deployed.tag,main_module_sha256:modules.find(x=>x.module_name==='worker-modules.mjs').sha256,modules:modules.length,compute_configured:secrets.some(x=>x.name==='KETO_EDGE_SIGNING_JWK'),private_source:true}));

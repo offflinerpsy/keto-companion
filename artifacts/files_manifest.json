@@ -1,29 +1,61 @@
 {
-  "status": "Ed25519 bridge release candidate; cloud verification pending",
+  "status": "0.4.0-mobile-pilot candidate; parent runtime and device acceptance pending",
   "main_module": "worker-modules.mjs",
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "1d40ac5f905f0f2a0eab285344973e0cd387d33a2b1de99c7cc9778644f45527",
-      "bytes": 431843,
+      "sha256": "25663c8704f17c942e37e0a264964251d3abb25509268eab3568d909e01ccb28",
+      "bytes": 504335,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "54f5d8dba03ce613a2c7897172029acdb621a937da6ddf018c4d859b6524fa93",
-      "bytes": 63263,
+      "sha256": "c42720e12879e0be1ec7b46e65c5a2e98ea801aca040c0bf5a452f660519f37f",
+      "bytes": 64576,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
     },
     {
+      "path": "cloudflare-saas/dist/assets/index.html",
+      "sha256": "3c30539c2bf1500b15d8e3681633e373c17dca9ae72787704b1e58284c750ff6",
+      "bytes": 26901,
+      "mime": "text/plain",
+      "module_name": "assets/index.html",
+      "module_type": "text"
+    },
+    {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "f0668ac8f268d89567af8001e12ab9fda7ef063abe39e6da1b3a2acc93a84105",
-      "bytes": 265282,
+      "sha256": "25506479241d8a71f6f66c7bb84c5219add359b4dd40b4f859f7860fb91dad97",
+      "bytes": 311980,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/style.css",
+      "sha256": "e400e1cd499192c117f222e68629038211b6599ceb0c3cdb62d7ac3f95c759bf",
+      "bytes": 12324,
+      "mime": "text/plain",
+      "module_name": "assets/style.css",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/help.html",
+      "sha256": "03b1067b65adc96aa7caf26256e9966844cf19a80af9d6ac3bcf10be4d650f96",
+      "bytes": 3031,
+      "mime": "text/plain",
+      "module_name": "assets/help.html",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/privacy.html",
+      "sha256": "74ca6f6dd2db4bad44495754eead5ae1e92c9553b5104daa904203f8a7b99f96",
+      "bytes": 1290,
+      "mime": "text/plain",
+      "module_name": "assets/privacy.html",
       "module_type": "text"
     },
     {
@@ -43,35 +75,43 @@
       "module_type": "text"
     },
     {
-      "path": "cloudflare-saas/dist/assets/help.html",
-      "sha256": "78bb8aef0841c0fce8d25dd234a430ce5922812eefa73dee01e6ba5a9c56eb14",
-      "bytes": 1172,
+      "path": "cloudflare-saas/dist/assets/manifest.webmanifest",
+      "sha256": "81048072ef146d5f75274b4f7d182c80d655ebd6e6f23165ebe1cebd92258b5f",
+      "bytes": 415,
       "mime": "text/plain",
-      "module_name": "assets/help.html",
+      "module_name": "assets/manifest.webmanifest",
       "module_type": "text"
     },
     {
-      "path": "cloudflare-saas/dist/assets/index.html",
-      "sha256": "0fd3cd8aab908a44996ace657689f769f5304863f8203fa04e965f546c129c08",
-      "bytes": 22530,
+      "path": "cloudflare-saas/dist/assets/icon.svg",
+      "sha256": "2d74bec5a1143e91ae0f003c9800f49f847b547d6ddde50d8ec4b1d7e2cd9417",
+      "bytes": 263,
       "mime": "text/plain",
-      "module_name": "assets/index.html",
+      "module_name": "assets/icon.svg",
       "module_type": "text"
     },
     {
-      "path": "cloudflare-saas/dist/assets/privacy.html",
-      "sha256": "74ca6f6dd2db4bad44495754eead5ae1e92c9553b5104daa904203f8a7b99f96",
-      "bytes": 1290,
+      "path": "cloudflare-saas/dist/assets/icon-180.png",
+      "sha256": "96ff87508937b391321d87fc0500fd912b430c4e68e41b6ef6c23190e43101b1",
+      "bytes": 1272,
       "mime": "text/plain",
-      "module_name": "assets/privacy.html",
+      "module_name": "assets/icon-180.png",
       "module_type": "text"
     },
     {
-      "path": "cloudflare-saas/dist/assets/style.css",
-      "sha256": "1d73f3f8fa727c3771b5e3a3a8692cd0a871a6f6b8c50f327dc3a3db3674ec91",
-      "bytes": 11695,
+      "path": "cloudflare-saas/dist/assets/icon-192.png",
+      "sha256": "5cea9f5d37df071521cfc4fa1ca7000da0724448743a09d8d9207cf38538cddf",
+      "bytes": 1356,
       "mime": "text/plain",
-      "module_name": "assets/style.css",
+      "module_name": "assets/icon-192.png",
+      "module_type": "text"
+    },
+    {
+      "path": "cloudflare-saas/dist/assets/icon-512.png",
+      "sha256": "e3c9de7f42935571a0dc5e873b6ade3a3d0c32115c2b8ea1f75a84efae010dcf",
+      "bytes": 4092,
+      "mime": "text/plain",
+      "module_name": "assets/icon-512.png",
       "module_type": "text"
     },
     {

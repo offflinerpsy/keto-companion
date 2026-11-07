@@ -1,3 +1,444 @@
+// cloudflare-saas/public/media.js
+var RecorderController = class {
+  constructor({ mediaDevices, Recorder, onState, onAudio, clock = () => Date.now(), interval = (fn, ms) => globalThis.setInterval(fn, ms), clear = (id) => globalThis.clearInterval(id) }) {
+    Object.assign(this, { mediaDevices, Recorder, onState, onAudio, clock, interval, clear });
+    this.generation = 0;
+    this.mode = "idle";
+  }
+  emit(mode, message = "") {
+    this.mode = mode;
+    this.onState({ mode, message, seconds: Math.min(60, Math.floor((this.clock() - (this.started ?? this.clock())) / 1e3)) });
+  }
+  release() {
+    if (this.timer) this.clear(this.timer);
+    this.timer = null;
+    for (const track of this.stream?.getTracks() || []) {
+      track.onended = null;
+      track.stop();
+    }
+    this.stream = null;
+  }
+  async start() {
+    if (this.mode !== "idle") return;
+    const generation = ++this.generation;
+    this.emit("permission", "\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438.");
+    try {
+      if (!this.mediaDevices?.getUserMedia || !this.Recorder) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0434\u0438\u043A\u0442\u043E\u0432\u043A\u0443 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u044B \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442.");
+      const mime = ["audio/mp4", "audio/webm"].find((x) => this.Recorder.isTypeSupported(x));
+      if (!mime) throw Error("\u042D\u0442\u043E\u0442 \u0431\u0440\u0430\u0443\u0437\u0435\u0440 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u044C MP4/WebM. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u0443.");
+      const stream = await this.mediaDevices.getUserMedia({ audio: true });
+      if (generation !== this.generation) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      this.stream = stream;
+      for (const track of stream.getTracks()) track.onended = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C.");
+      const recorder = new this.Recorder(stream, { mimeType: mime, audioBitsPerSecond: 64e3 });
+      this.recorder = recorder;
+      this.parts = [];
+      this.bytes = 0;
+      this.started = this.clock();
+      recorder.ondataavailable = (e) => {
+        if (generation !== this.generation) return;
+        if (e.data?.size) {
+          this.parts.push(e.data);
+          this.bytes += e.data.size;
+          if (this.bytes > 1e6) this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u043A\u043E\u0440\u043E\u0447\u0435.");
+        }
+      };
+      recorder.onerror = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
+      recorder.onstop = async () => {
+        this.release();
+        if (generation !== this.generation) return;
+        try {
+          const blob = new Blob(this.parts, { type: mime });
+          this.parts = [];
+          if (!blob.size) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0443\u0441\u0442\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
+          if (blob.size > 1e6) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411.");
+          this.abort = new AbortController();
+          this.emit("recognizing", "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u044E\u2026 \u041C\u043E\u0436\u043D\u043E \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.");
+          const text = await this.onAudio(blob, mime, this.abort.signal);
+          if (generation !== this.generation) return;
+          this.emit("idle", "\u0422\u0435\u043A\u0441\u0442 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C\xBB.");
+        } catch (e) {
+          if (generation === this.generation) this.emit("idle", e.name === "AbortError" ? "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u0432\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E." : e.message);
+        } finally {
+          this.parts = [];
+        }
+      };
+      recorder.start(250);
+      this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
+      this.timer = this.interval(() => {
+        this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
+        if (this.clock() - this.started >= 6e4) this.stop();
+      }, 250);
+    } catch (e) {
+      this.release();
+      if (generation === this.generation) this.emit("idle", e.name === "NotAllowedError" ? "\u041D\u0435\u0442 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u043D\u0430 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0435\u0433\u043E \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0441\u0430\u0439\u0442\u0430 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0442\u0435\u043A\u0441\u0442." : e.message);
+    }
+  }
+  stop() {
+    if (this.mode === "recording" && this.recorder?.state === "recording") {
+      this.recorder.stop();
+      this.release();
+    }
+  }
+  cancel(message = "\u0417\u0430\u043F\u0438\u0441\u044C \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430.") {
+    this.generation++;
+    this.abort?.abort();
+    if (this.recorder?.state === "recording") this.recorder.stop();
+    this.release();
+    this.parts = [];
+    this.emit("idle", message);
+  }
+};
+async function blobBase64(blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let text = "";
+  for (const b2 of bytes) text += String.fromCharCode(b2);
+  return btoa(text);
+}
+async function prepareImage(file, { bitmap = globalThis.createImageBitmap, document: document2 = globalThis.document, URL: URL2 = globalThis.URL, Image = globalThis.Image } = {}) {
+  if (!file || !file.type?.startsWith("image/") || file.size > 12e6) throw Error("\u041D\u0443\u0436\u043D\u043E \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0434\u043E 12 \u041C\u0411.");
+  let source, url;
+  try {
+    if (bitmap) source = await bitmap(file);
+    else {
+      url = URL2.createObjectURL(file);
+      source = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+    const width = source.width || source.naturalWidth, height = source.height || source.naturalHeight;
+    if (!width || !height || width * height > 24e6) throw Error("\u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0435.");
+    const canvas = document2.createElement("canvas");
+    let scale = Math.min(1, 1024 / Math.max(width, height));
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
+    const result = canvas.toDataURL("image/jpeg", 0.78);
+    if (result.length > 13e5) throw Error("\u041F\u043E\u0441\u043B\u0435 \u0441\u0436\u0430\u0442\u0438\u044F \u0444\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043C\u0435\u043D\u044C\u0448\u0438\u0439 \u0441\u043D\u0438\u043C\u043E\u043A.");
+    return result;
+  } catch (e) {
+    throw Error(e.message?.includes("\u041C\u0411") ? e.message : "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u0444\u043E\u0442\u043E. \u0414\u043B\u044F HEIC \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u044D\u043A\u0441\u043F\u043E\u0440\u0442 \u0432 JPEG/PNG \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
+  } finally {
+    source?.close?.();
+    if (url) URL2.revokeObjectURL(url);
+  }
+}
+
+// cloudflare-saas/public/mobile-ui.js
+var FAQ = [["\u041C\u0438\u043A\u0440\u043E\u0444\u043E\u043D", "\u041D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041C\u0438\u043A\u0440\u043E\u0444\u043E\u043D\xBB, \u0440\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C, \u0437\u0430\u0442\u0435\u043C \xAB\u0421\u0442\u043E\u043F\xBB. \u0422\u0435\u043A\u0441\u0442 \u043F\u043E\u044F\u0432\u0438\u0442\u0441\u044F \u0432 \u043F\u043E\u043B\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0438 \u043E\u0442\u043F\u0440\u0430\u0432\u044C\u0442\u0435 \u0441\u0430\u043C\u0438. \u041F\u0440\u0438 \u0437\u0430\u043A\u0440\u044B\u0442\u0438\u0438 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B \u0437\u0430\u043F\u0438\u0441\u044C \u043E\u0442\u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F."], ["PDF \u0438 Telegram", "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E, \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C PDF\xBB. \u0417\u0430\u0442\u0435\u043C \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \xAB\u041F\u043E\u0434\u0435\u043B\u0438\u0442\u044C\u0441\u044F PDF\xBB \u043E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0441\u0438\u0441\u0442\u0435\u043C\u043D\u0443\u044E \u043F\u0430\u043D\u0435\u043B\u044C \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 Telegram, \u0435\u0441\u043B\u0438 \u043E\u043D \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D. \u0415\u0441\u043B\u0438 \u043E\u0431\u043C\u0435\u043D \u0444\u0430\u0439\u043B\u0430\u043C\u0438 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D, \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435 PDF."], ["\u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u044C \u0438 \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u044F", "\u0421\u043E\u0437\u0434\u0430\u0439\u0442\u0435 \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u0435 \u0438 \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435 .ics. \u041F\u043E\u0441\u043B\u0435 \u0438\u043C\u043F\u043E\u0440\u0442\u0430 \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u044F \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442 \u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u044C \u0441 \u0435\u0433\u043E \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F\u043C\u0438. \u0418\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0432 KETO \u043D\u0435 \u043E\u0431\u043D\u043E\u0432\u043B\u044F\u044E\u0442 \u0438\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0435 \u0441\u043E\u0431\u044B\u0442\u0438\u0435 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438. \u041F\u043E\u0432\u0442\u043E\u0440\u0435\u043D\u0438\u044F \u044D\u043A\u0441\u043F\u043E\u0440\u0442\u0438\u0440\u0443\u044E\u0442\u0441\u044F \u043D\u0430 \u0434\u0432\u0430 \u0433\u043E\u0434\u0430."], ["\u0422\u0435\u043C\u044B \u0438 \u043F\u0430\u043C\u044F\u0442\u044C", "\u041A\u0430\u0436\u0434\u0430\u044F \u0442\u0435\u043C\u0430 \u0445\u0440\u0430\u043D\u0438\u0442 \u0434\u043E 60 \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0445 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439. \u041E\u0431\u0449\u0438\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u044F \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0442 \u0432\u043E \u0432\u0441\u0435\u0445 \u0442\u0435\u043C\u0430\u0445. \u0423\u0434\u0430\u043B\u0435\u043D\u0438\u0435 \u0442\u0435\u043C\u044B \u043D\u0435 \u0443\u0434\u0430\u043B\u044F\u0435\u0442 \u043F\u0440\u043E\u0444\u0438\u043B\u044C. \u0412\u0441\u0435\u0433\u043E \u0434\u043E 12 \u0442\u0435\u043C \u0438 200 \u041A\u0411 \u043E\u0431\u0449\u0435\u0439 \u0438\u0441\u0442\u043E\u0440\u0438\u0438; \u0441\u0442\u0430\u0440\u044B\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0443\u0431\u0438\u0440\u0430\u044E\u0442\u0441\u044F \u043F\u0440\u0438 \u0434\u043E\u0441\u0442\u0438\u0436\u0435\u043D\u0438\u0438 \u043F\u0440\u0435\u0434\u0435\u043B\u0430."], ["\u0424\u043E\u0442\u043E", "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0438\u043B\u0438 \u0432\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435. \u041E\u043D\u043E \u0441\u0436\u0438\u043C\u0430\u0435\u0442\u0441\u044F \u0438 \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0432\u043C\u0435\u0441\u0442\u0435 \u0441 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435\u043C. \u0414\u043B\u044F HEIC \u043C\u043E\u0436\u0435\u0442 \u043F\u043E\u043D\u0430\u0434\u043E\u0431\u0438\u0442\u044C\u0441\u044F \u044D\u043A\u0441\u043F\u043E\u0440\u0442 JPEG. \u041C\u0430\u0441\u0441\u0443 \u0438 \u043F\u043E\u043B\u043D\u044B\u0439 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u043E \u0444\u043E\u0442\u043E \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0438\u0442\u044C \u043D\u0435\u043B\u044C\u0437\u044F."], ["\u041A\u0430\u043A \u043D\u0430\u0447\u0430\u0442\u044C", "\u041D\u0430\u043F\u0438\u0448\u0438\u0442\u0435, \u0447\u0442\u043E \u0445\u043E\u0442\u0438\u0442\u0435 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C, \u0438\u043B\u0438 \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u043E \u0434\u043D\u0435. \u041B\u0438\u0447\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0441\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u043E\u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0432 \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0435 \u0434\u043B\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F."]];
+var HINTS = { theme: "\u041C\u0435\u043D\u044F\u0435\u0442 \u0442\u043E\u043B\u044C\u043A\u043E \u0446\u0432\u0435\u0442\u0430 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0430. \u041F\u0438\u0442\u0430\u043D\u0438\u0435 \u0438 \u0434\u0430\u043D\u043D\u044B\u0435 \u043D\u0435 \u043C\u0435\u043D\u044F\u044E\u0442\u0441\u044F.", text_size: "\u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0432\u0430\u0435\u0442 \u0432\u0435\u0441\u044C \u0442\u0435\u043A\u0441\u0442 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F. \u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \xAB\u041A\u0440\u0443\u043F\u043D\u044B\u0439\xBB \u0434\u043B\u044F \u0447\u0442\u0435\u043D\u0438\u044F \u0431\u0435\u0437 \u043E\u0447\u043A\u043E\u0432.", density: "\u041C\u0435\u043D\u044F\u0435\u0442 \u043E\u0442\u0441\u0442\u0443\u043F\u044B \u043A\u0430\u0440\u0442\u043E\u0447\u0435\u043A, \u043D\u0435 \u0441\u043E\u043A\u0440\u0430\u0449\u0430\u0435\u0442 \u0440\u0435\u0446\u0435\u043F\u0442\u044B \u0438 \u043F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u044F.", home: "\u041D\u0430\u0447\u0430\u043B\u044C\u043D\u044B\u0439 \u0440\u0430\u0437\u0434\u0435\u043B \u043F\u043E\u0441\u043B\u0435 \u0432\u0445\u043E\u0434\u0430. \u041C\u043E\u0436\u043D\u043E \u0432\u0441\u0435\u0433\u0434\u0430 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0438\u0442\u044C\u0441\u044F \u043D\u0438\u0436\u043D\u0438\u043C\u0438 \u043A\u043D\u043E\u043F\u043A\u0430\u043C\u0438.", simple_mode: "\u0423\u0431\u0438\u0440\u0430\u0435\u0442 \u0432\u0442\u043E\u0440\u043E\u0441\u0442\u0435\u043F\u0435\u043D\u043D\u044B\u0435 \u0434\u0435\u043A\u043E\u0440\u0430\u0442\u0438\u0432\u043D\u044B\u0435 \u043F\u043E\u0434\u043F\u0438\u0441\u0438; \u0432\u0441\u0435 \u043E\u0441\u043D\u043E\u0432\u043D\u044B\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u044E\u0442\u0441\u044F.", show_nutrition: "\u041F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442 \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0439 \u0441\u043E\u0441\u0442\u0430\u0432 \u0431\u043B\u044E\u0434. \u041D\u0435 \u043D\u0430\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043A\u0430\u043B\u043E\u0440\u0438\u0438 \u0438\u043B\u0438 \u043D\u043E\u0440\u043C\u044B.", meals_per_day: "\u0427\u0438\u0441\u043B\u043E \u043F\u0440\u0438\u0451\u043C\u043E\u0432 \u043F\u0438\u0449\u0438 \u0432 \u043D\u043E\u0432\u043E\u043C \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u043E\u043C \u043C\u0435\u043D\u044E. \u0413\u043E\u0442\u043E\u0432\u043E\u0435 \u043C\u0435\u043D\u044E \u043D\u0443\u0436\u043D\u043E \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0442\u044C.", max_active_minutes: "\u0412\u0440\u0435\u043C\u044F \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0439 \u0433\u043E\u0442\u043E\u0432\u043A\u0438 \u043E\u0434\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 15 \u043C\u0438\u043D\u0443\u0442. \u041D\u0435 \u043C\u0435\u043D\u044F\u0435\u0442 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E\u0441\u0442\u0438.", "display-name": "\u0418\u043C\u044F \u0434\u043B\u044F \u043E\u0431\u0440\u0430\u0449\u0435\u043D\u0438\u044F, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 \u0410\u043D\u043D\u0430. \u041F\u043E\u043B\u0435 \u043D\u0435\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435.", timezone: "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 IANA, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 Europe/Minsk. \u041E\u043F\u0440\u0435\u0434\u0435\u043B\u044F\u0435\u0442 \u0434\u0430\u0442\u0443 \u0434\u043D\u0435\u0432\u043D\u0438\u043A\u0430, \u043D\u0435 \u0432\u0440\u0435\u043C\u044F \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430.", goal: "\u0427\u0442\u043E \u0432\u0430\u043C \u0443\u0434\u043E\u0431\u043D\u043E, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 \xAB\u043C\u0435\u043D\u044C\u0448\u0435 \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u043D\u0430 \u0433\u043E\u0442\u043E\u0432\u043A\u0443\xBB. \u042D\u0442\u043E \u043D\u0435 \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435 \u0434\u0435\u0444\u0438\u0446\u0438\u0442\u0430 \u043A\u0430\u043B\u043E\u0440\u0438\u0439.", medications: "\u041F\u0435\u0440\u0435\u0447\u0438\u0441\u043B\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044F \u0447\u0435\u0440\u0435\u0437 \u0437\u0430\u043F\u044F\u0442\u0443\u044E. \u041F\u0443\u0441\u0442\u043E\u0435 \u043F\u043E\u043B\u0435 \u0441\u0430\u043C\u043E \u043F\u043E \u0441\u0435\u0431\u0435 \u043D\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u0435\u0442 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u043B\u0435\u043A\u0430\u0440\u0441\u0442\u0432.", energy_min_kcal: "\u041D\u0438\u0436\u043D\u044F\u044F \u0433\u0440\u0430\u043D\u0438\u0446\u0430 \u0440\u0430\u043D\u0435\u0435 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u043E\u0439 \u044D\u043D\u0435\u0440\u0433\u0438\u0438 \u043D\u0430 \u0434\u0435\u043D\u044C. \u041F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u043D\u0435 \u043F\u043E\u0434\u0431\u0438\u0440\u0430\u0435\u0442 \u044D\u0442\u043E \u0447\u0438\u0441\u043B\u043E.", energy_max_kcal: "\u0412\u0435\u0440\u0445\u043D\u044F\u044F \u0433\u0440\u0430\u043D\u0438\u0446\u0430 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u043E\u0439 \u044D\u043D\u0435\u0440\u0433\u0438\u0438. \u0414\u043E\u043B\u0436\u043D\u0430 \u0431\u044B\u0442\u044C \u043D\u0435 \u043C\u0435\u043D\u044C\u0448\u0435 \u043D\u0438\u0436\u043D\u0435\u0439.", protein_min_g: "\u0421\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0439 \u043C\u0438\u043D\u0438\u043C\u0443\u043C \u0431\u0435\u043B\u043A\u0430 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445 \u0437\u0430 \u0434\u0435\u043D\u044C, \u043D\u0435 \u043C\u0430\u0441\u0441\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430.", protein_max_g: "\u0421\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0439 \u043C\u0430\u043A\u0441\u0438\u043C\u0443\u043C \u0431\u0435\u043B\u043A\u0430 \u0437\u0430 \u0434\u0435\u043D\u044C. \u041D\u0435 \u043C\u0435\u043D\u044F\u0435\u0442 \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u0438\u0435 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F.", carb_basis: "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u0438\u043B\u0438 \u0440\u0430\u0441\u0447\u0451\u0442 net carbs. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0441\u043F\u043E\u0441\u043E\u0431 \u0438\u0437 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0445 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u043E\u0432.", carb_max_g: "\u041C\u0430\u043A\u0441\u0438\u043C\u0443\u043C \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445 \u0437\u0430 \u0434\u0435\u043D\u044C \u043F\u043E \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u043C\u0443 \u0441\u043F\u043E\u0441\u043E\u0431\u0443 \u043F\u043E\u0434\u0441\u0447\u0451\u0442\u0430.", fiber_min_g: "\u0421\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0439 \u043C\u0438\u043D\u0438\u043C\u0443\u043C \u043F\u0438\u0449\u0435\u0432\u044B\u0445 \u0432\u043E\u043B\u043E\u043A\u043E\u043D \u0437\u0430 \u0434\u0435\u043D\u044C. \u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445 \u043D\u0435 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043D\u043E\u043B\u044C.", saturated_fat_max_pct: "\u0421\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u0430\u044F \u0432\u0435\u0440\u0445\u043D\u044F\u044F \u0434\u043E\u043B\u044F \u044D\u043D\u0435\u0440\u0433\u0438\u0438 \u0438\u0437 \u043D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u044B\u0445 \u0436\u0438\u0440\u043E\u0432, \u0432 \u043F\u0440\u043E\u0446\u0435\u043D\u0442\u0430\u0445.", basis_note: "\u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435, \u0441 \u043A\u0435\u043C \u0438 \u043A\u043E\u0433\u0434\u0430 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u044B \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u043A\u0430\u043A\u0438\u0435 \u0435\u0441\u0442\u044C \u0434\u043E\u043F\u0443\u0449\u0435\u043D\u0438\u044F. \u041D\u0435 \u043A\u043E\u043F\u0438\u0440\u0443\u0439\u0442\u0435 \u0434\u0435\u043C\u043E\u043D\u0441\u0442\u0440\u0430\u0446\u0438\u043E\u043D\u043D\u044B\u0435 \u043D\u043E\u0440\u043C\u044B.", "reminder-title": "\u041A\u043E\u0440\u043E\u0442\u043A\u043E\u0435 \u043B\u0438\u0447\u043D\u043E\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 \xAB\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0434\u0435\u043D\u044C\xBB. \u041D\u0435 \u0434\u043E\u0431\u0430\u0432\u043B\u044F\u0439\u0442\u0435 \u0434\u0438\u0430\u0433\u043D\u043E\u0437\u044B.", "reminder-time": "\u041C\u0435\u0441\u0442\u043D\u043E\u0435 \u0432\u0440\u0435\u043C\u044F \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u043C \u0447\u0430\u0441\u043E\u0432\u043E\u043C \u043F\u043E\u044F\u0441\u0435. \u0423\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0438\u043C\u043F\u043E\u0440\u0442\u0430 \u0432 \u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u044C.", "reminder-zone": "\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 Europe/Minsk \u0438\u043B\u0438 America/New_York. \u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0443\u0447\u0438\u0442\u044B\u0432\u0430\u0435\u0442 \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u044B \u043B\u0435\u0442\u043D\u0435\u0433\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438.", "reminder-date": "\u0414\u043B\u044F \u043E\u0434\u043D\u043E\u043A\u0440\u0430\u0442\u043D\u043E\u0433\u043E \u0441\u043E\u0431\u044B\u0442\u0438\u044F \u043E\u0447\u0438\u0441\u0442\u0438\u0442\u0435 \u0434\u043D\u0438 \u043D\u0435\u0434\u0435\u043B\u0438 \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0431\u0443\u0434\u0443\u0449\u0443\u044E \u0434\u0430\u0442\u0443.", "reminder-enabled": "\u0412\u044B\u043A\u043B\u044E\u0447\u0430\u0435\u0442 \u0431\u0443\u0434\u0443\u0449\u0443\u044E \u0437\u0430\u0434\u0430\u0447\u0443 \u0432 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0438. \u0418\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0435 \u0441\u043E\u0431\u044B\u0442\u0438\u0435 \u0443\u0434\u0430\u043B\u044F\u0439\u0442\u0435 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E \u0432 \u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u0435." };
+function setupMobile({ $: $3, el: el2, call: call2, accept: accept2, getState, setView: setView2, run: run2, notify: notify2, epoch, setImage, getImage }) {
+  let pdf = null, attachmentGeneration = 0, recorder, chatBusy = false;
+  function resetPhoto() {
+    attachmentGeneration++;
+    setImage(null);
+    $3("message").required = true;
+    $3("photo-preview").hidden = true;
+    $3("photo-preview-image").removeAttribute("src");
+    $3("photo").value = "";
+    $3("photo-status").textContent = "";
+  }
+  async function attach(file) {
+    const generation = ++attachmentGeneration, stamp = epoch();
+    try {
+      const result = await prepareImage(file);
+      if (generation !== attachmentGeneration || stamp !== epoch()) return;
+      setImage(result);
+      $3("message").required = false;
+      $3("photo-preview-image").src = result;
+      $3("photo-preview").hidden = false;
+      $3("photo-status").textContent = "\u0424\u043E\u0442\u043E \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E. \u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0441 \u0432\u0430\u0448\u0438\u043C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435\u043C.";
+    } catch (e) {
+      if (stamp === epoch()) notify2(e.message);
+    }
+  }
+  $3("photo").onchange = (e) => {
+    const f = e.target.files?.[0];
+    if (f) attach(f);
+  };
+  $3("photo-remove").onclick = resetPhoto;
+  $3("message").addEventListener("paste", (e) => {
+    const file = [...e.clipboardData?.items || []].find((x) => x.kind === "file" && x.type.startsWith("image/"))?.getAsFile();
+    if (file) {
+      e.preventDefault();
+      attach(file);
+    }
+  });
+  recorder = new RecorderController({ mediaDevices: navigator.mediaDevices, Recorder: globalThis.MediaRecorder, onState: ({ mode, message, seconds }) => {
+    $3("voice-status").textContent = message;
+    $3("voice-timer").textContent = Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
+    $3("mic-button").disabled = mode !== "idle" || chatBusy;
+    $3("mic-button").setAttribute("aria-pressed", String(mode === "recording"));
+    $3("voice-controls").hidden = mode === "idle";
+    $3("voice-stop").hidden = mode !== "recording";
+    $3("send").disabled = mode !== "idle" || chatBusy;
+  }, onAudio: async (blob, mime, signal) => {
+    const stamp = epoch();
+    const data = await call2("keto_transcribe", { audio_base64: await blobBase64(blob), mime, request_id: crypto.randomUUID().replaceAll("-", "") }, { signal });
+    if (signal.aborted) throw new DOMException("\u041E\u0442\u043C\u0435\u043D\u0430", "AbortError");
+    if (stamp !== epoch()) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F.");
+    if (data.error_code) throw Error(data.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0440\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C.");
+    $3("message").value = [$3("message").value, data.text].filter(Boolean).join("\n");
+    $3("message").focus();
+    return data.text;
+  } });
+  $3("mic-button").onclick = () => {
+    if (chatBusy) return;
+    const s2 = getState();
+    if (!s2?.processing_consent || !s2?.profile.consent.storage || !s2?.profile.consent.health_data) {
+      notify2("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u043D\u0430 \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0443 \u0438 \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435.");
+      return;
+    }
+    recorder.start();
+  };
+  $3("voice-stop").onclick = () => recorder.stop();
+  $3("voice-cancel").onclick = () => recorder.cancel();
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) recorder.cancel();
+  });
+  window.addEventListener("pagehide", () => recorder.cancel());
+  function changeTopic(args) {
+    return run2(async () => {
+      const discards = ["create", "select", "delete", "clear"].includes(args.action);
+      if (discards && ($3("message").value.trim() || getImage()) && !confirm("\u041F\u0440\u0438 \u0441\u043C\u0435\u043D\u0435 \u0442\u0435\u043C\u044B \u0443\u0431\u0440\u0430\u0442\u044C \u0442\u0435\u043A\u0443\u0449\u0438\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A?")) return;
+      recorder.cancel();
+      const result = await call2("keto_topics", { ...args, confirmed: true, expected_revision: getState().revision });
+      if (discards) {
+        resetPhoto();
+        $3("message").value = "";
+      }
+      accept2(result);
+      setView2("chat");
+    });
+  }
+  $3("topic-picker").onchange = (e) => changeTopic({ action: "select", thread_id: e.target.value });
+  $3("topic-new").onclick = () => {
+    const title = prompt("\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043D\u043E\u0432\u043E\u0439 \u0442\u0435\u043C\u044B, \u0434\u043E 80 \u0437\u043D\u0430\u043A\u043E\u0432");
+    if (title?.trim()) changeTopic({ action: "create", title: title.trim() });
+  };
+  $3("topic-edit").onclick = () => {
+    const s2 = getState();
+    $3("topic-title").value = s2.topics?.find((t) => t.id === s2.active_thread)?.title || "";
+    $3("topic-delete").disabled = s2.active_thread === "main";
+    $3("topic-dialog").showModal();
+  };
+  $3("topic-close").onclick = () => $3("topic-dialog").close();
+  $3("topic-rename").onclick = () => {
+    $3("topic-dialog").close();
+    changeTopic({ action: "rename", thread_id: getState().active_thread, title: $3("topic-title").value });
+  };
+  $3("topic-delete").onclick = () => {
+    if (confirm("\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u044D\u0442\u043E\u0439 \u0442\u0435\u043C\u044B? \u041E\u0431\u0449\u0438\u0439 \u043F\u0440\u043E\u0444\u0438\u043B\u044C \u043E\u0441\u0442\u0430\u043D\u0435\u0442\u0441\u044F.")) {
+      $3("topic-dialog").close();
+      changeTopic({ action: "delete", thread_id: getState().active_thread });
+    }
+  };
+  $3("topic-clear").onclick = () => {
+    if (confirm("\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0438 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u0431\u043B\u044E\u0434 \u044D\u0442\u043E\u0439 \u0442\u0435\u043C\u044B?")) {
+      $3("topic-dialog").close();
+      changeTopic({ action: "clear", thread_id: getState().active_thread });
+    }
+  };
+  function resetPdf() {
+    pdf = null;
+    $3("menu-share").hidden = true;
+    $3("menu-download").hidden = true;
+    $3("pdf-status").textContent = "\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 PDF \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0435\u0433\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0433\u043E \u043C\u0435\u043D\u044E.";
+  }
+  $3("menu-pdf").onclick = () => run2(async () => {
+    resetPdf();
+    $3("menu-pdf").disabled = true;
+    try {
+      const stamp = epoch(), revision = getState().revision, data = await call2("keto_export", { format: "pdf" });
+      if (stamp !== epoch() || revision !== getState().revision) return;
+      const bytes = Uint8Array.from(atob(data.base64), (c2) => c2.charCodeAt(0));
+      pdf = new File([bytes], data.filename, { type: "application/pdf" });
+      $3("menu-share").hidden = false;
+      $3("menu-download").hidden = false;
+      $3("pdf-status").textContent = "PDF \u0433\u043E\u0442\u043E\u0432. \u0422\u0435\u043F\u0435\u0440\u044C \u043C\u043E\u0436\u043D\u043E \u043F\u043E\u0434\u0435\u043B\u0438\u0442\u044C\u0441\u044F \u0438\u043B\u0438 \u0441\u043A\u0430\u0447\u0430\u0442\u044C.";
+    } finally {
+      $3("menu-pdf").disabled = false;
+    }
+  });
+  function saveFile(file) {
+    const url = URL.createObjectURL(file), a2 = el2("a");
+    a2.href = url;
+    a2.download = file.name;
+    document.body.append(a2);
+    a2.click();
+    a2.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3e3);
+  }
+  $3("menu-download").onclick = () => {
+    if (pdf) saveFile(pdf);
+  };
+  $3("menu-share").onclick = () => {
+    if (!pdf) return;
+    if (navigator.canShare?.({ files: [pdf] }) && navigator.share) {
+      navigator.share({ files: [pdf], title: "\u041C\u043E\u0451 \u043C\u0435\u043D\u044E KETO" }).then(() => notify2("\u0424\u0430\u0439\u043B \u043F\u0435\u0440\u0435\u0434\u0430\u043D \u0441\u0438\u0441\u0442\u0435\u043C\u043D\u043E\u0439 \u043F\u0430\u043D\u0435\u043B\u0438 \u043E\u0431\u043C\u0435\u043D\u0430.")).catch((e) => notify2(e.name === "AbortError" ? "\u041E\u0431\u043C\u0435\u043D \u043E\u0442\u043C\u0435\u043D\u0451\u043D. PDF \u043C\u043E\u0436\u043D\u043E \u0441\u043A\u0430\u0447\u0430\u0442\u044C." : "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u043E\u0431\u043C\u0435\u043D. \u0421\u043A\u0430\u0447\u0430\u0439\u0442\u0435 PDF."));
+    } else {
+      notify2("\u041E\u0431\u043C\u0435\u043D \u0444\u0430\u0439\u043B\u0430\u043C\u0438 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. PDF \u0441\u043A\u0430\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044F.");
+      saveFile(pdf);
+    }
+  };
+  const days = ["\u041F\u043D", "\u0412\u0442", "\u0421\u0440", "\u0427\u0442", "\u041F\u0442", "\u0421\u0431", "\u0412\u0441"];
+  days.forEach((name2, i) => {
+    const label = el2("label"), input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = i;
+    input.setAttribute("aria-label", name2);
+    label.append(input, document.createTextNode(name2));
+    $3("reminder-weekdays").append(label);
+  });
+  function resetReminder() {
+    $3("reminder-form").reset();
+    $3("reminder-id").value = "";
+    $3("reminder-time").value = "20:00";
+    $3("reminder-zone").value = getState()?.profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    $3("reminder-enabled").checked = true;
+  }
+  $3("reminder-reset").onclick = resetReminder;
+  $3("reminder-day-template").onclick = () => {
+    resetReminder();
+    $3("reminder-title").value = "\u041A\u043E\u0440\u043E\u0442\u043A\u0430\u044F \u0437\u0430\u043F\u0438\u0441\u044C \u043E \u0434\u043D\u0435";
+    $3("reminder-weekdays").querySelectorAll("input").forEach((x) => x.checked = true);
+    $3("reminder-title").focus();
+  };
+  $3("reminder-menu-template").onclick = () => {
+    resetReminder();
+    $3("reminder-title").value = "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u043C\u0435\u043D\u044E \u043D\u0430 \u043D\u0435\u0434\u0435\u043B\u044E";
+    $3("reminder-weekdays").querySelectorAll("input").forEach((x) => x.checked = x.value === "6");
+    $3("reminder-title").focus();
+  };
+  async function reminderAction(action, id, values2) {
+    const data = await call2("keto_reminders", { action, reminder_id: id || "", ...values2 ? { values: values2 } : {}, confirmed: true, expected_revision: getState().revision });
+    accept2(data);
+  }
+  $3("reminder-form").onsubmit = (e) => {
+    e.preventDefault();
+    run2(async () => {
+      const id = $3("reminder-id").value;
+      await reminderAction(id ? "update" : "create", id, { title: $3("reminder-title").value, time: $3("reminder-time").value, timezone: $3("reminder-zone").value, enabled: $3("reminder-enabled").checked, date: $3("reminder-date").value || null, days_of_week: [...$3("reminder-weekdays").querySelectorAll("input:checked")].map((x) => Number(x.value)) });
+      resetReminder();
+    });
+  };
+  function renderReminders() {
+    const box = $3("reminder-list");
+    box.replaceChildren();
+    for (const r of getState()?.reminders || []) {
+      const card = el2("article", "panel" + (r.next_due && new Date(r.next_due) < /* @__PURE__ */ new Date() ? " reminder-overdue" : ""));
+      card.append(el2("h2", "", r.title), el2("p", "", r.enabled ? r.next_due ? "\u0421\u0440\u043E\u043A: " + new Date(r.next_due).toLocaleString("ru", { timeZone: r.timezone }) + " \xB7 " + r.timezone : "\u0412\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E, \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0439 \u0434\u0430\u0442\u044B \u043D\u0435\u0442" : "\u0412\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u043E"));
+      const complete = el2("button", "", "\u0412\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E"), edit = el2("button", "", "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C"), del = el2("button", "danger-button", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C"), ics = el2("button", "", "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u043A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u044C");
+      complete.onclick = () => run2(() => reminderAction("complete", r.id));
+      del.onclick = () => {
+        if (confirm("\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u0435 \u0438\u0437 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F? \u0421\u043E\u0431\u044B\u0442\u0438\u0435 \u0432 \u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u0435 \u0443\u0434\u0430\u043B\u044F\u0435\u0442\u0441\u044F \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E.")) run2(() => reminderAction("delete", r.id));
+      };
+      edit.onclick = () => {
+        $3("reminder-id").value = r.id;
+        $3("reminder-title").value = r.title;
+        $3("reminder-time").value = r.time;
+        $3("reminder-zone").value = r.timezone;
+        $3("reminder-date").value = r.date || "";
+        $3("reminder-enabled").checked = r.enabled;
+        $3("reminder-weekdays").querySelectorAll("input").forEach((x) => x.checked = r.days_of_week.includes(Number(x.value)));
+        $3("reminder-title").focus();
+      };
+      ics.disabled = !r.enabled || !r.next_due;
+      ics.onclick = () => run2(async () => {
+        const data = await call2("keto_reminders", { action: "ics", reminder_id: r.id });
+        saveFile(new File([data.text], data.filename, { type: data.mime }));
+        notify2("\u0418\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u0443\u0439\u0442\u0435 \u0444\u0430\u0439\u043B \u0432 \u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u044C. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0442\u0430\u043C \u0432\u0440\u0435\u043C\u044F \u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u0435 \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u0439.");
+      });
+      const row = el2("div", "button-row");
+      row.append(complete, edit, del, ics);
+      card.append(row);
+      box.append(card);
+    }
+    if (!box.children.length) box.append(el2("p", "muted", "\u041D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u0439 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0448\u0430\u0431\u043B\u043E\u043D \u0438\u043B\u0438 \u0437\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u0435 \u0444\u043E\u0440\u043C\u0443 \u2014 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u043A\u043D\u043E\u043F\u043A\u043E\u0439."));
+  }
+  function render() {
+    const s2 = getState();
+    if (!s2) return;
+    $3("mic-button").disabled = chatBusy || !s2.processing_consent || !s2.profile.consent.storage || !s2.profile.consent.health_data;
+    $3("topic-picker").replaceChildren(...(s2.topics || [{ id: "main", title: "\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0439 \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440" }]).map((t) => {
+      const option = el2("option", "", t.title);
+      option.value = t.id;
+      return option;
+    }));
+    $3("topic-picker").value = s2.active_thread || "main";
+    renderReminders();
+    resetPdf();
+    resize();
+  }
+  function help() {
+    const q2 = $3("help-search").value.toLocaleLowerCase();
+    $3("help-results").replaceChildren(...FAQ.filter((x) => x.join(" ").toLocaleLowerCase().includes(q2)).map(([title, text]) => {
+      const box = el2("section");
+      box.append(el2("h3", "", title), el2("p", "", text));
+      return box;
+    }));
+  }
+  $3("help-search").oninput = help;
+  help();
+  document.querySelectorAll("#settings-form input,#settings-form select,#profile-form input,#targets-form input,#targets-form select,#targets-form textarea,#reminder-form input").forEach((input, i) => {
+    if (input.type === "hidden") return;
+    const key = input.id || input.name, id = "field-help-" + i;
+    const hint = el2("small", "field-help", HINTS[key] || "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u043F\u043E\u043B\u044F \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u043F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C. \u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438.");
+    hint.id = id;
+    input.setAttribute("aria-describedby", id);
+    input.parentElement.append(hint);
+  });
+  const viewport = window.visualViewport;
+  let baseline = viewport?.height || window.innerHeight;
+  function resize() {
+    const height = viewport?.height || window.innerHeight, focused = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "");
+    if (!focused) baseline = height;
+    document.documentElement.style.setProperty("--viewport-height", height + "px");
+    document.documentElement.style.setProperty("--viewport-offset", (viewport?.offsetTop || 0) + "px");
+    document.body.classList.toggle("keyboard-open", focused && baseline - height > 100);
+  }
+  viewport?.addEventListener("resize", resize);
+  viewport?.addEventListener("scroll", resize);
+  window.addEventListener("resize", resize);
+  document.addEventListener("focusin", resize);
+  document.addEventListener("focusout", () => setTimeout(resize, 100));
+  resize();
+  let reminderTimer = setInterval(() => {
+    if (getState() && !document.hidden) renderReminders();
+  }, 6e4);
+  window.addEventListener("pagehide", () => {
+    clearInterval(reminderTimer);
+    reminderTimer = null;
+  });
+  window.addEventListener("pageshow", () => {
+    if (!reminderTimer) reminderTimer = setInterval(() => {
+      if (getState() && !document.hidden) renderReminders();
+    }, 6e4);
+  });
+  return { render, setChatBusy(value) {
+    chatBusy = value;
+    const s2 = getState();
+    $3("mic-button").disabled = value || !s2?.processing_consent || !s2?.profile.consent.storage || !s2?.profile.consent.health_data;
+    $3("send").disabled = value || recorder.mode !== "idle";
+  }, reset() {
+    chatBusy = false;
+    recorder.cancel("");
+    resetPhoto();
+    resetPdf();
+    $3("reminder-list").replaceChildren();
+    $3("topic-picker").replaceChildren();
+    $3("topic-dialog").close();
+    resetReminder();
+    $3("reminder-zone").value = "";
+  }, resetPhoto, recording: () => recorder.mode !== "idle" };
+}
+
 // cloudflare-saas/vendor/firebase-13.2.0/firebase-app.js
 /**
  * @license
@@ -5102,19 +5543,21 @@ async function run(fn) {
     return null;
   }
 }
-async function call(name2, args = {}) {
+async function call(name2, args = {}, options = {}) {
   const epoch = screenEpoch;
-  const r = await fetch("/api/tools/" + encodeURIComponent(name2), { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrf ?? "" }, body: JSON.stringify(args) });
+  const r = await fetch("/api/tools/" + encodeURIComponent(name2), { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrf ?? "" }, body: JSON.stringify(args), signal: options.signal });
   const d2 = await r.json();
   if (epoch !== screenEpoch) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
   if (!r.ok) {
     if (r.status === 401) showLogin();
-    throw Error({ BRIDGE_NOT_CONFIGURED: "\u0421\u0435\u0440\u0432\u0438\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", COMPUTE_UNAVAILABLE: "\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D.", REQUEST_PENDING: "\u0417\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u043E\u0431\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F.", REQUEST_FAILED: "\u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u043B\u0441\u044F; \u043D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u044B\u0439.", STATE_CHANGED: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u043B\u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.", BUSY_OR_CONSENT_OR_LIMIT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", VALIDATION_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435: \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u0432\u0435\u0442\u044B, \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B." }[d2.error] || d2.detail || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435.");
+    throw Error({ BRIDGE_NOT_CONFIGURED: "\u0421\u0435\u0440\u0432\u0438\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", COMPUTE_UNAVAILABLE: "\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D.", REQUEST_PENDING: "\u0417\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u043E\u0431\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F.", REQUEST_FAILED: "\u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u043B\u0441\u044F; \u043D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u044B\u0439.", STATE_CHANGED: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u043B\u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.", BUSY_OR_CONSENT_OR_LIMIT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", VALIDATION_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435: \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u0432\u0435\u0442\u044B, \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B." }[d2.error] || d2.message || d2.detail || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435.");
   }
   return d2;
 }
 function clearScreen() {
   screenEpoch++;
+  busy = false;
+  mobile.reset();
   oauthAccount = null;
   attachedSource = null;
   recipeSource = null;
@@ -5157,10 +5600,11 @@ function localDate() {
 }
 function setView(next) {
   view = next;
+  document.body.dataset.view = next;
   document.querySelectorAll("[data-page]").forEach((p) => p.hidden = p.dataset.page !== next);
   document.querySelectorAll("[data-view]").forEach((b2) => {
-    b2.classList.toggle("active", b2.dataset.view === next);
-    b2.setAttribute("aria-current", b2.dataset.view === next ? "page" : "false");
+    b2.classList.toggle("active", b2.dataset.view === (["chat", "today", "diary"].includes(next) ? next : "more"));
+    b2.setAttribute("aria-current", b2.dataset.view === (["chat", "today", "diary"].includes(next) ? next : "more") ? "page" : "false");
   });
   if (next === "recipes") run(loadRecipes);
   if (next === "onboarding") fillOnboard();
@@ -5185,7 +5629,7 @@ function accept(d2) {
 function renderState() {
   $2("login").hidden = true;
   $2("workspace").hidden = false;
-  $2("version").textContent = state.version;
+  $2("version").textContent = state.mobile_version || state.version;
   $2("demo-banner").hidden = state.subject_kind !== "demo";
   $2("connection").textContent = "\u041B\u0438\u0447\u043D\u043E\u0435 \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u043E";
   const u2 = state.ui;
@@ -5194,12 +5638,14 @@ function renderState() {
   $2("holds").hidden = !state.holds.length;
   $2("holds").textContent = "\u041F\u0435\u0440\u0441\u043E\u043D\u0430\u043B\u044C\u043D\u043E\u0435 \u043F\u043B\u0430\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u0438\u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E. \u0415\u0441\u0442\u044C \u043E\u0431\u0441\u0442\u043E\u044F\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u0430, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u043D\u0443\u0436\u043D\u043E \u043E\u0431\u0441\u0443\u0434\u0438\u0442\u044C \u0441 \u043B\u0435\u0447\u0430\u0449\u0438\u043C \u0441\u043F\u0435\u0446\u0438\u0430\u043B\u0438\u0441\u0442\u043E\u043C. \u0414\u043D\u0435\u0432\u043D\u0438\u043A \u0438 \u043E\u0431\u0449\u0438\u0435 \u0444\u0443\u043D\u043A\u0446\u0438\u0438 \u043E\u0441\u0442\u0430\u044E\u0442\u0441\u044F \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B.";
   $2("state-summary").textContent = "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0430\u044F \u0432\u0435\u0440\u0441\u0438\u044F " + state.revision + " \xB7 " + state.catalog.recipes + " \u0440\u0435\u0446\u0435\u043F\u0442\u0443\u0440\u044B";
+  mobile.render();
   renderProposals();
   renderDiary();
   renderHistory();
   if (state.chat.length) {
     $2("messages").replaceChildren(...state.chat.map((x) => el("div", "bubble " + x.role, x.text)));
-    $2("messages").scrollTop = $2("messages").scrollHeight;
+    const scroll = document.querySelector("[data-testid=chat-scroll]");
+    if (scroll) scroll.scrollTop = scroll.scrollHeight;
   } else {
     $2("messages").replaceChildren(el("div", "bubble assistant", "\u041D\u0430\u0447\u043D\u0451\u043C \u0441 \u0442\u043E\u0433\u043E, \u0447\u0442\u043E \u0432\u0430\u043C \u0441\u0435\u0439\u0447\u0430\u0441 \u043D\u0443\u0436\u043D\u043E: \u0438\u0434\u0435\u044F \u0431\u043B\u044E\u0434\u0430, \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u0438\u043B\u0438 \u0437\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E?"));
   }
@@ -5229,6 +5675,8 @@ function renderProposals() {
   $2("proposals").replaceChildren();
   for (const p of state.pending) {
     const card = el("div", "proposal");
+    card.setAttribute("role", "region");
+    card.setAttribute("aria-label", "\u0418\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F");
     card.append(el("span", "eyebrow", "\u041D\u0410 \u041F\u0420\u041E\u0412\u0415\u0420\u041A\u0423"), el("h3", "", { "ui": "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", "configuration": "\u041F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0438 \u0440\u0435\u0436\u0438\u043C", "profile.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0442\u0432\u0435\u0442\u044B", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "plan.accept": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E", "catalog.recipe.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442", "targets.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "feature.request": "\u041F\u043E\u0436\u0435\u043B\u0430\u043D\u0438\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0443", "ui.rollback": "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0432\u0438\u0434" }[p.type] || "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435"));
     const dl = el("dl");
     const pairs = p.type === "plan.accept" ? [["\u0414\u043D\u0435\u0439", p.payload.days?.length], ["\u0421\u0442\u0430\u0442\u0443\u0441", "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0439 \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"]] : flatten(p.payload);
@@ -5275,6 +5723,8 @@ async function propose(type, payload) {
   const r = await call("keto_propose_change", { event_type: type, payload, expected_revision: state.revision });
   accept(r);
   if (anchor) anchor.insertAdjacentElement("afterend", $2("proposals"));
+  $2("proposals").setAttribute("tabindex", "-1");
+  $2("proposals").focus();
   $2("proposals").scrollIntoView({ behavior: "smooth", block: "start" });
   return r;
 }
@@ -5283,6 +5733,7 @@ function recipeCard(r) {
   b2.append(el("span", "tag", r.category === "breakfast" ? "\u041A \u0437\u0430\u0432\u0442\u0440\u0430\u043A\u0443" : "\u041D\u0430 \u0432\u0430\u0448\u0435\u0439 \u043A\u0443\u0445\u043D\u0435"), el("h3", "", r.name_ru));
   const meta = el("div", "recipe-meta");
   meta.append(el("span", "", r.active_minutes + " \u043C\u0438\u043D"), el("span", "nutrition", Math.round(r.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0440\u0430\u0441\u0447\u0451\u0442"));
+  if (r.fit_note) b2.append(el("p", "muted", r.fit_note));
   b2.append(meta, el("span", "open", "\u0418\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u044B \u0438 \u0448\u0430\u0433\u0438 \u2192"));
   b2.addEventListener("click", () => openRecipe(r));
   return b2;
@@ -5397,10 +5848,10 @@ function fillOnboard() {
   renderQuestions();
 }
 function renderQuestions() {
-  const start2 = questionPage * 2;
-  $2("question-progress").textContent = `\u0412\u043E\u043F\u0440\u043E\u0441\u044B ${start2 + 1}\u2013${Math.min(start2 + 2, QUESTIONS.length)} \u0438\u0437 ${QUESTIONS.length}`;
+  const start2 = questionPage;
+  $2("question-progress").textContent = `\u0412\u043E\u043F\u0440\u043E\u0441 ${start2 + 1} \u0438\u0437 ${QUESTIONS.length}`;
   $2("screen-questions").replaceChildren();
-  for (const [key, label] of QUESTIONS.slice(start2, start2 + 2)) {
+  for (const [key, label] of QUESTIONS.slice(start2, start2 + 1)) {
     const lab = el("label", "", label), sel = el("select");
     sel.dataset.screen = key;
     sel.setAttribute("aria-label", label);
@@ -5411,11 +5862,14 @@ function renderQuestions() {
     }
     sel.value = screenDraft[key] === true ? "yes" : screenDraft[key] === false ? "no" : "unknown";
     sel.addEventListener("change", () => screenDraft[key] = sel.value === "unknown" ? null : sel.value === "yes");
-    lab.append(sel);
+    const hint = el("small", "field-help", key === "adult" ? "\u041F\u0435\u0440\u0441\u043E\u043D\u0430\u043B\u044C\u043D\u043E\u0435 \u043C\u0435\u043D\u044E \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u043E\u0441\u043B\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F \u0441\u043E\u0432\u0435\u0440\u0448\u0435\u043D\u043D\u043E\u043B\u0435\u0442\u0438\u044F." : "\u041E\u0442\u0432\u0435\u0442 \u0432\u043B\u0438\u044F\u0435\u0442 \u043D\u0430 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u043F\u0435\u0440\u0441\u043E\u043D\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u043C\u0435\u043D\u044E. \xAB\u041D\u0435 \u0437\u043D\u0430\u044E\xBB \u043E\u0441\u0442\u0430\u0432\u043B\u044F\u0435\u0442 \u0432\u043E\u043F\u0440\u043E\u0441 \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u043C, \u043D\u0435 \u0441\u0447\u0438\u0442\u0430\u0435\u0442\u0441\u044F \u043E\u0442\u0432\u0435\u0442\u043E\u043C \xAB\u043D\u0435\u0442\xBB.");
+    hint.id = "question-help-" + key;
+    sel.setAttribute("aria-describedby", hint.id);
+    lab.append(sel, hint);
     $2("screen-questions").append(lab);
   }
   $2("question-prev").disabled = questionPage === 0;
-  $2("question-next").disabled = start2 + 2 >= QUESTIONS.length;
+  $2("question-next").disabled = start2 + 1 >= QUESTIONS.length;
 }
 function markSafetyHold(d2) {
   if (!d2?.safety_hold) return;
@@ -5424,10 +5878,13 @@ function markSafetyHold(d2) {
   $2("menu-result").replaceChildren(el("div", "notice danger", "\u041C\u0435\u043D\u044E \u043F\u0440\u0438\u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E \u0438\u0437-\u0437\u0430 \u043D\u043E\u0432\u043E\u0433\u043E \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F."));
 }
 async function send(message) {
+  const sendEpoch = screenEpoch;
+  if (mobile.recording()) return;
+  if (!message.trim() && image) message = "\u041F\u043E\u043C\u043E\u0433\u0438 \u043E\u0431\u0441\u0443\u0434\u0438\u0442\u044C \u044D\u0442\u043E \u0444\u043E\u0442\u043E; \u0441\u043E\u0441\u0442\u0430\u0432 \u0438 \u043C\u0430\u0441\u0441\u0443 \u043D\u0443\u0436\u043D\u043E \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u044C.";
   if (busy) {
     if (!/(не могу дышать|задыхаюсь|теряю сознание|сильная боль в груди|непрекращающаяся рвота)/i.test(message)) return;
     try {
-      const d2 = await call("keto_chat", { message, request_id: crypto.randomUUID().replaceAll("-", "") });
+      const d2 = await call("keto_chat", { message, request_id: crypto.randomUUID().replaceAll("-", ""), thread_id: state?.active_thread || "main" });
       $2("messages").append(el("div", "bubble assistant", d2.message));
       markSafetyHold(d2);
     } catch (e) {
@@ -5436,24 +5893,31 @@ async function send(message) {
     return;
   }
   busy = true;
+  mobile.setChatBusy(true);
+  const submittedDraft = $2("message").value, submittedImage = image;
   $2("send").disabled = true;
   const user = el("div", "bubble user", message), wait = el("div", "bubble pending", "\u0420\u0430\u0437\u0431\u0438\u0440\u0430\u044E\u0441\u044C\u2026");
   $2("messages").append(user, wait);
-  $2("messages").scrollTop = $2("messages").scrollHeight;
+  const scroll = document.querySelector("[data-testid=chat-scroll]");
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
   try {
-    const args = { message, request_id: crypto.randomUUID().replaceAll("-", "") };
+    const args = { message, request_id: crypto.randomUUID().replaceAll("-", ""), thread_id: state?.active_thread || "main" };
     if (image) args.image_data_url = image;
     if (attachedSource) args.source_id = attachedSource;
     const d2 = await call("keto_chat", args);
+    if (sendEpoch !== screenEpoch) return;
     attachedSource = null;
     wait.remove();
     if (d2.state) accept(d2);
     if (!d2.state?.chat?.length || d2.error_code || d2.requires_consent) $2("messages").append(el("div", "bubble assistant", d2.message));
     markSafetyHold(d2);
-    $2("message").value = "";
-    image = null;
-    $2("photo").value = "";
-    $2("photo-status").textContent = "";
+    if ($2("message").value === submittedDraft) $2("message").value = "";
+    if (image === submittedImage) mobile.resetPhoto();
+    if (d2.open_view) {
+      const open = el("button", "secondary", "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u044F");
+      open.onclick = () => setView(d2.open_view);
+      $2("chat-extras").append(open);
+    }
     if (d2.recipes) {
       const cards = el("div", "recipe-grid");
       cards.append(...d2.recipes.map(recipeCard));
@@ -5465,19 +5929,26 @@ async function send(message) {
       setView("today");
     }
     if (d2.proposal) {
-      $2("chat-form").insertAdjacentElement("afterend", $2("proposals"));
-      $2("proposals").scrollIntoView({ behavior: "smooth" });
+      $2("chat-confirmations").append($2("proposals"));
+      $2("proposals").setAttribute("tabindex", "-1");
+      $2("proposals").focus();
+      $2("proposals").scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   } catch (e) {
-    wait.textContent = "\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u043D\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u043E. " + e.message;
-    notify(e.message);
+    if (sendEpoch === screenEpoch) {
+      wait.textContent = "\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u043D\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u043E. " + e.message;
+      notify(e.message);
+    }
   } finally {
-    busy = false;
-    $2("send").disabled = false;
+    if (sendEpoch === screenEpoch) {
+      busy = false;
+      mobile.setChatBusy(false);
+      $2("send").disabled = false;
+    }
   }
 }
 function download(data) {
-  const b2 = new Blob([data.text], { type: data.mime }), u2 = URL.createObjectURL(b2), a2 = el("a");
+  const b2 = new Blob([data.base64 ? Uint8Array.from(atob(data.base64), (c2) => c2.charCodeAt(0)) : data.text], { type: data.mime }), u2 = URL.createObjectURL(b2), a2 = el("a");
   a2.href = u2;
   a2.download = data.filename;
   document.body.append(a2);
@@ -5515,7 +5986,7 @@ $2("chat-form").addEventListener("submit", (e) => {
   send($2("message").value);
 });
 $2("message").addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing && window.matchMedia?.("(pointer: fine)").matches) {
     e.preventDefault();
     if ($2("message").value.trim()) send($2("message").value);
   }
@@ -5593,20 +6064,6 @@ $2("menu-import").addEventListener("change", (e) => run(async () => {
   $2("menu-import").closest(".panel").insertAdjacentElement("afterend", $2("proposals"));
   $2("proposals").scrollIntoView({ behavior: "smooth", block: "start" });
   e.target.value = "";
-}));
-$2("photo").addEventListener("change", (e) => run(async () => {
-  const f = e.target.files[0];
-  if (!f) return;
-  if (!["image/jpeg", "image/png"].includes(f.type) || f.size > 12e6) throw Error("\u041D\u0443\u0436\u043D\u043E JPEG/PNG \u0434\u043E 12 \u041C\u0411.");
-  const bitmap = await createImageBitmap(f);
-  const scale = Math.min(1, 1024 / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  image = canvas.toDataURL("image/jpeg", 0.8);
-  $2("photo-status").textContent = "\u0424\u043E\u0442\u043E \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u043E. \u0411\u0443\u0434\u0435\u0442 \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u043E \u0432 Azure \u0432\u043C\u0435\u0441\u0442\u0435 \u0441 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435\u043C; \u0442\u043E\u0447\u043D\u044B\u0439 \u0432\u0435\u0441 \u043F\u043E \u0444\u043E\u0442\u043E \u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u044F\u0435\u0442\u0441\u044F.";
 }));
 $2("revoke").onclick = () => run(async () => {
   if (confirm("\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0443 \u0432 Azure \u0438 \u043D\u043E\u0432\u044B\u0435 \u043B\u0438\u0447\u043D\u044B\u0435 \u0437\u0430\u043F\u0438\u0441\u0438? \u0421\u0442\u0430\u0440\u044B\u0439 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u043E\u0441\u0442\u0430\u043D\u0435\u0442\u0441\u044F \u0434\u043E \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F.")) accept(await call("keto_consent", { processing: false, storage: false, health: false, confirmed: true }));
@@ -5833,11 +6290,12 @@ async function start() {
     $2("cf-claim").hidden = true;
     $2("admin-tab").hidden = session.user.role !== "admin";
     await refresh();
-    setView(state.ui.home);
+    setView(state.ui.home || "chat");
   } catch (e) {
     session = null;
     showLogin();
     $2("cf-login-message").textContent = e.message;
   }
 }
+var mobile = setupMobile({ $: $2, el, call, accept, getState: () => state, setView, run, notify, epoch: () => screenEpoch, setImage: (value) => image = value, getImage: () => image });
 run(start);

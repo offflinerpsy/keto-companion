@@ -1,0 +1,44 @@
+[
+  {
+    "path": "/health",
+    "status": 200,
+    "content_type": "application/json; charset=utf-8",
+    "bytes": 146
+  },
+  {
+    "path": "/help",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 3031
+  },
+  {
+    "path": "/privacy",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 1290
+  },
+  {
+    "path": "/delete",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 979
+  },
+  {
+    "path": "/manifest.webmanifest",
+    "status": 200,
+    "content_type": "application/manifest+json",
+    "bytes": 415
+  },
+  {
+    "path": "/icon-192.png",
+    "status": 200,
+    "content_type": "image/png",
+    "bytes": 1015
+  },
+  {
+    "path": "/api/session",
+    "status": 401,
+    "content_type": "application/json; charset=utf-8",
+    "bytes": 19
+  }
+]

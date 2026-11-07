@@ -23,3 +23,9 @@ See [development](docs/en/DEVELOPMENT.md), [deployment](docs/en/DEPLOYMENT.md), 
 Site: https://keto-companion-saas-staging.offflinerpsy.workers.dev/ . The owner signs in with `offflinerpsy@gmail.com`; administrator role is granted only after that identity is verified. Use the Administrator section to create an email-bound invitation and copy its link. Each member signs in with their own Google account and separately accepts the invitation and consents. First acceptance requires only owner login and seeing the dashboard, not real health data.
 
 The deployed Cloudflare → Azure Terra path passed 20 end-to-end checks using two synthetic members; fixtures and images were removed. This does not verify an actual Google login or clinical suitability. Native ChatGPT voice, Gmail/Calendar synchronization, and closed Instagram access are not enabled.
+
+## Mobile update 0.4.0
+
+Chat-first layout with four bottom tabs, dictation into an editable draft, images, and separate conversation topics. Accepted menus export as PDF for the system share sheet. Reminders persist in the app; closed-page notifications require manually importing the ICS into Calendar. Contextual hints explain settings and personal fields. Technical JSON/CSV actions remain under Advanced.
+
+Source checks, deployed asset hashes and mobile-component rendering are verified. Physical iPhone Safari microphone, native sharing and Calendar import remain acceptance gates. Exact scope and limitations: `docs/evidence/MOBILE_RELEASE_RECEIPT.json`.

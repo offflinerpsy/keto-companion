@@ -1,0 +1,17 @@
+{
+  "source_before": "ab13ad8",
+  "visual_inspection": "Actual public header/chat/nav/CSS component rendered in isolated Linux Chromium and inspected as images",
+  "found": [
+    "Microphone label wrapped across lines",
+    "Refresh label split across lines at440px",
+    "Long placeholder clipped at large text in short viewport"
+  ],
+  "fixed": [
+    "Accessible microphone SVG control with48px target",
+    "Accessible refresh SVG44px and hidden redundant status below600px",
+    "Shorter editable-text placeholder",
+    "Compact topic overflow control"
+  ],
+  "no_apple_fonts_distributed": true,
+  "no_browser_on_owner_mac": true
+}

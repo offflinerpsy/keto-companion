@@ -40,3 +40,13 @@ qa/*
 !/deploy/cloudflare-staging.json
 !/deploy/README.md
 !/deploy/verify-staging.mjs
+
+# Runtime-only PDF font assets (not distributed in repository)
+.runtime-fonts/
+runtime-fonts/
+qa/mobile-browser/
+
+# Synthetic mobile QA inputs and terminal report only
+!qa/mobile-fixtures.json
+!qa/MOBILE_IMPLEMENTATION_RESULT.json
+!qa/MOBILE_IMPLEMENTATION_REPORT_RU.md
