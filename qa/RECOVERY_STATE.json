@@ -1,6 +1,6 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-07T22:54:15.267889+00:00",
+  "updated_at": "2026-11-07T22:55:06.196899+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.4.0-mobile-pilot",
   "active_task": null,
@@ -8,7 +8,8 @@
   "next_task": {
     "id": "KETO-MOBILE-ACCEPTANCE",
     "status": "requires_owner_device",
-    "action": "Reload the app on iPhone, tap microphone, speak, stop, confirm text appears without sending."
+    "action": "Reload the app on iPhone, tap microphone, speak, stop, confirm text appears without sending.",
+    "github_issue": 5
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",
