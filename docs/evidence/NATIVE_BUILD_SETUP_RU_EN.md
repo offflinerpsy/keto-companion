@@ -1,0 +1,5 @@
+# Native Cloudflare Builds / Штатный выпуск Cloudflare
+
+RU: выпуск использует приватный репозиторий и существующую build-авторизацию Cloudflare. Скрипт `scripts/deploy_cloudflare_staging.mjs` проверяет все восемь модулей по SHA-256, не устанавливает зависимости и публикует только staging. Токен предоставляется самим build runner и не выводится. Сессионный ключ создаётся внутри Cloudflare и остаётся секретным binding; скрипт его не читает. Azure compute в этом шаге не подключается. Публикация запускается вручную после подключения репозитория; успешное создание записи подключения не доказывает доступ GitHub App к репозиторию.
+
+EN: the release uses the private repository and an existing Cloudflare build authorization. The deployment script verifies the eight modules against their SHA-256 manifest, installs no dependencies, and targets staging only. The runner supplies its normal deployment credential; it is never printed. The session key remains a Cloudflare secret binding and is not read by the script. This release does not connect Azure compute. Creating the repository-connection record does not prove the GitHub App has repository access.
