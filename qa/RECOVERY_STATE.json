@@ -3,17 +3,17 @@
   "updated_at": "2026-11-07T20:16:35.235687+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.3.0-internal-pilot",
-  "active_task": null,
+  "active_task": {
+    "id": "KETO-COMPUTE-004",
+    "github_issue": 3,
+    "stage": "signature-adapter"
+  },
   "last_completed": {
     "id": "KETO-RELEASE-002",
     "status": "completed",
     "evidence": "docs/evidence/STAGING_DEPLOYMENT_RECEIPT.json"
   },
-  "next_task": {
-    "id": "KETO-COMPUTE-004",
-    "title": "Connect existing Azure compute to staging with non-exported signing key",
-    "status": "ready"
-  },
+  "next_task": null,
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",
     "sha256": "4c881831908438751fa4a0277754f430d18cf4d85804a81e468347a26d69a2ff"

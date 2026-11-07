@@ -858,8 +858,9 @@ var nonce = () => b642(crypto.getRandomValues(new Uint8Array(32)));
 var hex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, "0")).join("");
 var hash2 = async (x) => hex(await crypto.subtle.digest("SHA-256", typeof x === "string" ? te2.encode(x) : x));
 var OPS = { keto_open: "open", keto_recipes: "recipes", keto_consent: "consent", keto_propose_change: "propose", keto_apply_proposal: "apply", keto_menu: "menu", keto_chat: "chat", keto_export: "export", keto_import_menu: "import_menu" };
+var bridgeConfigured = (env) => Boolean(env.KETO_EDGE_BRIDGE_URL && (typeof env.KETO_EDGE_SIGNING_JWK === "string" && env.KETO_EDGE_SIGNING_JWK.length > 50 || typeof env.KETO_EDGE_BRIDGE_SECRET === "string" && env.KETO_EDGE_BRIDGE_SECRET.length >= 32));
 async function bridgeCall(env, subject, operation, state, args) {
-  if (typeof env.KETO_EDGE_BRIDGE_SECRET !== "string" || env.KETO_EDGE_BRIDGE_SECRET.length < 32 || typeof env.KETO_EDGE_BRIDGE_URL !== "string") throw Error("BRIDGE_NOT_CONFIGURED");
+  if (!bridgeConfigured(env)) throw Error("BRIDGE_NOT_CONFIGURED");
   let url;
   try {
     url = new URL(env.KETO_EDGE_BRIDGE_URL);
@@ -871,8 +872,22 @@ async function bridgeCall(env, subject, operation, state, args) {
   const body = te2.encode(JSON.stringify({ subject, operation, state, arguments: args }));
   if (body.length > 15e5) throw Error("PAYLOAD_TOO_LARGE");
   const stamp = String(now2()), n = nonce(), message2 = ["POST", url.pathname, stamp, n, await hash2(body)].join("\n");
-  const key = await crypto.subtle.importKey("raw", te2.encode(env.KETO_EDGE_BRIDGE_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const signature = hex(await crypto.subtle.sign("HMAC", key, te2.encode(message2)));
+  let signature;
+  if (env.KETO_EDGE_SIGNING_JWK) {
+    if (env.KETO_EDGE_BRIDGE_SECRET) throw Error("BRIDGE_NOT_CONFIGURED");
+    let jwk;
+    try {
+      jwk = JSON.parse(env.KETO_EDGE_SIGNING_JWK);
+    } catch {
+      throw Error("BRIDGE_NOT_CONFIGURED");
+    }
+    if (jwk.kty !== "OKP" || jwk.crv !== "Ed25519" || typeof jwk.d !== "string" || typeof jwk.x !== "string") throw Error("BRIDGE_NOT_CONFIGURED");
+    const key = await crypto.subtle.importKey("jwk", jwk, { name: "Ed25519" }, false, ["sign"]);
+    signature = hex(await crypto.subtle.sign("Ed25519", key, te2.encode(message2)));
+  } else {
+    const key = await crypto.subtle.importKey("raw", te2.encode(env.KETO_EDGE_BRIDGE_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    signature = hex(await crypto.subtle.sign("HMAC", key, te2.encode(message2)));
+  }
   const r = await fetch(url.href, { method: "POST", headers: { "content-type": "application/json", "x-keto-timestamp": stamp, "x-keto-nonce": n, "x-keto-signature": signature }, body, signal: AbortSignal.timeout(7e4) });
   if (!r.ok) throw Error(r.status === 422 ? "BRIDGE_REJECTED" : "BRIDGE_UNAVAILABLE");
   const reader = r.body?.getReader();
@@ -1296,7 +1311,7 @@ async function handle(req, env) {
       ready = true;
     } catch {
     }
-    return json({ version: "0.3.0-internal-pilot", build: "firebase-identity", capabilities: { firebase_google: ready && env.AUTH_PROVIDER === "firebase_google", direct_google: ready && env.AUTH_PROVIDER === "direct_google", storage: !!env.DB && !!env.UPLOADS, compute: !!env.KETO_EDGE_BRIDGE_SECRET && !!env.KETO_EDGE_BRIDGE_URL } });
+    return json({ version: "0.3.0-internal-pilot", build: "firebase-identity", capabilities: { firebase_google: ready && env.AUTH_PROVIDER === "firebase_google", direct_google: ready && env.AUTH_PROVIDER === "direct_google", storage: !!env.DB && !!env.UPLOADS, compute: bridgeConfigured(env) } });
   }
   if (method === "GET" && ["/", "/help", "/privacy", "/delete", "/app.bundle.js", "/style.css"].includes(path)) {
     if (!env.ASSETS) fail(503, "SETUP_REQUIRED");
@@ -1321,7 +1336,7 @@ async function handle(req, env) {
   if (path === "/auth/google/callback" && method === "GET" && env.AUTH_PROVIDER === "direct_google") return oauthCallback(req, env);
   if (path === "/api/session" && method === "GET") {
     const { u, raw } = await auth(req, env, { pending: true });
-    return json({ user: { role: u.role, status: u.status, email: u.email }, csrf: await csrfValue(env, raw), version: "0.3.0-internal-pilot", capabilities: { chat: env.KETO_EDGE_BRIDGE_SECRET && env.KETO_EDGE_BRIDGE_URL ? "configured_unverified" : "not_configured", compute: env.KETO_EDGE_BRIDGE_SECRET && env.KETO_EDGE_BRIDGE_URL ? "configured_unverified" : "not_configured", google_integrations: false, instagram_fetch: false, plugin: "existing Azure only" } });
+    return json({ user: { role: u.role, status: u.status, email: u.email }, csrf: await csrfValue(env, raw), version: "0.3.0-internal-pilot", capabilities: { chat: bridgeConfigured(env) ? "configured_unverified" : "not_configured", compute: bridgeConfigured(env) ? "configured_unverified" : "not_configured", google_integrations: false, instagram_fetch: false, plugin: "existing Azure only" } });
   }
   if (path === "/api/logout" && method === "POST") {
     const { raw } = await auth(req, env, { pending: true, write: true });

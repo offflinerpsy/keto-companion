@@ -1,6 +1,6 @@
 import {firebaseClaims} from './firebase-identity.mjs';
 import {beginDeletion,deletionStatus} from './deletion.mjs';
-import {handleTool,consentChange,bridgeCall} from './compute.mjs';
+import {handleTool,consentChange,bridgeCall,bridgeConfigured} from './compute.mjs';
 // Isolated invitation-only pilot. No clinical computation is enabled here.
 const OWNER='offflinerpsy@gmail.com', OAUTH_TTL=600, SESSION_TTL=7*86400, INVITE_TTL=72*3600;
 const te=new TextEncoder(), td=new TextDecoder();
@@ -103,7 +103,7 @@ async function firebaseComplete(req,env){
 
 async function handle(req,env){
  const url=new URL(req.url),path=url.pathname,method=req.method;
- if(path==='/health'&&method==='GET'){let ready=false;try{config(env);ready=true}catch{}return json({version:'0.3.0-internal-pilot',build:'firebase-identity',capabilities:{firebase_google:ready&&env.AUTH_PROVIDER==='firebase_google',direct_google:ready&&env.AUTH_PROVIDER==='direct_google',storage:!!env.DB&&!!env.UPLOADS,compute:!!env.KETO_EDGE_BRIDGE_SECRET&&!!env.KETO_EDGE_BRIDGE_URL}})}
+ if(path==='/health'&&method==='GET'){let ready=false;try{config(env);ready=true}catch{}return json({version:'0.3.0-internal-pilot',build:'firebase-identity',capabilities:{firebase_google:ready&&env.AUTH_PROVIDER==='firebase_google',direct_google:ready&&env.AUTH_PROVIDER==='direct_google',storage:!!env.DB&&!!env.UPLOADS,compute:bridgeConfigured(env)}})}
  if(method==='GET'&&['/','/help','/privacy','/delete','/app.bundle.js','/style.css'].includes(path)){if(!env.ASSETS)fail(503,'SETUP_REQUIRED');const asset=({'/help':'/help.html','/privacy':'/privacy.html','/delete':'/delete.html'})[path];const r=await env.ASSETS.fetch(asset?new Request(new URL(asset,req.url),req):req);const h=new Headers(r.headers);h.set('Content-Security-Policy',"default-src 'self'; script-src 'self' https://apis.google.com; style-src 'self'; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src https://keto-companion-auth-261107.firebaseapp.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");h.set('Cross-Origin-Opener-Policy','same-origin-allow-popups');h.set('Cache-Control','no-store');h.set('Referrer-Policy','no-referrer');h.set('X-Content-Type-Options','nosniff');return new Response(r.body,{status:r.status,headers:h})}
  if(path==='/auth/config'&&method==='GET'){config(env);return json(env.AUTH_PROVIDER==='firebase_google'?{provider:'firebase_google',firebase:firebasePublic(env)}:{provider:'direct_google'})}
  config(env);
@@ -111,7 +111,7 @@ async function handle(req,env){
  if(path==='/auth/firebase/complete'&&method==='POST'&&env.AUTH_PROVIDER==='firebase_google')return firebaseComplete(req,env);
  if(path==='/auth/google/start'&&method==='POST'&&env.AUTH_PROVIDER==='direct_google')return oauthStart(req,env);
  if(path==='/auth/google/callback'&&method==='GET'&&env.AUTH_PROVIDER==='direct_google')return oauthCallback(req,env);
- if(path==='/api/session'&&method==='GET'){const {u,raw}=await auth(req,env,{pending:true});return json({user:{role:u.role,status:u.status,email:u.email},csrf:await csrfValue(env,raw),version:'0.3.0-internal-pilot',capabilities:{chat:env.KETO_EDGE_BRIDGE_SECRET&&env.KETO_EDGE_BRIDGE_URL?'configured_unverified':'not_configured',compute:env.KETO_EDGE_BRIDGE_SECRET&&env.KETO_EDGE_BRIDGE_URL?'configured_unverified':'not_configured',google_integrations:false,instagram_fetch:false,plugin:'existing Azure only'}})}
+ if(path==='/api/session'&&method==='GET'){const {u,raw}=await auth(req,env,{pending:true});return json({user:{role:u.role,status:u.status,email:u.email},csrf:await csrfValue(env,raw),version:'0.3.0-internal-pilot',capabilities:{chat:bridgeConfigured(env)?'configured_unverified':'not_configured',compute:bridgeConfigured(env)?'configured_unverified':'not_configured',google_integrations:false,instagram_fetch:false,plugin:'existing Azure only'}})}
  if(path==='/api/logout'&&method==='POST'){const {raw}=await auth(req,env,{pending:true,write:true});await dbrun(env,'DELETE FROM sessions WHERE token_hash=?',await sha(raw));return json({ok:true},200,{'set-cookie':cookieSet('keto_session','',0)})}
  if(path==='/api/invites/claim'&&method==='POST'){
   const {u}=await auth(req,env,{pending:true,write:true});if(u.status!=='pending')fail(409,'INVITE_NOT_AVAILABLE');const x=await bodyJson(req);if(Object.keys(x).join()!=='token'||!/^[A-Za-z0-9_-]{43}$/.test(x.token||''))fail(400,'INVALID_INVITE');let t=now();

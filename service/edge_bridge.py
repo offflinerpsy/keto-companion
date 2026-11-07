@@ -1,6 +1,8 @@
 """Opt-in Cloudflare compute bridge; Azure stores only nonce replay metadata."""
 from __future__ import annotations
-import copy,hashlib,hmac,json,re,time,os
+import copy,hashlib,hmac,json,re,time,os,base64
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from cryptography.exceptions import InvalidSignature
 from .store import Conflict,safe_key,encode
 from .domain import Service,k,new_document,literal_guard
 from .brain import AzureBrain
@@ -21,16 +23,33 @@ class MemoryStore:
   self.doc=None;self.version=None
 
 class EdgeBridge:
- def __init__(self,secret,replay_store,brain,tool_map,image_clean,clock=None):
-  if not isinstance(secret,str) or len(secret.encode())<32:raise RuntimeError('Edge bridge requires a dedicated high-entropy secret')
-  self.secret=secret.encode();self.replay=replay_store;self.brain=brain;self.tool_map=tool_map;self.image_clean=image_clean;self.clock=clock or time.time
+ def __init__(self,secret,replay_store,brain,tool_map,image_clean,clock=None,public_jwk=None):
+  self.verify_key=None;self.secret=None
+  if public_jwk:
+   if secret:raise RuntimeError('Choose exactly one bridge authentication mode')
+   try:
+    key=json.loads(public_jwk) if isinstance(public_jwk,str) else public_jwk
+    if not isinstance(key,dict) or key.get('kty')!='OKP' or key.get('crv')!='Ed25519' or 'd' in key or not isinstance(key.get('x'),str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}',key['x']):raise ValueError()
+    self.verify_key=Ed25519PublicKey.from_public_bytes(base64.urlsafe_b64decode(key['x']+'='))
+   except (ValueError,TypeError,KeyError):raise RuntimeError('Invalid public verification key') from None
+  else:
+   if not isinstance(secret,str) or len(secret.encode())<32:raise RuntimeError('Edge bridge requires authentication')
+   self.secret=secret.encode()
+  self.replay=replay_store;self.brain=brain;self.tool_map=tool_map;self.image_clean=image_clean;self.clock=clock or time.time
  def execute(self,method,path,stamp,nonce,signature,body):
   if method!='POST' or path!=PATH or not isinstance(body,bytes) or len(body)>LIMIT:raise BridgeError('invalid request')
   if not isinstance(stamp,str) or not re.fullmatch(r'[0-9]{10}',stamp) or not isinstance(nonce,str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}',nonce):raise BridgeError('invalid request')
   now=int(self.clock())
   if abs(now-int(stamp))>60:raise BridgeError('expired')
-  material='\n'.join([method,path,stamp,nonce,hashlib.sha256(body).hexdigest()]).encode();expected=hmac.new(self.secret,material,hashlib.sha256).hexdigest()
-  if not isinstance(signature,str) or not hmac.compare_digest(expected,signature):raise BridgeError('invalid signature')
+  material='\n'.join([method,path,stamp,nonce,hashlib.sha256(body).hexdigest()]).encode()
+  if self.verify_key is not None:
+   try:
+    if not isinstance(signature,str) or not re.fullmatch(r'[0-9a-f]{128}',signature):raise ValueError()
+    self.verify_key.verify(bytes.fromhex(signature),material)
+   except (ValueError,InvalidSignature):raise BridgeError('invalid signature') from None
+  else:
+   expected=hmac.new(self.secret,material,hashlib.sha256).hexdigest()
+   if not isinstance(signature,str) or not hmac.compare_digest(expected,signature):raise BridgeError('invalid signature')
   digest=hashlib.sha256(nonce.encode()).hexdigest();key='edge_replay_'+digest
   try:self.replay.write(key,{'nonce_hash':digest,'expires_at':max(now,int(stamp))+121},None)
   except Conflict:raise BridgeError('replay') from None

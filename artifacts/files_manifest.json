@@ -1,19 +1,19 @@
 {
-  "status": "candidate; runtime and real login unverified",
+  "status": "Ed25519 bridge release candidate; cloud verification pending",
   "main_module": "worker-modules.mjs",
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "1bab41ef0ac82026e9c5fc92d6cfd1988ed4452ae34522ee27f6f2f37603c938",
-      "bytes": 431203,
+      "sha256": "1d40ac5f905f0f2a0eab285344973e0cd387d33a2b1de99c7cc9778644f45527",
+      "bytes": 431843,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "54acd16c33970ec1763e747188bf7b42c9e00a2d20b48201fa6e6547d28add00",
-      "bytes": 62872,
+      "sha256": "54f5d8dba03ce613a2c7897172029acdb621a937da6ddf018c4d859b6524fa93",
+      "bytes": 63263,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"

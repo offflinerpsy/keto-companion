@@ -235,12 +235,13 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
         await run_in_threadpool(bridge.revoke,params)
         return Response(status_code=200,headers={'Cache-Control':'no-store','Pragma':'no-cache'})
     edge_secret_value=edge_secret if edge_secret is not None else os.getenv('KETO_EDGE_BRIDGE_SECRET','')
-    if edge_secret_value:
+    edge_public_value=os.getenv('KETO_EDGE_PUBLIC_JWK','')
+    if edge_secret_value or edge_public_value:
         from .edge_bridge import EdgeBridge,BridgeError,LIMIT
         from .store import BlobStore
         replay_store=edge_replay_store if testing and edge_replay_store is not None else svc.store
         if not testing and not isinstance(replay_store,BlobStore):raise RuntimeError('Edge bridge requires durable Blob replay protection')
-        edge=EdgeBridge(edge_secret_value,replay_store,svc.brain,TOOL_MAP,image_clean)
+        edge=EdgeBridge(edge_secret_value,replay_store,svc.brain,TOOL_MAP,image_clean,public_jwk=edge_public_value)
         @app.post('/internal/keto/compute')
         async def edge_compute(req:Request):
             pieces=[];size=0
@@ -263,7 +264,7 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
     def protected_metadata():
         return {'resource':public_url+'/mcp','authorization_servers':([public_url] if bridge else ['https://login.microsoftonline.com/'+os.getenv('KETO_ENTRA_TENANT_ID','')+'/v2.0']),'scopes_supported':([SCOPE] if bridge else ['api://'+os.getenv('KETO_ENTRA_CLIENT_ID','')+'/user_impersonation']),'bearer_methods_supported':['header']}
     @app.get('/status')
-    def status():return {'service':'KETO Companion','version':VERSION,'transport':'HTTP + MCP','authentication_required':True,'medical_monitoring':False}
+    def status():return {'service':'KETO Companion','version':VERSION,'transport':'HTTP + MCP','authentication_required':True,'medical_monitoring':False,'source_commit':os.getenv('KETO_SOURCE_COMMIT',''),'edge_signature':'Ed25519' if edge_public_value else ('HMAC' if edge_secret_value else 'disabled')}
     @app.get('/')
     def home():return HTMLResponse((HERE/'static/index.html').read_text())
     @app.post('/api/login')
