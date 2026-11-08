@@ -1,0 +1,151 @@
+{
+  "source_commit": "4229ef74979f768148a074db22d78c9642d4b9d5",
+  "scope": "actual deployed client code and photo bytes in remote Chromium; synthetic API/local-storage adapters; no ownerMac browser and no real user profile",
+  "cases": [
+    {
+      "viewport": [
+        440,
+        956
+      ],
+      "large_dark": false,
+      "role": "admin",
+      "passed_interactions": [
+        "app_booted",
+        "developer_owner_only",
+        "palette_applied",
+        "image_link_dialog_fits",
+        "clipboard_image_has_preview",
+        "image_only_submit_allowed",
+        "remove_resets_required",
+        "drag_drop_has_preview",
+        "no_auto_media_send"
+      ],
+      "screen_count": 8,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_javascript_errors": 0,
+      "chat_scroll_height": 477.109375,
+      "failed_summary_checks": [
+        "overview_has_saved_records_text",
+        "missing_targets_are_explicitly_unknown"
+      ]
+    },
+    {
+      "viewport": [
+        375,
+        812
+      ],
+      "large_dark": false,
+      "role": "member",
+      "passed_interactions": [
+        "app_booted",
+        "developer_owner_only",
+        "palette_applied",
+        "image_link_dialog_fits",
+        "clipboard_image_has_preview",
+        "image_only_submit_allowed",
+        "remove_resets_required",
+        "drag_drop_has_preview",
+        "no_auto_media_send"
+      ],
+      "screen_count": 7,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_javascript_errors": 0,
+      "chat_scroll_height": 389.109375,
+      "failed_summary_checks": [
+        "overview_has_saved_records_text",
+        "missing_targets_are_explicitly_unknown"
+      ]
+    },
+    {
+      "viewport": [
+        440,
+        540
+      ],
+      "large_dark": true,
+      "role": "admin",
+      "passed_interactions": [
+        "app_booted",
+        "developer_owner_only",
+        "palette_applied",
+        "image_link_dialog_fits",
+        "clipboard_image_has_preview",
+        "image_only_submit_allowed",
+        "remove_resets_required",
+        "drag_drop_has_preview",
+        "no_auto_media_send"
+      ],
+      "screen_count": 8,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_javascript_errors": 0,
+      "chat_scroll_height": 191.75,
+      "failed_summary_checks": [
+        "overview_has_saved_records_text",
+        "missing_targets_are_explicitly_unknown"
+      ]
+    },
+    {
+      "viewport": [
+        956,
+        440
+      ],
+      "large_dark": false,
+      "role": "admin",
+      "passed_interactions": [
+        "app_booted",
+        "developer_owner_only",
+        "palette_applied",
+        "image_link_dialog_fits",
+        "clipboard_image_has_preview",
+        "image_only_submit_allowed",
+        "remove_resets_required",
+        "drag_drop_has_preview",
+        "no_auto_media_send"
+      ],
+      "screen_count": 8,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_javascript_errors": 0,
+      "chat_scroll_height": 95.109375,
+      "failed_summary_checks": [
+        "overview_has_saved_records_text",
+        "missing_targets_are_explicitly_unknown"
+      ]
+    },
+    {
+      "viewport": [
+        1280,
+        900
+      ],
+      "large_dark": false,
+      "role": "admin",
+      "passed_interactions": [
+        "app_booted",
+        "developer_owner_only",
+        "palette_applied",
+        "image_link_dialog_fits",
+        "clipboard_image_has_preview",
+        "image_only_submit_allowed",
+        "remove_resets_required",
+        "drag_drop_has_preview",
+        "no_auto_media_send"
+      ],
+      "screen_count": 8,
+      "horizontal_overflows": 0,
+      "composer_nav_overlaps": 0,
+      "uncaught_javascript_errors": 0,
+      "chat_scroll_height": 420.109375,
+      "failed_summary_checks": [
+        "overview_has_saved_records_text",
+        "missing_targets_are_explicitly_unknown"
+      ]
+    }
+  ],
+  "failed_assertion_count": 10,
+  "root_cause": "renderTranquilSummary was tested as an isolated helper but not called from actual renderState",
+  "fix_source": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+  "new_regression": "actual full state renderer updates overview instead of leaving an isolated tested helper unused",
+  "physical_iPhone": false
+}

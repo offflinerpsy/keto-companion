@@ -1,0 +1,408 @@
+{
+  "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+  "scope": "Actual deployed HTML/CSS/JS/photo in isolated Cloudflare Chromium; synthetic APIs/storage, no account/data/model access. Fixture first pass uses demo banner deliberately; separate actual personal-mode geometry below.",
+  "cases": [
+    {
+      "viewport": [
+        440,
+        956
+      ],
+      "large_dark": false,
+      "role": "admin",
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "developer_owner_only",
+          "passed": true
+        },
+        {
+          "name": "exact_source_palette",
+          "passed": true
+        },
+        {
+          "name": "overview_connected_to_actual_renderer",
+          "passed": true
+        },
+        {
+          "name": "saved_record_counts_not_fake_biometrics",
+          "passed": true
+        },
+        {
+          "name": "missing_targets_explicitly_unknown",
+          "passed": true
+        },
+        {
+          "name": "image_link_dialog_fits",
+          "passed": true
+        },
+        {
+          "name": "paste_has_preview",
+          "passed": true
+        },
+        {
+          "name": "image_only_draft_allowed",
+          "passed": true
+        },
+        {
+          "name": "removal_restores_required",
+          "passed": true
+        },
+        {
+          "name": "drop_has_preview",
+          "passed": true
+        },
+        {
+          "name": "pasted_photo_URL_offered_not_silently_fetched",
+          "passed": true
+        },
+        {
+          "name": "no_automatic_send",
+          "passed": true
+        },
+        {
+          "name": "overview_cleared_on_consent_revocation",
+          "passed": true
+        },
+        {
+          "name": "overview_restores_only_with_consent",
+          "passed": true
+        }
+      ],
+      "screens": 8,
+      "horizontal_overflow": 0,
+      "composer_nav_overlap": 0,
+      "uncaught_js_errors": 0
+    },
+    {
+      "viewport": [
+        375,
+        812
+      ],
+      "large_dark": false,
+      "role": "member",
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "developer_owner_only",
+          "passed": true
+        },
+        {
+          "name": "exact_source_palette",
+          "passed": true
+        },
+        {
+          "name": "overview_connected_to_actual_renderer",
+          "passed": true
+        },
+        {
+          "name": "saved_record_counts_not_fake_biometrics",
+          "passed": true
+        },
+        {
+          "name": "missing_targets_explicitly_unknown",
+          "passed": true
+        },
+        {
+          "name": "image_link_dialog_fits",
+          "passed": true
+        },
+        {
+          "name": "paste_has_preview",
+          "passed": true
+        },
+        {
+          "name": "image_only_draft_allowed",
+          "passed": true
+        },
+        {
+          "name": "removal_restores_required",
+          "passed": true
+        },
+        {
+          "name": "drop_has_preview",
+          "passed": true
+        },
+        {
+          "name": "pasted_photo_URL_offered_not_silently_fetched",
+          "passed": true
+        },
+        {
+          "name": "no_automatic_send",
+          "passed": true
+        },
+        {
+          "name": "overview_cleared_on_consent_revocation",
+          "passed": true
+        },
+        {
+          "name": "overview_restores_only_with_consent",
+          "passed": true
+        }
+      ],
+      "screens": 7,
+      "horizontal_overflow": 0,
+      "composer_nav_overlap": 0,
+      "uncaught_js_errors": 0
+    },
+    {
+      "viewport": [
+        440,
+        540
+      ],
+      "large_dark": true,
+      "role": "admin",
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "developer_owner_only",
+          "passed": true
+        },
+        {
+          "name": "exact_source_palette",
+          "passed": true
+        },
+        {
+          "name": "overview_connected_to_actual_renderer",
+          "passed": true
+        },
+        {
+          "name": "saved_record_counts_not_fake_biometrics",
+          "passed": true
+        },
+        {
+          "name": "missing_targets_explicitly_unknown",
+          "passed": true
+        },
+        {
+          "name": "image_link_dialog_fits",
+          "passed": true
+        },
+        {
+          "name": "paste_has_preview",
+          "passed": true
+        },
+        {
+          "name": "image_only_draft_allowed",
+          "passed": true
+        },
+        {
+          "name": "removal_restores_required",
+          "passed": true
+        },
+        {
+          "name": "drop_has_preview",
+          "passed": true
+        },
+        {
+          "name": "pasted_photo_URL_offered_not_silently_fetched",
+          "passed": true
+        },
+        {
+          "name": "no_automatic_send",
+          "passed": true
+        },
+        {
+          "name": "overview_cleared_on_consent_revocation",
+          "passed": true
+        },
+        {
+          "name": "overview_restores_only_with_consent",
+          "passed": true
+        }
+      ],
+      "screens": 8,
+      "horizontal_overflow": 0,
+      "composer_nav_overlap": 0,
+      "uncaught_js_errors": 0
+    },
+    {
+      "viewport": [
+        956,
+        440
+      ],
+      "large_dark": false,
+      "role": "admin",
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "developer_owner_only",
+          "passed": true
+        },
+        {
+          "name": "exact_source_palette",
+          "passed": true
+        },
+        {
+          "name": "overview_connected_to_actual_renderer",
+          "passed": true
+        },
+        {
+          "name": "saved_record_counts_not_fake_biometrics",
+          "passed": true
+        },
+        {
+          "name": "missing_targets_explicitly_unknown",
+          "passed": true
+        },
+        {
+          "name": "image_link_dialog_fits",
+          "passed": true
+        },
+        {
+          "name": "paste_has_preview",
+          "passed": true
+        },
+        {
+          "name": "image_only_draft_allowed",
+          "passed": true
+        },
+        {
+          "name": "removal_restores_required",
+          "passed": true
+        },
+        {
+          "name": "drop_has_preview",
+          "passed": true
+        },
+        {
+          "name": "pasted_photo_URL_offered_not_silently_fetched",
+          "passed": true
+        },
+        {
+          "name": "no_automatic_send",
+          "passed": true
+        },
+        {
+          "name": "overview_cleared_on_consent_revocation",
+          "passed": true
+        },
+        {
+          "name": "overview_restores_only_with_consent",
+          "passed": true
+        }
+      ],
+      "screens": 8,
+      "horizontal_overflow": 0,
+      "composer_nav_overlap": 0,
+      "uncaught_js_errors": 0
+    },
+    {
+      "viewport": [
+        1280,
+        900
+      ],
+      "large_dark": false,
+      "role": "admin",
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "developer_owner_only",
+          "passed": true
+        },
+        {
+          "name": "exact_source_palette",
+          "passed": true
+        },
+        {
+          "name": "overview_connected_to_actual_renderer",
+          "passed": true
+        },
+        {
+          "name": "saved_record_counts_not_fake_biometrics",
+          "passed": true
+        },
+        {
+          "name": "missing_targets_explicitly_unknown",
+          "passed": true
+        },
+        {
+          "name": "image_link_dialog_fits",
+          "passed": true
+        },
+        {
+          "name": "paste_has_preview",
+          "passed": true
+        },
+        {
+          "name": "image_only_draft_allowed",
+          "passed": true
+        },
+        {
+          "name": "removal_restores_required",
+          "passed": true
+        },
+        {
+          "name": "drop_has_preview",
+          "passed": true
+        },
+        {
+          "name": "pasted_photo_URL_offered_not_silently_fetched",
+          "passed": true
+        },
+        {
+          "name": "no_automatic_send",
+          "passed": true
+        },
+        {
+          "name": "overview_cleared_on_consent_revocation",
+          "passed": true
+        },
+        {
+          "name": "overview_restores_only_with_consent",
+          "passed": true
+        }
+      ],
+      "screens": 8,
+      "horizontal_overflow": 0,
+      "composer_nav_overlap": 0,
+      "uncaught_js_errors": 0
+    }
+  ],
+  "total_interaction_checks": 75,
+  "screen_layouts": 39,
+  "real_personal_mode_geometry": [
+    {
+      "viewport": [
+        956,
+        440
+      ],
+      "large_dark": false,
+      "message_scroll_height": 95.109375
+    },
+    {
+      "viewport": [
+        440,
+        540
+      ],
+      "large_dark": true,
+      "message_scroll_height": 191.75
+    },
+    {
+      "viewport": [
+        440,
+        956
+      ],
+      "large_dark": false,
+      "message_scroll_height": 477.109375
+    }
+  ],
+  "summary_previous_failed_checks_resolved": true,
+  "physical_iPhone_Safari": false,
+  "image_recognition_or_live_user_flow": false,
+  "screenshot_captured": "Current Menu with actual photo and synthetic data; not a clinical view"
+}

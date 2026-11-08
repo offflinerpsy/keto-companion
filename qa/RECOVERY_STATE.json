@@ -1,15 +1,15 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T16:39:23.465411+00:00",
+  "updated_at": "2026-11-08T18:11:25.244541+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
-  "version": "0.5.0-guided-pilot",
+  "version": "0.7.1-tranquil-dev-pilot",
   "active_task": {
     "id": "CF-DEV-MEDIA-08",
     "github_issue": 16,
-    "stage": "TranquilDawn_UI_and_existing_runner_release",
-    "writer_pid": 99163,
-    "source_baseline": "ef36b97613e1b06335faf973c3d8deebf56ec496",
-    "source_task": "qa/TRANQUIL_DAWN_TASK.md"
+    "stage": "final_pinned_promotion_no_new_runtime",
+    "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+    "last_verified_build": "d57f38b9-bb0b-4c88-98c7-f181d463da74",
+    "next_action": "One normal pinned native Cloudflare build of final pin/docs checkpoint; accept existing exact image only, record final receipt, mergePR17. Do not start agents or rebuild images."
   },
   "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
   "next_task": null,
@@ -38,7 +38,7 @@
   },
   "operating_rules": "AGENTS.md",
   "platform_failure_exact_cause": "not determined; no server-side chat telemetry",
-  "source_version": "0.7.0-dev-media-pilot",
+  "source_version": "0.7.1-tranquil-dev-pilot",
   "history": [
     {
       "previous_last_completed": {

@@ -1,6 +1,6 @@
-# Developer and media pilot · 0.7.0
+# Developer and media pilot · 0.7.1
 
-CF-DEV-MEDIA-08 is a source implementation. Local synthetic checks do not establish a deployed container, real Sol call, family release or device acceptance. The parent owns provisioning, image validation and release. Earlier staging receipts describe earlier builds.
+Current private staging implements the bounded developer/media pilot and Tranquil Dawn design. Actual full source CI and isolated candidate acceptance run in Cloudflare, independent of GitHub Actions. The real runtime image and source baseline are pinned; see `../evidence/TRANQUIL_CLOUDFLARE_GATE.json`. Real Sol-generated patch/vision checks were performed earlier with synthetic inputs and are separately scoped; complete owner browser workflow and physical-device/clinical acceptance remain unverified. No autonomous publication endpoint exists.
 
 The existing owner's More entry and explicit Nutrition / Development selector open a separate technical form. Nothing is inferred from nutrition conversation or imported source content. The owner checks “technical description only” and approves the exact text before one Sol high request. The request contains that text, a baseline and three permitted UI source files; its state is null. No profile, diary, photo, source attachment or chat history is included. A person can still type personal information into the technical box: the checkbox is an explicit attestation, not an automatic personal-data classifier.
 
@@ -34,3 +34,9 @@ Native Docker-in-Docker dependency installation uses the documented host network
 Final platform boundary: Builds executes the full trusted regression and builds/pushes the immutable image; its nested Docker runtime lacks cgroups, so candidate acceptance is executed in the real Cloudflare Container through a short-lived token-gated synthetic service probe. The main site receives the service binding only after that probe passes and is deleted. The image and candidate runtime have no nutrition data/secrets or internet access. A failure leaves developer mode unavailable; never run generated code in the main Worker as a fallback.
 
 The direct-image URL loader is a scrollable top-layer dialog rather than an expanding chat form: this prevents obstruction of navigation on short/narrow screens. Cancellation/session reset rejects late image responses.
+
+## Final recovery and release rule
+
+The prior conversation ended while an already-started Cloudflare release completed successfully. Recovery inspected that build and live runner pins rather than recreating resources. The missing overview render hook was fixed and all75actual-client synthetic interactions across39screen layouts now pass. Source DESIGN.md retains all nonblank lines of the supplied reference; accessibility and existing functionality adaptations are explicit in `../design/IMPLEMENTATION.md`.
+
+Default releases run the mandatory full trusted Cloudflare suite and then the pinned-existing-runtime acceptance. Explicit new-image rollout flags are removed after reviewed runtime upgrades. A future source baseline mismatch must stop for an authorized image release; it is not grounds for an unbounded rebuild/retry loop.

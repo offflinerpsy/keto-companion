@@ -1,0 +1,77 @@
+{
+  "index.html": {
+    "status": 200,
+    "mime": "text/html; charset=utf-8",
+    "source_matches": true,
+    "bytes": 42493
+  },
+  "app.bundle.js": {
+    "status": 200,
+    "mime": "text/javascript; charset=utf-8",
+    "source_matches": true,
+    "bytes": 548235
+  },
+  "style.css": {
+    "status": 200,
+    "mime": "text/css; charset=utf-8",
+    "source_matches": true,
+    "bytes": 33738
+  },
+  "favicon.svg": {
+    "status": 200,
+    "mime": "image/svg+xml",
+    "source_matches": true,
+    "bytes": 791
+  },
+  "favicon.ico": {
+    "status": 200,
+    "mime": "image/x-icon",
+    "source_matches": true,
+    "bytes": 5960
+  },
+  "favicon-16.png": {
+    "status": 200,
+    "mime": "image/png",
+    "source_matches": true,
+    "bytes": 811
+  },
+  "icon-180.png": {
+    "status": 200,
+    "mime": "image/png",
+    "source_matches": true,
+    "bytes": 12322
+  },
+  "tranquil-dawn.webp": {
+    "status": 200,
+    "mime": "image/webp",
+    "source_matches": true,
+    "bytes": 14148
+  },
+  "manifest.webmanifest": {
+    "status": 200,
+    "mime": "application/manifest+json",
+    "source_matches": true,
+    "bytes": 415
+  },
+  "health": {
+    "version": "0.7.1-tranquil-dev-pilot",
+    "build": "mobile-chat",
+    "capabilities": {
+      "firebase_google": true,
+      "direct_google": false,
+      "storage": true,
+      "compute": true
+    }
+  },
+  "private_session_unauth_http": 401,
+  "developer_unauth_http": 401,
+  "azure_status": {
+    "service": "KETO Companion",
+    "version": "0.2.1",
+    "transport": "HTTP + MCP",
+    "authentication_required": true,
+    "medical_monitoring": false,
+    "source_commit": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
+    "edge_signature": "Ed25519"
+  }
+}

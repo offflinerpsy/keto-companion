@@ -1,12 +1,50 @@
 {
-  "status": "passed",
-  "latest_verified_build": "ea73e12b-ba11-440d-84fe-4c7f5db4731f",
-  "source_commit": "726b2cbbbdb9a4598e1c8119631f11c04d70b63d",
-  "python_passed": 522,
-  "node_passed": 145,
+  "status": "passed_exact_source_full_ci_and_real_cloud_container",
+  "latest_verified_build": "d57f38b9-bb0b-4c88-98c7-f181d463da74",
+  "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+  "python_passed": 524,
+  "node_passed": 146,
   "fixed_gate_stages": 16,
-  "seconds": 174.96,
-  "isolated_candidate_runtime": "passed4stages; see CF_DEV_CLOUD_RUNTIME_ACCEPTANCE.json",
-  "publication": "next separate verified promotion",
-  "GitHub_Actions_required": false
+  "seconds": 216.84,
+  "GitHub_Actions_required": false,
+  "actual_cloud_container_acceptance": true,
+  "candidate_fixed_stages": [
+    {
+      "name": "syntax",
+      "exit_code": 0
+    },
+    {
+      "name": "build",
+      "exit_code": 0
+    },
+    {
+      "name": "product",
+      "exit_code": 0,
+      "passed_count": 14
+    },
+    {
+      "name": "python",
+      "exit_code": 0,
+      "passed_count": 17
+    }
+  ],
+  "candidate_application": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+  "baseline": "745f5a9df62804c5acd481bdbe8028eaebcc99c56dc45069f502d6c38fa20ad1",
+  "image_digest": "sha256:7da7876c0ebda038d68be79c803ab68a4d35de555147ff8515604dcfc2c99e2d",
+  "max_instances": 1,
+  "internet_access": false,
+  "temporary_probe_deleted": true,
+  "live_runner_bindings_verified": [
+    "plain_text",
+    "plain_text",
+    "durable_object_namespace"
+  ],
+  "container_environment_variables": 0,
+  "container_authorized_keys": 0,
+  "published_app_version": "6276eefc590e41998db152843daa3f1d",
+  "published_main_module_sha256": "4e59920d178db5b78ea5aeee3cf62b4d09e714e0cf5d808634c018ed138d7a68",
+  "default_build_trigger_restored": "python scripts/cloudflare_ci.py -> KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+  "old_image_rollout_flag_removed": true,
+  "operator_pin_unit_tests": 3,
+  "next_gate": "One final normal pinned promotion on this docs/pin checkpoint, no new image/model/agents"
 }

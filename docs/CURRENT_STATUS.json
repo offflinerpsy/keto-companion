@@ -1,13 +1,16 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T16:49:52.365729+00:00",
+  "updated_at": "2026-11-08T18:11:25.244541+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "CF-DEV-MEDIA-08",
     "github_issue": 16,
-    "stage": "TranquilDawn_source_complete_full_release_gates"
+    "stage": "final_pinned_promotion_no_new_runtime",
+    "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+    "last_verified_build": "d57f38b9-bb0b-4c88-98c7-f181d463da74",
+    "next_action": "One normal pinned native Cloudflare build of final pin/docs checkpoint; accept existing exact image only, record final receipt, mergePR17. Do not start agents or rebuild images."
   },
   "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
   "next_task": null,
@@ -16,16 +19,18 @@
     "compute_connected": true,
     "google_real_user_login_verified": false,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "e3f648d5313b68202336cda775ff7279556a2569",
+    "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
     "http_checks_passed": 24,
     "synthetic_e2e_checks": 20,
     "synthetic_cleanup_verified": true,
     "mobile_deployed": true,
     "mobile_backend_source_commit": "74e5e0fc0410b3d4fec54c144348e2300f420783",
-    "backend_source_commit": "e3f648d5313b68202336cda775ff7279556a2569",
+    "backend_source_commit": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
     "kitchen_deployed": true,
     "audit_fixes_deployed": true,
-    "family_release_acceptance": "not_complete"
+    "family_release_acceptance": "physical_device_and_real_owner_flow_pending",
+    "developer_preview_runner_connected": true,
+    "design_applied": "Tranquil Dawn"
   },
   "production": {
     "saas_deployed": false,
@@ -58,7 +63,7 @@
     "checkpoint_commit": "33cfab4e9991e4c8c15877934dcc8f43f96cb741",
     "checkpoint_issue": 1,
     "staging_issue": 2,
-    "ci_status": "startup_failure_before_tests",
+    "ci_status": "native_cloudflare_full_gate_passed_GitHub_Actions_not_required",
     "ci_run_ids": [
       42410047614,
       42410148697
@@ -74,7 +79,8 @@
     "onboarding_merge_commit": "c1260f1e1d9cc3ce60f8c071b58c5f4216c579fe",
     "kitchen_pr": 12,
     "audit_pr": 14,
-    "audit_merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0"
+    "audit_merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0",
+    "active_release_pr": 17
   },
   "mobile_acceptance": "Owner previously reported dictation works; current complete real-device regression not performed by agent.",
   "mobile_source": {
