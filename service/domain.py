@@ -8,6 +8,8 @@ from .store import Conflict
 from .brain import BrainUnavailable
 from .mobile import MobileService,mobile_init,compact_topics,topic
 from . import planning
+from .kitchen import KitchenService, init as kitchen_init, invalidate as kitchen_invalidate
+from .recipe_brain import RecipeDesigner
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'library/skills/keto-companion/scripts'))
 import keto_core as k
@@ -58,15 +60,18 @@ def literal_guard(message):
     if re.search(r'(сильная боль в груди|сильно болит грудь|задыхаюсь|теряю сознание|не могу дышать|непрекращающаяся рвота)',t) and not re.search(r'(что делать если|если бы|нет сильной|не задыхаюсь|это цитата)',t):return 'urgent'
     return None
 
-class Service(MobileService,planning.PlanningService):
-    def __init__(self,store,brain,transcriber=None):self.store=store;self.brain=brain;self.transcriber=transcriber;self.base=k.load_catalog(ROOT/'library/skills/keto-menu/data')
+class Service(KitchenService,MobileService,planning.PlanningService):
+    def __init__(self,store,brain,transcriber=None,recipe_designer=None):self.store=store;self.brain=brain;self.transcriber=transcriber;self.recipe_designer=recipe_designer or RecipeDesigner();self.base=k.load_catalog(ROOT/'library/skills/keto-menu/data')
     def load(self,subject,kind='personal'):
         d,v=self.store.read(subject)
         if d is None:d=new_document(subject,kind)
         if d['core']['owner_account_id']!=subject or d['core']['subject_id']!=subject:raise PermissionError('Профиль другого пользователя')
-        mobile_init(d)
+        mobile_init(d);kitchen_init(d)
         return d,v
-    def save(self,subject,d,v):compact_topics(d);return self.store.write(subject,d,v)
+    def save(self,subject,d,v):
+        compact_topics(d)
+        if len(k.canonical(d).encode())>1400000:raise InputError('Личное состояние слишком велико; экспортируйте и удалите ненужные записи')
+        return self.store.write(subject,d,v)
     def snapshot(self,d):
         mobile_init(d)
         p=d['core']['profile'];screen=k.screen_profile(p)
@@ -74,13 +79,13 @@ class Service(MobileService,planning.PlanningService):
           'processing_consent':d['processing_consent'],'screening':screen,'holds':d['holds'],
           'diary':d['core']['diary'][-60:],'plans':list(d['core']['plans'].values())[-8:],
           'checklists':d['core']['checklists'],'pending':[dict(x,expired=x['expires_at']<=time.time()) for x in d['pending'].values()],
-          'chat':topic(d,d['active_thread'])['messages'][-60:],'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'mobile_version':'0.5.0-guided-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
+          'chat':topic(d,d['active_thread'])['messages'][-60:],'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'kitchen':self.kitchen_snapshot(d),'mobile_version':'0.6.1-kitchen-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
           'capabilities':{'model':'Azure GPT-6.1 Terra','native_voice':'ChatGPT host only; not Terra audio',
           'storage':'Azure private Blob' if os.getenv('KETO_STORAGE_URL') else 'local SQLite',
           'google_sync':'explicit exports through connected Google tools; no automatic two-way sync',
           'background_monitoring':False,'self_modification':'validated preferences only, never arbitrary code'},'usage':d['usage']}
     def opened(self,subject,kind='personal'):
-        d,_=self.load(subject,kind);return {'state':self.snapshot(d),'message':HELP}
+        d,_=self.load(subject,kind);return {'state':self.snapshot(d),'message':HELP,**({'shopping':self.kitchen_shopping(d,list(d['core']['plans'].values())[-1])} if d['core']['plans'] else {})}
     def consent(self,subject,processing,storage,health,confirmed,kind='personal'):
         if confirmed is not True:raise PermissionError('Нужно согласие самой пользовательницы')
         for x in (processing,storage,health):
@@ -125,7 +130,9 @@ class Service(MobileService,planning.PlanningService):
         if not storage_consent(d):raise PermissionError('Сначала согласие на сохранение профиля и дневника')
         if event_type=='plan.accept':planning.ensure_current(d)
         if event_type=='plan.accept' and d['holds']:raise k.SafetyError('Сохранение меню приостановлено из-за нового ограничения')
-        if event_type=='guidance.setup':
+        if event_type.startswith('kitchen.'):
+            self.kitchen_validate_change(d,event_type[8:],payload)
+        elif event_type=='guidance.setup':
             planning.canonical_setup_valid(payload,k)
         elif event_type=='guidance.targets':
             current=planning.preview(d,k)
@@ -162,6 +169,9 @@ class Service(MobileService,planning.PlanningService):
         proposal={'id':pid,'type':event_type,'payload':payload,'base_revision':d['revision'],'expires_at':time.time()+1800,'status':'pending'}
         d['pending']={a:b for a,b in d['pending'].items() if b['expires_at']>time.time() or b['type']=='profile.update'}
         if len(d['pending'])>=12:raise InputError('Сначала подтвердите или отклоните предыдущие изменения')
+        if event_type.startswith('kitchen.'):
+            preview=self.kitchen_proposal_preview(d,event_type[8:],payload)
+            if preview:proposal['preview']=preview
         d['pending'][pid]=proposal;return proposal
     def propose(self,subject,event_type,payload,expected_revision,kind='personal'):
         d,v=self.load(subject,kind)
@@ -179,7 +189,9 @@ class Service(MobileService,planning.PlanningService):
         if expected_revision!=d['revision'] or p['base_revision']!=d['revision']:raise Conflict('Профиль изменился. Подготовьте предложение заново.')
         self._validate_on_apply(d,p)
         previous_plans=copy.deepcopy(d['core']['plans'])
-        if p['type']=='guidance.setup':
+        if p['type'].startswith('kitchen.'):
+            self.kitchen_apply_change(d,p['type'][8:],p['payload'],proposal_id)
+        elif p['type']=='guidance.setup':
             value=planning.canonical_setup_valid(p['payload'],k);d['guidance_choices']=value.pop('choices');d['core']=k.apply_event(d['core'],{'event_id':'event_'+proposal_id,'type':'profile.update','payload':value,'confirmed':True},d['core']['state_revision'],subject,k.merge_personal_catalog(self.base,d['core']))
         elif p['type']=='guidance.targets':
             current=planning.preview(d,k);targets=dict(current['candidate'],status='agreed',agreed_at=k.utc_now(),basis_note='starter-v1; подтверждено пользователем; не назначение и не согласование специалистом')
@@ -199,6 +211,7 @@ class Service(MobileService,planning.PlanningService):
         else:
             event={'event_id':'event_'+proposal_id,'type':p['type'],'payload':p['payload'],'confirmed':True}
             cat=k.merge_personal_catalog(self.base,d['core']);d['core']=k.apply_event(d['core'],event,d['core']['state_revision'],subject,cat)
+        if p['type'] in ('profile.update','settings.update','settings.rollback','configuration','targets.update','guidance.setup','guidance.targets'):kitchen_invalidate(d)
         if p['type']=='targets.update':d['targets_provenance']={'source':'manual','label':'изменено пользователем','applied_at':k.utc_now()}
         if p['type']=='profile.update' and set(p['payload'])<={'display_name'}:
             for pid,old in previous_plans.items():
@@ -228,13 +241,13 @@ class Service(MobileService,planning.PlanningService):
         d,_=self.load(subject,kind)
         if d['revision']==0:raise PermissionError('Нет сохранённого личного состояния')
         if format!='json':planning.ensure_current(d)
-        if format=='json':return {'filename':'keto-personal-export.json','mime':'application/json','text':json.dumps({'schema':'keto-personal-export-v2','created_at':k.utc_now(),'core':d['core'],'ui':d['ui']},ensure_ascii=False,indent=2)}
+        if format=='json':return {'filename':'keto-personal-export.json','mime':'application/json','text':json.dumps({'schema':'keto-personal-export-v2','created_at':k.utc_now(),'core':d['core'],'ui':d['ui'],'kitchen':d.get('kitchen',{}),'topics':d['topics']},ensure_ascii=False,indent=2)}
         plans=list(d['core']['plans'].values())
         if not plans:raise InputError('Сначала выберите и сохраните меню')
         if d['holds'] or plans[-1].get('status')!='user_accepted' or plans[-1].get('profile_hash')!=k.digest(d['core']['profile']):raise k.SafetyError('Меню устарело или заблокировано; сначала пересчёт. Личную копию JSON можно получить.')
         if format=='pdf':
             from .mobile_exports import menu_pdf
-            return menu_pdf(plans[-1],k.shopping_list(plans[-1]),ROOT)
+            return menu_pdf(plans[-1],self.kitchen_shopping(d,plans[-1]),ROOT)
         if format=='csv':return {'filename':'keto-menu.csv','mime':'text/csv;charset=utf-8','text':k.export_plan_csv(plans[-1])}
         if format=='html':
             plan=plans[-1];rows=[]
@@ -257,7 +270,11 @@ class Service(MobileService,planning.PlanningService):
         return self.propose(subject,'plan.accept',plan,expected_revision,kind)
     def chat(self,subject,message,request_id,kind='personal',image=None,source=None,thread_id=None):
         reservation={}
-        try:return self._chat(subject,message,request_id,kind,image,reservation,source,thread_id)
+        try:
+            if image is None and source is None and isinstance(message,str) and not literal_guard(message):
+                result=self.kitchen_chat(subject,message,request_id,kind,thread_id)
+                if result is not None:return result
+            return self._chat(subject,message,request_id,kind,image,reservation,source,thread_id)
         except (InputError,k.KetoError,ValueError,Conflict):
             if reservation:
                 # Only the caller that committed this reservation may mark it failed.
@@ -270,6 +287,7 @@ class Service(MobileService,planning.PlanningService):
                     except Conflict:continue
             raise
     def _chat(self,subject,message,request_id,kind='personal',image=None,reservation=None,source=None,thread_id=None):
+        chat_started=time.monotonic()
         message=text(message,6000);request_id=text(request_id,100)
         if not re.fullmatch(r'[A-Za-z0-9_-]{8,100}',request_id):raise InputError('Неверный request_id')
         if literal_guard(message)=='urgent':
@@ -324,8 +342,9 @@ class Service(MobileService,planning.PlanningService):
             parsed={'intent':'safety','safety_signals':[literal],'reply_ru':'','changes':[],'query':'','days':1,'diary_note':''};called=False
         else:
             ctx={'screening':k.screen_profile(d['core']['profile']),'holds':d['holds'],'ui':d['ui'],
-                'settings':d['core']['profile']['settings'],'screening_fields':list(k.SCREEN_FIELDS),'confirmed_preferences':{'allergies':d['core']['profile']['allergies'],'goal':d['core']['profile'].get('goal')},'food_catalog':[{'id':f['food_id'],'name':f['name_ru']} for f in k.merge_personal_catalog(self.base,d['core'])['foods'].values()],'recipe_choices':topic(d,tid).get('choices',[]),'recent_chat':[{'role':x['role'],'text':x['text'][:700]} for x in topic(d,tid)['messages'][-8:]],
+                'settings':d['core']['profile']['settings'],'screening_fields':list(k.SCREEN_FIELDS),'confirmed_preferences':{'allergies':d['core']['profile']['allergies'],'goal':d['core']['profile'].get('goal')},'food_catalog':[{'id':f['food_id'],'name':f['name_ru']} for f in k.merge_personal_catalog(self.base,d['core'])['foods'].values()],'recipe_choices':topic(d,tid).get('choices',[]),'recent_chat':[{'role':x['role'],'text':x['text'][:700]} for x in self.kitchen_recent_chat(d,tid)],
                 'capabilities':{'saved_diary':True,'google_connected':False,'dictation':'speech is transcribed into an editable draft, not auto-sent','topics':True,'pdf_export':True,'calendar_ics_export':True,'native_live_voice':False,'code_self_modification':False}}
+            ctx.update(self.kitchen_context(d,message,tid))
             if source is not None:ctx['untrusted_source']=source
             try:parsed=self.brain.infer(message,ctx,image);called=True
             except BrainUnavailable:
@@ -352,6 +371,19 @@ class Service(MobileService,planning.PlanningService):
             if intent=='guidance' and guide['candidate']:
                 extra['guidance_preview']=guide;reply='Предварительно: '+str(guide['candidate']['energy_min_kcal'])+'–'+str(guide['candidate']['energy_max_kcal'])+' ккал в день по сохранённым данным. Это не назначение; откройте расчёт и подтвердите отдельно.'
             else:reply='Сначала '+{'consent':'дайте свои разрешения','about':'укажите исходные данные','restrictions':'завершите ограничения','targets':'посмотрите и подтвердите ориентиры','ready':'откройте ваш план питания'}[stage]+'. Рецепты доступны отдельной кнопкой.'
+        elif intent=='kitchen':
+            spec={}
+            for change in parsed.get('changes',[]):
+                if change.get('key')=='kitchen.spec':spec=json.loads(change['json_value'])
+            products=self.kitchen(subject,'parse',query=message,thread_id=tid,kind=kind)
+            if products['questions']:
+                reply=' '.join(q['text'] for q in products['questions']);extra['product_questions']=products['questions']
+            else:
+                if products['pantry']:spec['pantry']=products['pantry']
+                elapsed=time.monotonic()-chat_started
+                extra.update(self.kitchen(subject,'generate',spec=spec,request_id=request_id,thread_id=tid,kind=kind,recipe_timeout=max(0,50-elapsed)))
+                reply=extra.pop('message',None) or ' '.join(str(q) for q in extra.get('questions',[])) or 'Подходящих блюд пока нет; ограничения сохранены.';extra.pop('state',None)
+                d,v=self.load(subject,kind)
         elif intent=='preferences':
             ui={};sett={};unsupported=[]
             for change in parsed['changes']:
@@ -432,8 +464,16 @@ class Service(MobileService,planning.PlanningService):
         elif intent=='feature_request':
             extra['proposal']=self._prepare(d,'feature.request',{'description':message[:1500]});reply='Это новая функция, а не безопасная настройка. Могу сохранить пожелание для разработки. Сейчас код и разрешения не изменены.'
         else:reply=parsed['reply_ru'] or 'Уточните, пожалуйста, задачу: подобрать еду, записать день или настроить интерфейс?'
-        usage=parsed.get('_usage',{})
-        d['usage']['input_tokens']+=int(usage.get('input_tokens',0));d['usage']['output_tokens']+=int(usage.get('output_tokens',0))
+        usage=dict(parsed.get('_usage',{}))
+        intent_usage=dict(usage)
+        extra['model_roles']=[{'role':'intent','deployment':parsed.get('_deployment',getattr(self.brain,'deployment','unknown')),'attempted':called,**intent_usage}]+extra.get('model_roles',[])
+        recipe_usage=extra.pop('model_usage',{})
+        called=called or extra.pop('model_called',False)
+        for key in ('input_tokens','output_tokens'):usage[key]=int(usage.get(key,0))+int(recipe_usage.get(key,0))
+        role=d['usage'].setdefault('roles',{}).setdefault('intent',{'calls':0,'input_tokens':0,'output_tokens':0})
+        role['calls']+=int(called)
+        for key in ('input_tokens','output_tokens'):role[key]+=int(intent_usage.get(key,0))
+        d['usage']['input_tokens']+=int(intent_usage.get('input_tokens',0));d['usage']['output_tokens']+=int(intent_usage.get('output_tokens',0))
         now=k.utc_now();topic(d,tid)['messages']+= [{'role':'user','text':message,'at':now}, {'role':'assistant','text':reply,'at':now,'request_id':request_id,'request_hash':request_hash}]
         topic(d,tid)['messages']=topic(d,tid)['messages'][-60:]
         d['chat']=copy.deepcopy(topic(d,'main')['messages'])

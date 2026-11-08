@@ -140,7 +140,7 @@ def test_tools_types(client):
 def rpc(c,method,params={}):return c.post('/mcp',headers={'Authorization':'Bearer '+KEY},json={'jsonrpc':'2.0','id':1,'method':method,'params':params})
 def test_mcp_initialize(client):assert rpc(client,'initialize',{'protocolVersion':'2025-11-25'}).json()['result']['serverInfo']['version']=='0.2.1'
 def test_mcp_tools(client):
- ts=rpc(client,'tools/list').json()['result']['tools'];assert len(ts)==12;assert next(t for t in ts if t['name']=='keto_apply_proposal')['_meta']['ui']['visibility']==['app']
+ ts=rpc(client,'tools/list').json()['result']['tools'];assert len(ts)==13;assert any(t['name']=='keto_kitchen' and not t['annotations']['readOnlyHint'] for t in ts);assert next(t for t in ts if t['name']=='keto_apply_proposal')['_meta']['ui']['visibility']==['app']
 def test_mcp_open(client):assert rpc(client,'tools/call',{'name':'keto_open','arguments':{}}).json()['result']['structuredContent']['state']['revision']==0
 
 def test_mcp_no_cookie_auth(client):login(client);assert client.post('/mcp',json={}).status_code==401

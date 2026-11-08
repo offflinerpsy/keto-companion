@@ -1,0 +1,25 @@
+{
+  "index.html": {
+    "status": 200,
+    "matches_source": true
+  },
+  "app.bundle.js": {
+    "status": 200,
+    "matches_source": true
+  },
+  "style.css": {
+    "status": 200,
+    "matches_source": true
+  },
+  "health": {
+    "version": "0.6.0-kitchen-pilot",
+    "build": "mobile-chat",
+    "capabilities": {
+      "firebase_google": true,
+      "direct_google": false,
+      "storage": true,
+      "compute": true
+    }
+  },
+  "unauthenticated_session_status": 401
+}

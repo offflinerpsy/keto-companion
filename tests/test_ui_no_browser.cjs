@@ -10,9 +10,11 @@ class Element {
   insertAdjacentElement(){} closest(){return null}
 }
 const nodes={};const document={body:new Element('body'),getElementById(id){return nodes[id]??=new Element()},createElement(tag){return new Element(tag)},querySelectorAll(){return []},querySelector(){return null},activeElement:null};
+const kitchenModule=fs.readFileSync('cloudflare-saas/public/kitchen-ui.js','utf8').replace(/^export /gm,'');
 const source=fs.readFileSync('service/static/app.js','utf8').replace(/^import .*;\n/gm,'').split("$('microsoft-login').onclick=")[0];
 const context={document,window:{},Intl,Date,setTimeout,clearTimeout,console};vm.createContext(context);
-vm.runInContext(source+`\nglobalThis.api={setState,renderPlan,renderProposals,openRecipe,clearScreen,readable,numberRu,foodState,call};`,context);
+vm.runInContext(kitchenModule+'\n'+source+`
+const kitchen=setupKitchen({$,el,call,getState:()=>state,accept,run,notify,setView,epoch:()=>screenEpoch});\nglobalThis.api={setState,renderPlan,renderProposals,openRecipe,clearScreen,readable,numberRu,foodState,call};`,context);
 const api=context.api;
 function state(owner,opts={}){return {version:'0.2.0',revision:1,subject_kind:'demo',profile:{owner_account_id:owner,profile_revision:1,consent:{storage:true,health_data:true},settings:{},targets:null},ui:{theme:'dark',text_size:'large',density:'comfortable',simple_mode:false,show_nutrition:true},processing_consent:true,screening:{can_plan:false},holds:[],diary:[],plans:[],pending:[],chat:[],ui_history:[],catalog:{recipes:72},...opts};}
 const plan={status:'user_accepted',profile_revision:1,days:[{date:'2026-11-08',meals:[{name_ru:'Тестовое блюдо',ingredients:[{name_ru:'Яйцо',grams_edible:0.5,state:'raw'}]}]}]};

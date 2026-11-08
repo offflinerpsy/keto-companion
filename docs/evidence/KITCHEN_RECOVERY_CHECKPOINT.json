@@ -1,0 +1,20 @@
+{
+  "task": "KETO-KITCHEN-06",
+  "recovered_at": "2026-11-08T11:54:56.457802+00:00",
+  "prior_final_suite": {
+    "python_passed": 470,
+    "python_skip": 1,
+    "node_passed": 88
+  },
+  "previous_own_processes": "all stopped",
+  "new_agents_started": false,
+  "cause_known": "Previous response ended before source commit/release; no background task remained. Exact chat infrastructure failure cannot be established from workspace logs.",
+  "concrete_acceptance_fixes": [
+    "Do not parse raw-state adjective сырой/сырая as cheese",
+    "Respect explicit count of extra products in kitchen chat",
+    "Yogurt-labelled method requires actual yoghurt",
+    "Explicitly describe oil already counted in recipe",
+    "Accessible stepper labels use field names"
+  ],
+  "next_gate": "Commit verified source, independent isolated UI QA and cloud deployment; no architecture expansion"
+}

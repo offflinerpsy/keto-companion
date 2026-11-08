@@ -1,0 +1,103 @@
+{
+  "checked": "2026-11-08",
+  "verified_food_file": "qa/KITCHEN_VERIFIED_FOODS.json",
+  "source": "USDA official FoodDataCentral JSON;2full records+5previously fetched search nutrient arrays; no further API calls after429",
+  "raw_evidence": [
+    {
+      "id": 171077,
+      "raw_file": "qa/fdc-kitchen-171077.json",
+      "sha256": "e8bb999081b23fd43c8e8a7f41623d140825f0a11e443e7b9a1b75df865ea99a",
+      "nutrient_record": "full food"
+    },
+    {
+      "id": 173725,
+      "raw_file": "qa/fdc-kitchen-173725.json",
+      "sha256": "f374ad47651783d1db4b09c82e2e5ebec67f466043f321293564624ea3043a74",
+      "nutrient_record": "full food"
+    },
+    {
+      "id": 175119,
+      "raw_file": "qa/usda-search-3.json",
+      "sha256": "be8bdf84e60b217e0c012f0f094fbc7a62f6479c6b4788033ecb06e529cefd24",
+      "nutrient_record": "search foodNutrients"
+    },
+    {
+      "id": 171025,
+      "raw_file": "qa/usda-search-4.json",
+      "sha256": "e1ee66cde7e8ad60c70f5f44766cbb7a05ba2242918449b2210f2ad124c3b617",
+      "nutrient_record": "search foodNutrients"
+    },
+    {
+      "id": 174515,
+      "raw_file": "qa/usda-local-search-1.json",
+      "sha256": "a75f9ee12658ef899ade4b48fc600e254ecec5b1189752facf66dd42d4e25159",
+      "nutrient_record": "search foodNutrients"
+    },
+    {
+      "id": 171257,
+      "raw_file": "qa/usda-local-search-2.json",
+      "sha256": "6f237061d13e13723e9e8b880b14d72109cc8e02b80be163a5310c4a25e632e4",
+      "nutrient_record": "search foodNutrients"
+    },
+    {
+      "id": 172336,
+      "raw_file": "qa/usda-local-search-3.json",
+      "sha256": "0c150a9d08fa372db1e34ad6c726a187bd1a4b547fed4a35245e0a1bc75b296c",
+      "nutrient_record": "search foodNutrients"
+    }
+  ],
+  "brand_label_references": [
+    {
+      "id": "BY_SAV_SOFT5",
+      "name": "Савушкин творог мягкий5%,125г",
+      "source": "https://savushkin.com/products/tvorog-myagkiy/",
+      "per100g": {
+        "energy_kcal": 85.4,
+        "protein_g": 8.5,
+        "fat_g": 5,
+        "label_carbohydrate_g": 1.6
+      },
+      "fiber_g": null,
+      "saturated_fat_g": null,
+      "status": "label_reference_only",
+      "carbohydrate_semantics": "EAEU label not automatically equivalent to USDA total; no double fiber subtraction"
+    },
+    {
+      "id": "BY_SAV_SOFT01",
+      "name": "Савушкин творог мягкий0,1%,125г",
+      "source": "https://savushkin.com/products/tvorog-myagkiy/",
+      "per100g": {
+        "energy_kcal": 44,
+        "protein_g": 10,
+        "fat_g": 0.1,
+        "label_carbohydrate_g": 1
+      },
+      "fiber_g": null,
+      "saturated_fat_g": null,
+      "status": "label_reference_only"
+    }
+  ],
+  "memory_docs": [
+    "https://developers.cloudflare.com/agent-memory/",
+    "https://developers.cloudflare.com/agents/concepts/conversation-state-and-memory/",
+    "https://developers.cloudflare.com/ai-search/concepts/how-ai-search-works/"
+  ],
+  "memory_decision": "Structured peruser D1 authoritative facts+bounded included source retrieval; AgentMemory private beta not provisioned; no new vectors needed at this scale; no credits/free claim",
+  "model": {
+    "deployment": "gpt-6.1-sol",
+    "reasoning": "high",
+    "actual_schema_smoke": "completed",
+    "tokens": 345,
+    "new_resources": false
+  },
+  "food_safety": "https://www.foodsafety.gov/food-safety-charts/safe-minimum-internal-temperatures",
+  "warnings": [
+    "Alaska pollock173725=минтай, Atlanticpollock175129=сайда",
+    "Raw chicken171077 distinct from cooked171477",
+    "Sourcream171257 genericfat19.35% not exact local20%brand",
+    "Kefir Lifeway intentionally excluded",
+    "Soft tvorog not generic cottagecheese; brand unreported nutrients NOT0",
+    "Do not claim current retailer stock or pricing",
+    "IDs/nutrients in supplied foods are actual fetched primary data, no model estimates"
+  ]
+}

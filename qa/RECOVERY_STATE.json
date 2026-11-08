@@ -1,15 +1,15 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T10:27:44.127334+00:00",
+  "updated_at": "2026-11-08T12:26:13.501442+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
   "active_task": null,
-  "last_completed": "KETO-ONBOARDING-05",
+  "last_completed": "KETO-KITCHEN-06",
   "next_task": {
-    "id": "KETO-SETUP-ACCEPTANCE",
+    "id": "KETO-KITCHEN-ACCEPTANCE",
+    "github_issue": 10,
     "status": "owner_acceptance",
-    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT.",
-    "github_issue": 10
+    "action": "Reload usual account and select your appliance in What shall we cook; confirm the available mode matches your device manual before using a recipe."
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",
@@ -36,7 +36,7 @@
   },
   "operating_rules": "AGENTS.md",
   "platform_failure_exact_cause": "not determined; no server-side chat telemetry",
-  "source_version": "0.5.0-guided-pilot",
+  "source_version": "0.6.1-kitchen-pilot",
   "history": [
     {
       "previous_last_completed": {
@@ -161,5 +161,16 @@
     "report": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json",
     "source_archive_current": false
   },
-  "onboarding_cloud_effects": "not_delivered; no cloud operations attempted"
+  "onboarding_cloud_effects": "not_delivered; no cloud operations attempted",
+  "kitchen_checkpoint": {
+    "phase": "implementation_and_focused_checks_complete",
+    "branch": "feature/kitchen-configurator",
+    "python_focused": 36,
+    "evidence": "qa/kitchen-focused-python-final.log",
+    "node_focused": 5,
+    "next_action": "Run the single final local regression on the final source, then write qa/KITCHEN_IMPLEMENTATION_RESULT.json.",
+    "external_effects": "not_delivered; no cloud or model calls",
+    "processes": []
+  },
+  "data_version": "0.1.1+verified-food-extension-2026-11-08"
 }

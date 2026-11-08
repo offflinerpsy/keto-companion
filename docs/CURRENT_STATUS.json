@@ -1,49 +1,54 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T10:27:44.126105+00:00",
-  "source_version": "0.5.0-guided-pilot",
+  "updated_at": "2026-11-08T12:26:13.501442+00:00",
+  "source_version": "0.6.1-kitchen-pilot",
   "plugin_version": "0.2.1",
-  "data_version": "0.1.1",
+  "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": null,
-  "last_completed": "KETO-ONBOARDING-05",
+  "last_completed": "KETO-KITCHEN-06",
   "next_task": {
-    "id": "KETO-SETUP-ACCEPTANCE",
+    "id": "KETO-KITCHEN-ACCEPTANCE",
+    "github_issue": 10,
     "status": "owner_acceptance",
-    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT.",
-    "github_issue": 10
+    "action": "Reload usual account and select your appliance in What shall we cook; confirm the available mode matches your device manual before using a recipe."
   },
   "staging": {
     "deployed": true,
     "compute_connected": true,
     "google_real_user_login_verified": false,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "cad763dbafb1b1e38d9b6703e8ce3eef269ea7a8",
+    "source_commit": "6b2a9e27e56f6552d2d47d671703bddc06b90b93",
     "http_checks_passed": 24,
     "synthetic_e2e_checks": 20,
     "synthetic_cleanup_verified": true,
     "mobile_deployed": true,
     "mobile_backend_source_commit": "74e5e0fc0410b3d4fec54c144348e2300f420783",
-    "backend_source_commit": "c86ed6b59f28b2e8fd95be4b95beee667e753d1a"
+    "backend_source_commit": "6b2a9e27e56f6552d2d47d671703bddc06b90b93",
+    "kitchen_deployed": true
   },
   "production": {
     "saas_deployed": false,
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 424,
-    "node_synthetic_tests": 82,
+    "python_tests": 491,
+    "node_synthetic_tests": 89,
     "local_workerd_checks": 30,
     "workerd_compatibility_date": "2026-10-03",
     "target_cloud_compatibility_date": "2026-11-07",
     "cloud_synthetic_e2e_checks": 20,
     "actual_cloud_compatibility_date": "2026-11-07",
     "python_skipped": 1,
-    "onboarding_component_checks": 57
+    "onboarding_component_checks": 57,
+    "kitchen_ui_checks": 64,
+    "kitchen_real_provider_checks": 10,
+    "appliance_ui_checks": 36
   },
   "not_verified": [
-    "Actual new setup flow in owner Google session",
-    "Physical iPhone/Safari acceptance",
-    "Clinical suitability"
+    "Real family-account authenticated kitchen workflow",
+    "Physical iPhone/Safari new kitchen acceptance",
+    "Clinical and kitchen-tested suitability",
+    "Cloud credit balance"
   ],
   "repository": "https://github.com/offflinerpsy/keto-companion",
   "visibility": "private",
@@ -64,7 +69,8 @@
     "mobile_release_pr": 7,
     "mobile_merge_commit": "b92f1bfd58b93785c115874be923bbeec0a3b3dd",
     "onboarding_pr": 9,
-    "onboarding_merge_commit": "c1260f1e1d9cc3ce60f8c071b58c5f4216c579fe"
+    "onboarding_merge_commit": "c1260f1e1d9cc3ce60f8c071b58c5f4216c579fe",
+    "kitchen_pr": 12
   },
   "mobile_acceptance": "User requested mobile revision; actual device validation still pending",
   "mobile_source": {
@@ -94,5 +100,8 @@
     "evidence": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json"
   },
   "onboarding_stage": "deployed_user_acceptance_pending",
-  "onboarding_receipt": "docs/evidence/ONBOARDING_RELEASE_RECEIPT.json"
+  "onboarding_receipt": "docs/evidence/ONBOARDING_RELEASE_RECEIPT.json",
+  "kitchen_stage": "deployed_owner_acceptance_pending",
+  "kitchen_receipt": "docs/evidence/KITCHEN_RELEASE_RECEIPT.json",
+  "appliance_receipt": "docs/evidence/KITCHEN_APPLIANCES_ADDENDUM.json"
 }

@@ -1,0 +1,15 @@
+{
+  "task": "KETO-KITCHEN-06",
+  "parent_takeover": true,
+  "previous_writer_stopped": 19777,
+  "source_preserved": true,
+  "reason": "Implementation plus first full suites produced; parent applies concrete independent acceptance fixes and final validation, without new scope or writer",
+  "first_full_python": "459passed,2failed,1skip; evidence preserved",
+  "first_full_node": "one static-VM import adapter failure; evidence preserved",
+  "no_owner_browser": true,
+  "hashes": {
+    "service/kitchen.py": "8edf4571102ec0dabe1e9e7a237c69adaa1661394e1a3c9c93b19c9c4e477121",
+    "service/domain.py": "b1c36df2ecf7dff2cb13a3a035fd9609f0c1a3dce8c1fb085856bc4aecd67530",
+    "cloudflare-saas/public/kitchen-ui.js": "257f58473b04d7b3250f02d7cbb64109adf4ed320bc0a712cb1670f89ce4a8b4"
+  }
+}

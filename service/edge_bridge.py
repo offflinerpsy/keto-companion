@@ -73,7 +73,7 @@ class EdgeBridge:
     try:response={'text':self.transcriber.transcribe(args['audio_base64'],args['mime']),'model_called':True}
     except SpeechError as e:response={'error_code':e.code,'message':speech_message(e.code),'model_called':e.paid}
     return {'response':response,'state':None}
-   names={'guidance':'keto_guidance','topics':'keto_topics','reminders':'keto_reminders','open':'keto_open','recipes':'keto_recipes','consent':'keto_consent','propose':'keto_propose_change','apply':'keto_apply_proposal','menu':'keto_menu','chat':'keto_chat','export':'keto_export','import_menu':'keto_import_menu','delete':'keto_delete_profile'}
+   names={'kitchen':'keto_kitchen','guidance':'keto_guidance','topics':'keto_topics','reminders':'keto_reminders','open':'keto_open','recipes':'keto_recipes','consent':'keto_consent','propose':'keto_propose_change','apply':'keto_apply_proposal','menu':'keto_menu','chat':'keto_chat','export':'keto_export','import_menu':'keto_import_menu','delete':'keto_delete_profile'}
    if op not in names:raise ValueError()
    schema=copy.deepcopy(self.tool_map[names[op]]['inputSchema']);schema['properties'].pop('ui_confirmation',None);schema['required']=[x for x in schema['required'] if x!='ui_confirmation'];Draft202012Validator(schema).validate(args)
    if doc is not None:
@@ -92,6 +92,7 @@ class EdgeBridge:
    elif op=='chat':
     if isinstance(self.brain,AzureBrain) and os.getenv('KETO_AZURE_AUTH')=='cli':raise BridgeError('model unavailable')
     result=svc.chat(subject,args['message'],args['request_id'],image=None if literal_guard(args['message'])=='urgent' else self.image_clean(args.get('image_data_url')),source=source,thread_id=args.get('thread_id'))
+   elif op=='kitchen':result=svc.kitchen(subject,**args)
    elif op=='guidance':result=svc.guidance(subject,**args)
    elif op=='topics':result=svc.topics(subject,**args)
    elif op=='reminders':result=svc.reminders(subject,**args)
@@ -104,7 +105,7 @@ class EdgeBridge:
    else:result=svc.delete_profile(subject,args['expected_revision'],args['confirmation'])
    if isinstance(result.get('state'),dict):
     snapshot=result['state'];snapshot['capabilities']['storage']='Cloudflare D1';snapshot['capabilities']['native_voice']='Microphone dictation via Azure; editable transcript, not a voice conversation';snapshot['capabilities']['dictation']=True
-    if not snapshot['holds'] and snapshot['plans'] and snapshot['plans'][-1].get('status')=='user_accepted':result['shopping']=k.shopping_list(snapshot['plans'][-1])
+    if not snapshot['holds'] and snapshot['plans'] and snapshot['plans'][-1].get('status')=='user_accepted':result['shopping']=svc.kitchen_shopping(store.doc,snapshot['plans'][-1])
    if result.get('requires_consent'):result['message']='Для личного диалога нужны ваши разрешения на обработку Azure и хранение в Cloudflare.'
    return {'response':result,'state':None if op=='export' and args.get('format')=='pdf' else copy.deepcopy(store.doc)}
   except (ValueError,TypeError,KeyError,ValidationError,k.KetoError,Conflict) as e:raise BridgeError(str(e)) from None

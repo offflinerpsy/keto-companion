@@ -1,0 +1,82 @@
+{
+  "scope": "current KitchenService with real AzureSolHigh plus local synthetic-state confirmations; not deployed authenticated cloud or physical iPhone",
+  "source_sha256": "e8570625dfea66c65bf16815c0c33709e724d3edcdb40d9012cbdb1aaa751f6b",
+  "checks": [
+    {
+      "name": "nonempty_validated_candidates",
+      "passed": true
+    },
+    {
+      "name": "purchase_limit_respected",
+      "passed": true
+    },
+    {
+      "name": "all_ingredients_exist",
+      "passed": true
+    },
+    {
+      "name": "no_silent_raw_cooked_swap",
+      "passed": true
+    },
+    {
+      "name": "chat_save_requires_confirmation",
+      "passed": true
+    },
+    {
+      "name": "same_recipe_saved",
+      "passed": true
+    },
+    {
+      "name": "chat_half_calculated_and_summarized",
+      "passed": true
+    },
+    {
+      "name": "repeat_no_additional_model",
+      "passed": true
+    }
+  ],
+  "model_roles": [
+    {
+      "role": "recipe",
+      "deployment": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "attempted": true,
+      "input_tokens": 5202,
+      "output_tokens": 243,
+      "status": "completed",
+      "latency_ms": 8913
+    }
+  ],
+  "fallback_reason": null,
+  "recipe_titles": [
+    "Птица с овощами",
+    "Омлет с овощами",
+    "Шампиньоны с овощами"
+  ],
+  "summary": {
+    "date": "2026-11-08",
+    "known_entries": 1,
+    "unquantified_entries": 0,
+    "nutrition": {
+      "energy_kcal": 86.5,
+      "protein_g": 7.068,
+      "fat_g": 4.815,
+      "carbohydrate_total_g": 3.84,
+      "fiber_g": 1.5,
+      "saturated_fat_g": 1.5854,
+      "calcium_mg": 52.0,
+      "iron_mg": 1.157,
+      "magnesium_mg": 13.2,
+      "potassium_mg": 171.0,
+      "sodium_mg": 81.8,
+      "vitamin_d_ug": 1.0,
+      "folate_dfe_ug": 49.3,
+      "vitamin_b12_ug": 0.445,
+      "vitamin_c_mg": 21.96,
+      "net_carbohydrate_g": 2.34
+    },
+    "note": "Сумма только подтверждённых записей с известными порциями, не вся фактически съеденная еда. Неизвестные значения не считаются нулём."
+  },
+  "seconds": 9.35,
+  "passed": true
+}

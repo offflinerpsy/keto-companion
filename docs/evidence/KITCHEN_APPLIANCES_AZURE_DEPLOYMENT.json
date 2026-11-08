@@ -1,0 +1,12 @@
+{
+  "task": "KETO-KITCHEN-06",
+  "source_commit": "6b2a9e27e56f6552d2d47d671703bddc06b90b93",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "d583ead07adbfc353e4655d62f9c4474018f71e10afe1a9cda6fd53a9f671079",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "status": 4,
+  "complete": true,
+  "deployment_id": "f508ca3b-7e75-4846-87a7-11ac68a2ffb6",
+  "checked_at": "2026-11-08T12:23:45.999711+00:00"
+}

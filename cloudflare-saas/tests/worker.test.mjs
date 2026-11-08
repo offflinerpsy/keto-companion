@@ -257,3 +257,41 @@ test('guidance status is role-neutral, requires explicit baseline confirmation a
  assert.equal((await tool(e,owner,'keto_guidance',{action:'status',subject:'another-user'})).status,400);
  }finally{restore()}
 });
+
+test('Kitchen shares bridge state, own pantry confirmation and replay; admin cannot select another member',async()=>{
+ const e=env(),owner=(await login(e)).cookie,a=await member(e,owner,'kitchen@example.test','kitchen-member');const restore=useBridge(e);
+ try{
+  let r=await tool(e,a,'keto_consent',{processing:true,storage:true,health:true,confirmed:true});let state=(await r.json()).state;
+  const items=['F171287','F169291','F169251'].map(food_id=>({food_id,state:'raw',grams:500}));
+  r=await tool(e,a,'keto_kitchen',{action:'pantry',values:{items},expected_revision:state.revision});assert.equal(r.status,200);let p=await r.json();assert.equal(p.state.kitchen.pantry.length,0);
+  r=await tool(e,a,'keto_apply_proposal',{proposal_id:p.proposal.id,expected_revision:state.revision,approved:true});assert.equal(r.status,200);state=(await r.json()).state;assert.equal(state.kitchen.pantry.length,3);
+  const args={action:'generate',spec:{mode:'pantry_only',meal:'dinner',time_budget:20,equipment:'pan',servings:2},request_id:'kitchen_bridge_generate'};
+  r=await tool(e,a,'keto_kitchen',args);assert.equal(r.status,200);let first=await r.json();assert.equal(first.recipes.length,3);assert(first.fallback_reason);assert.equal(first.model_called,false);
+  r=await tool(e,a,'keto_kitchen',args);assert.equal(r.status,200);assert.deepEqual((await r.json()).recipes,first.recipes);
+  assert.equal((await tool(e,a,'keto_kitchen',{...args,spec:{...args.spec,servings:1}})).status,409);
+  assert.equal((await tool(e,owner,'keto_kitchen',{action:'status',subject:'kitchen-member'})).status,400);
+  const personal=await tool(e,owner,'keto_kitchen',{action:'status'});assert.notEqual(personal.status,200); // owner has not consented, no member state is visible
+  assert.equal(e.DB.db.prepare('SELECT SUM(requests) n FROM usage').get().n,0);
+ }finally{restore()}
+});
+test('Kitchen paid generation reserves both quotas before call; replay, consent/session revocation and cap',async()=>{
+ const e=env(),owner=(await login(e)).cookie,a=await member(e,owner,'kitchen-paid@example.test','kitchen-paid');let restore=useBridge(e);
+ try{assert.equal((await tool(e,a,'keto_consent',{processing:true,storage:true,health:true,confirmed:true})).status,200)}finally{restore()}
+ const original=globalThis.fetch;let calls=0,mode='normal';
+ globalThis.fetch=async(_url,init)=>{
+  calls++;assert.equal(e.DB.db.prepare('SELECT SUM(requests) n FROM usage').get().n,calls);assert.equal(e.DB.db.prepare('SELECT SUM(requests) n FROM global_usage').get().n,calls);
+  const data=JSON.parse(new TextDecoder().decode(init.body));assert.equal(data.operation,'kitchen');
+  if(mode==='consent')e.DB.db.prepare('UPDATE consents SET processing=0,consent_revision=consent_revision+1').run();
+  if(mode==='session')e.DB.db.prepare('UPDATE sessions SET expires_at=0').run();
+  return new Response(JSON.stringify({response:{message:'SYNTHETIC_PAID_KITCHEN',model_called:true,model_roles:[{role:'recipe',deployment:'gpt-6.1-sol',input_tokens:15,output_tokens:25}]},state:data.state}));
+ };
+ try{
+  const args={action:'generate',spec:{mode:'inspiration'},request_id:'kitchen_paid_generate_01'};
+  assert.equal((await tool(e,a,'keto_kitchen',args)).status,200);assert.equal((await tool(e,a,'keto_kitchen',args)).status,200);assert.equal(calls,1);
+  e.DB.db.prepare('UPDATE global_usage SET requests=500').run();assert.equal((await tool(e,a,'keto_kitchen',{...args,request_id:'kitchen_paid_cap_01'})).status,409);assert.equal(calls,1);e.DB.db.prepare('UPDATE global_usage SET requests=1').run();
+  mode='consent';assert.equal((await tool(e,a,'keto_kitchen',{...args,request_id:'kitchen_paid_revoke_01'})).status,409);
+  assert.equal(e.DB.db.prepare("SELECT response_json FROM jobs WHERE request_id='kitchen_paid_revoke_01'").get().response_json,null);
+  e.DB.db.prepare('UPDATE consents SET processing=1').run();mode='session';assert.equal((await tool(e,a,'keto_kitchen',{...args,request_id:'kitchen_paid_expire_01'})).status,409);
+  assert.equal(e.DB.db.prepare("SELECT response_json FROM jobs WHERE request_id='kitchen_paid_expire_01'").get().response_json,null);
+ }finally{globalThis.fetch=original}
+});
