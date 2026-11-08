@@ -1,6 +1,6 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T10:26:42.949401+00:00",
+  "updated_at": "2026-11-08T10:27:44.127334+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
   "active_task": null,
@@ -8,7 +8,8 @@
   "next_task": {
     "id": "KETO-SETUP-ACCEPTANCE",
     "status": "owner_acceptance",
-    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT."
+    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT.",
+    "github_issue": 10
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",

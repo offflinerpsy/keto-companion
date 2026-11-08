@@ -1,6 +1,6 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T10:26:42.949401+00:00",
+  "updated_at": "2026-11-08T10:27:44.126105+00:00",
   "source_version": "0.5.0-guided-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
@@ -9,7 +9,8 @@
   "next_task": {
     "id": "KETO-SETUP-ACCEPTANCE",
     "status": "owner_acceptance",
-    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT."
+    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT.",
+    "github_issue": 10
   },
   "staging": {
     "deployed": true,
@@ -58,10 +59,12 @@
     "native_cloudflare_build": "success",
     "release_pull_request": 4,
     "release_merge_commit": "4661687931e263a9fd002239a4ec473aaaa8356e",
-    "next_acceptance_issue": 5,
+    "next_acceptance_issue": 10,
     "current_canonical_branch": "main",
     "mobile_release_pr": 7,
-    "mobile_merge_commit": "b92f1bfd58b93785c115874be923bbeec0a3b3dd"
+    "mobile_merge_commit": "b92f1bfd58b93785c115874be923bbeec0a3b3dd",
+    "onboarding_pr": 9,
+    "onboarding_merge_commit": "c1260f1e1d9cc3ce60f8c071b58c5f4216c579fe"
   },
   "mobile_acceptance": "User requested mobile revision; actual device validation still pending",
   "mobile_source": {
