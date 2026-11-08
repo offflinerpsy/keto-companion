@@ -1,10 +1,14 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T12:26:13.501442+00:00",
-  "source_version": "0.6.1-kitchen-pilot",
+  "updated_at": "2026-11-08T13:09:21.807961+00:00",
+  "source_version": "0.6.2-audit-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
-  "active_task": null,
+  "active_task": {
+    "id": "SPEC-AUDIT-07",
+    "github_issue": 13,
+    "stage": "reviewed_fixes_staging_release_spec_validation"
+  },
   "last_completed": "KETO-KITCHEN-06",
   "next_task": {
     "id": "KETO-KITCHEN-ACCEPTANCE",

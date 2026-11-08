@@ -337,7 +337,8 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
         result=await run_in_threadpool(invoke,r,name,args)
         if name=='keto_transcribe' and result.get('error_code'):return JSONResponse(result,status_code=422)
         return result
-    @app.api_route('/mcp',methods=['GET','DELETE'])
+    @app.get('/mcp',operation_id='mcp_stream_not_offered_get')
+    @app.delete('/mcp',operation_id='mcp_stream_not_offered_delete')
     def stream_not_offered():return Response(status_code=405,headers={'Allow':'POST'})
     @app.post('/mcp')
     async def mcp(req:Request):

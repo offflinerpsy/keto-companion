@@ -48,12 +48,15 @@ jobs:
           node tests/test_ui_no_browser.cjs
           node tests/test_oauth_ui.cjs
       - name: Validate machine-readable product and design contracts
-        run: .venv/bin/python scripts/export_contracts.py --check
+        run: |
+          .venv/bin/python scripts/export_contracts.py --check
+          .venv/bin/python scripts/verify_specification.py
       - name: Rebuild assets and detect uncommitted generated changes
         run: |
           node cloudflare-saas/build.cjs
+          node scripts/build_legacy_ui.cjs
           python scripts/verify_repository.py
-          git diff --exit-code -- artifacts/files_manifest.json cloudflare-saas/public/app.bundle.js cloudflare-saas/public/style.css cloudflare-saas/public/knowledge.html cloudflare-saas/src/embedded-assets.mjs cloudflare-saas/dist
+          git diff --exit-code -- artifacts/files_manifest.json cloudflare-saas/public/app.bundle.js cloudflare-saas/public/style.css cloudflare-saas/public/knowledge.html cloudflare-saas/src/embedded-assets.mjs cloudflare-saas/dist service/static/app.bundle.js
       - name: Record exact scope, not a clinical or device certification
         if: always()
         run: |

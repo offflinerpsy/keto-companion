@@ -310,9 +310,23 @@ class KitchenService:
         return core().merge_personal_catalog(self.base,d['core'])
 
     def kitchen_shopping(self,d,plan):
-        rows=core().shopping_list(plan)
-        pantry=init(d).get('plan_pantry',{}).get(plan['plan_id'])
-        return missing_list(rows,pantry) if pantry is not None else rows
+        block=init(d);pantry=block.get('plan_pantry',{}).get(plan['plan_id'])
+        if pantry is None:return core().shopping_list(plan)
+        servings=block.get('plan_servings',{}).get(plan['plan_id'])
+        if servings is None:
+            # Backward compatibility: older kitchen plans retained whole-batch recipes
+            # but not the explicit household size. Infer only one consistent size.
+            recipes=d['core'].get('custom_recipes',{})
+            counts={recipes[m['recipe_id']]['base_servings'] for day in plan['days'] for m in day['meals'] if m['recipe_id'] in recipes}
+            all_known=all(m['recipe_id'] in recipes for day in plan['days'] for m in day['meals'])
+            if not all_known or len(counts)!=1:raise ValueError('Уточните число порций для списка покупок; размер блюда не определён')
+            servings=counts.pop()
+        servings=core().integer(servings,'shopping_servings',1,6)
+        batch_plan=copy.deepcopy(plan)
+        for day in batch_plan['days']:
+            for meal in day['meals']:
+                for ingredient in meal['ingredients']:ingredient['grams_edible']*=servings
+        return missing_list(core().shopping_list(batch_plan),pantry)
 
     def kitchen_proposal_preview(self,d,action,payload):
         if action not in ('save','favorite','diary','rate'):return None
@@ -402,6 +416,8 @@ class KitchenService:
                     d['core']=k.apply_event(d['core'],{'event_id':'day_'+proposal_id,'type':'plan.accept','payload':plan,'confirmed':True},d['core']['state_revision'],d['core']['owner_account_id'],self.kitchen_catalog(d))
                 if action=='accept_day':
                     block.setdefault('plan_pantry',{})[plan['plan_id']]=copy.deepcopy(group['spec']['pantry']);block['plan_pantry']=dict(list(block['plan_pantry'].items())[-8:])
+                    block.setdefault('plan_servings',{})[plan['plan_id']]=group['spec']['servings']
+                    block['plan_servings']={pid:n for pid,n in block['plan_servings'].items() if pid in block['plan_pantry']}
                 block['accepted']=(block['accepted']+[{'recipe_id':item,'name_ru':block['drafts'][item]['recipe']['name_ru'],'thread_id':payload['thread_id'],'method_id':block['drafts'][item]['method_id'],'food_ids':[i['food_id'] for i in block['drafts'][item]['recipe']['ingredients']],'at':k.utc_now()} for item in ids])[-30:]
         if action in ('remember','forget'):block['facts_changed_at']=k.utc_now()
         if action in ('remember','forget','pantry'):
@@ -424,17 +440,19 @@ class KitchenService:
             else:
                 carb='carbohydrate_total_g' if targets['carb_basis']=='total' else k.DERIVED
                 zone=d['core']['profile'].get('timezone');today=datetime.now(ZoneInfo(zone)).date().isoformat() if zone else None
-                logged=[r for r in d['core']['diary'] if r['date']==today and r.get('intake_status')=='confirmed']
-                used=0;known=True
+                entries_today=[r for r in d['core']['diary'] if r['date']==today]
+                logged=[r for r in entries_today if r.get('intake_status')=='confirmed']
+                used=0;known=all(r.get('intake_status')=='confirmed' for r in entries_today)
                 for r in logged:
                     if r.get('recipe_id') not in cat['recipes']:known=False;continue
                     value=k.calculate_recipe(cat,r['recipe_id'],r.get('portions',1))['nutrition'][carb]
                     if value is None:known=False
                     else:used+=value
                 remaining=max(0,targets['carb_max_g']-used) if known else None
-                budget={'carb_basis':targets['carb_basis'],'daily_max_g':targets['carb_max_g'],'confirmed_logged_g':used if known else None,'remaining_g':remaining,'meal_assumption_g':remaining/d['core']['profile']['settings']['meals_per_day'] if remaining is not None else None}
+                budget={'carb_basis':targets['carb_basis'],'daily_max_g':targets['carb_max_g'],'confirmed_logged_g':used if known else None,'remaining_g':remaining,'meal_assumption_g':remaining/d['core']['profile']['settings']['meals_per_day'] if remaining is not None else None,'diary_complete_for_budget':known,'known_subtotal_g':used}
                 value=portion['nutrition'][carb];allot=budget['meal_assumption_g']
                 note='Проверены аллергии и исключения. '+('Углеводы порции укладываются в условную равную долю остатка дня.' if value is not None and allot is not None and value<=allot else 'Углеводы превышают условную долю дня или данных недостаточно.')+' Равная доля — допущение продукта, не медицинская норма и не гарантия кетоза.'
+                if not known:note+=' Есть записи без полного количества/состава; остаток углеводов не определён. Указанная сумма — только известная часть.'
         kcal=portion['nutrition'].get('energy_kcal');allocation=targets['energy_min_kcal']/d['core']['profile']['settings']['meals_per_day'] if targets else None
         groups={cat['foods'][i['food_id']]['group'] for i in rec['ingredients']}
         light=not (groups & {'egg','poultry','fish','meat','seafood','soy','dairy'}) or (kcal is not None and allocation is not None and kcal<allocation*.5)

@@ -295,3 +295,27 @@ test('Kitchen paid generation reserves both quotas before call; replay, consent/
   assert.equal(e.DB.db.prepare("SELECT response_json FROM jobs WHERE request_id='kitchen_paid_expire_01'").get().response_json,null);
  }finally{globalThis.fetch=original}
 });
+
+test('SPEC-AUDIT: calculate wording cannot bypass paid recipe reservation',async()=>{
+ const e=env(),owner=(await login(e)).cookie,user=await member(e,owner,'audit-quota@example.test','audit-quota');let restore=useBridge(e);
+ try{assert.equal((await tool(e,user,'keto_consent',{processing:true,storage:true,health:true,confirmed:true})).status,200)}finally{restore()}
+ const uid=e.DB.db.prepare("SELECT id FROM users WHERE email='audit-quota@example.test'").get().id,day=new Date().toISOString().slice(0,10),original=globalThis.fetch;let calls=0;
+ globalThis.fetch=async(_url,init)=>{calls++;assert.equal(e.DB.db.prepare('SELECT requests FROM usage WHERE user_id=? AND day=?').get(uid,day).requests,1);assert.equal(e.DB.db.prepare('SELECT requests FROM global_usage WHERE day=?').get(day).requests,1);const x=JSON.parse(new TextDecoder().decode(init.body));return new Response(JSON.stringify({response:{model_called:true,message:'SYNTHETIC RECIPE'},state:x.state}))};
+ try{
+  e.DB.db.prepare('INSERT INTO usage(user_id,day,requests) VALUES(?,?,30)').run(uid,day);
+  const args={message:'Рассчитай ужин: есть яйца, кабачок и шампиньоны; без покупок за 20 минут',request_id:'audit_quota_bypass_01'};
+  assert.equal((await tool(e,user,'keto_chat',args)).status,409);assert.equal(calls,0);
+  e.DB.db.prepare('UPDATE usage SET requests=0 WHERE user_id=? AND day=?').run(uid,day);
+  assert.equal((await tool(e,user,'keto_chat',{...args,request_id:'audit_quota_charged_02'})).status,200);assert.equal(calls,1);
+ }finally{globalThis.fetch=original}
+});
+test('SPEC-AUDIT: verified no-model chat result refunds reserved quota',async()=>{
+ const e=env(),owner=(await login(e)).cookie,user=await member(e,owner,'audit-refund@example.test','audit-refund');const restore=useBridge(e);
+ try{
+  assert.equal((await tool(e,user,'keto_consent',{processing:true,storage:true,health:true,confirmed:true})).status,200);
+  const result=await tool(e,user,'keto_chat',{message:'Рассчитай мои калории',request_id:'audit_guidance_refund_01'});
+  assert.equal(result.status,200);assert.equal((await result.json()).model_called,false);
+  assert.equal(e.DB.db.prepare('SELECT COALESCE(SUM(requests),0) n FROM usage').get().n,0);
+  assert.equal(e.DB.db.prepare('SELECT COALESCE(SUM(requests),0) n FROM global_usage').get().n,0);
+ }finally{restore()}
+});

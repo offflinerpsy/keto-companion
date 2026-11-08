@@ -1,0 +1,71 @@
+{
+  "checked_at": "2026-11-08T13:03:57.692165+00:00",
+  "repository": "offflinerpsy/keto-companion",
+  "visibility": "private",
+  "Actions_enabled": true,
+  "allowed_actions": "all",
+  "source_workflow_lint": {
+    "tool": "actionlint1.7.12",
+    "passed": true,
+    "optional_shellcheck_pyflakes": "disabled; not claimed executed"
+  },
+  "runs": [
+    {
+      "id": 42481679949,
+      "html_url": "https://github.com/offflinerpsy/keto-companion/actions/runs/42481679949",
+      "head_sha": "ee4b42707e138f677fb32e9dfb4602a26c1b5b63",
+      "name": "Synthetic checks / Проверки",
+      "path": ".github/workflows/ci.yml",
+      "event": "workflow_dispatch",
+      "status": "completed",
+      "conclusion": "startup_failure",
+      "created_at": "2026-11-08T12:44:53Z",
+      "updated_at": "2026-11-08T12:44:54Z",
+      "jobs": 0,
+      "timing": {
+        "billable": {},
+        "run_duration_ms": 1000
+      }
+    },
+    {
+      "id": 42482082477,
+      "html_url": "https://github.com/offflinerpsy/keto-companion/actions/runs/42482082477",
+      "head_sha": "b4c72f112c930eea44aa03bd1d0bc766c3cc3cb8",
+      "name": "Full synthetic verification",
+      "path": ".github/workflows/ci.yml",
+      "event": "workflow_dispatch",
+      "status": "completed",
+      "conclusion": "startup_failure",
+      "created_at": "2026-11-08T12:50:06Z",
+      "updated_at": "2026-11-08T12:50:07Z",
+      "jobs": 0,
+      "timing": {
+        "billable": {},
+        "run_duration_ms": 1000
+      }
+    },
+    {
+      "id": 42482759954,
+      "html_url": "https://github.com/offflinerpsy/keto-companion/actions/runs/42482759954",
+      "head_sha": "4ac6d3ebd14c0a01eb74247e6b1cf49c94c2a964",
+      "name": "Platform smoke (no application or credentials)",
+      "path": ".github/workflows/ci.yml",
+      "event": "workflow_dispatch",
+      "status": "completed",
+      "conclusion": "startup_failure",
+      "created_at": "2026-11-08T12:59:10Z",
+      "updated_at": "2026-11-08T12:59:11Z",
+      "jobs": 0,
+      "timing": {
+        "billable": {},
+        "run_duration_ms": 1000
+      }
+    }
+  ],
+  "minimal_probe": "No checkout, actions, application, dependencies, cloud or secret use; one echo step,1minute cap",
+  "conclusion": "Hosted execution is blocked before any job, including minimal registered-workflow probe. API provides no detailed root cause. Local syntax passed; no claim that code tests ran in GitHub.",
+  "Codex_GitHub_review": "Existing bot explicitly reports review usage limit on PR12; no credit purchase or repeated paid retry",
+  "payment_settings_modified": false,
+  "self_hosted_runner_registered": false,
+  "next_operator_action": "Inspect the linked run/account Actions startup restriction or ask GitHub Support using these run IDs; then rerun full synthetic workflow. Do not weaken tests or make repo public."
+}

@@ -1,0 +1,78 @@
+{
+  "checked_at": "2026-11-08T13:02:22.368241+00:00",
+  "source": "OSV public advisory database",
+  "scope": "direct pinned Python runtime/test dependencies only; transitive/vendored code and unknown flaws not covered",
+  "records": [
+    {
+      "name": "fastapi",
+      "version": "0.162.2",
+      "advisories": []
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1",
+      "advisories": []
+    },
+    {
+      "name": "jsonschema",
+      "version": "4.26.0",
+      "advisories": []
+    },
+    {
+      "name": "azure-functions",
+      "version": "1.26.0",
+      "advisories": []
+    },
+    {
+      "name": "azure-identity",
+      "version": "1.27.0",
+      "advisories": []
+    },
+    {
+      "name": "azure-storage-blob",
+      "version": "12.31.1",
+      "advisories": []
+    },
+    {
+      "name": "Pillow",
+      "version": "13.0.0",
+      "advisories": []
+    },
+    {
+      "name": "PyJWT",
+      "version": "2.15.1",
+      "advisories": []
+    },
+    {
+      "name": "cryptography",
+      "version": "50.0.2",
+      "advisories": []
+    },
+    {
+      "name": "reportlab",
+      "version": "5.1.0",
+      "advisories": []
+    },
+    {
+      "name": "icalendar",
+      "version": "7.3.0",
+      "advisories": []
+    },
+    {
+      "name": "imageio-ffmpeg",
+      "version": "0.8.1",
+      "advisories": []
+    },
+    {
+      "name": "pytest",
+      "version": "9.2.0",
+      "advisories": []
+    },
+    {
+      "name": "pypdf",
+      "version": "7.0.0",
+      "advisories": []
+    }
+  ],
+  "complete": true
+}

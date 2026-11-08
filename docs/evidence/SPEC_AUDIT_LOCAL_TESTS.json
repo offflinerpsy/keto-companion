@@ -1,0 +1,30 @@
+{
+  "task": "SPEC-AUDIT-07",
+  "source_version": "0.6.2-audit-pilot",
+  "checked_at": "2026-11-08T13:09:21.809839+00:00",
+  "scope": "Full synthetic local suite on owner Mac; no browser, real identity, paid provider or private profile",
+  "python": {
+    "passed": 502,
+    "skipped": 1,
+    "skip_reason": "Existing Linux-specific RAM audio descriptor test on macOS",
+    "warning_count": 1
+  },
+  "node": {
+    "passed": 93,
+    "failed": 0
+  },
+  "legacy_ui": "passed",
+  "legacy_oauth_ui": "passed",
+  "contracts": "six exported inventories match; stable consecutive generation",
+  "workflow_lint": "actionlint1.7.12 passed; optional shellcheck/pyflakes not run",
+  "build_determinism": "SaaS and legacy bundle hashes equal across repeated rebuilds",
+  "code_review_baseline": "ee4b42707e138f677fb32e9dfb4602a26c1b5b63",
+  "findings_fixed": [
+    "SA07-01",
+    "SA07-02",
+    "SA07-03",
+    "SA07-04"
+  ],
+  "github_hosted": "startup_failure before jobs; not executed",
+  "clinical_or_physical_device_validation": false
+}

@@ -229,7 +229,7 @@
     },
     "/mcp": {
       "delete": {
-        "operationId": "stream_not_offered_mcp_get",
+        "operationId": "mcp_stream_not_offered_delete",
         "responses": {
           "200": {
             "content": {
@@ -243,7 +243,7 @@
         "summary": "Stream Not Offered"
       },
       "get": {
-        "operationId": "stream_not_offered_mcp_get",
+        "operationId": "mcp_stream_not_offered_get",
         "responses": {
           "200": {
             "content": {

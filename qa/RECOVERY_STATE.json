@@ -1,9 +1,13 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T12:26:13.501442+00:00",
+  "updated_at": "2026-11-08T13:09:21.809238+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
-  "active_task": null,
+  "active_task": {
+    "id": "SPEC-AUDIT-07",
+    "github_issue": 13,
+    "stage": "reviewed_fixes_staging_release_spec_validation"
+  },
   "last_completed": "KETO-KITCHEN-06",
   "next_task": {
     "id": "KETO-KITCHEN-ACCEPTANCE",
@@ -36,7 +40,7 @@
   },
   "operating_rules": "AGENTS.md",
   "platform_failure_exact_cause": "not determined; no server-side chat telemetry",
-  "source_version": "0.6.1-kitchen-pilot",
+  "source_version": "0.6.2-audit-pilot",
   "history": [
     {
       "previous_last_completed": {

@@ -12,6 +12,7 @@ from jsonschema import Draft202012Validator,ValidationError
 PATH='/internal/keto/compute';LIMIT=1_500_000
 class BridgeError(Exception):pass
 class MemoryStore:
+ storage_scope="caller_private_storage; transient_compute_only"
  def __init__(self,subject,doc):self.subject=subject;self.doc=copy.deepcopy(doc);self.version=1 if doc is not None else None
  def read(self,key):
   if key!=self.subject:raise BridgeError('identity')

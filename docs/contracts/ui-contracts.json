@@ -51,9 +51,9 @@
     "cloudflare-saas/public/app.css": "609c3bd1d8d71c174f9b586aa38efd938bd13a853bc6f93cd6d4c064d133064f",
     "cloudflare-saas/public/index.html": "6152364b012db6804fe48e181eba5c03bde283800eae7c1408247d4934eaf7a1",
     "cloudflare-saas/public/routes.js": "0414f2be4b0de5e8f2fa41344bec7cab183f682a8a9080284f4010ec42c8d2e2",
-    "cloudflare-saas/src/compute.mjs": "5f42079388a1071a19d4741ddae71e17480763b89d5a7d6bf401b4a4b06bdf30",
-    "cloudflare-saas/src/worker.mjs": "e552a8ac5c2abd57736cf6e2526188baad42e5d4b184310b09fcde3aba406e8a",
-    "service/app.py": "b5b18251d7a5f54a016f8ee7fbb8a6af5e75899d14b351567bb969eaf3f55292"
+    "cloudflare-saas/src/compute.mjs": "f1f1ddf7344550ca0c64a08fc6fb17a440ad1dbd976da0a84136bf69f6ecb9a1",
+    "cloudflare-saas/src/worker.mjs": "4e555fa06d00529b4a0a6b2ff686002ea829b6d877f0cf85cba8ca6c9febe59e",
+    "service/app.py": "07d315a7d31d8225a47a03914ec8d99a51ced39f8bb143081d376b7db56714df"
   },
   "static_elements": [
     {

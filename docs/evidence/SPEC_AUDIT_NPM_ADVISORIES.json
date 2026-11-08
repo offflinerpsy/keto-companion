@@ -1,0 +1,22 @@
+{
+  "scope": "npm lockfile dependency graph in ui-sdk; does not scan vendored/browser/source code or prove absence of unknown vulnerabilities",
+  "before": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 2,
+    "critical": 0,
+    "total": 2
+  },
+  "after": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "fix": "Removed unused @openai/mcp-extensions dependency, which included vulnerable nested zod; runtime imports absent. Remaining installed build dependencies unchanged and pinned exactly.",
+  "advisory": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+  "no_automatic_major_upgrade": true
+}
