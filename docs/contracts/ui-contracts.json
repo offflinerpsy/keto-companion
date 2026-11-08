@@ -100,7 +100,7 @@
     "cloudflare-saas/public/index.html": "a7791cd3b1d17a1800685053c598fcbb824b46d2bfbcee676783e4cdbe72ca13",
     "cloudflare-saas/public/routes.js": "04c6882a4f13978182a2b8aa27d0556cb1cfbde8010fdacb9a5f6411145167e1",
     "cloudflare-saas/src/compute.mjs": "f1f1ddf7344550ca0c64a08fc6fb17a440ad1dbd976da0a84136bf69f6ecb9a1",
-    "cloudflare-saas/src/worker.mjs": "92ad655dda283889fdd0a4834867c67e8bd4f1fc9ca5dfff4e66085dde1fc85b",
+    "cloudflare-saas/src/worker.mjs": "65eee91340da63bf857aacdc6f9d82632c22bed49743fc52bcb7a6554f137d1e",
     "service/app.py": "ef66602e8108ec640d0186bd9996339ec633e34091642dcaf35a961e29db6d0f"
   },
   "static_elements": [

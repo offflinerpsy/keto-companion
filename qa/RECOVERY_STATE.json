@@ -2,8 +2,23 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-08T18:21:13.045770+00:00",
-  "active_task": null,
+  "updated_at": "2026-11-08T22:30:09.024601+00:00",
+  "active_task": {
+    "id": "AGR-305-LOGIN",
+    "linear_issue": "https://linear.app/agregator/issue/AGR-305",
+    "stage": "reviewed_source_fix; OAuth_configuration_and_release_pending",
+    "branch": "codex/fix-google-login-state",
+    "scope": "Repair existing owner Google login; broad audit deferred",
+    "accepted_local_checks": {
+      "python_baseline": "523 passed,1 macOS skip",
+      "node_current": "153 passed",
+      "focused_auth": "77 passed",
+      "independent_review": "no actionable findings"
+    },
+    "next_action": "Register/verify exact staging /__/auth/handler in existing Google OAuth client, then complete reviewed Cloudflare release before activating same-origin authDomain",
+    "browser_authority": "Renewed explicit background Chrome permission requested; no browser used",
+    "owner_login_verified": false
+  },
   "last_completed": {
     "id": "CF-DEV-MEDIA-08",
     "github_issue": 16,
