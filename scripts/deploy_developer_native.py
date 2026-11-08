@@ -53,7 +53,9 @@ def main():
         if fonts is None:raise RuntimeError('Verified runtime fonts must be prepared by the CI stage')
         shutil.copytree(fonts,context/'.runtime-fonts')
         safe={k:v for k,v in os.environ.items() if k in ('PATH','HOME','LANG','LC_ALL','TMPDIR','DOCKER_HOST','DOCKER_CONTEXT')}
-        run('image_build',['docker','build','--platform','linux/amd64','--provenance=false','--build-arg','NODE_IMAGE='+NODE,'--build-arg','PYTHON_IMAGE='+PYTHON,'-f',str(context/'developer-runtime/Dockerfile'),'-t',tag,str(context)],timeout=900,env=safe)
+        # Trusted pinned dependency build needs the CI host network for nested-Docker DNS.
+        # Candidate code is NOT part of Dockerfile instructions and still runs --network=none.
+        run('image_build',['docker','build','--network=host','--platform','linux/amd64','--provenance=false','--build-arg','NODE_IMAGE='+NODE,'--build-arg','PYTHON_IMAGE='+PYTHON,'-f',str(context/'developer-runtime/Dockerfile'),'-t',tag,str(context)],timeout=900,env=safe)
         original=next(x for x in manifest['sources'] if x['path'].endswith('help.html'))
         files=[{'path':original['path'],'before_sha256':original['sha256'],'content':original['content']+'\n<!-- synthetic Cloudflare isolated acceptance -->\n'}]
         patch_hash=hashlib.sha256(json.dumps(files,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()

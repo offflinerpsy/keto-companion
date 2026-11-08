@@ -28,3 +28,5 @@ The first Docker dependency image failed because Node required libatomic.so.1. T
 Direct image URLs are restricted to the listed public CDNs and explicit loading. JPEG/PNG/WebP and GIF first frame are normalized to metadata-free JPEG. Plain image-URL paste offers a loader but does not fetch or send automatically; unrelated text paste remains untouched. The optional URL field cannot block ordinary chat submission. Late developer responses after account change are discarded.
 
 A manual encrypted registry-credential transfer was blocked and not retried; no credential was returned. Normal release is attempted only through the already-authorized native Cloudflare build and official cf CLI, keeping credentials inside that platform. A permission error stops the release; no new token/role is granted to work around it.
+
+Native Docker-in-Docker dependency installation uses the documented host network only while building the reviewed pinned image: bridge-DNS failed in the build environment. The actual candidate tests still use `--network none`, and the deployed Container class has `enableInternet=false`. No model-supplied Dockerfile, package list or command is accepted.

@@ -1,0 +1,10 @@
+{
+  "build_uuid": "54945201-216b-4450-8e04-6688a1500ede",
+  "full_native_gate_passed": true,
+  "root_cause": "Docker RUN pip could not resolve package-host DNS (Errno -3) while the host CI dependency install succeeded",
+  "failure_stage": "reviewed image dependency installation, before any generated candidate execution or registry authentication",
+  "remedy": "Docker build --network=host only for reviewed pinned Dockerfile; Docker run candidate remains --network none; Container.enableInternet false unchanged",
+  "official_source": "https://developers.cloudflare.com/sandbox/sdk/migrate/other-features/",
+  "credentials_exported": false,
+  "test_or_auth_constraints_removed": false
+}
