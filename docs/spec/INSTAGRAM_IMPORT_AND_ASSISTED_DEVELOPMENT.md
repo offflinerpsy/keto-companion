@@ -89,11 +89,11 @@ Existing Mac Codex is suitable for manually authorized development work but is n
 
 **Development runner:** member cannot invoke coding; forged role/source/file cannot invoke coding; disabled or expired mode blocks at server; replay does not bill twice; old commits cannot publish; protected paths remain protected through renames/symlinks/generated files; sandbox cannot reach personal data/secrets/other workspaces; task budget cancellation and late-result rejection work; failed tests prevent publication; malicious source instructions cannot alter pipeline; owner can revoke or roll back.
 
-Current hosted GitHub Actions still returns startup_failure before jobs (issue13, checked in this turn). This is not successful CI. An independently trusted isolated runner could eventually execute the same tests, but must itself be implemented and verified; it is not a reason to bypass release gates. Code generation/preview can be trialled without permission to change the live family app. Automatic publication should remain off while trusted execution is unverified.
+Current hosted GitHub Actions still returns startup_failure before jobs (issue 13, checked in this turn). This is not successful CI. An independently trusted isolated runner could eventually execute the same tests, but must itself be implemented and verified; it is not a reason to bypass release gates. Code generation/preview can be trialled without permission to change the live family app. Automatic publication should remain off while trusted execution is unverified.
 
 ## 8. Delivery boundaries for this decision
 
-This change is documentation only. Existing import/feature-request behavior was checked with2focused Python tests and3focused synthetic Worker tests. No new Instagram account connection, Share Extension, video transcription, coding runner, automatic PR publisher or developer-mode permission has been implemented or enabled by this decision. No new paid provider calls, cloud resources, schedules or production writes occurred.
+This change is documentation only. Existing import/feature-request behavior was checked with 2 focused Python tests and 3 focused synthetic Worker tests. No new Instagram account connection, Share Extension, video transcription, coding runner, automatic PR publisher or developer-mode permission has been implemented or enabled by this decision. No new paid provider calls, cloud resources, schedules or production writes occurred.
 
 Recommended order: improve personal import first; then implement the isolated owner-approved developer runner; verify task/runtime gates; only then consider tightly scoped preview automation. The existing CI startup issue remains recorded rather than silently declared fixed.
 
