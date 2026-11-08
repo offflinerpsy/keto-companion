@@ -107,5 +107,9 @@
     "GitHub-hosted startup_failure occurs before jobs even on echo-only workflow; root cause unavailable",
     "Intended member consent/allergy roundtrip and device/file/calendar acceptance remain manual gates",
     "Clinical suitability, appliance-specific kitchen trials and unknown flaws not established"
-  ]
+  ],
+  "github_pr": 14,
+  "merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0",
+  "repository_visibility": "PRIVATE",
+  "hosted_ci_blocker_issue": 13
 }

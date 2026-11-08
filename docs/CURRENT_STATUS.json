@@ -73,7 +73,9 @@
     "mobile_merge_commit": "b92f1bfd58b93785c115874be923bbeec0a3b3dd",
     "onboarding_pr": 9,
     "onboarding_merge_commit": "c1260f1e1d9cc3ce60f8c071b58c5f4216c579fe",
-    "kitchen_pr": 12
+    "kitchen_pr": 12,
+    "audit_pr": 14,
+    "audit_merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0"
   },
   "mobile_acceptance": "Owner previously reported dictation works; current complete real-device regression not performed by agent.",
   "mobile_source": {

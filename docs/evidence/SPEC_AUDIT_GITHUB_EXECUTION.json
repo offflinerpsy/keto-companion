@@ -67,5 +67,20 @@
   "Codex_GitHub_review": "Existing bot explicitly reports review usage limit on PR12; no credit purchase or repeated paid retry",
   "payment_settings_modified": false,
   "self_hosted_runner_registered": false,
-  "next_operator_action": "Inspect the linked run/account Actions startup restriction or ask GitHub Support using these run IDs; then rerun full synthetic workflow. Do not weaken tests or make repo public."
+  "next_operator_action": "Inspect the linked run/account Actions startup restriction or ask GitHub Support using these run IDs; then rerun full synthetic workflow. Do not weaken tests or make repo public.",
+  "latest_after_merge_runs": [
+    {
+      "id": 42484457576,
+      "event": "push",
+      "source_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0",
+      "conclusion": "startup_failure",
+      "url": "https://github.com/offflinerpsy/keto-companion/actions/runs/42484457576"
+    },
+    {
+      "id": 42484458573,
+      "event": "pull_request",
+      "conclusion": "startup_failure",
+      "url": "https://github.com/offflinerpsy/keto-companion/actions/runs/42484458573"
+    }
+  ]
 }
