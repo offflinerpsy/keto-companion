@@ -1,0 +1,235 @@
+{
+  "schema": "keto-spec-audit-findings-v1",
+  "task_id": "SPEC-AUDIT-07",
+  "baseline_commit": "ee4b42707e138f677fb32e9dfb4602a26c1b5b63",
+  "review_scope": {
+    "kind": "fresh independent bounded actual-source documentation/review",
+    "critical_paths": [
+      "service/domain.py",
+      "service/kitchen.py",
+      "service/planning.py",
+      "service/portion_search.py",
+      "service/mobile.py",
+      "service/speech.py",
+      "service/mobile_exports.py",
+      "service/edge_bridge.py",
+      "service/confirmation.py",
+      "service/entra.py",
+      "service/oauth_bridge.py",
+      "service/brain.py",
+      "service/recipe_brain.py",
+      "service/app.py",
+      "service/store.py",
+      "cloudflare-saas/src/worker.mjs",
+      "cloudflare-saas/src/compute.mjs",
+      "cloudflare-saas/src/deletion.mjs",
+      "cloudflare-saas/src/firebase-identity.mjs",
+      "cloudflare-saas/public/index.html",
+      "cloudflare-saas/public/app.js",
+      "cloudflare-saas/public/setup-ui.js",
+      "cloudflare-saas/public/setup-controls.js",
+      "cloudflare-saas/public/kitchen-ui.js",
+      "cloudflare-saas/public/mobile-ui.js",
+      "cloudflare-saas/public/media.js",
+      "cloudflare-saas/public/routes.js",
+      "cloudflare-saas/public/app.css",
+      "cloudflare-saas/public/firebase-login.js",
+      "cloudflare-saas/public/firebase-flow.js",
+      "cloudflare-saas/build.cjs",
+      "cloudflare-saas/knowledge.cjs",
+      ".github/workflows/ci.yml",
+      "library/skills/keto-companion/scripts/keto_core.py"
+    ],
+    "reproducers": "docs/spec/review_probes.py",
+    "runtime_code_changes": false,
+    "full_suites_run": false,
+    "browser_mcp_app_cloud_model_calls": false,
+    "source_snapshot_note": "docs/spec/SOURCE_STATUS.md"
+  },
+  "findings": [
+    {
+      "id": "SA07-01",
+      "severity": "P2",
+      "title_en": "Remaining carbohydrate budget appears complete after unquantified intake",
+      "title_ru": "Остаток углеводов выглядит известным при неполном дневнике",
+      "locations": [
+        {
+          "file": "service/kitchen.py",
+          "line": 427,
+          "symbol": "KitchenService.kitchen_card"
+        },
+        {
+          "file": "service/kitchen.py",
+          "line": 434,
+          "symbol": "remaining budget"
+        }
+      ],
+      "reproducer": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python docs/spec/review_probes.py; probe_unknown_diary_budget",
+      "steps": [
+        "Create a synthetic consented screened member with carb_max_g=40.",
+        "Confirm a diary.add for today with intake_status=unquantified and no recipe/grams.",
+        "Generate synthetic valid kitchen candidates and read first card budget."
+      ],
+      "observed": {
+        "unquantified_entries": 1,
+        "confirmed_logged_g": 0,
+        "remaining_g": 40.0
+      },
+      "expected": "Unknown intake must qualify the remaining budget as incomplete or unknown, rather than a known allowance for the whole day.",
+      "impact": "User or intent context can interpret an apparently full remaining allowance after eating an unweighed meal. This is a completeness/presentation bug, not proof of clinical harm.",
+      "recommendation": "Track all today entries when calculating completeness; return unknown/qualified remaining values when any intake is unquantified/estimated/unresolvable; keep known subtotal separate. Add mixed-known/unknown diary regression.",
+      "confidence": "high",
+      "evidence_level": "actual_service_synthetic",
+      "limitations": "No real intake or clinical outcome; budget is a product heuristic.",
+      "status": "baseline_reproduced; concurrent parent changes not independently reviewed"
+    },
+    {
+      "id": "SA07-02",
+      "severity": "P1",
+      "title_en": "Local-keyword classification skips Worker paid admission before kitchen design",
+      "title_ru": "Ключевое слово локального расчёта обходит платную квоту Worker перед генерацией кухни",
+      "locations": [
+        {
+          "file": "cloudflare-saas/src/compute.mjs",
+          "line": 70,
+          "symbol": "localEstimate/paid"
+        },
+        {
+          "file": "service/domain.py",
+          "line": 274,
+          "symbol": "Service.chat kitchen dispatch before _chat"
+        },
+        {
+          "file": "service/kitchen.py",
+          "line": 635,
+          "symbol": "KitchenService.kitchen_chat"
+        }
+      ],
+      "reproducer": "Same command; probe_chat_quota_classification",
+      "steps": [
+        "Use message: Рассчитай ужин: есть яйца, кабачок и шампиньоны; без покупок за 20 минут.",
+        "Evaluate the baseline Worker localEstimate predicate verbatim.",
+        "Call actual Service.chat with consent and a fake offline designer that records attempts."
+      ],
+      "observed": {
+        "worker_paid_reservation": 0,
+        "synthetic_designer_attempts": 1,
+        "service_model_called": true
+      },
+      "expected": "Every request able to reach a provider must reserve member/global paid admission before dispatch.",
+      "impact": "Mixed kitchen/calculation wording can bypass Worker 30/member and 500/global admission; service-side default 60-call limit still exists. This does not establish unlimited access or a provider invoice.",
+      "recommendation": "Reserve conservative chat admission before bridge; refund only when trusted response confirms no model call, or use a server-owned deterministic operation classification. Add actual Worker-at-cap mixed-message regression.",
+      "confidence": "high",
+      "evidence_level": "source_predicate_plus_actual_dispatcher_synthetic",
+      "limitations": "No full Worker/database at-cap E2E and no real provider call.",
+      "status": "baseline_reproduced; concurrent parent changes not independently reviewed"
+    },
+    {
+      "id": "SA07-03",
+      "severity": "P2",
+      "title_en": "Saved shopping subtracts batch stock from per-person plan needs",
+      "title_ru": "Покупки сохранённого плана вычитают кладовую всего блюда из потребности одной порции",
+      "locations": [
+        {
+          "file": "service/kitchen.py",
+          "line": 312,
+          "symbol": "KitchenService.kitchen_shopping"
+        },
+        {
+          "file": "service/kitchen.py",
+          "line": 404,
+          "symbol": "plan_pantry snapshot"
+        },
+        {
+          "file": "service/kitchen.py",
+          "line": 508,
+          "symbol": "kitchen_day portions=1"
+        }
+      ],
+      "reproducer": "Same command; probe_batch_shopping",
+      "steps": [
+        "Build actual validated two-serving omelette draft using egg 200g and zucchini 240g.",
+        "Use pantry egg 100g and zucchini 120g.",
+        "Read actual card missing list: egg 100g + zucchini 120g.",
+        "Use the same portions=1 meal representation saved by kitchen_day and its batch pantry snapshot; call actual kitchen_shopping."
+      ],
+      "observed": {
+        "whole_batch_missing": [
+          {
+            "food_id": "F171287",
+            "grams_edible": 100.0
+          },
+          {
+            "food_id": "F169291",
+            "grams_edible": 120.0
+          }
+        ],
+        "saved_plan_shopping": []
+      },
+      "expected": "Retain batch-servings semantics for shopping/export separately from per-person nutrient plan; do not lose the previously disclosed shortage.",
+      "impact": "Shopping after save and PDF shopping can omit ingredients for additional eaters or show inconsistent amounts relative to the Studio batch.",
+      "recommendation": "Store and apply accepted plan serving count when constructing shopping; keep nutrition per person. Add a fully accepted multi-serving day/export regression.",
+      "confidence": "high",
+      "evidence_level": "actual_component_functions_with_saved_day_representation",
+      "limitations": "Not a complete accepted-day E2E; plan representation intentionally constructed synthetically.",
+      "status": "baseline_reproduced; concurrent parent changes not independently reviewed"
+    },
+    {
+      "id": "SA07-04",
+      "severity": "P1",
+      "title_en": "Profile editor drops saved allergens absent from its checkbox list",
+      "title_ru": "Анкета удаляет сохранённые аллергены, которых нет в её checkbox-списке",
+      "locations": [
+        {
+          "file": "cloudflare-saas/public/app.js",
+          "line": 16,
+          "symbol": "ALLERGENS"
+        },
+        {
+          "file": "cloudflare-saas/public/app.js",
+          "line": 62,
+          "symbol": "fillOnboard"
+        },
+        {
+          "file": "cloudflare-saas/public/app.js",
+          "line": 77,
+          "symbol": "profile-form submit"
+        },
+        {
+          "file": "library/skills/keto-companion/scripts/keto_core.py",
+          "line": 21,
+          "symbol": "ALLERGENS"
+        }
+      ],
+      "reproducer": "Same command; probe_allergen_editor_projection",
+      "steps": [
+        "Save a supported mustard allergy through actual service proposal/apply.",
+        "Derive visible checkbox IDs from baseline app.js ALLERGENS.",
+        "Project saved allergies into those checkboxes as fillOnboard does.",
+        "Submit checked IDs plus an unrelated display-name edit through actual proposal/apply."
+      ],
+      "observed": {
+        "saved_before": [
+          "mustard"
+        ],
+        "visible_checkbox_count": 11,
+        "submitted_allergies": [],
+        "saved_after": []
+      },
+      "expected": "An unrelated form edit preserves all saved canonical allergens; every supported allergen must be editable or retained until explicit removal.",
+      "impact": "Existing mustard/mollusc/gluten/lupin/sulfite restrictions can disappear from a confirmed profile round trip, allowing later recipes containing the lost allergen. No actual exposure or clinical harm was tested.",
+      "recommendation": "Render all canonical allergens and preserve unknown/unrepresented saved values until explicitly reviewed/removed; show removals clearly in confirmation. Add round-trip tests over all 16 values and unrelated edits.",
+      "confidence": "high",
+      "evidence_level": "source_derived_form_projection_plus_actual_service_apply",
+      "limitations": "No rendered DOM/browser; user still confirms the generated profile proposal.",
+      "status": "baseline_reproduced; concurrent parent changes not independently reviewed"
+    }
+  ],
+  "limitations": [
+    "Four baseline synthetic observations only; no repeated audit of concurrent parent fixes.",
+    "No full suites/build, CI dispatch, live cloud/runtime, real user/device/browser or clinical validation.",
+    "Source-derived UI projection is not rendered DOM evidence; quota and batch probes have explicit component-level boundaries.",
+    "Reported GitHub hosted startup failure exact cause unknown; prior Codex GitHub review usage limit is separate.",
+    "Source registry references were inspected locally; no new paper retrieval or independent clinical evidence appraisal."
+  ]
+}

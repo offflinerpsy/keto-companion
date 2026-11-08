@@ -1,0 +1,407 @@
+{
+  "schema": "keto-requirement-matrix-v1",
+  "task_id": "SPEC-AUDIT-07",
+  "baseline_commit": "ee4b42707e138f677fb32e9dfb4602a26c1b5b63",
+  "coverage_guarantee": false,
+  "test_execution": "Only docs/spec/review_probes.py observations executed by this review; linked suites not run",
+  "requirements": [
+    {
+      "id": "FR-01",
+      "title": "Membership and private isolation",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "cloudflare-saas/src/worker.mjs",
+        "cloudflare-saas/src/firebase-identity.mjs",
+        "cloudflare-saas/src/compute.mjs"
+      ],
+      "test_paths": [
+        "cloudflare-saas/tests/worker.test.mjs"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-02",
+      "title": "Own consent and revocation",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/domain.py",
+        "cloudflare-saas/src/compute.mjs"
+      ],
+      "test_paths": [
+        "tests/test_service.py",
+        "cloudflare-saas/tests/worker.test.mjs"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-03",
+      "title": "Guided onboarding",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/planning.py",
+        "cloudflare-saas/public/setup-ui.js",
+        "cloudflare-saas/public/app.js"
+      ],
+      "test_paths": [
+        "tests/test_planning.py",
+        "cloudflare-saas/tests/setup.test.mjs"
+      ],
+      "current_status": "implemented_source_with_review_finding",
+      "findings": [
+        "SA07-04"
+      ],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-04",
+      "title": "Energy and targets",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/planning.py",
+        "library/skills/keto-companion/scripts/keto_core.py"
+      ],
+      "test_paths": [
+        "tests/test_planning.py",
+        "tests/test_portion_search.py"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-05",
+      "title": "Reference cookbook",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/domain.py",
+        "service/mobile.py"
+      ],
+      "test_paths": [
+        "tests/test_service.py",
+        "tests/test_mobile.py"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-06",
+      "title": "Pantry modes",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/kitchen.py",
+        "service/data/kitchen_policy.json"
+      ],
+      "test_paths": [
+        "tests/test_kitchen.py",
+        "tests/test_kitchen_parent.py"
+      ],
+      "current_status": "implemented_source_with_review_finding",
+      "findings": [
+        "SA07-03"
+      ],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-07",
+      "title": "Meal day and equipment",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/kitchen.py",
+        "service/data/kitchen_policy.json"
+      ],
+      "test_paths": [
+        "tests/test_kitchen_appliances.py",
+        "tests/test_kitchen_release.py"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-08",
+      "title": "Grounded new recipes",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/recipe_brain.py",
+        "service/kitchen.py"
+      ],
+      "test_paths": [
+        "tests/test_kitchen.py"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-09",
+      "title": "Proposals and confirmation",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/domain.py",
+        "service/confirmation.py",
+        "cloudflare-saas/src/compute.mjs"
+      ],
+      "test_paths": [
+        "tests/test_service.py",
+        "tests/test_edge_bridge.py"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-10",
+      "title": "Diary and portions",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/kitchen.py",
+        "library/skills/keto-companion/scripts/keto_core.py"
+      ],
+      "test_paths": [
+        "tests/test_kitchen_parent.py",
+        "tests/test_mobile.py"
+      ],
+      "current_status": "implemented_source_with_review_finding",
+      "findings": [
+        "SA07-01"
+      ],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-11",
+      "title": "Shared preferences and forgetting",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/kitchen.py",
+        "cloudflare-saas/public/kitchen-ui.js"
+      ],
+      "test_paths": [
+        "tests/test_kitchen.py",
+        "tests/test_kitchen_parent.py"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-12",
+      "title": "Bounded topics and recall",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/mobile.py",
+        "service/kitchen.py"
+      ],
+      "test_paths": [
+        "tests/test_mobile.py",
+        "tests/test_kitchen.py"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-13",
+      "title": "Dictation",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/speech.py",
+        "cloudflare-saas/public/media.js",
+        "cloudflare-saas/public/mobile-ui.js"
+      ],
+      "test_paths": [
+        "tests/test_mobile.py",
+        "tests/test_mobile_parent_review.py",
+        "cloudflare-saas/tests/media.test.mjs"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-14",
+      "title": "Photos and private sources",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/app.py",
+        "service/edge_bridge.py",
+        "cloudflare-saas/src/worker.mjs"
+      ],
+      "test_paths": [
+        "tests/test_edge_bridge.py",
+        "cloudflare-saas/tests/worker.test.mjs"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-15",
+      "title": "Export share import",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/mobile_exports.py",
+        "service/domain.py",
+        "cloudflare-saas/public/mobile-ui.js"
+      ],
+      "test_paths": [
+        "tests/test_mobile.py",
+        "tests/test_kitchen.py"
+      ],
+      "current_status": "implemented_source_with_review_finding",
+      "findings": [
+        "SA07-03"
+      ],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-16",
+      "title": "Reminders and ICS",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "service/mobile.py",
+        "service/mobile_exports.py"
+      ],
+      "test_paths": [
+        "tests/test_mobile.py"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-17",
+      "title": "Deletion and quotas",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "cloudflare-saas/src/deletion.mjs",
+        "cloudflare-saas/src/compute.mjs"
+      ],
+      "test_paths": [
+        "cloudflare-saas/tests/worker.test.mjs"
+      ],
+      "current_status": "implemented_source_with_review_finding",
+      "findings": [
+        "SA07-02"
+      ],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-18",
+      "title": "Interface and navigation",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "cloudflare-saas/public/routes.js",
+        "cloudflare-saas/public/app.css",
+        "cloudflare-saas/public/index.html"
+      ],
+      "test_paths": [
+        "cloudflare-saas/tests/setup.test.mjs",
+        "cloudflare-saas/tests/static.test.mjs",
+        "cloudflare-saas/tests/kitchen.test.mjs"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    },
+    {
+      "id": "FR-19",
+      "title": "Separate releases",
+      "spec": "docs/spec/PRODUCT.md",
+      "source_paths": [
+        "cloudflare-saas/build.cjs",
+        "service/entra.py",
+        "service/oauth_bridge.py",
+        ".github/workflows/ci.yml"
+      ],
+      "test_paths": [
+        "tests/test_oauth_bridge.py",
+        "tests/test_edge_ed25519.py",
+        "cloudflare-saas/tests/static.test.mjs"
+      ],
+      "current_status": "implemented_source_acceptance_partial",
+      "findings": [],
+      "unverified": [
+        "exact deployed build",
+        "physical device/browser acceptance",
+        "clinical acceptance where applicable"
+      ]
+    }
+  ]
+}

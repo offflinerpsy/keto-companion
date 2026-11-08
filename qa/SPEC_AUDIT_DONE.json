@@ -1,0 +1,193 @@
+{
+  "schema": "keto-spec-audit-done-v1",
+  "task_id": "SPEC-AUDIT-07",
+  "status": "completed",
+  "stage": "bounded_source_documentation_and_independent_review",
+  "baseline_commit": "ee4b42707e138f677fb32e9dfb4602a26c1b5b63",
+  "completed_at": "2026-11-08T13:11:33.301873+00:00",
+  "completion_boundary": "Assigned documentation/review files complete. Parent code/CI/cloud/device/family acceptance is separate and unverified by this reviewer.",
+  "created_files": [
+    "docs/en/AI_DESIGN_HANDOFF.md",
+    "docs/ru/AI_DESIGN_HANDOFF.md",
+    "docs/spec/AI_AND_MEMORY.md",
+    "docs/spec/API_AND_ACTIONS.md",
+    "docs/spec/ARCHITECTURE.md",
+    "docs/spec/BASELINE_SOURCE_MANIFEST.json",
+    "docs/spec/DATA_MODEL.md",
+    "docs/spec/DESIGN_SYSTEM.md",
+    "docs/spec/NUTRITION_RULES.md",
+    "docs/spec/OPERATIONS.md",
+    "docs/spec/PRODUCT.md",
+    "docs/spec/QA_RELEASE.md",
+    "docs/spec/README.md",
+    "docs/spec/ROADMAP_AND_GAPS.md",
+    "docs/spec/RU_INDEX.md",
+    "docs/spec/SCREEN_MAP.md",
+    "docs/spec/SECURITY_PRIVACY.md",
+    "docs/spec/SOURCE_STATUS.md",
+    "docs/spec/TEST_INVENTORY.md",
+    "docs/spec/UI_CONTRACTS.json",
+    "docs/spec/UI_CONTRACTS.md",
+    "docs/spec/USER_FLOWS.md",
+    "docs/spec/requirement_matrix.json",
+    "docs/spec/review_probes.py",
+    "qa/SPEC_AUDIT_DONE.json",
+    "qa/SPEC_AUDIT_FINDINGS.json"
+  ],
+  "brief_counts": {
+    "markdown_files": 20,
+    "markdown_lines": 3555,
+    "functional_requirements": 19,
+    "static_ui_contract_rows": 232,
+    "test_inventory_files": 23,
+    "test_functions_or_literal_node_registrations": 373,
+    "test_inventory_is_executed_test_count": false,
+    "baseline_source_manifest_files": 44,
+    "findings": 4,
+    "P0": 0,
+    "P1": 2,
+    "P2": 2,
+    "P3": 0
+  },
+  "review_coverage": {
+    "manual_source_review": [
+      "service/domain.py",
+      "service/kitchen.py",
+      "service/planning.py",
+      "service/portion_search.py",
+      "service/mobile.py",
+      "service/speech.py",
+      "service/mobile_exports.py",
+      "service/edge_bridge.py",
+      "service/confirmation.py",
+      "service/entra.py",
+      "service/oauth_bridge.py",
+      "service/app.py",
+      "service/brain.py",
+      "service/recipe_brain.py",
+      "service/store.py",
+      "cloudflare-saas/src/worker.mjs",
+      "cloudflare-saas/src/compute.mjs",
+      "cloudflare-saas/src/deletion.mjs",
+      "cloudflare-saas/src/firebase-identity.mjs",
+      "cloudflare-saas/public/app.js",
+      "cloudflare-saas/public/setup-ui.js",
+      "cloudflare-saas/public/setup-controls.js",
+      "cloudflare-saas/public/kitchen-ui.js",
+      "cloudflare-saas/public/mobile-ui.js",
+      "cloudflare-saas/public/media.js",
+      "cloudflare-saas/public/routes.js",
+      "cloudflare-saas/public/firebase-login.js",
+      "cloudflare-saas/public/firebase-flow.js",
+      "library/skills/keto-companion/scripts/keto_core.py",
+      ".github/workflows/ci.yml"
+    ],
+    "structural_and_reference_review": [
+      "Static index forms/pages/dialogs/selectors, maintained CSS, build packaging",
+      "Four SQL migrations; kitchen policy; local food/recipe/source registries",
+      "Existing test fixtures/names and selected assertions; no coverage measurement",
+      "Deployment/font/repository script entry points only; no external execution"
+    ],
+    "not_claimed": [
+      "Full repository security audit",
+      "All test assertions manually reviewed",
+      "Independent verification of concurrent parent fixes",
+      "Live release or clinical validation"
+    ]
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python docs/spec/review_probes.py",
+      "result": "exit 0; original direct-baseline-source version executed SA07-01,02,03 once",
+      "observations": {
+        "SA07-01": {
+          "unquantified_entries": 1,
+          "remaining_g": 40.0,
+          "confirmed_logged_g": 0
+        },
+        "SA07-02": {
+          "worker_predicate_paid": 0,
+          "fake_designer_attempts": 1
+        },
+        "SA07-03": {
+          "batch_missing_egg_g": 100.0,
+          "batch_missing_zucchini_g": 120.0,
+          "saved_shopping": []
+        }
+      }
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python; runpy.run_path(review_probes.py), probe_allergen_editor_projection only",
+      "result": "exit 0; SA07-04 executed once",
+      "observations": {
+        "saved_before": [
+          "mustard"
+        ],
+        "visible_checkbox_count": 11,
+        "saved_after": []
+      }
+    },
+    {
+      "command": "Documentation JSON parsing, Python AST parsing, relative link/requirement path checks",
+      "result": "25 existing files checked; 818 relative links; 19 requirements; zero errors before completion receipt creation"
+    },
+    {
+      "command": "Source baseline line lookup and git-object SHA-256 extraction",
+      "result": "44 source/migration fingerprints; concurrent parent differences recorded, not accepted fixes"
+    },
+    {
+      "command": "node --version; .venv/bin/python --version",
+      "result": "v26.3.1; Python 3.12.12"
+    }
+  ],
+  "reproduction_runner_note": "After parent changed runtime source, a read-only git-show baseline loader was added to review_probes.py. Its syntax was checked, but no second audit run was performed. Original direct-source observations are the execution receipts above.",
+  "failures": [],
+  "limitations": [
+    "No full regression/build/CI/browser/MCP/app/cloud/provider execution.",
+    "No real users, health data, credentials or auth stores accessed.",
+    "Quota classification and batch shopping use explicitly scoped component-level reproductions; allergy editor uses source-derived form projection, not DOM.",
+    "Parent changed runtime/CI/generated files during documentation; baseline findings remain historical to the exact commit until parent reconciles its fixes.",
+    "GitHub hosted startup failure exact cause unknown; no billing inference.",
+    "Only family staging is reported in task context; current target not refreshed.",
+    "No device, cooking or clinical validation."
+  ],
+  "source_of_truth": "docs/spec/README.md; docs/spec/SOURCE_STATUS.md; docs/spec/BASELINE_SOURCE_MANIFEST.json",
+  "scope_preservation": {
+    "runtime_or_ci_or_cloud_or_global_config_written_by_reviewer": false,
+    "recovery_state_updated_by_reviewer": false,
+    "subagents_started": 0,
+    "browser_mcp_app_clients_started": 0,
+    "installs": 0,
+    "git_write_commands": 0,
+    "cloud_effects": "not_delivered; no attempts",
+    "new_persistent_runtime_or_servers": 0
+  },
+  "next_action": "Parent reconciles SA07-01..04 with its own code/CI fixes and final regression receipts before family acceptance.",
+  "artifact_sha256_excluding_this_receipt": {
+    "docs/en/AI_DESIGN_HANDOFF.md": "74fde6820d728de76b01e29c009fdf45fa5a21bed827113c95ed2d5ad7d36950",
+    "docs/ru/AI_DESIGN_HANDOFF.md": "21a2a8fde6c357a536fc0342174b1c5549891d0ecbc082bfc8f49d1deba2f0b6",
+    "docs/spec/AI_AND_MEMORY.md": "8cb26dc091118f028490d1775bc7d1e516d5adfc239734cb789d3444bb3e8b0a",
+    "docs/spec/API_AND_ACTIONS.md": "ee9e58173f3a193cd66d2ee0eb38da04e1a63d39d5a8730f5c48731eb3290afd",
+    "docs/spec/ARCHITECTURE.md": "59463da390bc664df87372ecfd8825e143ff1d9c0ebcaa0b5d1b5db94aa4645d",
+    "docs/spec/BASELINE_SOURCE_MANIFEST.json": "2b758274e28a6839cfd2b3be16acd2b2ff306f31ca0a72aaef5cad641f683ea0",
+    "docs/spec/DATA_MODEL.md": "8791c8cf728c80d31a8b6870f04fccd8893e9e1313b3c1678e25201ade2cfc11",
+    "docs/spec/DESIGN_SYSTEM.md": "a70237ba5ace400299153d709f257e548d696d920091e863fb75fd8cf5548bd7",
+    "docs/spec/NUTRITION_RULES.md": "67c519f1734369ba1d429adb33659b9350e1fed05b6cc3b5facde3a3ceebfffe",
+    "docs/spec/OPERATIONS.md": "9ed2cdceaa7fd3f2c33506b566c007d94bdff306a5b7090d43bbf940f057cbdc",
+    "docs/spec/PRODUCT.md": "ea048836c6142ceadee33afd04886c92c5bec1953cc756e2179cb1e032e22272",
+    "docs/spec/QA_RELEASE.md": "c049404013a8caf3cf35c800e1a20f9d63d04b9dca8c61d743b94d6257298227",
+    "docs/spec/README.md": "ee9673fda321989a85413d1441c389b7c2c2e8a0df8be2f99428930c3856f674",
+    "docs/spec/ROADMAP_AND_GAPS.md": "7ca5f67ad8a0ad63772117b0f35821bb4843c4ee17ffbf3d8b544167b235885c",
+    "docs/spec/RU_INDEX.md": "918e0665afa79a1f8666a24dabafeb032d6eafe1efacefc7c405fd77bf7b5143",
+    "docs/spec/SCREEN_MAP.md": "c41825c24b5ea322193cede3dbc4c04a2853af473944225561da44f6ff7fb0ca",
+    "docs/spec/SECURITY_PRIVACY.md": "3b5e251ffa44a578d52ea126ee283cf6407d51565ebab5d7136c8ffdf2219e44",
+    "docs/spec/SOURCE_STATUS.md": "8c48edc32fe4cc13d876b70153643654698f48233643382fb635dc31cec5f08c",
+    "docs/spec/TEST_INVENTORY.md": "5ecb18998e34dd6b3e3b14e27a69f49abb4b533e97431116d4396fab2d091155",
+    "docs/spec/UI_CONTRACTS.json": "786a86d44ab2795944acbb3cc91a39f47fdcc0279114073aa61750ea9c03c899",
+    "docs/spec/UI_CONTRACTS.md": "2e3f5983f34add44244c503c1dd71cb4ed52a89a42dd486552a244018e252cb5",
+    "docs/spec/USER_FLOWS.md": "ab063fbc72ebd6a1643868e1e555ac3b14cccf6c7e571ef6417cea89aaba732f",
+    "docs/spec/requirement_matrix.json": "975f7344c4744e75cfc75aa33ebe5d0e87367fe428489a6a0a3b56cf4d70d02c",
+    "docs/spec/review_probes.py": "7c7b5f85a019f79ba807765c2c04af80d9fce47b1a07127061b97d279f0c0a89",
+    "qa/SPEC_AUDIT_FINDINGS.json": "8c3477412af0436b322a9e3836b9f6b5e453643b24e8ec30dc0e0d3caf0d643b"
+  }
+}
