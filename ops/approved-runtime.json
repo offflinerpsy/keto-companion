@@ -1,0 +1,11 @@
+{
+  "account": "0609100baf768271ea2811c9a9ee2b16",
+  "worker": "keto-companion-developer-runner",
+  "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+  "baseline": "745f5a9df62804c5acd481bdbe8028eaebcc99c56dc45069f502d6c38fa20ad1",
+  "image_digest": "sha256:7da7876c0ebda038d68be79c803ab68a4d35de555147ff8515604dcfc2c99e2d",
+  "instance_type": "standard-1",
+  "max_instances": 1,
+  "acceptance_build": "d57f38b9-bb0b-4c88-98c7-f181d463da74",
+  "scope": "Existing immutable runtime only; a different source baseline needs separately approved image release. No app personal data."
+}

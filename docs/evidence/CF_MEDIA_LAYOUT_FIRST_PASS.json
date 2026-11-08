@@ -1,0 +1,44 @@
+{
+  "scope": "RemoteChromium geometry on deployed0.6.2base plus exact candidate0.7media controls/CSS; no applicationJS/auth",
+  "cases": [
+    {
+      "viewport": [
+        440,
+        956
+      ],
+      "link_open": false,
+      "overlap": false
+    },
+    {
+      "viewport": [
+        375,
+        812
+      ],
+      "link_open": true,
+      "composer_bottom": 897.23,
+      "nav_top": 749,
+      "overlap": true
+    },
+    {
+      "viewport": [
+        440,
+        540
+      ],
+      "large_dark": true,
+      "link_open": true,
+      "composer_bottom": 921.52,
+      "nav_top": 487,
+      "overlap": true
+    },
+    {
+      "viewport": [
+        1280,
+        900
+      ],
+      "link_open": true,
+      "overlap": false
+    }
+  ],
+  "fix": "Move URL loader out of composer into top-layer scrollable dialog; close/reset invalidate late image response; hide redundant drop hint on narrow view unless dragging",
+  "final_retest_pending": true
+}

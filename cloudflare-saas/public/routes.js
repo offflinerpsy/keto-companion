@@ -1,4 +1,4 @@
-export const ROUTES=['chat','today','diary','more','recipes','settings','sources','reminders','admin','targets','knowledge','memory','setup-consent','setup-about','setup-restrictions','setup-targets'];
+export const ROUTES=['chat','today','diary','more','recipes','settings','sources','reminders','admin','developer','targets','knowledge','memory','setup-consent','setup-about','setup-restrictions','setup-targets'];
 const MAIN=['chat','today','diary','more'];
 export function routeValue(hash,fallback='chat'){const value=String(hash||'').replace(/^#/,'');return ROUTES.includes(value)?value:fallback}
 export function initialRoute(state,hash){const g=state.guidance;if(g&&!g.ready){if(routeValue(hash,'')==='recipes')return 'recipes';return 'setup-'+g.stage}return routeValue(hash,state.ui?.home||'chat')}

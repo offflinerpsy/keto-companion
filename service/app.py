@@ -56,15 +56,15 @@ TOOL_MAP={x['name']:x for x in TOOLS}
 
 def image_clean(value):
     if value is None:return None
-    from PIL import Image
-    if not isinstance(value,str) or not value.startswith(('data:image/png;base64,','data:image/jpeg;base64,')):raise InputError('Нужно фото JPEG или PNG, не ссылка и не SVG')
+    from PIL import Image,ImageOps
+    if not isinstance(value,str) or not value.startswith(('data:image/png;base64,','data:image/jpeg;base64,','data:image/webp;base64,','data:image/gif;base64,')):raise InputError('Нужно фото JPEG, PNG, WebP или GIF, не страница и не SVG')
     try:raw=base64.b64decode(value.split(',',1)[1],validate=True)
     except Exception as e:raise InputError('Повреждённое фото') from e
     if len(raw)>1_000_000:raise InputError('Сожмите фото до 1 МБ')
     try:
         im=Image.open(io.BytesIO(raw))
-        if im.format not in ('JPEG','PNG') or im.width*im.height>8_000_000:raise InputError('Слишком большое изображение')
-        im.load();im=im.convert('RGB');im.thumbnail((1024,1024));buf=io.BytesIO();im.save(buf,format='JPEG',quality=82)
+        if im.format not in ('JPEG','PNG','WEBP','GIF') or im.width*im.height>8_000_000:raise InputError('Слишком большое изображение')
+        im.seek(0);im.load();im=ImageOps.exif_transpose(im).convert('RGB');im.thumbnail((1024,1024));buf=io.BytesIO();im.save(buf,format='JPEG',quality=82)
     except InputError:raise
     except Exception as e:raise InputError('Не удалось прочитать фото') from e
     return 'data:image/jpeg;base64,'+base64.b64encode(buf.getvalue()).decode()

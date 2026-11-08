@@ -1,0 +1,10 @@
+{
+  "last_nested_attempt": "e36e994f-e3a3-4ee9-9036-dc292affc322",
+  "full_CI_passed": true,
+  "trusted_image_build_passed": true,
+  "exact_failure": "/sys/fs/cgroup/user.slice/user-2500.slice/cgroup.controllers unavailable; Docker run cannot start in this Builds runtime",
+  "decision": "Build and push the reviewed immutable image in Cloudflare Builds. Gate main binding on actual Cloudflare Container RPC acceptance, not nested Docker.",
+  "acceptance": "One fixed synthetic help-only patch, six-minute temporary token-gated service probe, no real account/DB/R2, explicit deletion; all four fixed tests and exact hashes required. No candidate egress exception.",
+  "fallback_to_unisolated_execution": false,
+  "permission_expansion": false
+}

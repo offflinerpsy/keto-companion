@@ -1,0 +1,41 @@
+{
+  "scope": "Remote Chromium geometry: deployed baseline public markup/styles plus exact0.7 media/dialog controls and CSS; no appJS/backend/account",
+  "viewports": [
+    {
+      "w": 440,
+      "h": 956,
+      "owner": true,
+      "large_dark": false,
+      "open_dialog": false,
+      "messages_px": 381.27
+    },
+    {
+      "w": 375,
+      "h": 812,
+      "owner": false,
+      "large_dark": false,
+      "open_dialog": true,
+      "messages_px": 292.02
+    },
+    {
+      "w": 440,
+      "h": 540,
+      "owner": true,
+      "large_dark": true,
+      "open_dialog": true,
+      "messages_px": 74.02
+    },
+    {
+      "w": 1280,
+      "h": 900,
+      "owner": true,
+      "large_dark": false,
+      "open_dialog": true,
+      "messages_px": 300.16
+    }
+  ],
+  "all_no_horizontal_overflow": true,
+  "all_composer_outside_bottom_nav": true,
+  "all_dialogs_fit_viewport": true,
+  "physical_iPhone": false
+}

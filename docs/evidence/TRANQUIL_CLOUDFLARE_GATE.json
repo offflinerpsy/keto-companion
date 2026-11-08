@@ -1,0 +1,52 @@
+{
+  "status": "passed_standard_pinned_promotion_and_public_readback",
+  "latest_verified_build": "2185581c-26fd-49c0-b93c-df4dabc8c3e9",
+  "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
+  "python_passed": 524,
+  "node_passed": 146,
+  "fixed_gate_stages": 16,
+  "seconds": 141.64,
+  "GitHub_Actions_required": false,
+  "actual_cloud_container_acceptance": true,
+  "candidate_fixed_stages": [
+    {
+      "name": "syntax",
+      "exit_code": 0
+    },
+    {
+      "name": "build",
+      "exit_code": 0
+    },
+    {
+      "name": "product",
+      "exit_code": 0,
+      "passed_count": 14
+    },
+    {
+      "name": "python",
+      "exit_code": 0,
+      "passed_count": 17
+    }
+  ],
+  "candidate_application": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+  "baseline": "745f5a9df62804c5acd481bdbe8028eaebcc99c56dc45069f502d6c38fa20ad1",
+  "image_digest": "sha256:7da7876c0ebda038d68be79c803ab68a4d35de555147ff8515604dcfc2c99e2d",
+  "max_instances": 1,
+  "internet_access": false,
+  "temporary_probe_deleted": true,
+  "live_runner_bindings_verified": [
+    "plain_text",
+    "plain_text",
+    "durable_object_namespace"
+  ],
+  "container_environment_variables": 0,
+  "container_authorized_keys": 0,
+  "published_app_version": "62b7714e0d1c4b6fa1e26660fccc537a",
+  "published_main_module_sha256": "4e59920d178db5b78ea5aeee3cf62b4d09e714e0cf5d808634c018ed138d7a68",
+  "default_build_trigger_restored": "python scripts/cloudflare_ci.py -> KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+  "old_image_rollout_flag_removed": true,
+  "operator_pin_unit_tests": 3,
+  "next_gate": null,
+  "prior_image_rollout_build": "d57f38b9-bb0b-4c88-98c7-f181d463da74",
+  "runtime_rebuild_in_final_promotion": false
+}

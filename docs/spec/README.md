@@ -1,6 +1,8 @@
 # KETO Companion: source specification
 
-> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+Current source: **0.7.1-tranquil-dev-pilot**. Read [developer and media pilot](DEVELOPER_MEDIA_PILOT.md) for the current implementation, parent release boundary and exact limitations. The audit below remains pinned to its historical baseline.
+
+> Historical audit specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
 
 SPEC-AUDIT-07 · independent source review · 2026-11-08.
 Baseline: `ee4b42707e138f677fb32e9dfb4602a26c1b5b63` (`release0.6.1`).
@@ -101,3 +103,7 @@ Do not interpret document completion as absence of defects or permission to rele
 ## Proposed additions — not deployed
 
 [Instagram personal import and chat-assisted development](INSTAGRAM_IMPORT_AND_ASSISTED_DEVELOPMENT.md) · [Русский](../ru/INSTAGRAM_AND_DEV_MODE.md). This is a feasibility/design decision, not an enabled Instagram connector or coding runner.
+
+## Supplied visual system and release
+
+[Tranquil Dawn source](../design/DESIGN.md) · [Explicit adaptations](../design/IMPLEMENTATION.md) · [RU guide](../ru/TRANQUIL_DAWN.md) · [EN guide](../en/TRANQUIL_DAWN.md). Current full CI executes in Cloudflare, not GitHub Actions; historical GitHub startup failures are not an active required pipeline. Developer mode remains owner-enabled, bounded to three UI sources and private preview/diff; no automatic publication or private social-account reading is claimed.

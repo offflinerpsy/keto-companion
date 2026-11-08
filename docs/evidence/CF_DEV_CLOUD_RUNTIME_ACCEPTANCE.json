@@ -1,0 +1,42 @@
+{
+  "task": "CF-DEV-MEDIA-08",
+  "build_uuid": "ea73e12b-ba11-440d-84fe-4c7f5db4731f",
+  "source_commit": "726b2cbbbdb9a4598e1c8119631f11c04d70b63d",
+  "baseline": "84a008469080307dd23ae3d0ec86b77134aef1f99bdeff9e3780633217e24bd8",
+  "image_digest": "sha256:e8767f24fd63eaa69805742a613368fb714833ed15ad03c47fddc596293b1444",
+  "patch_hash": "0866f90c88df9925e568155adc0aed23d5071c9b2b55c7a02621d58cd8a8dad1",
+  "status": "passed",
+  "scope": "actual private Cloudflare Container through service RPC; one fixed synthetic UI patch; no owner session, app data or model request",
+  "stages": [
+    {
+      "name": "syntax",
+      "exit_code": 0
+    },
+    {
+      "name": "build",
+      "exit_code": 0
+    },
+    {
+      "name": "product",
+      "exit_code": 0,
+      "passed_count": 14
+    },
+    {
+      "name": "python",
+      "exit_code": 0,
+      "passed_count": 17
+    }
+  ],
+  "temporary_probe_deleted": true,
+  "no_database_or_R2_binding": true,
+  "full_gate": {
+    "python_passed": 522,
+    "node_passed": 145,
+    "stages": 16,
+    "seconds": 174.96,
+    "GitHub_Actions_required": false
+  },
+  "first_runtime_attempt_failed": true,
+  "first_runtime_error_exact_cause": "Not recorded by original wrapper; identical immutable image subsequently passed without code changes. No claim of identified transient platform cause.",
+  "main_site_published_by_this_diagnostic": false
+}

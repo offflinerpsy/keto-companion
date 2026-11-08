@@ -1,0 +1,221 @@
+{
+  "schema": "keto-continuation-state-v1",
+  "updated_at": "2026-11-08T18:12:07.019088+00:00",
+  "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
+  "version": "0.7.1-tranquil-dev-pilot",
+  "active_task": {
+    "id": "CF-DEV-MEDIA-08",
+    "github_issue": 16,
+    "stage": "final_standard_pinned_build_running",
+    "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
+    "build_uuid": "2185581c-26fd-49c0-b93c-df4dabc8c3e9",
+    "next_action": "Read only this build. On success preserve receipt and mergePR17. No new models/agents/runtime images/duplicate build. The deployed13fcf93assets already passed75interactions and39layout checks."
+  },
+  "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
+  "next_task": null,
+  "source_archive": {
+    "path": "deliverables/saas-identity-source.tar.gz",
+    "sha256": "4c881831908438751fa4a0277754f430d18cf4d85804a81e468347a26d69a2ff"
+  },
+  "test_boundaries": {
+    "runtime": "5.20260926.0-alpha",
+    "compatibility_date_tested": "2026-10-03",
+    "production_compatibility_date_unverified": "2026-11-07",
+    "real_google_signin_verified": false,
+    "browser_or_voice_verified": false,
+    "clinical_validation": false,
+    "cloud_changes_this_recovery": false
+  },
+  "processes": {
+    "codex_started_this_recovery": false,
+    "browser_started_this_recovery": false,
+    "runtime_disposed": true,
+    "recorded_prior_jobs_running": [],
+    "mobile_owned_checks_running": [],
+    "mobile_browser_started": false,
+    "mobile_runtime_started": false,
+    "onboarding_owned_checks_running": []
+  },
+  "operating_rules": "AGENTS.md",
+  "platform_failure_exact_cause": "not determined; no server-side chat telemetry",
+  "source_version": "0.7.1-tranquil-dev-pilot",
+  "history": [
+    {
+      "previous_last_completed": {
+        "id": "KETO-COMPUTE-004",
+        "status": "completed",
+        "github_issue": 3,
+        "evidence": "docs/evidence/COMPUTE_RELEASE_RECEIPT.json"
+      },
+      "stage": "mobile_source_completed",
+      "at": "2026-11-07T22:24:23.859652+00:00"
+    },
+    {
+      "previous_last_completed": "KETO-MOBILE-006",
+      "task": "KETO-ONBOARDING-05",
+      "stage": "completed_source",
+      "at": "2026-11-08T10:01:01.705364+00:00",
+      "evidence": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json"
+    }
+  ],
+  "mobile_checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests library/skills/keto-companion/tests",
+      "result": "380 passed",
+      "evidence": "qa/mobile-python-frozen-source.log"
+    },
+    {
+      "command": "node --test cloudflare-saas/tests/*.test.mjs",
+      "result": "74 passed",
+      "evidence": "qa/mobile-node-frozen-source.log"
+    },
+    {
+      "command": "node --test cloudflare-saas/tests/static.test.mjs",
+      "result": "4 passed on final frontend/build",
+      "evidence": "qa/mobile-final-assets-tests.log"
+    },
+    {
+      "command": "node tests/test_ui_no_browser.cjs && node tests/test_oauth_ui.cjs",
+      "result": "passed",
+      "evidence": "qa/mobile-legacy-ui-final.log"
+    },
+    {
+      "command": "node cloudflare-saas/build.cjs",
+      "result": "passed; 13 multipart modules",
+      "evidence": "qa/mobile-build-final.log"
+    },
+    {
+      "command": ".venv/bin/python scripts/prepare_pdf_fonts.py --directory .runtime-fonts",
+      "result": "pinned SHA-256 verified; fonts excluded from Git"
+    },
+    {
+      "command": "Repository content/build hashes and git diff --check",
+      "result": "passed; static scope only",
+      "evidence": "qa/mobile-repository-final.json"
+    },
+    {
+      "command": "Container browser scripts syntax check",
+      "result": "passed; browser execution not run"
+    }
+  ],
+  "source_hashes": {
+    "service/planning.py": "a6a88428abdfc17c35571f0aa3eaccd9e6fb3ab8018406a48238a0ff8d3ab426",
+    "service/domain.py": "299ee74bf93a2165f51b40ff36d0ffa28b7486ef5296aec5e6b5aa7ab2c7fbd1",
+    "service/data/starter_policy_sources.json": "8672cbfcde6048c52a7d9126c8a2c1f753635e5b075739f4256c0d9e287d6fb7",
+    "cloudflare-saas/public/setup-ui.js": "14099d60e836e76d35c57b50602395196df47e33a9d018e21f514e7d3ed79beb",
+    "cloudflare-saas/public/setup-controls.js": "cefa15d87cccb0c8ff22282eca754d9a519b77a41ec1998f28967390aeadd724",
+    "cloudflare-saas/public/routes.js": "e26a5a2519970e6cbe00d140031669937c68b91bbf1d1e08c99f0364dfe61dc2",
+    "cloudflare-saas/public/knowledge-data.js": "35133aa8f7a20ff9da4e2a64f78d7cf85b0537be7489ee0602d820388764fd0f",
+    "cloudflare-saas/public/app.js": "e1074e235c0126ddd551ce62e357b397cfcf7583c2c56152acdf7df527b31dac",
+    "artifacts/files_manifest.json": "fe4b022170f0e21d01393900b07a864be2b78631cac9915bc497e811f1aebee3"
+  },
+  "blockers": [
+    "HEIC requires browser decoding or JPEG/PNG export; low signal recordings may be rejected",
+    "No background WebPush, automatic Google synchronization or automatic Telegram sending",
+    "Calendar changes require manual reimport/update; recurrence export is bounded to two years",
+    "Fonts are runtime-only build assets prepared by parent; missing fonts fail explicitly",
+    "Exact recipe combinations may not exist; partial results disclose differences and never relax hard exclusions",
+    "New runtime/device/visual/model/clinical acceptance remains with parent; earlier 0.3.0 cloud/runtime receipts are not this build"
+  ],
+  "mobile_cloud_effects": "not_delivered; no cloud writes attempted",
+  "owner_feedback": {
+    "dictation": "user confirms works",
+    "environment": "desktop Chrome in current feedback; not physical iPhone acceptance"
+  },
+  "onboarding_checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests library/skills/keto-companion/tests --junitxml=qa/onboarding-final-python.xml",
+      "result": "420 passed, 1 skipped, 1 warning",
+      "evidence": "qa/onboarding-final-python.log"
+    },
+    {
+      "command": "node --test cloudflare-saas/tests/*.test.mjs",
+      "result": "81 passed",
+      "evidence": "qa/onboarding-final-node.log"
+    },
+    {
+      "command": "node tests/test_ui_no_browser.cjs && node tests/test_oauth_ui.cjs",
+      "result": "passed",
+      "evidence": "qa/onboarding-final-legacy-ui.log"
+    },
+    {
+      "command": "node cloudflare-saas/build.cjs",
+      "result": "passed; 13 modules",
+      "evidence": "qa/onboarding-final-build.log"
+    },
+    {
+      "command": "Repository artifact/content check; git diff --check; container script syntax",
+      "result": "passed; static scope only",
+      "evidence": "qa/onboarding-final-repository.json"
+    }
+  ],
+  "onboarding_limits": [
+    "Both synthetic healthy automatically targeted profiles returned catalog_infeasible; constraints were retained and the UI provides explicit reference/support paths",
+    "Container DOM/visual tests prepared and syntax-checked only; parent must run them",
+    "Current 0.5 build not run in workerd/cloud or on a physical device; prior runtime/release receipts apply to older builds",
+    "Starter-v1 is a bounded product policy, not individualized medical approval; manual targets are preserved until explicit replacement",
+    "One Linux-only MP4 RAM descriptor test skipped on Mac; parent Linux/runtime check remains",
+    "One non-failing JUnit record_property/xunit2 warning; recorded menu outcomes remain available"
+  ],
+  "current_source_delivery": {
+    "kind": "existing_worktree",
+    "manifest": "artifacts/files_manifest.json",
+    "report": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json",
+    "source_archive_current": false
+  },
+  "onboarding_cloud_effects": "not_delivered; no cloud operations attempted",
+  "kitchen_checkpoint": {
+    "phase": "implementation_and_focused_checks_complete",
+    "branch": "feature/kitchen-configurator",
+    "python_focused": 36,
+    "evidence": "qa/kitchen-focused-python-final.log",
+    "node_focused": 5,
+    "next_action": "Run the single final local regression on the final source, then write qa/KITCHEN_IMPLEMENTATION_RESULT.json.",
+    "external_effects": "not_delivered; no cloud or model calls",
+    "processes": []
+  },
+  "data_version": "0.1.1+verified-food-extension-2026-11-08",
+  "previous_external_blocker": {
+    "id": "GITHUB-HOSTED-STARTUP",
+    "github_issue": 13,
+    "status": "blocked_external_startup",
+    "action": "Restore GitHub hosted job execution using linked full/minimal run evidence, then rerun full workflow; no payment upgrade or visibility change without owner approval."
+  },
+  "dev_media_checkpoint": {
+    "phase": "focused_checks_accepted_source_handoff",
+    "report": "qa/CF_DEV_MEDIA_08_RESULT.json",
+    "baseline": "c5e7b5fcc17ae43e16a99faf7011d66deac7d546951545ce97f90b41a1e72087",
+    "effects": "not_delivered; no cloud/model/Docker/browser operations",
+    "processes": [],
+    "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
+  },
+  "dev_media_source": {
+    "status": "completed_source",
+    "report": "qa/CF_DEV_MEDIA_08_RESULT.json",
+    "baseline": "c5e7b5fcc17ae43e16a99faf7011d66deac7d546951545ce97f90b41a1e72087",
+    "node_focused_passed": 47,
+    "python_focused_passed": 25,
+    "live_model_tested_by_source_writer": false,
+    "live_runner_tested_by_source_writer": false,
+    "release_performed_by_source_writer": false,
+    "publication_broker": "not_configured",
+    "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
+  },
+  "release_blocker_legacy": "GitHub Actions not required: nativeCloudflare verified baseline; final0.7 gate pending",
+  "recovery_boundaries": {
+    "ordinary_web_version_last_verified": "0.6.2-audit-pilot",
+    "azure_backend_source": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
+    "new_personal_data_read": false,
+    "new_personal_data_written": false,
+    "new_auth_identity_created": false,
+    "Mac_browser_started": false,
+    "native_full_gate_verified": {
+      "python": 520,
+      "node": 133,
+      "stages": 16
+    },
+    "manual_registry_credential_export": "blocked; not retried",
+    "native_official_registry_push": "not yet reached",
+    "auto_publication": "not implemented; preview/diff only"
+  }
+}

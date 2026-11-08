@@ -1,0 +1,12 @@
+{
+  "source": "User-uploaded DESIGN.md",
+  "title": "Tranquil Dawn \u2014 Style Reference",
+  "uploaded_sha256": "8d48d35bcdba847ebf2975c8a2dc12ac3489561e4b3e1b197b7feeaad9eb09fe",
+  "repository_copy": "docs/design/DESIGN.md",
+  "repository_copy_normalization": "Blank lines normalized; no design tokens/instructions changed",
+  "photo": "docs/design/PHOTO_PROVENANCE.json",
+  "adaptations_must_be_explicit": "docs/design/IMPLEMENTATION.md",
+  "default_theme": "light",
+  "normalized_line_sha256": "a25f4f750c0f8d33bd7fbbb359b93c316e9ecbc0a8f1e3743f79bdbf32a46dba",
+  "normalized_source_verified": true
+}

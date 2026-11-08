@@ -1,0 +1,8 @@
+{
+  "scope": "real Azure multimodal input, synthetic red square; not actual browser upload or food identification",
+  "status": 200,
+  "text": "Красный квадрат.",
+  "passed": true,
+  "seconds": 3.42,
+  "personal_image_used": false
+}

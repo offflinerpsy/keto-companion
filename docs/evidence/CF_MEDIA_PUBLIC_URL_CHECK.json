@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "mime": "image/jpeg",
+  "bytes": 4752,
+  "seconds": 1.636,
+  "scope": "Actual controlled public CDN fetch with DNS/redirect/MIME checks, not authenticated Cloudflare endpoint or private content",
+  "sanitized_format": "JPEG",
+  "sanitized_dimensions": [
+    64,
+    43
+  ],
+  "metadata_stripped": true
+}

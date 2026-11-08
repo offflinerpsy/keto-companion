@@ -1,0 +1,18 @@
+{
+  "title": "Calm ocean with pastel sky at sunrise",
+  "author": "Birgit Steven-Lahno",
+  "source_page": "https://unsplash.com/photos/calm-ocean-with-pastel-sky-at-sunrise-9uFXYoHIcvw",
+  "download": "https://images.unsplash.com/photo-1783780163466-52762d104c8a?auto=format&fit=crop&w=1200&h=600&q=78&fm=webp",
+  "license": "Unsplash License",
+  "license_url": "https://unsplash.com/license",
+  "checked_at": "2026-11-08",
+  "asset": "cloudflare-saas/public/tranquil-dawn.webp",
+  "sha256": "49f025cafa6d6de3ab0a8b2d5ba510ce91a2ba2a45792b03af958c7edffc1bf4",
+  "bytes": 14148,
+  "dimensions": [
+    1200,
+    600
+  ],
+  "purpose": "Decorative atmosphere for user Tranquil Dawn style; not user health or meal evidence",
+  "served_same_origin": true
+}

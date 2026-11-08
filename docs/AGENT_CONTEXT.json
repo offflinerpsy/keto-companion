@@ -1,12 +1,13 @@
 {
   "schema": "keto-agent-context-v1",
   "language": "English canonical; Russian index and design handoff available",
-  "release": "0.6.2-audit-pilot",
+  "release": "0.7.1-tranquil-dev-pilot",
   "read_first": [
     "AGENTS.md",
     "docs/CURRENT_STATUS.json",
     "docs/spec/README.md",
-    "docs/spec/CURRENT_CORRECTIONS.md"
+    "docs/spec/CURRENT_CORRECTIONS.md",
+    "docs/spec/DEVELOPER_MEDIA_PILOT.md"
   ],
   "design_entrypoints": {
     "en": "docs/en/AI_DESIGN_HANDOFF.md",
@@ -59,6 +60,10 @@
     "Do not claim CI success from startup_failure, or clinical/device validation from mocks",
     "Do not publish private repository or share font files"
   ],
-  "current_external_blocker": "GitHub-hosted jobs fail before execution; see docs/evidence/SPEC_AUDIT_GITHUB_EXECUTION.json",
-  "historical_review_commit": "055938ef42b1ba15e2ef568de17e8e01f883a31f"
+  "current_external_blocker": "No dependency on GitHub Actions. Current Cloudflare full source and real isolated-container gates pass; real-owner/device acceptance remains separate.",
+  "historical_review_commit": "055938ef42b1ba15e2ef568de17e8e01f883a31f",
+  "authoritative_design": "docs/design/DESIGN.md",
+  "design_adaptations": "docs/design/IMPLEMENTATION.md",
+  "design_source": "docs/design/DESIGN.md",
+  "developer_mode": "owner-only timed pilot; three allowlisted UI files; isolated no-internet candidate tests; private preview/diff only"
 }

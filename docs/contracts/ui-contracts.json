@@ -1,31 +1,78 @@
 {
   "css_tokens": {
     ":root": {
-      "--accent": "#6b4265",
-      "--bg": "#f7f3f6",
-      "--ink": "#312b33",
-      "--line": "#ded4df",
-      "--muted": "#655c68",
-      "--paper": "#fff",
-      "--radius": "20px",
-      "--soft": "#f0e7ee",
-      "--warn": "#8b322f"
+      "--accent": "var(--color-spruce-teal)",
+      "--bg": "var(--color-canvas-warm-cream)",
+      "--color-canvas-warm-cream": "#FAF9F6",
+      "--color-card-surface-white": "#FFFFFF",
+      "--color-coral-alert": "#E06A4E",
+      "--color-deep-charcoal": "#1A2421",
+      "--color-dusk-indigo": "#4F659C",
+      "--color-mint-glaze-surface": "#F0F7F5",
+      "--color-muted-peach": "#F09E81",
+      "--color-slate-neutral": "#6C7A76",
+      "--color-spruce-teal": "#0E3B36",
+      "--color-verdant-mint": "#43A08A",
+      "--container": "428px",
+      "--font-plus-jakarta-sans": "\"Plus Jakarta Sans\", Inter, \"SF Pro Display\", Urbanist, -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif",
+      "--grid-gap": "12px",
+      "--hero-surface": "rgba(250,249,246,.96)",
+      "--ink": "var(--color-deep-charcoal)",
+      "--leading-body": "1.5",
+      "--line": "#D7E3DF",
+      "--muted": "var(--color-slate-neutral)",
+      "--on-accent": "#FFFFFF",
+      "--paper": "var(--color-card-surface-white)",
+      "--pastel-lavender": "#EBEDF5",
+      "--pastel-peach": "#FBECE5",
+      "--pastel-sage": "#E6F0E8",
+      "--pastel-seafoam": "#E1F1EC",
+      "--plum": "var(--accent)",
+      "--radius": "22px",
+      "--radius-hero": "24px",
+      "--radius-input": "12px",
+      "--radius-pill": "999px",
+      "--section-padding": "24px",
+      "--shadow-ambient": "0 8px 24px rgba(0,30,20,.04)",
+      "--soft": "var(--color-mint-glaze-surface)",
+      "--space-unit": "4px",
+      "--spacing-12": "12px",
+      "--spacing-16": "16px",
+      "--spacing-20": "20px",
+      "--spacing-24": "24px",
+      "--spacing-28": "28px",
+      "--spacing-36": "36px",
+      "--spacing-4": "4px",
+      "--spacing-8": "8px",
+      "--text-body": "15px",
+      "--text-body-lg": "17px",
+      "--text-body-sm": "13px",
+      "--text-caption": "11px",
+      "--text-display": "28px",
+      "--text-heading": "20px",
+      "--text-heading-lg": "24px",
+      "--text-secondary": "#5E6F68",
+      "--text-subheading": "17px",
+      "--warn": "#9A3E29"
     },
     "body.dark": {
-      "--accent": "#ddb4d5",
-      "--bg": "#211c24",
-      "--ink": "#f7eff6",
-      "--line": "#64556a",
-      "--muted": "#cbbdcb",
-      "--paper": "#302936",
-      "--soft": "#463449",
-      "--warn": "#ffc0b5"
+      "--accent": "#ACDCCD",
+      "--bg": "#142521",
+      "--hero-surface": "rgba(32,54,48,.97)",
+      "--ink": "#EFF5F1",
+      "--line": "#506C61",
+      "--muted": "#B5C9C0",
+      "--on-accent": "#142521",
+      "--paper": "#203630",
+      "--pastel-lavender": "#343E56",
+      "--pastel-peach": "#543C32",
+      "--pastel-sage": "#304A39",
+      "--pastel-seafoam": "#2A4B41",
+      "--soft": "#2A433A",
+      "--text-secondary": "#B5C9C0",
+      "--warn": "#FFC3B3"
     },
-    "body.light": {
-      "--bg": "#f4f5f8",
-      "--paper": "#fff",
-      "--soft": "#eceaf4"
-    }
+    "body.light": {}
   },
   "notice": "Static markup only. Additional DOM elements are constructed by setup-ui.js, kitchen-ui.js and mobile-ui.js; see design handoff. Preserve ids, data attributes and event contracts during redesign.",
   "routes": [
@@ -38,6 +85,7 @@
     "sources",
     "reminders",
     "admin",
+    "developer",
     "targets",
     "knowledge",
     "memory",
@@ -48,12 +96,12 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "609c3bd1d8d71c174f9b586aa38efd938bd13a853bc6f93cd6d4c064d133064f",
-    "cloudflare-saas/public/index.html": "6152364b012db6804fe48e181eba5c03bde283800eae7c1408247d4934eaf7a1",
-    "cloudflare-saas/public/routes.js": "0414f2be4b0de5e8f2fa41344bec7cab183f682a8a9080284f4010ec42c8d2e2",
+    "cloudflare-saas/public/app.css": "36f36fd4689df1963cb8a2a381606be0dc863418e884ef84ef0ec371c75d2d7c",
+    "cloudflare-saas/public/index.html": "a7791cd3b1d17a1800685053c598fcbb824b46d2bfbcee676783e4cdbe72ca13",
+    "cloudflare-saas/public/routes.js": "04c6882a4f13978182a2b8aa27d0556cb1cfbde8010fdacb9a5f6411145167e1",
     "cloudflare-saas/src/compute.mjs": "f1f1ddf7344550ca0c64a08fc6fb17a440ad1dbd976da0a84136bf69f6ecb9a1",
-    "cloudflare-saas/src/worker.mjs": "4e555fa06d00529b4a0a6b2ff686002ea829b6d877f0cf85cba8ca6c9febe59e",
-    "service/app.py": "07d315a7d31d8225a47a03914ec8d99a51ced39f8bb143081d376b7db56714df"
+    "cloudflare-saas/src/worker.mjs": "92ad655dda283889fdd0a4834867c67e8bd4f1fc9ca5dfff4e66085dde1fc85b",
+    "service/app.py": "ef66602e8108ec640d0186bd9996339ec633e34091642dcaf35a961e29db6d0f"
   },
   "static_elements": [
     {
@@ -209,6 +257,15 @@
       "tag": "section"
     },
     {
+      "id": "developer-mode-controls",
+      "tag": "div"
+    },
+    {
+      "id": "chat-mode",
+      "tag": "select"
+    },
+    {
+      "aria-label": "Рецепты",
       "data-testid": "recipes-shortcut",
       "data-view": "recipes",
       "tag": "button",
@@ -274,6 +331,11 @@
       "tag": "textarea"
     },
     {
+      "id": "image-drop-zone",
+      "tag": "button",
+      "type": "button"
+    },
+    {
       "id": "photo-status",
       "tag": "p"
     },
@@ -281,6 +343,12 @@
       "id": "photo",
       "tag": "input",
       "type": "file"
+    },
+    {
+      "aria-label": "Фото по ссылке",
+      "id": "image-link-open",
+      "tag": "button",
+      "type": "button"
     },
     {
       "aria-label": "Начать диктовку",
@@ -602,6 +670,11 @@
       "tag": "button"
     },
     {
+      "data-view": "developer",
+      "id": "developer-tab",
+      "tag": "button"
+    },
+    {
       "data-view": "admin",
       "id": "admin-tab",
       "tag": "button"
@@ -665,6 +738,104 @@
       "type": "button"
     },
     {
+      "data-page": "developer",
+      "tag": "section"
+    },
+    {
+      "id": "dev-enable",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-disable",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-refresh",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-back",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-status",
+      "tag": "p"
+    },
+    {
+      "id": "dev-form",
+      "tag": "form"
+    },
+    {
+      "id": "dev-task",
+      "tag": "textarea"
+    },
+    {
+      "id": "dev-technical",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "dev-draft",
+      "tag": "button",
+      "type": "submit"
+    },
+    {
+      "id": "dev-approval",
+      "tag": "section"
+    },
+    {
+      "id": "dev-exact",
+      "tag": "pre"
+    },
+    {
+      "id": "dev-generate",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-cancel",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-output",
+      "tag": "section"
+    },
+    {
+      "id": "dev-diff",
+      "tag": "pre"
+    },
+    {
+      "id": "dev-test",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-receipt",
+      "tag": "p"
+    },
+    {
+      "id": "dev-download",
+      "tag": "a"
+    },
+    {
+      "id": "dev-preview",
+      "tag": "iframe"
+    },
+    {
+      "id": "dev-finish",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-jobs",
+      "tag": "div"
+    },
+    {
       "data-page": "memory",
       "tag": "section"
     },
@@ -726,6 +897,28 @@
     {
       "data-page": "today",
       "tag": "section"
+    },
+    {
+      "data-view": "recipes",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dawn-overview",
+      "tag": "section"
+    },
+    {
+      "id": "dawn-overview-title",
+      "tag": "h2"
+    },
+    {
+      "id": "dawn-status-cards",
+      "tag": "div"
+    },
+    {
+      "aria-label": "Подготовка личного меню",
+      "id": "dawn-progress",
+      "tag": "div"
     },
     {
       "data-view": "recipes",
@@ -1047,6 +1240,29 @@
     {
       "id": "close-help",
       "tag": "button"
+    },
+    {
+      "id": "image-link-details",
+      "tag": "dialog"
+    },
+    {
+      "id": "image-link-title",
+      "tag": "h2"
+    },
+    {
+      "id": "image-link-url",
+      "tag": "input",
+      "type": "text"
+    },
+    {
+      "id": "image-link-load",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "image-link-close",
+      "tag": "button",
+      "type": "button"
     }
   ]
 }

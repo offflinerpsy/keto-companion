@@ -1,5 +1,10 @@
 # KETO Companion
 
+## Current 0.7.1 pilot
+
+The supplied Tranquil Dawn design is live. Owner-only bounded development produces a tested private preview/diff, not self-publication. Chat accepts image paste, drop and explicitly loaded public image links. Full regression and exact isolated candidate acceptance run in **Cloudflare**, without GitHub Actions. [RU quick guide](docs/ru/START_071.md) · [EN quick guide](docs/en/START_071.md) · [exact release evidence](docs/evidence/CF_DEV_MEDIA_08_RELEASE_RECEIPT.json).
+
+
 **Private family pilot · mobile-first web app · explicit consent · deterministic nutrition calculations.**
 
 [English](README.en.md) · [Русский](README.ru.md) · [Live staging](https://keto-companion-saas-staging.offflinerpsy.workers.dev/)
@@ -42,7 +47,7 @@ Cloudflare stores the web app's private records. The signed Azure bridge process
 
 The complete workflow is [Full synthetic verification](.github/workflows/ci.yml). It discovers all Python and Node product suites, prepares checksum-pinned PDF fonts, checks source contracts and detects generated-asset drift. No cloud credentials, paid model calls, real users or deployments are supplied to CI.
 
-**Hosted GitHub Actions currently fails before any job starts, including a no-code echo-only probe.** This is not a passing CI badge and not a failed product test. Exact run IDs and boundaries: [GitHub execution evidence](docs/evidence/SPEC_AUDIT_GITHUB_EXECUTION.json). Existing GitHub Codex review usage is exhausted; independent local source review and reproducible regression evidence are recorded separately. No paid upgrade was enabled.
+**Historical GitHub Actions startup failure is not a current release blocker: Cloudflare now runs the full trusted gate.** This is not a passing CI badge and not a failed product test. Exact run IDs and boundaries: [GitHub execution evidence](docs/evidence/SPEC_AUDIT_GITHUB_EXECUTION.json). Existing GitHub Codex review usage is exhausted; independent local source review and reproducible regression evidence are recorded separately. No paid upgrade was enabled.
 
 ## Development rules
 

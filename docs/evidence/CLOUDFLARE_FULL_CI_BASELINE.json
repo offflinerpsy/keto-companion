@@ -1,0 +1,51 @@
+{
+  "task": "CF-DEV-MEDIA-08",
+  "scope": "Existing reviewed0.6.2 baseline plus clean-CI dependency declarations; new0.7 developer/media source not included yet",
+  "commit": "104bd9fc5a1b2fcd83c0f4f8511114a1fd71c03e",
+  "provider": "Cloudflare Workers Builds",
+  "build_uuid": "6edbab93-a24d-4ecf-bb08-7d03f34e321d",
+  "status": "success",
+  "python_passed": 503,
+  "python_skipped": 0,
+  "node_scope": "all cloudflare-saas/tests/*.test.mjs and both legacy scripts; exit0",
+  "checks": [
+    "python_env",
+    "python_dependencies",
+    "node_dependencies",
+    "runtime_fonts",
+    "all_python",
+    "all_node",
+    "legacy_ui",
+    "legacy_oauth_ui",
+    "contracts",
+    "specification",
+    "web_build",
+    "legacy_build",
+    "hygiene",
+    "generated_assets_match"
+  ],
+  "all_exit_codes": 0,
+  "seconds": 168.16,
+  "deployment_id": "357c94bc6e9a4162be7986c493db7fe6",
+  "deploy_after_tests_only": true,
+  "GitHub_Actions_required": false,
+  "runner_env_cloud_credentials_removed": true,
+  "paid_model_calls_or_real_user_data": false,
+  "previous_failures": [
+    {
+      "build": "df05f8e0-14ab-4eee-a507-7d890a61f2b5",
+      "cause": "Default Python version incompatible with pinned Azure Functions package; pinned Python3.12.12 andNode26.3.1"
+    },
+    {
+      "build": "1f572945-6633-46b0-a4f7-46ff32b8f891",
+      "cause": "2test imports httpx2 omitted from requirements-dev; exact local version2.16.0 pinned"
+    },
+    {
+      "build": "f88fc41c-abe1-421c-a2ff-682dda657ee9",
+      "cause": "Legacy MCP integration test imported undeclared mcp; exact localversion2.3.0 pinned"
+    }
+  ],
+  "tests_skipped_to_get_green": false,
+  "paid_account_upgrade": false,
+  "checked_at": "2026-11-08T14:49:09.875289+00:00"
+}

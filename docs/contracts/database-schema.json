@@ -15,6 +15,10 @@
     {
       "path": "cloudflare-saas/migrations/0004_firebase_challenges.sql",
       "sha256": "8792013359128e7759237dff78d2a321ceaba5114a78ea9d0729d52aa5ee9811"
+    },
+    {
+      "path": "cloudflare-saas/migrations/0007_developer.sql",
+      "sha256": "b14472ebb08a288c52670e300f1261c5bab9d129d4e4fd73bbf9df8ea5d616c6"
     }
   ],
   "notice": "Actual SQLite-compatible D1 migration result; no user data or database connection.",
@@ -165,6 +169,242 @@
         }
       ],
       "table": "deletion_jobs"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "job_id",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "action",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "dev_events"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "owner_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "session_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "request_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "request_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "baseline",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "build_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "state",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "0",
+          "name": "revision",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "settings_epoch",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "lease_until",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": "0",
+          "name": "model_reserved",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "patch_hash",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "result_json",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "error_code",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "expires_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "cancelled_at",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "owner_id",
+          "on_delete": "NO ACTION",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "dev_jobs"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "INTEGER"
+        },
+        {
+          "default": "0",
+          "name": "enabled_until",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": "3",
+          "name": "max_jobs_day",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": "5000",
+          "name": "max_output_tokens",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": "'{}'",
+          "name": "capabilities",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "0",
+          "name": "epoch",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "active_job",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "0",
+          "name": "lease_until",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "dev_settings"
     },
     {
       "columns": [

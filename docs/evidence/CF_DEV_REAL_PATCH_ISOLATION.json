@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "baseline": "1d55bf44222b02d15787d989ba1eb94844005bf3d442a80f2b1979665a2b4b36",
+  "patch_hash": "e148722cc74cac6ecf92837ce322422732eb733f0f2162b4fc419a12fa5664b0",
+  "exit_code": 0,
+  "stages": [
+    {
+      "name": "syntax",
+      "exit_code": 0,
+      "passed_count": null,
+      "truncated": false
+    },
+    {
+      "name": "build",
+      "exit_code": 0,
+      "passed_count": null,
+      "truncated": false
+    },
+    {
+      "name": "product",
+      "exit_code": 0,
+      "passed_count": 14,
+      "truncated": false
+    },
+    {
+      "name": "python",
+      "exit_code": 0,
+      "passed_count": 17,
+      "truncated": false
+    }
+  ],
+  "scope": "actual Sol-generated help patch, exact frozen snapshot, real Linux no-network Docker, candidateUID1000",
+  "secrets_supplied": false,
+  "actual_cloud_user_flow": false
+}

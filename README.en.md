@@ -1,5 +1,10 @@
 # KETO Companion — English guide
 
+## Current release 0.7.1
+
+Tranquil Dawn, intentional chat image paste/drop/URL loading, and owner-only tested private developer preview/diff are implemented. No arbitrary production self-modification or closed social-account access is claimed. Full trusted CI and candidate acceptance now run in Cloudflare, not GitHub Actions. [Quick guide](docs/en/START_071.md) · [release evidence](docs/evidence/CF_DEV_MEDIA_08_RELEASE_RECEIPT.json).
+
+
 ## Product
 
 The primary product is a private family web app, not a publicly released ChatGPT plugin. A member signs in with Google, accepts an invitation and gives their own processing/storage consent. A ChatGPT subscription is not required for this standalone app. Infrastructure/model usage belongs to the owner; credits and billing balance are not assumed unlimited or free.
@@ -25,4 +30,4 @@ The assistant does not diagnose, change medicines, certify nutrition adequacy or
 
 Use [development instructions](docs/en/DEVELOPMENT.md), [operations](docs/spec/OPERATIONS.md) and [QA gates](docs/spec/QA_RELEASE.md). Current truth is [CURRENT_STATUS.json](docs/CURRENT_STATUS.json), source and the newest applicable receipt, not a historical test count.
 
-GitHub-hosted CI startup is currently blocked before jobs; [evidence](docs/evidence/SPEC_AUDIT_GITHUB_EXECUTION.json). Local deterministic tests, source review, deployment verification, real Google sign-in, physical iPhone testing and clinical review are distinct scopes. See [review resolutions](docs/review/SPEC_AUDIT_RESOLUTIONS.md) before handing the pilot to a family member.
+Historical GitHub-hosted startup was blocked; current release uses verified Cloudflare native CI; [evidence](docs/evidence/SPEC_AUDIT_GITHUB_EXECUTION.json). Local deterministic tests, source review, deployment verification, real Google sign-in, physical iPhone testing and clinical review are distinct scopes. See [review resolutions](docs/review/SPEC_AUDIT_RESOLUTIONS.md) before handing the pilot to a family member.

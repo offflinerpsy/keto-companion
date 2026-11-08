@@ -55,3 +55,7 @@ qa/mobile-browser/
 !qa/setup-fixtures.json
 !qa/ONBOARDING_IMPLEMENTATION_RESULT.json
 !qa/ONBOARDING_IMPLEMENTATION_REPORT_RU.md
+
+# CF-DEV-MEDIA-08: deterministic technical build inputs, no private state
+/developer-runtime/build/
+!qa/CF_DEV_MEDIA_08_RESULT.json

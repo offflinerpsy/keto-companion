@@ -1,0 +1,16 @@
+{
+  "commit": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
+  "build_uuid": "caa41399-c2da-4796-bf71-4a4b1c2ea6c8",
+  "tests_and_build_gate": "passed",
+  "python_passed": 520,
+  "python_skipped": 0,
+  "node_passed": 133,
+  "all_gate_stages": 16,
+  "gate_seconds": 157.74,
+  "deployment": "failed after passed gate before image build/push",
+  "exact_error": "FileNotFoundError:.runtime-fonts; trusted font stage writes runtime-fonts",
+  "corrected": "Use either checksum-verified runtime-font directory; unchanged app functionality",
+  "GitHub_Actions_required": false,
+  "raw_registry_credentials_exported": false,
+  "real_user_data_changed": false
+}
