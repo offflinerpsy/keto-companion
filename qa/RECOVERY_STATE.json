@@ -1,19 +1,15 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T13:09:21.809238+00:00",
+  "updated_at": "2026-11-08T13:18:58.106871+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
-  "active_task": {
-    "id": "SPEC-AUDIT-07",
-    "github_issue": 13,
-    "stage": "reviewed_fixes_staging_release_spec_validation"
-  },
-  "last_completed": "KETO-KITCHEN-06",
+  "active_task": null,
+  "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
   "next_task": {
-    "id": "KETO-KITCHEN-ACCEPTANCE",
-    "github_issue": 10,
-    "status": "owner_acceptance",
-    "action": "Reload usual account and select your appliance in What shall we cook; confirm the available mode matches your device manual before using a recipe."
+    "id": "GITHUB-HOSTED-STARTUP",
+    "github_issue": 13,
+    "status": "blocked_external_startup",
+    "action": "Restore GitHub hosted job execution using linked full/minimal run evidence, then rerun full workflow; no payment upgrade or visibility change without owner approval."
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",

@@ -1,5 +1,7 @@
 # Security, privacy and review boundaries
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 This is source inspection, not a penetration test or legal/clinical certification.
 No real account, session store, credential file, cloud resource or user diary was read.
 
@@ -74,7 +76,7 @@ Bridge signs method/path/timestamp/nonce/body hash and reserves nonce metadata o
 Exactly one Ed25519/HMAC mode is accepted; timestamp skew is bounded to 60 seconds.
 Replay reservation and private-state commit are different boundaries.
 A failed commit can follow successful upstream model work; keep it uncertain rather than retry blindly.
-SA07-02 is a cost-admission classification defect despite these idempotency controls.
+SA07-02 was a baseline cost-admission defect and is now closed by conservative pre-dispatch quota reservation.
 
 ## Sources, SSRF and injection
 
@@ -125,12 +127,12 @@ Per-subject/global grant and rotation limits are explicit.
 Authentication rechecks exact current Entra object/subject mapping.
 These are separate from Google/Firebase SaaS membership and must not be merged silently.
 
-## Concrete review risks
+## Historical defects and remaining review risks
 
-- SA07-04: UI can omit a saved allergen during an unrelated profile edit.
-- SA07-02: local-looking chat keywords can avoid Worker paid admission then reach recipe design.
-- SA07-01: incomplete diary intake still yields an apparently known remaining carb budget.
-- SA07-03: batch pantry and per-person saved shopping are inconsistent.
+- SA07-04 baseline: UI omitted some saved allergens; corrected and tested in both clients.
+- SA07-02 baseline: mixed wording avoided paid admission; corrected and verified at quota cap.
+- SA07-01 baseline: incomplete diary overstated known remainder; corrected to unknown with separate subtotal.
+- SA07-03 baseline: batch/per-person shopping mismatch; corrected with household-serving metadata.
 - Full document/event growth remains finite; no automatic indefinite archive is implemented.
 - Runtime compatibility, real Google session, popup/media, physical device and clinical behavior are unverified here.
 - CI startup failure cause is not established; no billing/security conclusion follows from it.

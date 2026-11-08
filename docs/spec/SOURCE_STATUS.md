@@ -27,3 +27,7 @@ Parent can run the documented command to reproduce the baseline while retaining 
 
 Next action: parent reproduces SA07-04 and validates its own repair with a regression.
 No parent CI, code fix, cloud release or user acceptance is certified by this receipt.
+
+## Parent reconciliation after independent completion
+
+The exact independent documentation snapshot is preserved in git commit `055938ef42b1ba15e2ef568de17e8e01f883a31f`. Current maintained Markdown has subsequently been reconciled with runtime `e3f648d5313b68202336cda775ff7279556a2569` /0.6.2. The original findings and completion JSON remain unchanged and refer to their original baseline, not current defects. Parent regressions and release evidence are linked in [CURRENT_CORRECTIONS](CURRENT_CORRECTIONS.md).

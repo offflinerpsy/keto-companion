@@ -1,5 +1,7 @@
 # User flows and acceptance transitions
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 Source UI: [app](../../cloudflare-saas/public/app.js),
 [setup](../../cloudflare-saas/public/setup-ui.js),
 [kitchen](../../cloudflare-saas/public/kitchen-ui.js),
@@ -23,7 +25,7 @@ Server authority: [domain](../../service/domain.py), [Worker](../../cloudflare-s
 At any stage, reference recipes remain a supported alternative.
 A blocker must explain its actual reason; the flow must not substitute demo calories.
 An infeasible catalogue result does not weaken constraints.
-See SA07-04 before relying on allergy editor round trips.
+Allergy editor round trips preserve every supported and stored value; see the SA07-04 regression in current corrections.
 
 ## FLOW-02 — Text, dictation and photo discussion
 
@@ -68,8 +70,7 @@ Cancellation is not proof of upstream billing cancellation.
 13. Prepare PDF revalidates current plan and generates the private file.
 14. Share PDF is a second user gesture to the system sheet; Telegram delivery is not verified.
 
-SA07-01 affects remaining carbohydrate advice when diary intake is incomplete.
-SA07-03 affects batch shopping after the per-person plan is saved.
+Incomplete diary entries now make the remaining carbohydrate allowance unknown (SA07-01 fixed). Saved shopping uses household batch size separately from personal nutrient totals (SA07-03 fixed).
 Do not resolve either by hiding unknowns or changing clinical targets.
 
 ## FLOW-04 — Temporary wish to persistent memory

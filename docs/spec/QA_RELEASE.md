@@ -1,6 +1,8 @@
 # QA and release gates
 
-## What this review actually did
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
+## Independent baseline review: what it did
 
 SPEC-AUDIT-07 inspected maintained source, migrations, frontend modules and workflow.
 It ran four short, synthetic in-memory reproducers, with no network/model/GUI/browser/cloud.
@@ -56,7 +58,7 @@ SA07-03 is not a complete accepted-day E2E.
 SA07-04 is not rendered DOM/browser evidence.
 These distinctions are retained in findings JSON so parent can reproduce at the next boundary.
 
-## CI source gap at reviewed baseline
+## CI gap at baseline (fixed in current workflow)
 
 [ci.yml](../../.github/workflows/ci.yml) explicitly selects only:
 
@@ -144,3 +146,11 @@ Use synthetic fixture evidence for engineering screenshots; real-person checks r
 These are acceptance requirements, not completed user actions.
 When only a real person's sign-in/consent remains, provide that one action;
 do not create more technical work or seed a production identity to bypass it.
+
+## Current implementation-owner acceptance
+
+All four baseline defects were reproduced before correction, then covered by new regressions. Current full local execution: **502 Python passed, 1 platform-specific skip; 93 Node passed**, plus both legacy UI/authorization scripts. The new tests include actual editor-function execution in a minimal DOM, Worker quota-at-cap behavior, a complete two-serving day and known/unknown diary totals. This is not a full browser/device or clinical test. See [local test receipt](../evidence/SPEC_AUDIT_LOCAL_TESTS.json).
+
+The current workflow now selects all suites, prepares fonts, validates machine contracts and these docs, and checks both rebuilt clients for drift. GitHub-hosted runs, including a one-command no-application probe, still stop before jobs. See [exact evidence](../evidence/SPEC_AUDIT_GITHUB_EXECUTION.json). No GitHub-hosted pass or successful Codex GitHub review is asserted.
+
+Run `python scripts/verify_specification.py` and `.venv/bin/python scripts/export_contracts.py --check` after changing documentation or contracts. Baseline reproduction code should not be used as a desired-behavior test; current regressions are in `tests/test_spec_audit_regressions.py` and `cloudflare-saas/tests/allergy-editor.test.mjs`.

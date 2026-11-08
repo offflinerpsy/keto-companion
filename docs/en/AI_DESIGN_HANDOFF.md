@@ -1,5 +1,7 @@
 # AI design handoff: KETO Companion
 
+> Current handoff: **0.6.2-audit-pilot**. Four baseline findings were fixed and tested; preserve the new regressions. See [current corrections](../spec/CURRENT_CORRECTIONS.md), [exact generated UI/API contracts](../contracts/) and [review resolutions](../review/SPEC_AUDIT_RESOLUTIONS.md). This does not imply physical-device or clinical acceptance.
+
 Task SPEC-AUDIT-07, baseline `ee4b42707e138f677fb32e9dfb4602a26c1b5b63`, 2026-11-08.
 This is an implementation brief for another designer/agent, based on actual source.
 It is not a screenshot-based visual acceptance or a deployment instruction.
@@ -192,8 +194,8 @@ An isolated authorized parent preview can provide the required screenshot eviden
 - Model/deployment/budget choices, private bindings, generated release identities.
 - Admin page into a family medical-record viewer.
 
-Known source defects are tracked as SA07-01..04 in
-[findings](../../qa/SPEC_AUDIT_FINDINGS.json); parent owns fixes.
+Historical baseline findings SA07-01..04 are retained in
+[findings](../../qa/SPEC_AUDIT_FINDINGS.json); current fixes and tests are in the review resolutions.
 A redesign must not silently work around them by inventing data or changing backend rules.
 
 ## Staged implementation checklist
@@ -222,3 +224,7 @@ git diff --check
 
 If source behavior changes, add a meaningful regression at its owning boundary.
 Do not run browser scripts, install packages or alter cloud configuration just to obtain a design mockup.
+
+## Additional invariant after audit / Дополнительный инвариант
+
+Render every saved allergy, including canonical values not originally visible and any stored legacy value. An unrelated profile edit must never erase a restriction. Keep unknown diary intake visibly unknown, and distinguish per-person nutrition from household shopping. Test both the SaaS and legacy editor if editing shared logic. / Все сохранённые аллергии должны оставаться видимыми и сохранными при изменении других полей. Не превращайте неизвестное питание в ноль и не смешивайте личный рацион с покупками на всё блюдо.

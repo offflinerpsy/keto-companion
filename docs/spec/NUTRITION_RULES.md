@@ -1,5 +1,7 @@
 # Nutrition and deterministic rules
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 This document describes source arithmetic and product safeguards.
 It is not a clinical protocol or an independent appraisal of every cited paper.
 No new literature/network retrieval or clinical review was performed.
@@ -174,15 +176,13 @@ Pantry-plus limits distinct missing IDs, not shops, packages or monetary cost.
 Day generation aggregates stock over all dishes and rechecks global shortages.
 A three-dish day only becomes acceptable if the entire day passes current core constraints.
 Viewing/save/diary actions do not implement automatic stock depletion.
-SA07-03 identifies an accepted-plan shopping mismatch for multi-serving kitchen state.
+SA07-03 correction: accepted kitchen plans retain `plan_servings`; purchase needs are scaled to the complete batch before pantry subtraction. Nutrient totals remain per person. Older plans infer only a consistent saved recipe batch size, otherwise require clarification.
 
 ## NUM-12 — Diary and remaining budgets
 
 Daily totals use confirmed recipe IDs and explicit portions in the confirmed profile timezone.
 Unquantified entries are counted separately; absence of entries is not zero food intake.
-SA07-01: `kitchen_card` currently filters those entries out before its remaining-carb calculation,
-so the displayed remaining allowance can appear fully known despite incomplete intake.
-Design should retain qualified language and must not strengthen that estimate into advice.
+SA07-01 correction: any unquantified or unresolved entry makes `remaining_g` and `meal_assumption_g` null. `known_subtotal_g` remains the known subtotal; `diary_complete_for_budget` is false. No diary entries establish only absence of recorded intake, not proof that no food was eaten. Design must preserve this uncertainty.
 
 ## Included reference roles and limits
 

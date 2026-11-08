@@ -1,5 +1,7 @@
 # Checked-in test inventory
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 Source enumeration only; these suites were not executed by SPEC-AUDIT-07.
 Python parametrization and dynamically constructed Node cases are not expanded.
 Test names identify intent, not measured line/branch coverage or a current PASS.

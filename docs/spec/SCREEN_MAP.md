@@ -1,5 +1,7 @@
 # Screen map
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 Source: [index](../../cloudflare-saas/public/index.html),
 [router](../../cloudflare-saas/public/routes.js),
 [app](../../cloudflare-saas/public/app.js),
@@ -81,7 +83,7 @@ one screening question at a time, previous/next, explicit prepare-save.
 Question answer values unknown/yes/no map to null/true/false.
 The first unanswered or unreviewed field determines the resumed question.
 Submit compares changed fields and prepares `profile.update`.
-SA07-04: current checkbox subset can drop a previously saved unlisted allergen.
+SA07-04 is corrected: all 16 supported allergy choices plus any existing unrecognized value are rendered. Preserve those values through unrelated edits; only explicit uncheck and confirmation removes one.
 Do not hide or recode this gap as a successful simplified questionnaire.
 
 ## Setup targets — #setup-targets

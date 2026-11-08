@@ -1,5 +1,7 @@
 # Operations and recoverability
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 This runbook describes source entry points and safe checks.
 It grants no authority to deploy, install, read credentials or change production.
 SPEC-AUDIT-07 performed none of those operations.
@@ -45,7 +47,7 @@ Do not run them as recovery or restore old plugin source over current source.
 Both generated bundle and static asset manifest must match maintained source.
 PNG assets in modular packaging are represented as base64 text and decoded by wrapper code.
 Do not assume dist asset text is a directly served PNG without the wrapper contract.
-Version text in package/build metadata lags current Worker 0.6.1 and is not target proof.
+Worker/mobile/package metadata is aligned at 0.6.2-audit-pilot. The legacy protocol identifier remains 0.2.1; exact artifact hashes and deployment receipts, not the label alone, establish the target.
 
 ## Check commands
 

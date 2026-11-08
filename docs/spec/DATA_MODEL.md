@@ -1,5 +1,7 @@
 # Data model and lifecycle
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 Authoritative SQL: [0001](../../cloudflare-saas/migrations/0001_initial.sql),
 [0002](../../cloudflare-saas/migrations/0002_integration.sql),
 [0003](../../cloudflare-saas/migrations/0003_global_usage.sql),
@@ -134,7 +136,8 @@ Catalogue hashes include personal extensions and invalidate incompatible plan ap
 - Ratings: bounded to 30; accepted recipe history bounded to 30.
 - Topic group: spec, candidate IDs, selected ID and creation time.
 - `facts_changed_at`: suppresses older context after remember/forget.
-- `plan_pantry`: snapshots for last eight accepted kitchen plans.
+- `plan_pantry`: pantry snapshots for the last eight accepted kitchen plans.
+- `plan_servings`: validated household servings for the same plan IDs. Shopping applies this factor before pantry subtraction; personal nutrient amounts are not multiplied. Older records infer a single consistent `base_servings` from saved recipes or ask for clarification.
 
 A draft selection updates working context; it does not accept a meal, log food or consume stock.
 A kitchen diary action can save a referenced personal recipe before logging its confirmed fraction.

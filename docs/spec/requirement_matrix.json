@@ -3,7 +3,7 @@
   "task_id": "SPEC-AUDIT-07",
   "baseline_commit": "ee4b42707e138f677fb32e9dfb4602a26c1b5b63",
   "coverage_guarantee": false,
-  "test_execution": "Only docs/spec/review_probes.py observations executed by this review; linked suites not run",
+  "test_execution": "Parent full local synthetic suite:502Python passed/1platformskip,93Node passed; exact receipt docs/evidence/SPEC_AUDIT_LOCAL_TESTS.json. Hosted GitHub not executed due startup_failure.",
   "requirements": [
     {
       "id": "FR-01",
@@ -20,7 +20,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -40,7 +39,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -56,17 +54,23 @@
       ],
       "test_paths": [
         "tests/test_planning.py",
-        "cloudflare-saas/tests/setup.test.mjs"
+        "cloudflare-saas/tests/setup.test.mjs",
+        "tests/test_spec_audit_regressions.py",
+        "cloudflare-saas/tests/allergy-editor.test.mjs",
+        "cloudflare-saas/tests/worker.test.mjs"
       ],
-      "current_status": "implemented_source_with_review_finding",
+      "current_status": "implemented_corrected_local_regression_passed_acceptance_partial",
       "findings": [
         "SA07-04"
       ],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
-      ]
+      ],
+      "historical_findings": [
+        "SA07-04"
+      ],
+      "finding_resolution": "fixed_with_parent_regression"
     },
     {
       "id": "FR-04",
@@ -83,7 +87,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -103,7 +106,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -118,17 +120,23 @@
       ],
       "test_paths": [
         "tests/test_kitchen.py",
-        "tests/test_kitchen_parent.py"
+        "tests/test_kitchen_parent.py",
+        "tests/test_spec_audit_regressions.py",
+        "cloudflare-saas/tests/allergy-editor.test.mjs",
+        "cloudflare-saas/tests/worker.test.mjs"
       ],
-      "current_status": "implemented_source_with_review_finding",
+      "current_status": "implemented_corrected_local_regression_passed_acceptance_partial",
       "findings": [
         "SA07-03"
       ],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
-      ]
+      ],
+      "historical_findings": [
+        "SA07-03"
+      ],
+      "finding_resolution": "fixed_with_parent_regression"
     },
     {
       "id": "FR-07",
@@ -145,7 +153,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -164,7 +171,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -185,7 +191,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -200,17 +205,23 @@
       ],
       "test_paths": [
         "tests/test_kitchen_parent.py",
-        "tests/test_mobile.py"
+        "tests/test_mobile.py",
+        "tests/test_spec_audit_regressions.py",
+        "cloudflare-saas/tests/allergy-editor.test.mjs",
+        "cloudflare-saas/tests/worker.test.mjs"
       ],
-      "current_status": "implemented_source_with_review_finding",
+      "current_status": "implemented_corrected_local_regression_passed_acceptance_partial",
       "findings": [
         "SA07-01"
       ],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
-      ]
+      ],
+      "historical_findings": [
+        "SA07-01"
+      ],
+      "finding_resolution": "fixed_with_parent_regression"
     },
     {
       "id": "FR-11",
@@ -227,7 +238,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -247,7 +257,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -269,7 +278,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -290,7 +298,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -306,17 +313,23 @@
       ],
       "test_paths": [
         "tests/test_mobile.py",
-        "tests/test_kitchen.py"
+        "tests/test_kitchen.py",
+        "tests/test_spec_audit_regressions.py",
+        "cloudflare-saas/tests/allergy-editor.test.mjs",
+        "cloudflare-saas/tests/worker.test.mjs"
       ],
-      "current_status": "implemented_source_with_review_finding",
+      "current_status": "implemented_corrected_local_regression_passed_acceptance_partial",
       "findings": [
         "SA07-03"
       ],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
-      ]
+      ],
+      "historical_findings": [
+        "SA07-03"
+      ],
+      "finding_resolution": "fixed_with_parent_regression"
     },
     {
       "id": "FR-16",
@@ -332,7 +345,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -346,17 +358,22 @@
         "cloudflare-saas/src/compute.mjs"
       ],
       "test_paths": [
-        "cloudflare-saas/tests/worker.test.mjs"
+        "cloudflare-saas/tests/worker.test.mjs",
+        "tests/test_spec_audit_regressions.py",
+        "cloudflare-saas/tests/allergy-editor.test.mjs"
       ],
-      "current_status": "implemented_source_with_review_finding",
+      "current_status": "implemented_corrected_local_regression_passed_acceptance_partial",
       "findings": [
         "SA07-02"
       ],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
-      ]
+      ],
+      "historical_findings": [
+        "SA07-02"
+      ],
+      "finding_resolution": "fixed_with_parent_regression"
     },
     {
       "id": "FR-18",
@@ -375,7 +392,6 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
@@ -398,10 +414,12 @@
       "current_status": "implemented_source_acceptance_partial",
       "findings": [],
       "unverified": [
-        "exact deployed build",
         "physical device/browser acceptance",
         "clinical acceptance where applicable"
       ]
     }
-  ]
+  ],
+  "current_release": "0.6.2-audit-pilot",
+  "current_runtime_commit": "e3f648d5313b68202336cda775ff7279556a2569",
+  "baseline_review_doc_commit": "055938ef42b1ba15e2ef568de17e8e01f883a31f"
 }

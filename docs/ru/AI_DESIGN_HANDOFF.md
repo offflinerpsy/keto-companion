@@ -1,5 +1,7 @@
 # Передача дизайнеру/AI: KETO Companion
 
+> Актуальная передача: **0.6.2-audit-pilot**. Четыре ошибки исходного ревью исправлены и покрыты тестами. Сохраняйте эти проверки: [исправления](../spec/CURRENT_CORRECTIONS.md), [точные JSON-контракты](../contracts/), [решения ревью](../review/SPEC_AUDIT_RESOLUTIONS.md). Это не приёмка физического устройства и не медицинское заключение.
+
 SPEC-AUDIT-07 · исходный commit `ee4b42707e138f677fb32e9dfb4602a26c1b5b63` · 08.11.2026.
 Документ подготовлен по действительным исходникам для самостоятельной работы дизайнера.
 Это не визуальная приёмка по скриншотам и не подтверждение готовности к публикации.
@@ -197,7 +199,7 @@ DOM-проверка доказывает семантику; скриншот �
 - Модели, deployment/budget, private bindings и идентичности релиза.
 - Админ-экран на просмотр семейных медицинских дневников.
 
-Дефекты SA07-01..04 записаны в [findings](../../qa/SPEC_AUDIT_FINDINGS.json).
+Исторические дефекты SA07-01..04 записаны в [findings](../../qa/SPEC_AUDIT_FINDINGS.json); актуальные исправления и тесты — в решениях ревью.
 Исправления принадлежат родителю; не маскируйте их придуманными данными или ослаблением backend.
 
 ## Поэтапная работа дизайнера
@@ -226,3 +228,7 @@ git diff --check
 
 Если меняется поведение, нужна содержательная регрессия на его собственной границе.
 Не запускайте browser scripts, установку пакетов или cloud-изменения ради дизайнерского макета.
+
+## Additional invariant after audit / Дополнительный инвариант
+
+Render every saved allergy, including canonical values not originally visible and any stored legacy value. An unrelated profile edit must never erase a restriction. Keep unknown diary intake visibly unknown, and distinguish per-person nutrition from household shopping. Test both the SaaS and legacy editor if editing shared logic. / Все сохранённые аллергии должны оставаться видимыми и сохранными при изменении других полей. Не превращайте неизвестное питание в ноль и не смешивайте личный рацион с покупками на всё блюдо.

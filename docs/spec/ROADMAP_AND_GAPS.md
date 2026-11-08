@@ -1,10 +1,12 @@
 # Roadmap and gaps
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 This is a gap register for the same task, not a second product backlog.
 Parent owns issue status, prioritization, fixes and release acceptance.
 Source baseline is `ee4b42707e138f677fb32e9dfb4602a26c1b5b63`.
 
-## Actionable review findings
+## Baseline findings (corrected in 0.6.2)
 
 | ID | Severity | Concrete gap | Required next evidence |
 | --- | --- | --- | --- |
@@ -19,10 +21,10 @@ No P0 finding was established in this bounded pass; that is not a no-P0 guarante
 
 ## Release blockers and acceptance still open
 
-- Parent must integrate source fixes and final regression/CI evidence.
-- Reviewed CI Python allowlist omits newer suites; fonts need explicit preparation for PDF checks.
+- Four baseline corrections and full local regression are complete; real GitHub-hosted execution remains blocked.
+- Current CI selects all suites, prepares pinned fonts and checks docs/contracts/generated builds; it must actually execute in GitHub before claiming hosted CI success.
 - Reported hosted startup failure has no established cause; billing attribution is unsupported.
-- Exact Worker/Azure deployed hashes and private bindings were not verified here.
+- Exact staging deployment hashes are separately verified by the implementation owner; the independent review did not itself perform deployment.
 - Requested runtime date 2026-11-07 is not established by older Miniflare/date evidence.
 - Intended person's real Google login, invitation claim and own consent remain separate checks.
 - Popup, microphone, HEIC decoding, mobile keyboard, PDF share and calendar import need actual client/device evidence.
@@ -72,14 +74,11 @@ Do not begin that implementation as part of this completed documentation pass.
 
 ## Metadata drift
 
-Worker/mobile version 0.6.1 coexists with service/plugin 0.2.1,
-package/build 0.6.0 and example 0.5.0 labels.
+Worker/mobile/package version0.6.2 coexists with the intentionally retained legacy service/plugin0.2.1 and older example0.5.0 labels.
 These are different source identifiers; an operator should use exact artifact hashes/target readback.
 Catalogue version string in core is older than the data handoff label; hash the actual files.
 Parent may consolidate metadata aliases separately without overwriting historical receipts.
 
 ## One next action
 
-Parent reproduces SA07-04 against the profile editor and preserves every canonical saved allergen
-through an unrelated edit, then adds the regression to its own code/CI work.
-Other findings remain in the same review receipt for parent triage; this reviewer stops here.
+Restore GitHub-hosted job startup using the recorded minimal/full run IDs, then rerun the full workflow. Do not bypass identity, safety checks or billing controls. After that, continue the existing bounded owner/device acceptance rather than opening parallel implementation tasks.

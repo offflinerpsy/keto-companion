@@ -1,5 +1,7 @@
 # Design system and layout contract
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 Maintained styles: [public/app.css](../../cloudflare-saas/public/app.css).
 Maintained markup: [public/index.html](../../cloudflare-saas/public/index.html).
 Generated `style.css` prepends pinned noUiSlider CSS; edit `app.css`, then use the build.

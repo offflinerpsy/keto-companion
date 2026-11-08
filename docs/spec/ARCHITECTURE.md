@@ -1,5 +1,7 @@
 # Architecture
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 ## Components and trust boundaries
 
 ```mermaid
@@ -150,4 +152,4 @@ This public identifier is from the deployment script; this review made no reques
 - Nonce replay metadata is durable; personal compute state is transient at the Azure bridge.
 - A chat request may call Terra and then Sol; request count is not a provider invoice.
 - No current code path establishes clinical or physical appliance validation.
-- See SA07-02 for the gap between keyword-based admission and actual paid recipe dispatch.
+- SA07-02 is corrected: conservative pre-call chat reservation is independent of user wording; only verified no-model responses refund quota.

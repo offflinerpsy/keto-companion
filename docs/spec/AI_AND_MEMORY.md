@@ -1,5 +1,7 @@
 # AI, budgets and memory
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 ## Model routes found in source
 
 | Role | Configuration/default | Work | Bounds |
@@ -30,9 +32,7 @@ No real provider calls were made in this review.
 
 A timeout or failed response is not a zero-cost assertion.
 Calls are reserved before possible provider work and uncertain effects are not automatically retried.
-SA07-02: the Worker labels certain chat keywords local before actual kitchen dispatch;
-this can omit its paid/global admission even while the recipe designer is attempted.
-The local service ceiling still exists; the finding does not establish unlimited calls.
+SA07-02 correction: all potentially paid chat requests reserve member/global quota before dispatch, regardless of words such as “рассчитай”. Verified no-model results refund that reservation. Dedicated deterministic guidance operations remain model-free. Both request-admission and service-side limits still apply.
 
 ## Data sent to the model
 

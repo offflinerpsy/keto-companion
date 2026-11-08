@@ -1,8 +1,10 @@
 # KETO Companion: source specification
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 SPEC-AUDIT-07 · independent source review · 2026-11-08.
 Baseline: `ee4b42707e138f677fb32e9dfb4602a26c1b5b63` (`release0.6.1`).
-This is a description of inspected source and a bounded review, not release approval.
+This is the maintained specification, reconciled by the implementation owner after the independent baseline review. It is not clinical or unconditional family release approval.
 The parent changed runtime/CI while documentation was being written. All defect
 observations remain pinned to the baseline; those fixes were not re-audited.
 Read [source snapshot status](SOURCE_STATUS.md) and
@@ -70,9 +72,9 @@ No new backlog, cloud resource, issue or runtime was created by this review.
 
 | Layer | Source value | Interpretation |
 | --- | --- | --- |
-| Worker health/session; mobile snapshot | `0.6.1-kitchen-pilot` | Current app behavior identifier |
+| Worker health/session; mobile snapshot | `0.6.2-audit-pilot` | Current app behavior identifier |
 | Python service `VERSION` | `0.2.1` | Legacy service/plugin identity retained |
-| npm package/build manifest text | `0.6.0-kitchen-pilot` | Metadata lag; do not infer deployed version |
+| npm package/build manifest text | `0.6.2-audit-pilot` | Aligned source metadata; exact deployment receipts remain authoritative |
 | Example configuration | `0.5.0-guided-pilot` | Example metadata, not target proof |
 | Core engine/schema | `0.1.0` / `1` | Deterministic engine and core state |
 | Service document | schema `2` | Wrapper around core state |
@@ -89,5 +91,9 @@ Sources: [worker](../../cloudflare-saas/src/worker.mjs),
 Four actionable findings were independently recorded; none is labelled P0.
 They concern allergy editor preservation, request accounting, incomplete diary budgets
 and batch shopping. See exact severity, evidence and confidence in findings JSON.
-Full regression, CI repair, runtime deployment and family acceptance belong to the parent.
+Full local regression and staging fixes are recorded in [current corrections](CURRENT_CORRECTIONS.md). Hosted GitHub startup, real-device and clinical acceptance remain separate gates.
 Do not interpret document completion as absence of defects or permission to release.
+
+## Source-derived machine contracts
+
+[Generated contracts](../contracts/) contain API schemas, deterministic OpenAPI, D1 columns/relations, route/control inventories and kitchen limits. `scripts/export_contracts.py --check` detects drift. [Review resolutions](../review/SPEC_AUDIT_RESOLUTIONS.md) and [GitHub execution evidence](../evidence/SPEC_AUDIT_GITHUB_EXECUTION.json) distinguish current corrections from historical findings.

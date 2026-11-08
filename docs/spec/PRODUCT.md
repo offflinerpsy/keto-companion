@@ -1,5 +1,7 @@
 # Product specification
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 ## Purpose
 
 KETO Companion helps an invited adult organize food choices, understand preliminary
@@ -57,7 +59,7 @@ The four stages are consent, baseline/about, restrictions and targets.
 Unknown medical answers remain unknown; selecting no coefficient does not invent one.
 Saved answers resume the relevant stage.
 Acceptance: untouched fields do not submit slider defaults, and changing baseline requires a new proposal.
-The current allergy editor has a preservation defect: SA07-04.
+Both editors preserve all 16 canonical allergens and any stored legacy value until explicit removal and confirmation. Baseline finding SA07-04 is fixed and regression-tested.
 
 ### FR-04 — Preliminary guidance
 
@@ -113,7 +115,7 @@ Free text can be stored without fabricated grams/calories.
 Kitchen distinguishes half a portion from half of a whole batch.
 Daily summaries count quantified entries and disclose unquantified ones.
 Acceptance: quantities are calculated on the server after confirmation.
-Current remaining-carbohydrate guidance can still overstate completeness: SA07-01.
+Incomplete diary intake makes the remaining carbohydrate allowance unknown; known subtotal is separate. Baseline SA07-01 is fixed.
 
 ### FR-11 — Confirmed shared preferences
 
@@ -152,7 +154,7 @@ PDF preparation and system share are two user gestures.
 CSV/JSON menu import recomputes trusted catalogue ingredients and requires confirmation.
 Acceptance: stale/held plans cannot produce an accepted-plan export;
 file sharing does not claim Telegram delivery.
-Batch-derived shopping has a review finding: SA07-03.
+Batch-derived shopping uses saved household servings before subtracting pantry stock; nutrient plans remain per person. Baseline SA07-03 is fixed.
 
 ### FR-16 — Reminders
 
@@ -167,7 +169,7 @@ Deletion revokes sessions immediately and returns a receipt for continued cleanu
 Private R2 objects and D1 active data are cleaned in bounded steps.
 Model requests have per-user/global Worker accounting and service limits.
 Acceptance: uncertain upstream effects are not replayed with the same request ID.
-SA07-02 identifies a keyword classification bypass of Worker paid admission.
+All potentially paid chat requests now reserve Worker quota before compute, with refund only on a trusted no-model result. Baseline SA07-02 is fixed.
 
 ### FR-18 — Interface and navigation
 

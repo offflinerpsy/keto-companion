@@ -1,5 +1,7 @@
 # Exact static UI contract inventory
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 Extracted from [index.html](../../cloudflare-saas/public/index.html).
 This is static markup, not a DOM snapshot. Setup moves consent/onboarding/energy fields.
 Dynamic kitchen IDs and callback contracts are described in the bilingual design handoff.

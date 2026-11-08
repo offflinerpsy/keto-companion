@@ -1,5 +1,7 @@
 # API and actions
 
+> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+
 This is a source-backed action inventory, not a generated OpenAPI/JSON Schema export.
 Exact tool input schemas live in [service/app.py](../../service/app.py).
 Worker mapping lives in [compute.mjs](../../cloudflare-saas/src/compute.mjs).
@@ -134,7 +136,7 @@ Completed normal jobs can replay their cached response if consent revision is un
 Pending jobs return REQUEST_PENDING; failed jobs do not automatically rerun.
 Audio and PDF are transient: completed replay returns ALREADY_PROCESSED, not saved bytes/text.
 Request counters conservatively retain uncertain attempts; `model_called=false` can refund admission.
-SA07-02 documents a route-classification accounting gap, not unlimited provider access.
+SA07-02 documented a baseline accounting gap, now closed by conservative chat reservation and verified no-model refund.
 
 ## Signed internal bridge
 
