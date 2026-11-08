@@ -1,4 +1,4 @@
-name: Synthetic checks / Проверки
+name: Full synthetic verification
 on:
   push:
     branches: [main]
@@ -7,35 +7,68 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: keto-checks-${{ github.ref }}
+  group: keto-verification-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   verify:
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      KETO_ENV: test
+      KETO_AUTH_MODE: local_test
+      KETO_LOCAL_DB: /tmp/keto-ci-bootstrap.sqlite
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUTF8: '1'
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact source without persisted write credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '26'
-      - name: Repository hygiene and pinned artifacts
+      - name: Validate repository and pinned artifacts before dependencies
         run: python scripts/verify_repository.py
-      - name: Isolated dependencies, no cloud credentials
+      - name: Install pinned test dependencies; no cloud credentials
         run: |
           python -m venv .venv
-          .venv/bin/python -m pip install -r requirements-dev.txt
-          npm ci --prefix ui-sdk --ignore-scripts
-      - name: Deterministic Python tests
-        run: .venv/bin/python -m pytest -q tests/test_service.py tests/test_oauth_bridge.py tests/test_edge_candidate.py tests/test_edge_bridge.py library/skills/keto-companion/tests/test_core.py
-      - name: Synthetic Worker and UI checks
+          .venv/bin/python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          npm ci --prefix ui-sdk --ignore-scripts --no-fund
+          mkdir -p reports
+      - name: Prepare checksummed runtime-only PDF fonts
+        run: .venv/bin/python scripts/prepare_pdf_fonts.py --download
+      - name: All deterministic Python tests, including current product suites
+        run: .venv/bin/python -m pytest -q tests library/skills/keto-companion/tests --junitxml=reports/python-junit.xml
+      - name: All synthetic Worker and client tests
         run: |
-          node --test cloudflare-saas/tests/*.test.mjs
+          node --test --test-reporter=junit --test-reporter-destination=reports/node-junit.xml cloudflare-saas/tests/*.test.mjs
           node tests/test_ui_no_browser.cjs
           node tests/test_oauth_ui.cjs
-      - name: Reproducible build verification
+      - name: Validate machine-readable product and design contracts
+        run: .venv/bin/python scripts/export_contracts.py --check
+      - name: Rebuild assets and detect uncommitted generated changes
         run: |
           node cloudflare-saas/build.cjs
           python scripts/verify_repository.py
+          git diff --exit-code -- artifacts/files_manifest.json cloudflare-saas/public/app.bundle.js cloudflare-saas/public/style.css cloudflare-saas/public/knowledge.html cloudflare-saas/src/embedded-assets.mjs cloudflare-saas/dist
+      - name: Record exact scope, not a clinical or device certification
+        if: always()
+        run: |
+          {
+            echo '## KETO synthetic verification'
+            echo "Source: $GITHUB_SHA"
+            echo 'All pytest-discovered product suites and Node test files are selected.'
+            echo 'No cloud credentials, real identities, paid model calls, production data or browser sessions are supplied.'
+            echo 'Passing this workflow does not establish clinical safety, recipe kitchen trials, Google OAuth or physical iPhone acceptance.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve synthetic test results only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: synthetic-test-results-${{ github.run_id }}
+          path: reports/*-junit.xml
+          if-no-files-found: ignore
+          retention-days: 3
