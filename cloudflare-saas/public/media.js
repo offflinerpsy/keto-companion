@@ -20,3 +20,24 @@ export async function prepareImage(file,{bitmap=globalThis.createImageBitmap,doc
   const width=source.width||source.naturalWidth,height=source.height||source.naturalHeight;if(!width||!height||width*height>24000000)throw Error('Изображение слишком большое.');const canvas=document.createElement('canvas');let scale=Math.min(1,1024/Math.max(width,height));canvas.width=Math.max(1,Math.round(width*scale));canvas.height=Math.max(1,Math.round(height*scale));canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);const result=canvas.toDataURL('image/jpeg',.78);if(result.length>1300000)throw Error('После сжатия фото больше 1 МБ. Выберите меньший снимок.');return result;
  }catch(e){throw Error(e.message?.includes('МБ')?e.message:'Не удалось прочитать фото. Для HEIC выберите экспорт в JPEG/PNG и попробуйте снова.')}finally{source?.close?.();if(url)URL.revokeObjectURL(url)}
 }
+
+// One attachment controller for picker, paste, drop and explicit public-image URL.
+// Dependencies are injectable for focused DOM tests; no global document handlers.
+export function setupChatImages({root,$,prepare=prepareImage,link,epoch,setImage,notify}){
+ let generation=0;
+ const current=(g,e)=>g===generation&&e===epoch();
+ function reset(){generation++;setImage(null);$('message').required=true;$('photo-preview').hidden=true;$('photo-preview-image').removeAttribute('src');$('photo').value='';$('photo-status').textContent='';$('image-link-url').value='';$('image-drop-zone').classList.remove('dragging')}
+ function display(value){setImage(value);$('message').required=false;$('photo-preview-image').src=value;$('photo-preview').hidden=false;$('photo-status').textContent='Фото подготовлено. Отправится только с вашим сообщением.'}
+ async function attach(file){const g=++generation,e=epoch();try{const value=await prepare(file);if(current(g,e))display(value)}catch(error){if(current(g,e))notify(error.message)}}
+ function first(files){const images=[...files].filter(f=>f.type?.startsWith('image/'));if(images.length){if(images.length>1)notify('За одно сообщение можно отправить одно фото. Выбрано первое.');void attach(images[0]);return true}if(files.length)notify('Нужен файл изображения. Страницу можно добавить текстом или скриншотом.');return false}
+ function offerUrl(value){const url=String(value||'').split('\n').find(x=>x.trim()&&!x.startsWith('#'));if(!url)return;try{if(new URL(url).protocol!=='https:')throw Error();$('image-link-url').value=url;$('image-link-details').open=true;$('image-link-url').focus();notify('Проверьте ссылку и нажмите «Загрузить фото по ссылке».')}catch{notify('Нужна прямая публичная HTTPS-ссылка на изображение.')}}
+ $('photo').onchange=e=>first(e.target.files||[]);$('photo-remove').onclick=reset;
+ root.addEventListener('paste',e=>{const files=[...(e.clipboardData?.items||[])].filter(x=>x.kind==='file'&&x.type.startsWith('image/')).map(x=>x.getAsFile()).filter(Boolean);if(!files.length){const text=(e.clipboardData?.getData('text/plain')||'').trim();if(/^https:\/\/[^\s]+$/i.test(text)&&(/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(text)||/^https:\/\/(?:images\.unsplash\.com|images\.pexels\.com|upload\.wikimedia\.org)\//i.test(text)))offerUrl(text);return;}const text=e.clipboardData?.getData('text/plain');if(!text)e.preventDefault();first(files)});
+ const zone=$('image-drop-zone');zone.onclick=()=>$('photo').click();zone.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('photo').click()}});
+ const relevant=e=>[...(e.dataTransfer?.types||[])].some(t=>['Files','text/uri-list'].includes(t));
+ root.addEventListener('dragover',e=>{if(relevant(e)){e.preventDefault();e.dataTransfer.dropEffect='copy';zone.classList.add('dragging')}});
+ root.addEventListener('dragleave',e=>{if(!root.contains(e.relatedTarget))zone.classList.remove('dragging')});
+ root.addEventListener('drop',e=>{if(!relevant(e))return;e.preventDefault();zone.classList.remove('dragging');if(!first(e.dataTransfer.files||[]))offerUrl(e.dataTransfer.getData('text/uri-list'))});
+ $('image-link-load').onclick=async()=>{const g=++generation,e=epoch(),url=$('image-link-url').value;try{const value=await link(url);if(current(g,e))display(value)}catch(error){if(current(g,e))notify(error.message)}};
+ return {reset,attach,offerUrl,invalidate(){generation++}};
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "keto-developer-api-deployment-v1",
+  "worker_name": "keto-companion-developer-runner",
+  "main_module": "worker.mjs",
+  "compatibility_date": "2026-11-07",
+  "sdk": {"name":"@cloudflare/containers","version":"0.3.7"},
+  "durable_object_class": "KetoTester",
+  "new_sqlite_classes": ["KetoTester"],
+  "namespace_binding": "KETO_TESTER",
+  "container": {"max_instances":1,"port":8080,"enable_internet":false,"sleep_after":"5m","image_digest":"PARENT_SUPPLIES_VERIFIED_DIGEST"},
+  "service_binding": {"name":"DEVELOPER_RUNNER","service":"keto-companion-developer-runner","entrypoint":"DeveloperRunner"},
+  "required_vars_on_both_workers": ["DEVELOPER_BASELINE","DEVELOPER_IMAGE_DIGEST"],
+  "main_worker_private_bindings": ["DB","UPLOADS"],
+  "runtime_secret_bindings": [],
+  "external_fetch": "404",
+  "cron_on_main_worker": "*/10 * * * *",
+  "publication_broker": "not_configured",
+  "deployment_owner": "parent; descriptor is not deployment evidence"
+}

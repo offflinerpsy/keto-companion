@@ -1,0 +1,9 @@
+{
+  "name": "keto-developer-runtime",
+  "version": "0.7.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@cloudflare/containers": "0.3.7"
+  }
+}

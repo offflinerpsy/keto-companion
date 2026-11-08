@@ -1,16 +1,15 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T13:18:58.106871+00:00",
+  "updated_at": "2026-11-08T15:15:23.748279+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
-  "active_task": null,
-  "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
-  "next_task": {
-    "id": "GITHUB-HOSTED-STARTUP",
-    "github_issue": 13,
-    "status": "blocked_external_startup",
-    "action": "Restore GitHub hosted job execution using linked full/minimal run evidence, then rerun full workflow; no payment upgrade or visibility change without owner approval."
+  "active_task": {
+    "id": "CF-DEV-MEDIA-08",
+    "stage": "recovered_source_release_verification",
+    "status": "in_progress"
   },
+  "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
+  "next_task": null,
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",
     "sha256": "4c881831908438751fa4a0277754f430d18cf4d85804a81e468347a26d69a2ff"
@@ -36,7 +35,7 @@
   },
   "operating_rules": "AGENTS.md",
   "platform_failure_exact_cause": "not determined; no server-side chat telemetry",
-  "source_version": "0.6.2-audit-pilot",
+  "source_version": "0.7.0-dev-media-pilot",
   "history": [
     {
       "previous_last_completed": {
@@ -172,5 +171,32 @@
     "external_effects": "not_delivered; no cloud or model calls",
     "processes": []
   },
-  "data_version": "0.1.1+verified-food-extension-2026-11-08"
+  "data_version": "0.1.1+verified-food-extension-2026-11-08",
+  "previous_external_blocker": {
+    "id": "GITHUB-HOSTED-STARTUP",
+    "github_issue": 13,
+    "status": "blocked_external_startup",
+    "action": "Restore GitHub hosted job execution using linked full/minimal run evidence, then rerun full workflow; no payment upgrade or visibility change without owner approval."
+  },
+  "dev_media_checkpoint": {
+    "phase": "focused_checks_accepted_source_handoff",
+    "report": "qa/CF_DEV_MEDIA_08_RESULT.json",
+    "baseline": "c5e7b5fcc17ae43e16a99faf7011d66deac7d546951545ce97f90b41a1e72087",
+    "effects": "not_delivered; no cloud/model/Docker/browser operations",
+    "processes": [],
+    "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
+  },
+  "dev_media_source": {
+    "status": "completed_source",
+    "report": "qa/CF_DEV_MEDIA_08_RESULT.json",
+    "baseline": "c5e7b5fcc17ae43e16a99faf7011d66deac7d546951545ce97f90b41a1e72087",
+    "node_focused_passed": 47,
+    "python_focused_passed": 25,
+    "live_model_tested_by_source_writer": false,
+    "live_runner_tested_by_source_writer": false,
+    "release_performed_by_source_writer": false,
+    "publication_broker": "not_configured",
+    "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
+  },
+  "release_blocker_legacy": "GitHub Actions not required: nativeCloudflare verified baseline; final0.7 gate pending"
 }

@@ -1,6 +1,8 @@
 # KETO Companion: source specification
 
-> Current specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
+Current source: **0.7.0-dev-media-pilot**. Read [developer and media pilot](DEVELOPER_MEDIA_PILOT.md) for the current implementation, parent release boundary and exact limitations. The audit below remains pinned to its historical baseline.
+
+> Historical audit specification: **0.6.2-audit-pilot**, reconciled with runtime commit `e3f648d5313b68202336cda775ff7279556a2569`. The independent review examined 0.6.1; SA07-01…04 are historical findings corrected in 0.6.2. Read [current corrections](CURRENT_CORRECTIONS.md) for exact source, regression evidence and remaining acceptance gates.
 
 SPEC-AUDIT-07 · independent source review · 2026-11-08.
 Baseline: `ee4b42707e138f677fb32e9dfb4602a26c1b5b63` (`release0.6.1`).

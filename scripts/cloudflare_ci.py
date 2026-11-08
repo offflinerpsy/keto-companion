@@ -20,6 +20,8 @@ def main():
     py=str(ROOT/'.venv/bin/python')
     run('python_dependencies',[py,'-m','pip','install','--disable-pip-version-check','-r','requirements-dev.txt'],240)
     run('node_dependencies',['npm','ci','--prefix','ui-sdk','--ignore-scripts','--no-fund'],120)
+    run('container_sdk',['npm','ci','--prefix','developer-runtime','--ignore-scripts','--no-fund'],90)
+    run('container_worker_build',['node','scripts/build_developer_runtime.cjs'],30)
     run('runtime_fonts',[py,'scripts/prepare_pdf_fonts.py','--download'],90)
     run('all_python',[py,'-m','pytest','-q','tests','library/skills/keto-companion/tests'],240)
     node_tests=sorted(str(x.relative_to(ROOT)) for x in (ROOT/'cloudflare-saas/tests').glob('*.test.mjs'))

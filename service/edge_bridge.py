@@ -25,7 +25,9 @@ class MemoryStore:
   self.doc=None;self.version=None
 
 class EdgeBridge:
- def __init__(self,secret,replay_store,brain,tool_map,image_clean,clock=None,public_jwk=None,transcriber=None):
+ def __init__(self,secret,replay_store,brain,tool_map,image_clean,clock=None,public_jwk=None,transcriber=None,developer=None):
+  from .developer import DeveloperDesigner
+  self.developer=developer or DeveloperDesigner()
   self.transcriber=transcriber or AudioTranscriber();self.verify_key=None;self.secret=None
   if public_jwk:
    if secret:raise RuntimeError('Choose exactly one bridge authentication mode')
@@ -65,6 +67,9 @@ class EdgeBridge:
    if not isinstance(args,dict):raise ValueError()
    source=args.pop('source_context',None) if op=='chat' else None
    if source is not None and (not isinstance(source,dict) or set(source)!={'title','author','url','text'} or any(not isinstance(v,str) or len(v)>2000 for v in source.values()) or len(json.dumps(source,ensure_ascii=False).encode())>10000):raise ValueError()
+   if op=='developer_patch':
+    if doc is not None:raise ValueError('developer state forbidden')
+    return {'response':self.developer.propose(args),'state':None}
    if op=='sanitize_image':
     if set(args)!={'image_data_url'} or doc is not None:raise ValueError()
     return {'response':{'image_data_url':self.image_clean(args['image_data_url'])},'state':None}

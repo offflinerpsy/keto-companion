@@ -242,3 +242,7 @@ Real assistive-technology focus-return behavior remains an acceptance check.
 PWA manifest and icons describe an installable-looking web surface.
 No service-worker/background WebPush behavior is established by the manifest.
 These public pages do not expose a logged-in person's data.
+
+## developer · owner-only technical pilot
+
+More and the explicit chat mode selector open `developer`; members cannot run or inspect its jobs. Controls cover enable for one hour, exact technical task confirmation, one generation, isolated test, private synthetic preview, diff download and cancel/disable. It adds no bottom tab. Status distinguishes draft, checking, checked, unpublished, failed and cancelled. See [developer and media pilot](DEVELOPER_MEDIA_PILOT.md).

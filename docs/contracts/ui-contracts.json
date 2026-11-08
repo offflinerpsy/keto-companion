@@ -38,6 +38,7 @@
     "sources",
     "reminders",
     "admin",
+    "developer",
     "targets",
     "knowledge",
     "memory",
@@ -48,12 +49,12 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "609c3bd1d8d71c174f9b586aa38efd938bd13a853bc6f93cd6d4c064d133064f",
-    "cloudflare-saas/public/index.html": "6152364b012db6804fe48e181eba5c03bde283800eae7c1408247d4934eaf7a1",
-    "cloudflare-saas/public/routes.js": "0414f2be4b0de5e8f2fa41344bec7cab183f682a8a9080284f4010ec42c8d2e2",
+    "cloudflare-saas/public/app.css": "daab548220ea557aacb529c25c2bc6e80ce2707d479edfdd429496dc4ad62f5f",
+    "cloudflare-saas/public/index.html": "ea34530563c32856a1ddcc6013c61ff2f7d091fd595643ce69ed822ae0a169d6",
+    "cloudflare-saas/public/routes.js": "04c6882a4f13978182a2b8aa27d0556cb1cfbde8010fdacb9a5f6411145167e1",
     "cloudflare-saas/src/compute.mjs": "f1f1ddf7344550ca0c64a08fc6fb17a440ad1dbd976da0a84136bf69f6ecb9a1",
-    "cloudflare-saas/src/worker.mjs": "4e555fa06d00529b4a0a6b2ff686002ea829b6d877f0cf85cba8ca6c9febe59e",
-    "service/app.py": "07d315a7d31d8225a47a03914ec8d99a51ced39f8bb143081d376b7db56714df"
+    "cloudflare-saas/src/worker.mjs": "1d6cd3310a2b33c21fcbadfeeb6a8115f1e014b73c29c5b80fb459e37327cf94",
+    "service/app.py": "ef66602e8108ec640d0186bd9996339ec633e34091642dcaf35a961e29db6d0f"
   },
   "static_elements": [
     {
@@ -209,6 +210,14 @@
       "tag": "section"
     },
     {
+      "id": "developer-mode-controls",
+      "tag": "div"
+    },
+    {
+      "id": "chat-mode",
+      "tag": "select"
+    },
+    {
       "data-testid": "recipes-shortcut",
       "data-view": "recipes",
       "tag": "button",
@@ -272,6 +281,25 @@
       "aria-describedby": "composer-help",
       "id": "message",
       "tag": "textarea"
+    },
+    {
+      "id": "image-drop-zone",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "image-link-details",
+      "tag": "details"
+    },
+    {
+      "id": "image-link-url",
+      "tag": "input",
+      "type": "text"
+    },
+    {
+      "id": "image-link-load",
+      "tag": "button",
+      "type": "button"
     },
     {
       "id": "photo-status",
@@ -602,6 +630,11 @@
       "tag": "button"
     },
     {
+      "data-view": "developer",
+      "id": "developer-tab",
+      "tag": "button"
+    },
+    {
       "data-view": "admin",
       "id": "admin-tab",
       "tag": "button"
@@ -663,6 +696,104 @@
       "id": "reminder-reset",
       "tag": "button",
       "type": "button"
+    },
+    {
+      "data-page": "developer",
+      "tag": "section"
+    },
+    {
+      "id": "dev-enable",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-disable",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-refresh",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-back",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-status",
+      "tag": "p"
+    },
+    {
+      "id": "dev-form",
+      "tag": "form"
+    },
+    {
+      "id": "dev-task",
+      "tag": "textarea"
+    },
+    {
+      "id": "dev-technical",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "dev-draft",
+      "tag": "button",
+      "type": "submit"
+    },
+    {
+      "id": "dev-approval",
+      "tag": "section"
+    },
+    {
+      "id": "dev-exact",
+      "tag": "pre"
+    },
+    {
+      "id": "dev-generate",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-cancel",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-output",
+      "tag": "section"
+    },
+    {
+      "id": "dev-diff",
+      "tag": "pre"
+    },
+    {
+      "id": "dev-test",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-receipt",
+      "tag": "p"
+    },
+    {
+      "id": "dev-download",
+      "tag": "a"
+    },
+    {
+      "id": "dev-preview",
+      "tag": "iframe"
+    },
+    {
+      "id": "dev-finish",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "dev-jobs",
+      "tag": "div"
     },
     {
       "data-page": "memory",

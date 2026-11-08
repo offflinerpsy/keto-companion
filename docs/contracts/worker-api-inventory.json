@@ -12,6 +12,7 @@
     "/api/export",
     "/api/invites/claim",
     "/api/logout",
+    "/api/media/image-link",
     "/api/personal/delete",
     "/api/session",
     "/api/sources",
@@ -27,7 +28,7 @@
   ],
   "notice": "Inventory from literal routes and OPS, not full OpenAPI. Dynamic admin/source/upload/deletion routes and all authorization conditions must be read in source.",
   "schema": "keto-worker-inventory-v1",
-  "source_sha256": "4e555fa06d00529b4a0a6b2ff686002ea829b6d877f0cf85cba8ca6c9febe59e",
+  "source_sha256": "1d6cd3310a2b33c21fcbadfeeb6a8115f1e014b73c29c5b80fb459e37327cf94",
   "tool_operations": {
     "keto_apply_proposal": "apply",
     "keto_chat": "chat",

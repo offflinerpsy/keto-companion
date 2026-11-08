@@ -1,12 +1,13 @@
 {
   "schema": "keto-agent-context-v1",
   "language": "English canonical; Russian index and design handoff available",
-  "release": "0.6.2-audit-pilot",
+  "release": "0.7.0-dev-media-pilot",
   "read_first": [
     "AGENTS.md",
     "docs/CURRENT_STATUS.json",
     "docs/spec/README.md",
-    "docs/spec/CURRENT_CORRECTIONS.md"
+    "docs/spec/CURRENT_CORRECTIONS.md",
+    "docs/spec/DEVELOPER_MEDIA_PILOT.md"
   ],
   "design_entrypoints": {
     "en": "docs/en/AI_DESIGN_HANDOFF.md",

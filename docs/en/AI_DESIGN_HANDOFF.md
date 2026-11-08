@@ -228,3 +228,12 @@ Do not run browser scripts, install packages or alter cloud configuration just t
 ## Additional invariant after audit / Дополнительный инвариант
 
 Render every saved allergy, including canonical values not originally visible and any stored legacy value. An unrelated profile edit must never erase a restriction. Keep unknown diary intake visibly unknown, and distinguish per-person nutrition from household shopping. Test both the SaaS and legacy editor if editing shared logic. / Все сохранённые аллергии должны оставаться видимыми и сохранными при изменении других полей. Не превращайте неизвестное питание в ноль и не смешивайте личный рацион с покупками на всё блюдо.
+
+## 0.7 developer and media pilot
+
+The current source adds owner-only `developer` in More and an explicit chat mode selector, without adding a bottom tab. Preserve the exact-text confirmation, technical-only attestation, separate draft and Stop control. Generated code runs only in the sandboxed private preview. A tested patch is not a published release. Missing runner configuration must leave nutrition usable and display a local unavailable message.
+
+Photo picker, paste, drop and public-link action share the attachment controller. Do not add global document drop handlers or auto-fetch pasted URLs. Preserve account/topic invalidation and the first-image notice. The fixed image hosts and user disclosure are part of the privacy boundary. See [the pilot contract and limitations](../spec/DEVELOPER_MEDIA_PILOT.md) and [generated source contracts](../contracts/developer-media-contract.json). Pixel/device acceptance remains with the parent; no Mac browser was used by the source writer.
+
+## Developer/media pilot0.7
+Owner-only technical mode has separate inputs, confirmation and synthetic iframe; never copy nutrition history or attachments into it. Keep image paste/drop and optional URL loading on the shared attachment preview path. Preserve session/generation guards and no-auto-send semantics. Icons are authored local bowl/leaf assets, no Apple fonts.
