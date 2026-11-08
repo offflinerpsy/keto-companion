@@ -8736,6 +8736,7 @@ function accept(d2) {
 }
 function renderState() {
   kitchen.render();
+  renderTranquilSummary(state);
   $2("login").hidden = true;
   $2("workspace").hidden = false;
   $2("version").textContent = state.mobile_version || state.version;

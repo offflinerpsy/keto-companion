@@ -54,12 +54,13 @@ class Element{
  constructor(tag='div'){this.tag=tag;this.hidden=false;this.value='';this.dataset={};this.children=[];this.textContent='';this.open=false;this.classList={toggle(){}};this.attributes={};}
  addEventListener(){} setAttribute(k,v){this.attributes[k]=v} replaceChildren(...nodes){this.children=nodes;this.textContent=''} append(...nodes){this.children.push(...nodes)} reset(){} close(){this.open=false} scrollIntoView(){} querySelectorAll(){return []}
 }
-function harness(){
+function harness(actualStateRender=false){
  const nodes={},document={body:new Element(),getElementById(id){return nodes[id]??=new Element()},createElement:tag=>new Element(tag),querySelectorAll:()=>[],querySelector:()=>null};
  const stubs={setupDeveloper:'()=>({reset(){},identity(){},load(){}})',mountDeveloperExtension:'()=>{}',setupMobile:'()=>({reset(){},render(){},resetPhoto(){},setChatBusy(){}})',setupGuidance:'()=>({reset(){},render(){},afterApplied(){},resolve(x){return x}})',createRouter:'()=>({reset(){},go(x){globalThis.lastView=x},back(){}})',setupKitchen:'()=>({render(){},reset(){}})',kitchenActionLabels:'{}',firebaseLogin:'()=>{}'};
  let source=app.replace(/^import \{([^}]+)\} from '[^']+';$/gm,(_,names)=>names.split(',').map(name=>'const '+name+'='+stubs[name]+';').join('')).replace('run(start);','');
  // Render only the changed overview; existing modules are exercised by their own focused tests.
- source+='\nrenderState=()=>renderTranquilSummary(state);globalThis.api={tranquilSummary,setState,clearScreen,showLogin,call,accept};';
+ if(!actualStateRender)source+='\nrenderState=()=>renderTranquilSummary(state);';
+ source+='\nglobalThis.api={tranquilSummary,setState,clearScreen,showLogin,call,accept};';
  const context={document,window:{},history:{},location:{href:'https://synthetic.invalid/'},sessionStorage:{getItem(){return null}},URL,FormData,Blob,Response,crypto:webcrypto,Date,Intl,setTimeout,clearTimeout,console};vm.createContext(context);vm.runInContext(source,context);return{context,api:context.api,nodes};
 }
 function accepted(){return {processing_consent:true,profile:{owner_account_id:'synthetic-a',profile_revision:5,consent:{storage:true,health_data:true},targets:{}},screening:{can_plan:true},holds:[],guidance:{targets_stale:false},kitchen:{pantry:[{grams:null}]},diary:[{intake_status:'unquantified'}],plans:[]}}
@@ -99,4 +100,10 @@ test('short-height chat and large text keep dedicated scrolling and compact icon
  const composer=html.slice(html.indexOf('<form id="chat-form"'),html.indexOf('<section data-page="setup"'));
  assert.match(composer,/<div class="composer-bottom">[\s\S]*id="image-link-open"[\s\S]*id="mic-button"[\s\S]*id="send"/);
  assert.doesNotMatch(css,/#(?:holds|proposals|chat-confirmations)\s*\{[^}]*display:none/);
+});
+
+test('actual full state renderer updates overview instead of leaving an isolated tested helper unused',()=>{
+ const {api,nodes}=harness(true);const s=accepted();Object.assign(s,{version:'test',mobile_version:'test',revision:1,subject_kind:'personal',ui:{theme:'ivory-plum',text_size:'normal',density:'comfortable',simple_mode:false,show_nutrition:true},catalog:{recipes:72},pending:[],chat:[],ui_history:[],diary:[]});s.profile.targets=null;
+ api.setState(s);assert.equal(nodes['dawn-overview'].hidden,false);assert.equal(nodes['dawn-status-cards'].children.length,4);assert.match(content(nodes['dawn-status-cards']),/Не задан/);
+ api.setState({...s,processing_consent:false});assert.equal(nodes['dawn-overview'].hidden,true);assert.equal(nodes['dawn-status-cards'].children.length,0);
 });

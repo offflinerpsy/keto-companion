@@ -69,6 +69,7 @@ function setState(next){if(state&&state.profile.owner_account_id!==next.profile.
 function accept(d){if(d?.state){setState(d.state);}if(d?.shopping)renderShopping(d.shopping);if(d?.message)notify(d.message);guided.afterApplied(d);if(d?.receipt?.type==='profile.update'&&router.current==='setup-restrictions')fillOnboard();return d;}
 function renderState(){
  kitchen.render();
+ renderTranquilSummary(state);
  $('login').hidden=true;$('workspace').hidden=false;$('version').textContent=state.mobile_version||state.version;$('demo-banner').hidden=state.subject_kind!=='demo';$('connection').textContent='Личное пространство';
  const u=state.ui;document.body.className=[u.theme==='dark'?'dark':u.theme==='light'?'light':'',u.text_size==='large'?'large':'',u.density==='compact'?'compact':'',u.simple_mode?'simple':'',!u.show_nutrition?'no-nutrition':''].filter(Boolean).join(' ');
  $('consent-panel').hidden=state.processing_consent&&state.profile.consent.storage&&state.profile.consent.health_data;

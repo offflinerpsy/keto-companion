@@ -23,6 +23,10 @@ def run(stage,args,timeout=120,input=None,env=None):
             diagnostic=(result.stdout+'\n'+result.stderr)[-7000:]
             diagnostic=re.sub(r'(?i)(token|password|authorization|secret)([=: ]+)[^\s]+',r'\1\2[redacted]',diagnostic)
             print('KETO_SAFE_STAGE_DIAGNOSTIC '+stage+' '+diagnostic,flush=True)
+        elif stage=='cloud_container_acceptance':
+            # Fixed synthetic probe only. Emit its bounded diagnostic, never CI auth values.
+            lines=[line[:2500] for line in (result.stdout+'\n'+result.stderr).splitlines() if line.startswith(('Error:','SyntaxError:','TypeError:'))]
+            print('KETO_CONTAINER_ACCEPTANCE_DIAGNOSTIC '+json.dumps(lines),flush=True)
         elif stage=='official_registry_push':
             output=(result.stdout+'\n'+result.stderr).lower()
             reason='authorization_or_permission' if any(x in output for x in ['unauthorized','permission','forbidden','authentication','403','401']) else 'registry_transport_or_cli'
@@ -46,6 +50,13 @@ def api(method,path,body=None):
         raise RuntimeError('Cloudflare operation failed '+method+' HTTP'+str(e.code)+' codes='+str(codes)+' reasons='+','.join(reasons)) from None
     if data.get('success') is False:raise RuntimeError('Cloudflare operation unsuccessful')
     return data['result']
+def approved_rollout(existing,pin,image,instances):
+    expected='registry.cloudflare.com/'+ACCOUNT+'/keto-developer-runner@'+pin.get('image_digest','')
+    if os.getenv('KETO_APPROVED_ROLLOUT')!='1' or pin.get('account')!=ACCOUNT or pin.get('worker')!=NAME or existing.get('id')!=pin.get('application_id') or existing.get('name')!=NAME or existing.get('configuration',{}).get('image')!=expected or existing.get('max_instances')!=1 or existing.get('scheduling_policy')!='default':raise RuntimeError('EXPLICIT_CURRENT_IMAGE_APPROVAL_REQUIRED')
+    if any(x.get('status',{}).get('state') not in ('inactive','stopped','failed') for x in instances):raise RuntimeError('ACTIVE_JOB_NOT_INTERRUPTED')
+    if not image.startswith('registry.cloudflare.com/'+ACCOUNT+'/keto-developer-runner@sha256:') or not re.fullmatch(r'sha256:[a-f0-9]{64}',image.rsplit('@',1)[-1]):raise RuntimeError('INVALID_TARGET_IMAGE')
+    return {'strategy':'rolling','kind':'full_auto','step_percentage':100,'description':'Owner-reviewed KETO source update; preserve private/no-network/one-instance limits','target_configuration':{'image':image}}
+
 def main():
     if os.environ.get('KETO_NATIVE_RUNNER_RELEASE')!='1':raise RuntimeError('Explicit owner-reviewed release switch required')
     if os.environ.get('CLOUDFLARE_ACCOUNT_ID',ACCOUNT)!=ACCOUNT:raise RuntimeError('Unexpected account')
@@ -77,16 +88,29 @@ def main():
     artifact=ROOT/'developer-runtime/dist/worker.mjs'
     release={'account':ACCOUNT,'worker':NAME,'baseline':baseline,'image':image,'image_digest':digest,'worker_sha256':hashlib.sha256(artifact.read_bytes()).hexdigest(),'max_instances':1,'instance_type':'standard-1','accepted_network':'none'}
     (ROOT/'developer-runtime/release.json').write_text(json.dumps(release,indent=2)+'\n')
-    run('service_worker_deploy',['node','scripts/deploy_developer_runtime.mjs'],90)
     prefix='/accounts/'+ACCOUNT+'/containers/applications';apps=api('GET',prefix)
     if isinstance(apps,dict):apps=apps.get('applications',apps.get('items',[]))
     existing=next((x for x in apps if x.get('name')==NAME),None)
     if existing:
-        if existing.get('configuration',{}).get('image')!=image:raise RuntimeError('Existing container image differs; explicit rollout required, not silently overwritten')
         if existing.get('max_instances')!=1:raise RuntimeError('Existing runtime bounds mismatch')
+        if existing.get('configuration',{}).get('image')!=image:
+            pin=json.loads((ROOT/'ops/approved-runtime.json').read_text())
+            instances=api('GET',prefix+'/'+existing['id']+'/instances-v2')
+            request=approved_rollout(existing,pin,image,instances)
+            rollout=api('POST',prefix+'/'+existing['id']+'/rollouts',request)
+            print('KETO_APPROVED_IMAGE_ROLLOUT '+json.dumps({'application_id':existing['id'],'rollout_id':rollout.get('id'),'previous_digest':pin['image_digest'],'new_digest':digest}),flush=True)
+            for attempt in range(24):
+                current=api('GET',prefix+'/'+existing['id'])
+                if current.get('configuration',{}).get('image')==image:break
+                time.sleep(5)
+            else:raise RuntimeError('APPROVED_ROLLOUT_NOT_READY')
         app=existing
+        run('service_worker_deploy',['node','scripts/deploy_developer_runtime.mjs'],90)
     else:
+        run('service_worker_deploy',['node','scripts/deploy_developer_runtime.mjs'],90)
         app=api('POST',prefix,{'name':NAME,'scheduling_policy':'default','instances':0,'max_instances':1,'durable_objects':{'script_name':NAME,'class_name':'KetoTester'},'configuration':{'image':image,'instance_type':'standard-1'},'observability':{'logs':{'enabled':False}}})
+    # Give immutable-image and Worker metadata a bounded propagation interval.
+    time.sleep(10)
     run('cloud_container_acceptance',['node','scripts/verify_developer_cloud_runtime.mjs'],timeout=390)
     result=json.loads((ROOT/'docs/evidence/CF_DEV_CLOUD_RUNTIME_ACCEPTANCE.json').read_text())
     if result['baseline']!=baseline or result['image_digest']!=digest or result['status']!='passed' or not result['temporary_probe_deleted']:raise RuntimeError('Cloud runtime acceptance incomplete')

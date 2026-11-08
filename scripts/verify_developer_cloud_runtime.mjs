@@ -28,7 +28,7 @@ try{
  await new Promise(resolve=>setTimeout(resolve,5000));
  const response=await fetch('https://'+name+'.'+subdomain+'.workers.dev/',{method:'POST',headers:{Authorization:'Bearer '+secret},signal:AbortSignal.timeout(310000)});
  result=await response.json();
- if(!response.ok||result.status!=='passed'||result.exit_code!==0||result.baseline!==manifest.baseline||result.patch_hash!==patchHash||result.image_digest!==release.image_digest)throw Error('Cloud Container acceptance failed: '+JSON.stringify({http:response.status,status:result.status,error:result.error}).slice(0,450));
+ if(!response.ok||result.status!=='passed'||result.exit_code!==0||result.baseline!==manifest.baseline||result.patch_hash!==patchHash||result.image_digest!==release.image_digest)throw Error('Cloud Container acceptance failed: '+JSON.stringify({http:response.status,status:result.status,error:result.error,stages:(result.stages||[]).map(s=>({name:s.name,exit_code:s.exit_code,log_tail:(s.log||'').slice(-1000)}))}).slice(0,450));
  const stages=['syntax','build','product','python'];
  if(result.stages?.length!==stages.length||!result.stages.every((s,i)=>s.name===stages[i]&&s.exit_code===0&&(i<2||Number.isInteger(s.passed_count)&&s.passed_count>0)))throw Error('Cloud Container acceptance stages invalid');
 }finally{
