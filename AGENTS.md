@@ -29,3 +29,7 @@ Stop at the current task's acceptance criteria and write the handoff. When only 
 ## Specification and design handoff
 
 Start with `docs/AGENT_CONTEXT.json`, `docs/spec/README.md` and `docs/spec/CURRENT_CORRECTIONS.md`. English and Russian design handoffs are `docs/en/AI_DESIGN_HANDOFF.md` and `docs/ru/AI_DESIGN_HANDOFF.md`. Source-derived JSON contracts live in `docs/contracts/` and must pass `scripts/export_contracts.py --check`; verify documentation links/paths with `scripts/verify_specification.py`. Preserve current audit regressions when redesigning. `docs/spec/review_probes.py` intentionally reproduces old defects at its baseline commit, not desired current behavior. GitHub-hosted startup failure is an external execution blocker, never a passing test result.
+
+## Completed Cloudflare developer/media release
+
+Use compact `qa/RECOVERY_STATE.json` first. If active_task is null and the referenced build succeeded, do not restart agents or image builds. Current release uses native Cloudflare full CI, then exact pinned existing runtime acceptance, then deployment. `ops/approved-runtime.json` is updated only from real accepted cloud evidence. Explicit image-rollout flags must be removed after a reviewed image update. Documentation changes do not require a new image. Historical failed receipts are retained, not reinterpreted as current blockers. Ordinary developer output ends at private tested preview/diff; production publication remains a separate reviewed operation.

@@ -37,6 +37,6 @@ The direct-image URL loader is a scrollable top-layer dialog rather than an expa
 
 ## Final recovery and release rule
 
-The prior conversation ended while an already-started Cloudflare release completed successfully. Recovery inspected that build and live runner pins rather than recreating resources. The missing overview render hook was fixed and all75actual-client synthetic interactions across39screen layouts now pass. Source DESIGN.md retains all nonblank lines of the supplied reference; accessibility and existing functionality adaptations are explicit in `../design/IMPLEMENTATION.md`.
+The prior conversation ended while an already-started Cloudflare release completed successfully. Recovery inspected that build and live runner pins rather than recreating resources. The missing overview render hook was fixed and all 75 actual-client synthetic interactions across39 screen layouts now pass. Source DESIGN.md retains all nonblank lines of the supplied reference; accessibility and existing functionality adaptations are explicit in `../design/IMPLEMENTATION.md`.
 
 Default releases run the mandatory full trusted Cloudflare suite and then the pinned-existing-runtime acceptance. Explicit new-image rollout flags are removed after reviewed runtime upgrades. A future source baseline mismatch must stop for an authorized image release; it is not grounds for an unbounded rebuild/retry loop.

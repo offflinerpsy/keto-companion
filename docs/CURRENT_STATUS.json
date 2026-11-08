@@ -1,25 +1,23 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T18:11:25.244541+00:00",
+  "updated_at": "2026-11-08T18:18:33.191882+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
-  "active_task": {
-    "id": "CF-DEV-MEDIA-08",
-    "github_issue": 16,
-    "stage": "final_pinned_promotion_no_new_runtime",
-    "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
-    "last_verified_build": "d57f38b9-bb0b-4c88-98c7-f181d463da74",
-    "next_action": "One normal pinned native Cloudflare build of final pin/docs checkpoint; accept existing exact image only, record final receipt, mergePR17. Do not start agents or rebuild images."
+  "active_task": null,
+  "last_completed": "CF-DEV-MEDIA-08: Cloudflare-tested developer preview, media and supplied Tranquil Dawn design",
+  "next_task": {
+    "id": "OWNER-DEVELOPER-ACCEPTANCE",
+    "github_issue": 10,
+    "status": "requires_actual_owner_session",
+    "action": "Owner opens More→Development or chat Development mode, enables one hour, submits a harmless technical help/UI request and reviews exact task before one allowed generation. Test/private preview only; no automatic live publication."
   },
-  "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
-  "next_task": null,
   "staging": {
     "deployed": true,
     "compute_connected": true,
     "google_real_user_login_verified": false,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+    "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
     "http_checks_passed": 24,
     "synthetic_e2e_checks": 20,
     "synthetic_cleanup_verified": true,
@@ -28,7 +26,7 @@
     "backend_source_commit": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
     "kitchen_deployed": true,
     "audit_fixes_deployed": true,
-    "family_release_acceptance": "physical_device_and_real_owner_flow_pending",
+    "family_release_acceptance": "actual_owner_pilot_and_physical_device_pending",
     "developer_preview_runner_connected": true,
     "design_applied": "Tranquil Dawn"
   },
@@ -37,25 +35,32 @@
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 502,
-    "node_synthetic_tests": 93,
+    "python_tests": 524,
+    "node_synthetic_tests": 146,
     "local_workerd_checks": 30,
     "workerd_compatibility_date": "2026-10-03",
     "target_cloud_compatibility_date": "2026-11-07",
     "cloud_synthetic_e2e_checks": 20,
     "actual_cloud_compatibility_date": "2026-11-07",
-    "python_skipped": 1,
+    "python_skipped": 0,
     "onboarding_component_checks": 57,
     "kitchen_ui_checks": 64,
     "kitchen_real_provider_checks": 10,
     "appliance_ui_checks": 36,
-    "GitHub_hosted_execution": "blocked_before_jobs",
-    "specification_links_checked": 857
+    "GitHub_hosted_execution": "not_required",
+    "specification_links_checked": 857,
+    "Cloudflare_full_gate": "passed",
+    "current_client_synthetic_checks": 75,
+    "current_layouts_checked": 39
   },
   "not_verified": [
-    "Actual GitHub-hosted test execution",
-    "Postfix authenticated family/device acceptance",
-    "Clinical suitability and physical appliance kitchen trials"
+    "Developer pilot is owner-enabled and limited to three UI sources, one active job, three generations/day; private preview/diff, not automatic publication or arbitrary Codex",
+    "Complete real-owner authenticated developer generate/test/download workflow not exercised by this agent",
+    "Image paste/drop and private preview are tested in actual browser code with synthetic APIs; physical iPhone input/share/voice not revalidated",
+    "Direct image links only from three allowlisted public image hosts; closed Instagram/Telegram not connected or scraped",
+    "No credentials copied from social/browser sessions, no new medical rules or automatic nutrition changes",
+    "Candidate tests are fixed narrow trusted stages; they are not full medical/security/clinical certification",
+    "Existing Cloudflare credits and exact bills not verified; resource and request limits do not imply free usage"
   ],
   "repository": "https://github.com/offflinerpsy/keto-companion",
   "visibility": "private",
@@ -63,7 +68,7 @@
     "checkpoint_commit": "33cfab4e9991e4c8c15877934dcc8f43f96cb741",
     "checkpoint_issue": 1,
     "staging_issue": 2,
-    "ci_status": "native_cloudflare_full_gate_passed_GitHub_Actions_not_required",
+    "ci_status": "Cloudflare_native_full_gate_and_container_passed",
     "ci_run_ids": [
       42410047614,
       42410148697
@@ -71,7 +76,7 @@
     "native_cloudflare_build": "success",
     "release_pull_request": 4,
     "release_merge_commit": "4661687931e263a9fd002239a4ec473aaaa8356e",
-    "next_acceptance_issue": 13,
+    "next_acceptance_issue": 10,
     "current_canonical_branch": "main",
     "mobile_release_pr": 7,
     "mobile_merge_commit": "b92f1bfd58b93785c115874be923bbeec0a3b3dd",
@@ -80,7 +85,7 @@
     "kitchen_pr": 12,
     "audit_pr": 14,
     "audit_merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0",
-    "active_release_pr": 17
+    "active_release_pr": null
   },
   "mobile_acceptance": "Owner previously reported dictation works; current complete real-device regression not performed by agent.",
   "mobile_source": {
@@ -141,5 +146,6 @@
     "publication_broker": "not_configured",
     "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
   },
-  "release_blocker_legacy": "GitHub Actions not required: nativeCloudflare verified baseline; final0.7 gate pending"
+  "release_blocker_legacy": "GitHub Actions not required: nativeCloudflare verified baseline; final0.7 gate pending",
+  "current_release_receipt": "docs/evidence/CF_DEV_MEDIA_08_RELEASE_RECEIPT.json"
 }

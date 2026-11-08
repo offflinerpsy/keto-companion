@@ -13,5 +13,7 @@
   "direct_tool_probe": "network policy denied HTTP403; temporary resource deleted, not retried through alternate transport",
   "diagnostic_build": "ea73e12b-ba11-440d-84fe-4c7f5db4731f",
   "diagnostic_full_gate_retained": true,
-  "trigger_restore_required": true
+  "trigger_restore_required": false,
+  "historical_status_note": "Historical intermediate checkpoint only; current accepted state is CF_DEV_MEDIA_08_RELEASE_RECEIPT.json",
+  "final_pinned_build": "2185581c-26fd-49c0-b93c-df4dabc8c3e9"
 }

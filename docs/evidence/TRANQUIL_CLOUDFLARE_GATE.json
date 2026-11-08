@@ -1,11 +1,11 @@
 {
-  "status": "passed_exact_source_full_ci_and_real_cloud_container",
-  "latest_verified_build": "d57f38b9-bb0b-4c88-98c7-f181d463da74",
-  "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+  "status": "passed_standard_pinned_promotion_and_public_readback",
+  "latest_verified_build": "2185581c-26fd-49c0-b93c-df4dabc8c3e9",
+  "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
   "python_passed": 524,
   "node_passed": 146,
   "fixed_gate_stages": 16,
-  "seconds": 216.84,
+  "seconds": 141.64,
   "GitHub_Actions_required": false,
   "actual_cloud_container_acceptance": true,
   "candidate_fixed_stages": [
@@ -41,10 +41,12 @@
   ],
   "container_environment_variables": 0,
   "container_authorized_keys": 0,
-  "published_app_version": "6276eefc590e41998db152843daa3f1d",
+  "published_app_version": "62b7714e0d1c4b6fa1e26660fccc537a",
   "published_main_module_sha256": "4e59920d178db5b78ea5aeee3cf62b4d09e714e0cf5d808634c018ed138d7a68",
   "default_build_trigger_restored": "python scripts/cloudflare_ci.py -> KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
   "old_image_rollout_flag_removed": true,
   "operator_pin_unit_tests": 3,
-  "next_gate": "One final normal pinned promotion on this docs/pin checkpoint, no new image/model/agents"
+  "next_gate": null,
+  "prior_image_rollout_build": "d57f38b9-bb0b-4c88-98c7-f181d463da74",
+  "runtime_rebuild_in_final_promotion": false
 }

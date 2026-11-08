@@ -32,5 +32,12 @@
     "difference": "blank-line formatting only"
   },
   "operator_pin_restored_from_live_settings": true,
-  "deployed_summary_regression_resolved": true
+  "deployed_summary_regression_resolved": true,
+  "terminal_result": {
+    "status": "complete",
+    "build": "2185581c-26fd-49c0-b93c-df4dabc8c3e9",
+    "normal_pinned_promotion_verified": true,
+    "new_image_created": false,
+    "new_agents_started": 0
+  }
 }

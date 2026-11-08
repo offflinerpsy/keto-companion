@@ -1,0 +1,158 @@
+{
+  "task": "CF-DEV-MEDIA-08",
+  "version": "0.7.1-tranquil-dev-pilot",
+  "status": "private_staging_pilot_delivered_real_owner_acceptance_remaining",
+  "checked_at": "2026-11-08T18:18:33.191882+00:00",
+  "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "GitHub_pull_request": 17,
+  "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
+  "application_runtime_source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+  "backend_source_commit": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
+  "deployment": {
+    "cloudflare_build_uuid": "2185581c-26fd-49c0-b93c-df4dabc8c3e9",
+    "outcome": "success",
+    "version_id": "62b7714e0d1c4b6fa1e26660fccc537a",
+    "main_module_sha256": "4e59920d178db5b78ea5aeee3cf62b4d09e714e0cf5d808634c018ed138d7a68",
+    "modules": 19,
+    "standard_pinned_promotion": true,
+    "runtime_rebuild": false,
+    "temporary_rollout_flag_removed": true
+  },
+  "native_CI": {
+    "platform": "Cloudflare Builds",
+    "python_passed": 524,
+    "node_passed": 146,
+    "node_failed": 0,
+    "fixed_gate_stages": 16,
+    "gate_seconds": 141.64,
+    "GitHub_Actions_required": false,
+    "real_user_or_paid_model_calls_in_CI": false
+  },
+  "isolated_candidate_acceptance": {
+    "platform": "Cloudflare Container",
+    "baseline": "745f5a9df62804c5acd481bdbe8028eaebcc99c56dc45069f502d6c38fa20ad1",
+    "image_digest": "sha256:7da7876c0ebda038d68be79c803ab68a4d35de555147ff8515604dcfc2c99e2d",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "network": "disabled",
+    "actual_cloud_container_acceptance": true,
+    "fixed_stages": [
+      "syntax",
+      "build",
+      "product",
+      "python"
+    ],
+    "exact_source_stage_counts": {
+      "product": 14,
+      "python": 17
+    },
+    "temporary_probe_deleted": true,
+    "family_state_or_credentials_available_to_candidate": false,
+    "publication_broker": false
+  },
+  "current_UI_acceptance": {
+    "source_commit": "13fcf93edc3cf211e11abbc0a91cf4de255bfc15",
+    "synthetic_interactions_passed": 75,
+    "screen_layouts": 39,
+    "viewport_cases": 5,
+    "horizontal_overflows": 0,
+    "composer_navigation_overlap": 0,
+    "uncaught_JavaScript_errors": 0,
+    "actual_deployed_assets": true,
+    "actual_personal_state_or_Google_session": false,
+    "physical_iPhone_Safari": false,
+    "summary_prior_failure_corrected": true,
+    "extra_personal_mode_geometry_checks": 3
+  },
+  "design": {
+    "name": "Tranquil Dawn",
+    "original_user_file_sha256": "8d48d35bcdba847ebf2975c8a2dc12ac3489561e4b3e1b197b7feeaad9eb09fe",
+    "nonblank_source_lines_sha256": "de15f4ebc8eef4c70b6a9bb1af1cc7fedac99d433c11274f9308599789e09c9a",
+    "reference_text_preserved": true,
+    "formatting_difference": "blank lines only",
+    "adaptations": "docs/design/IMPLEMENTATION.md",
+    "no_invented_biometrics": true
+  },
+  "source_matching_public_readback": {
+    "index.html": {
+      "status": 200,
+      "source_matches": true,
+      "mime": "text/html; charset=utf-8"
+    },
+    "app.bundle.js": {
+      "status": 200,
+      "source_matches": true,
+      "mime": "text/javascript; charset=utf-8"
+    },
+    "style.css": {
+      "status": 200,
+      "source_matches": true,
+      "mime": "text/css; charset=utf-8"
+    },
+    "favicon.svg": {
+      "status": 200,
+      "source_matches": true,
+      "mime": "image/svg+xml"
+    },
+    "favicon.ico": {
+      "status": 200,
+      "source_matches": true,
+      "mime": "image/x-icon"
+    },
+    "icon-180.png": {
+      "status": 200,
+      "source_matches": true,
+      "mime": "image/png"
+    },
+    "tranquil-dawn.webp": {
+      "status": 200,
+      "source_matches": true,
+      "mime": "image/webp"
+    },
+    "health": {
+      "version": "0.7.1-tranquil-dev-pilot",
+      "build": "mobile-chat",
+      "capabilities": {
+        "firebase_google": true,
+        "direct_google": false,
+        "storage": true,
+        "compute": true
+      }
+    },
+    "/api/session": {
+      "unauthenticated_http": 401
+    },
+    "/api/developer": {
+      "unauthenticated_http": 401
+    },
+    "azure_status": {
+      "service": "KETO Companion",
+      "version": "0.2.1",
+      "transport": "HTTP + MCP",
+      "authentication_required": true,
+      "medical_monitoring": false,
+      "source_commit": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
+      "edge_signature": "Ed25519"
+    }
+  },
+  "earlier_real_provider_checks": {
+    "Sol_high_patch": "docs/evidence/CF_DEV_REAL_MODEL.json; previous source baseline; not new current owner session",
+    "actual_generated_patch_isolation": "docs/evidence/CF_DEV_REAL_PATCH_ISOLATION.json; previous source baseline",
+    "image_vision": "docs/evidence/CF_MEDIA_REAL_VISION.json; synthetic image, not food weight or browser flow",
+    "public_image_fetch": "docs/evidence/CF_MEDIA_PUBLIC_URL_CHECK.json; public CDN only"
+  },
+  "no_new_agents_this_recovery": true,
+  "no_owner_Mac_browsers_or_ComputerUse": true,
+  "new_paid_model_calls_this_recovery": 0,
+  "existing_family_records_read_or_changed": false,
+  "outstanding_local_test_processes": [],
+  "boundaries": [
+    "Developer pilot is owner-enabled and limited to three UI sources, one active job, three generations/day; private preview/diff, not automatic publication or arbitrary Codex",
+    "Complete real-owner authenticated developer generate/test/download workflow not exercised by this agent",
+    "Image paste/drop and private preview are tested in actual browser code with synthetic APIs; physical iPhone input/share/voice not revalidated",
+    "Direct image links only from three allowlisted public image hosts; closed Instagram/Telegram not connected or scraped",
+    "No credentials copied from social/browser sessions, no new medical rules or automatic nutrition changes",
+    "Candidate tests are fixed narrow trusted stages; they are not full medical/security/clinical certification",
+    "Existing Cloudflare credits and exact bills not verified; resource and request limits do not imply free usage"
+  ]
+}
