@@ -1,16 +1,15 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T12:11:22.295564+00:00",
+  "updated_at": "2026-11-08T12:17:08.347898+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
-  "active_task": null,
-  "last_completed": "KETO-KITCHEN-06",
-  "next_task": {
-    "id": "KETO-KITCHEN-ACCEPTANCE",
-    "github_issue": 10,
-    "status": "owner_acceptance",
-    "action": "Reload usual account and ask for dinner from eggs, zucchini and mushrooms in20minutes without purchases; review calculated options. No personal measurements need to be sent outside the app."
+  "active_task": {
+    "id": "KETO-KITCHEN-06",
+    "github_issue": 11,
+    "stage": "owner_appliance_addendum"
   },
+  "last_completed": "KETO-KITCHEN-06",
+  "next_task": null,
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",
     "sha256": "4c881831908438751fa4a0277754f430d18cf4d85804a81e468347a26d69a2ff"

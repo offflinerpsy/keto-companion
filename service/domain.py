@@ -79,7 +79,7 @@ class Service(KitchenService,MobileService,planning.PlanningService):
           'processing_consent':d['processing_consent'],'screening':screen,'holds':d['holds'],
           'diary':d['core']['diary'][-60:],'plans':list(d['core']['plans'].values())[-8:],
           'checklists':d['core']['checklists'],'pending':[dict(x,expired=x['expires_at']<=time.time()) for x in d['pending'].values()],
-          'chat':topic(d,d['active_thread'])['messages'][-60:],'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'kitchen':self.kitchen_snapshot(d),'mobile_version':'0.6.0-kitchen-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
+          'chat':topic(d,d['active_thread'])['messages'][-60:],'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'kitchen':self.kitchen_snapshot(d),'mobile_version':'0.6.1-kitchen-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
           'capabilities':{'model':'Azure GPT-6.1 Terra','native_voice':'ChatGPT host only; not Terra audio',
           'storage':'Azure private Blob' if os.getenv('KETO_STORAGE_URL') else 'local SQLite',
           'google_sync':'explicit exports through connected Google tools; no automatic two-way sync',

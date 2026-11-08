@@ -23,3 +23,6 @@ The original72 reference recipes remain unchanged. USDA records increased78→85
 
 ## Verified release
 Version0.6 is deployed to the existing staging environment. Actual client assets passed64isolated browser checks with synthetic APIs, and the initial-screen screenshot was visually inspected. Current Service+realSolhigh produced2model-origin options plus1explicit template;10provider roundtrip checks passed. Existing personal profiles were neither read nor modified. Full receipt: `docs/evidence/KITCHEN_RELEASE_RECEIPT.json`.
+
+## Owner appliance addendum
+Version0.6.1 adds multicooker, air-fryer and waffle-iron choices;18controlled method families. Supported modes and limitations: [Appliances](APPLIANCES.md).

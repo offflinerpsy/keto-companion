@@ -1,0 +1,42 @@
+{
+  "requested_by_owner": [
+    "multicooker",
+    "air_fryer",
+    "waffle_iron"
+  ],
+  "task": "KETO-KITCHEN-06",
+  "source_version": "0.6.1-kitchen-pilot",
+  "checked_at": "2026-11-08T12:19:43.555432+00:00",
+  "added_method_families": [
+    "multicooker_egg_steam",
+    "multicooker_poultry_steam",
+    "air_fryer_fish",
+    "air_fryer_poultry",
+    "air_fryer_vegetables",
+    "waffle_egg_cheese"
+  ],
+  "method_count": 18,
+  "models_unknown": true,
+  "no_personal_profile_mutation": true,
+  "multicooker_scope": "non-pressure steam only, if explicitly supported by the user appliance manual",
+  "pressure_cooking_supported": false,
+  "process_water": "explicit non-consumed reservoir water, per manufacturer instructions, not hidden edible ingredient",
+  "temperature_and_duration": "No universal appliance temperature/time; existing food doneness checks retained; listed minutes are planning estimates",
+  "kitchen_tested": false,
+  "sources": [
+    {
+      "url": "https://www.foodsafety.gov/food-safety-charts/safe-minimum-internal-temperatures",
+      "use": "Existing internal food temperature reference, not appliance setting"
+    },
+    {
+      "url": "https://bydash.com/blogs/recipes/the-chaffle",
+      "use": "Manufacturer demonstrates egg/cheese waffle method; no copied recipe quantities or brand-model claim"
+    }
+  ],
+  "focused_checks": {
+    "python": 21,
+    "node": 5
+  },
+  "prior_release": "docs/evidence/KITCHEN_RELEASE_RECEIPT.json",
+  "remaining": "Full regression and deployment verification"
+}

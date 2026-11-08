@@ -31,4 +31,4 @@ receipt={'task':'KETO-KITCHEN-06','source_commit':commit,'azure_app':APP,'archiv
 (ROOT/'qa/azure-compute-release-pending.json').write_text(json.dumps(receipt,indent=2))
 raw=run([AZ,'functionapp','deployment','source','config-zip','-g',GROUP,'-n',APP,'--src',str(archive),'--build-remote','true','--timeout','600','--only-show-errors','-o','json'],timeout=660)
 d=json.loads(raw);receipt.update({'status':d.get('status'),'complete':d.get('complete'),'deployment_id':d.get('id'),'checked_at':datetime.datetime.now(datetime.timezone.utc).isoformat()})
-(ROOT/'docs/evidence/KITCHEN_AZURE_DEPLOYMENT.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt))
+(ROOT/'docs/evidence/KITCHEN_APPLIANCES_AZURE_DEPLOYMENT.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt))

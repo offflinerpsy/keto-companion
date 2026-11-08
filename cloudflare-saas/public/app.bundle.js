@@ -193,7 +193,17 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   }
   const meal = select("meal", "\u041F\u0440\u0438\u0451\u043C \u043F\u0438\u0449\u0438", [["dinner", "\u0423\u0436\u0438\u043D"], ["breakfast", "\u0417\u0430\u0432\u0442\u0440\u0430\u043A"], ["lunch", "\u041E\u0431\u0435\u0434"], ["snack", "\u041F\u0435\u0440\u0435\u043A\u0443\u0441"], ["day", "\u0417\u0430\u0432\u0442\u0440\u0430\u043A, \u043E\u0431\u0435\u0434, \u0443\u0436\u0438\u043D"]]);
   const servings = field("servings", "\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u0441\u0435\u0433\u043E", "number", 1, 1, 6), time = field("time", "\u041C\u0438\u043D\u0443\u0442 \u043D\u0430 \u0431\u043B\u044E\u0434\u043E", "number", 20, 5, 120), missing = field("missing", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430: \u0440\u0430\u0437\u043D\u044B\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "number", 2, 0, 5);
-  const equipment = select("equipment", "\u041E\u0431\u043E\u0440\u0443\u0434\u043E\u0432\u0430\u043D\u0438\u0435", [["pan", "\u0421\u043A\u043E\u0432\u043E\u0440\u043E\u0434\u0430"], ["stove", "\u041F\u043B\u0438\u0442\u0430"], ["oven", "\u0414\u0443\u0445\u043E\u0432\u043A\u0430"], ["no_cook", "\u0411\u0435\u0437 \u043D\u0430\u0433\u0440\u0435\u0432\u0430"]]);
+  const equipment = select("equipment", "\u041E\u0431\u043E\u0440\u0443\u0434\u043E\u0432\u0430\u043D\u0438\u0435", [["pan", "\u0421\u043A\u043E\u0432\u043E\u0440\u043E\u0434\u0430"], ["stove", "\u041F\u043B\u0438\u0442\u0430"], ["oven", "\u0414\u0443\u0445\u043E\u0432\u043A\u0430"], ["multicooker", "\u041C\u0443\u043B\u044C\u0442\u0438\u0432\u0430\u0440\u043A\u0430 \xB7 \u043F\u0430\u0440 \u0431\u0435\u0437 \u0434\u0430\u0432\u043B\u0435\u043D\u0438\u044F"], ["air_fryer", "\u0410\u044D\u0440\u043E\u0433\u0440\u0438\u043B\u044C"], ["waffle_iron", "\u0412\u0430\u0444\u0435\u043B\u044C\u043D\u0438\u0446\u0430"], ["no_cook", "\u0411\u0435\u0437 \u043D\u0430\u0433\u0440\u0435\u0432\u0430"]]);
+  const equipmentHint = el2("p", "muted");
+  equipmentHint.id = "kitchen-equipment-help";
+  equipment.setAttribute("aria-describedby", equipmentHint.id);
+  controls.append(equipmentHint);
+  const equipmentNotes = { multicooker: "\u041F\u043E\u043A\u0430 \u0442\u043E\u043B\u044C\u043A\u043E \u0440\u0435\u0436\u0438\u043C \xAB\u041D\u0430 \u043F\u0430\u0440\u0443\xBB \u0431\u0435\u0437 \u0434\u0430\u0432\u043B\u0435\u043D\u0438\u044F. \u0412\u043E\u0434\u0443, \u0432\u0441\u0442\u0430\u0432\u043A\u0443 \u0438 \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E\u0435 \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u043D\u0438\u0435 \u043A\u0440\u044B\u0448\u043A\u0438 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u044F\u0435\u0442 \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F \u0432\u0430\u0448\u0435\u0439 \u043C\u043E\u0434\u0435\u043B\u0438.", air_fryer: "\u041D\u0435 \u043F\u0435\u0440\u0435\u043F\u043E\u043B\u043D\u044F\u0439\u0442\u0435 \u043A\u043E\u0440\u0437\u0438\u043D\u0443. \u0420\u0435\u0436\u0438\u043C \u0438 \u0432\u0440\u0435\u043C\u044F \u0437\u0430\u0432\u0438\u0441\u044F\u0442 \u043E\u0442 \u043C\u043E\u0434\u0435\u043B\u0438; \u0433\u043E\u0442\u043E\u0432\u043D\u043E\u0441\u0442\u044C \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u0442\u0441\u044F \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E.", waffle_iron: "\u041D\u0435\u0441\u043B\u0430\u0434\u043A\u0438\u0435 \u044F\u0438\u0447\u043D\u043E-\u0441\u044B\u0440\u043D\u044B\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B. \u0420\u0430\u0437\u043C\u0435\u0440 \u0437\u0430\u043A\u043B\u0430\u0434\u043A\u0438 \u0438 \u0440\u0435\u0436\u0438\u043C \u0437\u0430\u0432\u0438\u0441\u044F\u0442 \u043E\u0442 \u0432\u0430\u0444\u0435\u043B\u044C\u043D\u0438\u0446\u044B." };
+  equipment.onchange = () => {
+    equipmentHint.textContent = equipmentNotes[equipment.value] || "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u0438\u0431\u043E\u0440, \u043A\u043E\u0442\u043E\u0440\u044B\u043C \u0431\u0443\u0434\u0435\u0442\u0435 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C\u0441\u044F.";
+    if (equipment.value === "multicooker" && Number(time.value) < 25) time.value = "25";
+  };
+  equipment.onchange();
   const cuisine = field("cuisine", "\u0421\u0442\u0438\u043B\u044C \u043A\u0443\u0445\u043D\u0438", "text", "\u0414\u043E\u043C\u0430\u0448\u043D\u044F\u044F \u043A\u0443\u0445\u043D\u044F \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438");
   cuisine.maxLength = 100;
   const avoid = el2("input");
@@ -285,6 +295,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     c2.dataset.testid = "kitchen-candidate";
     c2.dataset.recipeId = r.recipe_id;
     c2.append(el2("span", "tag", r.draft_label || "\u0421\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442"), el2("h3", "", r.name_ru), el2("p", "muted", r.ingredients.map((i) => i.name_ru).slice(0, 3).join(" \xB7 ")), el2("p", "muted", r.active_minutes + " \u043C\u0438\u043D \xB7 " + number(r.servings || 1) + " \u043F\u043E\u0440\u0446\u0438\u0439 \u0432\u0441\u0435\u0433\u043E"));
+    if (r.equipment_note) c2.append(el2("p", "notice", r.equipment_note));
     const fit = el2("details"), fitSummary = el2("summary", "", "\u041F\u043E\u0447\u0435\u043C\u0443 \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0442");
     fit.append(fitSummary, el2("p", "", r.fit_note || "\u0421\u043E\u0441\u0442\u0430\u0432 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D \u043F\u043E \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0443."));
     c2.append(fit);
@@ -420,6 +431,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         time.value = d2.spec.time_budget;
         missing.value = d2.spec.max_missing_items;
         form.elements.namedItem("mode").value = d2.spec.mode;
+        equipmentHint.textContent = equipmentNotes[equipment.value] || "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u0438\u0431\u043E\u0440, \u043A\u043E\u0442\u043E\u0440\u044B\u043C \u0431\u0443\u0434\u0435\u0442\u0435 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C\u0441\u044F.";
         pantry = d2.spec.pantry.map((i) => ({ ...i, name_ru: foods.find((f2) => f2.food_id === i.food_id)?.name_ru || getState().kitchen.pantry.find((f2) => f2.food_id === i.food_id)?.name_ru || i.food_id }));
         renderChips();
       }

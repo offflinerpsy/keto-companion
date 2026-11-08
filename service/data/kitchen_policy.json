@@ -1,5 +1,5 @@
 {
-  "version": "kitchen-v1",
+  "version": "kitchen-v1.1",
   "region": "Belarus",
   "limits": {
     "pantry_items": 30,
@@ -325,6 +325,13 @@
     ],
     "yogurt": [
       "F171304"
+    ],
+    "raw_egg": [
+      "F171287"
+    ],
+    "waffle_cheese": [
+      "F173414",
+      "F170845"
     ]
   },
   "common_ids": [
@@ -603,6 +610,131 @@
         "oil"
       ],
       "no_cook": false
+    },
+    {
+      "id": "multicooker_egg_steam",
+      "title": "Омлет с овощами на пару в мультиварке",
+      "equipment": [
+        "multicooker"
+      ],
+      "minutes": 25,
+      "roles": [
+        "raw_egg",
+        "vegetable"
+      ],
+      "temperature_c": 71,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false,
+      "requires_process_water": true
+    },
+    {
+      "id": "multicooker_poultry_steam",
+      "title": "Птица с овощами на пару в мультиварке",
+      "equipment": [
+        "multicooker"
+      ],
+      "minutes": 35,
+      "roles": [
+        "raw_poultry",
+        "vegetable"
+      ],
+      "temperature_c": 74,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "oil"
+      ],
+      "no_cook": false,
+      "requires_process_water": true
+    },
+    {
+      "id": "air_fryer_fish",
+      "title": "Рыба с овощами в аэрогриле",
+      "equipment": [
+        "air_fryer"
+      ],
+      "minutes": 25,
+      "roles": [
+        "raw_fish",
+        "vegetable"
+      ],
+      "temperature_c": 63,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "air_fryer_poultry",
+      "title": "Птица с овощами в аэрогриле",
+      "equipment": [
+        "air_fryer"
+      ],
+      "minutes": 30,
+      "roles": [
+        "raw_poultry",
+        "vegetable"
+      ],
+      "temperature_c": 74,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "air_fryer_vegetables",
+      "title": "Овощи в аэрогриле",
+      "equipment": [
+        "air_fryer"
+      ],
+      "minutes": 20,
+      "roles": [
+        "vegetable",
+        "vegetable"
+      ],
+      "temperature_c": null,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "waffle_egg_cheese",
+      "title": "Несладкие яично-сырные вафли",
+      "equipment": [
+        "waffle_iron"
+      ],
+      "minutes": 15,
+      "roles": [
+        "raw_egg",
+        "waffle_cheese"
+      ],
+      "temperature_c": 71,
+      "optional_groups": [
+        "herb",
+        "oil"
+      ],
+      "no_cook": false,
+      "role_grams": {
+        "raw_egg": 100,
+        "waffle_cheese": 40
+      },
+      "source": {
+        "source_id": "WAF_DASH",
+        "url": "https://bydash.com/blogs/recipes/the-chaffle",
+        "note": "Подтверждает способ приготовления яично-сырной смеси в вафельнице; наши граммовки и инструкции не скопированы и не прошли кухонные испытания."
+      }
     }
   ],
   "substitutions": {
@@ -621,5 +753,28 @@
       "F171025",
       "F172336"
     ]
+  },
+  "equipment": [
+    "pan",
+    "stove",
+    "oven",
+    "multicooker",
+    "air_fryer",
+    "waffle_iron",
+    "no_cook"
+  ],
+  "equipment_notes": {
+    "multicooker": "Только режим «На пару» без давления, если он предусмотрен вашей моделью. Вода в чаше — технологическая, не часть блюда; объём и обращение с крышкой определяет инструкция прибора.",
+    "air_fryer": "Аэрогриль с циркуляцией горячего воздуха. Размер загрузки, штатный режим и допустимые формы сверяйте с инструкцией; точная модель пока не указана.",
+    "waffle_iron": "Вафельница с подходящими антипригарными пластинами. Объём одной закладки зависит от модели. Не переливайте смесь; индикатор нагрева не подтверждает готовность яиц."
+  },
+  "equipment_patterns": {
+    "pan": "на сковород",
+    "stove": "на плите",
+    "oven": "в духовк",
+    "multicooker": "в мультиварк",
+    "air_fryer": "в аэрогрил|\\bair\\s*fryer\\b",
+    "waffle_iron": "в вафельниц|\\bwaffle\\s*(?:maker|iron)\\b",
+    "no_cook": "без (?:нагрева|термообработки)"
   }
 }

@@ -65,7 +65,7 @@ def spec_valid(value, pantry, cat):
     if not isinstance(value, dict) or set(value)-{'mode','meal','servings','time_budget','cuisine','equipment','avoid','pantry','max_missing_items'}:
         raise ValueError('Неизвестный параметр кухни')
     s = {'mode':'pantry_only','meal':'dinner','servings':1,'time_budget':30,'cuisine':'Домашняя кухня Беларуси','equipment':'pan','avoid':[], 'max_missing_items':2, **copy.deepcopy(value)}
-    if s['mode'] not in MODES or s['meal'] not in MEALS or s['equipment'] not in ('pan','stove','oven','no_cook'): raise ValueError('Проверьте режим, приём пищи и оборудование')
+    if s['mode'] not in MODES or s['meal'] not in MEALS or s['equipment'] not in POLICY['equipment']: raise ValueError('Проверьте режим, приём пищи и оборудование')
     for key, lo, hi in [('servings',1,6),('time_budget',5,120),('max_missing_items',0,5)]:
         s[key] = k.integer(s[key], key, lo, hi)
     s['cuisine'] = k.clean_text(s['cuisine'], 'cuisine', 100)
@@ -163,6 +163,21 @@ def canonical_steps(method, ingredients):
     steps = ['Взвесьте съедобную часть в указанном состоянии: '+names+'. Массы относятся ко всему блюду.']
     if method['no_cook']:
         steps.append('Нарежьте подходящие для еды без нагрева продукты. Готовый белковый продукт используйте охлаждённым, соблюдая срок и условия хранения. Соедините перечисленные ингредиенты.')
+    elif method['equipment']==['multicooker']:
+        steps.append('Используйте только предусмотренный вашей моделью режим «На пару» без давления. Не переносите эти указания на режим скороварки. Если такого режима нет, выберите другое оборудование.')
+        steps.append('Налейте в чашу технологическую воду в объёме, указанном производителем; она не входит в съедобный состав и не учтена как продукт. Установите штатную паровую вставку. Не готовьте без воды и не превышайте допустимую загрузку.')
+        if method['id']=='multicooker_egg_steam':steps.append('Взбейте яйца, мелко нарежьте овощи. Перелейте смесь в разрешённую производителем жаропрочную форму и поставьте её на паровую вставку, не перекрывая циркуляцию пара. Не выливайте жидкую смесь прямо в отверстия вставки.')
+        else:steps.append('Сырой белковый продукт и овощи подготовьте отдельно; после сырой птицы вымойте руки и инвентарь. Разложите продукты небольшими кусочками на паровой вставке. Готовые к употреблению продукты не должны касаться сырой птицы.')
+        steps.append('Готовьте до безопасной температуры внутри продукта. При открывании крышки соблюдайте инструкцию и берегитесь горячего пара; расчётное время не гарантирует готовность.')
+    elif method['equipment']==['air_fryer']:
+        steps.append('Подготовьте продукты и разложите их в разрешённой производителем корзине или форме, оставляя место для циркуляции воздуха. При большой порции готовьте партиями. Не наливайте в прибор масло для фритюра и не используйте незакреплённую бумагу.')
+        steps.append('Выберите рекомендованный инструкцией вашей модели режим для этих продуктов. В середине приготовления при необходимости переверните кусочки безопасным инструментом. Точная температура воздуха и время зависят от модели, размера кусочков и загрузки; универсальная настройка не назначается.')
+        if method['id']=='air_fryer_poultry':steps.append('После работы с сырой птицей вымойте руки и инвентарь; не допускайте контакта сырой птицы с готовой едой.')
+        if any(i['food_id'] in POLICY['groups']['mushroom'] for i in ingredients):steps.append('Шампиньоны доведите до полной готовности; сырыми не подавайте.')
+    elif method['equipment']==['waffle_iron']:
+        steps.append('Натрите указанный сыр, взбейте яйца и смешайте только перечисленные ингредиенты. Если в списке есть зелень, мелко нарежьте её. Мука, сахар и дополнительное масло не подразумеваются.')
+        steps.append('Подготовьте вафельницу по инструкции. Выложите небольшую порцию смеси с учётом вместимости пластин, закройте без усилия и готовьте партиями. Не переполняйте прибор и не добавляйте сырые мясо или рыбу в эту смесь.')
+        steps.append('Готовые вафли должны полностью схватиться внутри; проверьте безопасную температуру яичного блюда. Сигнал нагрева вафельницы и румяная поверхность сами по себе не подтверждают готовность.')
     elif method['id']=='omelette':
         steps.append('Нарежьте овощи. На антипригарной сковороде под крышкой прогрейте их до мягкости на умеренном огне; добавьте взбитые яйца, готовьте до полной готовности. Если без масла пригорает, остановитесь и выберите другой способ.')
     elif method['id']=='mushroom_pan':
@@ -174,10 +189,12 @@ def canonical_steps(method, ingredients):
     else:
         steps.append('Нарежьте перечисленные ингредиенты, готовьте на антипригарной сковороде под крышкой на умеренном огне до полной готовности. Если без масла пригорает, остановитесь.')
     oils=[i for i in ingredients if i['food_id'] in POLICY['groups']['oil']]
-    if oils:steps.insert(1,'Используйте только уже учтённое масло из состава: '+', '.join(i['name_ru']+' — '+str(round(i['grams_edible'],1))+' г' for i in oils)+'. Распределите его по сковороде или форме; для блюда без нагрева вмешайте в готовую смесь.')
+    if oils:
+        oil_use='Смешайте масло с продуктами, не наливайте его на дно прибора.' if method['equipment']==['air_fryer'] else 'Слегка смажьте пластины, только если это разрешено инструкцией.' if method['equipment']==['waffle_iron'] else 'Используйте для продуктов или подходящей формы; для блюда без нагрева вмешайте в готовую смесь.'
+        steps.insert(1,'Используйте только уже учтённое масло из состава: '+', '.join(i['name_ru']+' — '+str(round(i['grams_edible'],1))+' г' for i in oils)+'. '+oil_use)
     if method['temperature_c']:
         steps.append(f'Проверьте пищевым термометром в самой толстой части: не ниже {method["temperature_c"]} °C. Указанное время — ориентир, не гарантия безопасности.')
-    steps.append('Ничего сверх списка не добавлено: масло и соль допустимы только после отдельного пересчёта с их граммами. Остатки быстро охладите и уберите в холодильник; при разогреве доведите до 74 °C.')
+    steps.append('Ничего сверх списка не добавлено: дополнительное масло и соль допустимы только после отдельного пересчёта с их граммами. Остатки быстро охладите и уберите в холодильник; при разогреве доведите до 74 °C.')
     return '\n'.join(steps)
 
 def missing_list(ingredients, pantry):
@@ -247,6 +264,8 @@ def template_drafts(context, d, cat):
                 for fid in combo:
                     f=cat['foods'][fid];g=f.get('group');per=100 if g=='egg' else 150 if g in ('fish','poultry','soy') else 120 if g=='vegetable' else 100 if g=='dairy' else 8
                     if spec['meal']=='day':per=150 if g=='egg' else 190 if g in ('fish','poultry','soy') else 200 if g=='vegetable' else per
+                    for role,value in m.get('role_grams',{}).items():
+                        if fid in POLICY['groups'][role]:per=value;break
                     per += (20 if g in ('egg','vegetable') else 10)*variant
                     amount=per*spec['servings'];available=stock.get(fid)
                     if available and available['grams'] is not None and spec['mode']=='pantry_only':amount=min(amount,available['grams'])
@@ -420,7 +439,7 @@ class KitchenService:
         groups={cat['foods'][i['food_id']]['group'] for i in rec['ingredients']}
         light=not (groups & {'egg','poultry','fish','meat','seafood','soy','dairy'}) or (kcal is not None and allocation is not None and kcal<allocation*.5)
         if light:note+=' Это небольшое блюдо или гарнир, не полноценный приём пищи по условному распределению дня. Дополнение можно подобрать в режиме докупки.'
-        return {**portion,'meal_role':'side_or_light' if light else 'meal_idea','servings':rec['base_servings'],'whole_batch':batch,'missing':missing_list(batch['ingredients'],spec['pantry']),'origin':entry['origin'],'draft_label':LABEL if entry['origin']=='sol' else FALLBACK_LABEL,'fit_note':note,'budget':budget,'method_id':entry['method_id'],'sources':[{'source_id':'food:'+i['food_id'],'url':i['source_url']} for i in portion['ingredients']]+[POLICY['safety_source']],'quantity_note':'Граммы без указанного запаса требуют взвешивания; кладовая не списана.'}
+        return {**portion,'meal_role':'side_or_light' if light else 'meal_idea','servings':rec['base_servings'],'whole_batch':batch,'missing':missing_list(batch['ingredients'],spec['pantry']),'origin':entry['origin'],'draft_label':LABEL if entry['origin']=='sol' else FALLBACK_LABEL,'fit_note':note,'budget':budget,'method_id':entry['method_id'],'sources':[{'source_id':'food:'+i['food_id'],'url':i['source_url']} for i in portion['ingredients']]+[POLICY['safety_source']],'equipment':spec['equipment'],'equipment_note':POLICY.get('equipment_notes',{}).get(spec['equipment'],''),'quantity_note':'Граммы без указанного запаса требуют взвешивания; кладовая не списана.'}
 
     def kitchen_fit_day(self,d,spec,cat,entries):
         from .portion_search import fit_portions
@@ -615,6 +634,7 @@ class KitchenService:
         if literal_guard(message) or re.search(r'беремен|диабет|инсулин|форсиг|джардинс|поч[екч]|лекарств|аллерги|сглт|sglt|рпп|кормлю',msg):return None
         group=t.get('kitchen');explicit=bool(re.search(r'подведи.*итог|итоги дня|итоги за сегодня|сколько.*съел|сводка.*дня|без покупок|можно докупить|ничего нет|только из|из кладовой|сохрани рецепт|что ты обо мне помнишь|забудь.*предпочт|запомни.*не люблю|есть .*(?:ужин|завтрак|приготов|обед)',msg))
         follow=bool(group and re.search(r'вариант|второй|первый|третий|запиши.*половин|сохрани|докупить|без сыра',msg))
+        explicit=explicit or bool(re.search(r'приготов|сделай|испеки|хочу',msg) and any(re.search(pattern,msg) for pattern in POLICY['equipment_patterns'].values()))
         if not explicit and not follow:return None
         if not d['processing_consent'] or not storage_consent(d):return None
         if not re.fullmatch(r'[A-Za-z0-9_-]{8,100}',request_id):raise ValueError('Неверный request_id')
@@ -685,7 +705,14 @@ class KitchenService:
                             if word in msg:s['meal']=meal
                     minutes=re.search(r'(\d{1,3})\s*мин',msg)
                     if minutes:s['time_budget']=int(minutes[1])
-                    result=self.kitchen(subject,'generate',spec=s,request_id=request_id,thread_id=tid,kind=kind)
+                    appliance_matches=[name for name,pattern in POLICY['equipment_patterns'].items() if re.search(pattern,msg)]
+                    if len(appliance_matches)>1:
+                        result={'message':'Для одного подбора выберите один прибор: мультиварку, аэрогриль, вафельницу, духовку или плиту. Сохранённые варианты пока не изменены.','model_called':False,'open_view':'recipes'}
+                    elif 'multicooker' in appliance_matches and re.search(r'под давлен|скороварк',msg):
+                        result={'message':'Режимы под давлением пока не поддерживаются: точная модель не задана. Выберите пар без давления, если он есть по инструкции, или другой прибор.','model_called':False,'open_view':'recipes'}
+                    else:
+                        if appliance_matches:s['equipment']=appliance_matches[0]
+                        result=self.kitchen(subject,'generate',spec=s,request_id=request_id,thread_id=tid,kind=kind)
         if action:result=self.kitchen(subject,action,thread_id=tid,recipe_id=rid,values=values,expected_revision=d['revision'],kind=kind)
         latest,v=self.load(subject,kind)
         if not latest['processing_consent'] or not storage_consent(latest):raise Conflict('Согласие изменилось; ответ отброшен')

@@ -21,3 +21,5 @@ test('Studio has no public deployment/model setting, model numbers or paid searc
 });
 
 test('chat and memory confirmations remain visible and numbers accept decimal comma',()=>{const js=readFileSync(new URL('../public/kitchen-ui.js',import.meta.url),'utf8');assert(js.includes("document.body.dataset.view==='chat'"));assert(js.includes("document.body.dataset.view==='memory'"));assert(js.includes("replace(',','.')"));assert(js.includes("number-control"));assert(js.includes('dayCard'));});
+
+test('Owner appliances have explicit choices and accessible model-specific hints',()=>{const ui=read('../public/kitchen-ui.js');for(const name of ['multicooker','air_fryer','waffle_iron'])assert(ui.includes(name));assert(ui.includes('kitchen-equipment-help'));assert(ui.includes('aria-describedby'));assert(ui.includes('без давления'));assert(ui.includes('equipment_note'));});

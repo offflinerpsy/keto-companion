@@ -1,17 +1,16 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T12:11:22.295564+00:00",
+  "updated_at": "2026-11-08T12:17:08.345952+00:00",
   "source_version": "0.6.0-kitchen-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
-  "active_task": null,
-  "last_completed": "KETO-KITCHEN-06",
-  "next_task": {
-    "id": "KETO-KITCHEN-ACCEPTANCE",
-    "github_issue": 10,
-    "status": "owner_acceptance",
-    "action": "Reload usual account and ask for dinner from eggs, zucchini and mushrooms in20minutes without purchases; review calculated options. No personal measurements need to be sent outside the app."
+  "active_task": {
+    "id": "KETO-KITCHEN-06",
+    "github_issue": 11,
+    "stage": "owner_appliance_addendum"
   },
+  "last_completed": "KETO-KITCHEN-06",
+  "next_task": null,
   "staging": {
     "deployed": true,
     "compute_connected": true,
