@@ -67,7 +67,13 @@ class MobileService:
             if d['active_thread']==thread_id:d['active_thread']='main'
         elif action=='clear':topic(d,thread_id)['messages']=[];topic(d,thread_id)['choices']=[]
         else:raise ValueError('Неизвестное действие темы')
-        if action in ('delete','clear'):d['requests']={rid:r for rid,r in d.get('requests',{}).items() if r.get('thread_id','main')!=thread_id}
+        if action in ('delete','clear'):
+            d['requests']={rid:r for rid,r in d.get('requests',{}).items() if r.get('thread_id','main')!=thread_id}
+            if action=='clear':topic(d,thread_id).pop('kitchen',None)
+            block=d.get('kitchen',{});block['requests']={rid:r for rid,r in block.get('requests',{}).items() if r.get('thread_id')!=thread_id}
+            block['accepted']=[r for r in block.get('accepted',[]) if r.get('thread_id')!=thread_id]
+            active={rid for t in d['topics'].values() for rid in t.get('kitchen',{}).get('candidate_ids',[])}
+            block['drafts']={rid:r for rid,r in block.get('drafts',{}).items() if rid in active}
         d['chat']=copy.deepcopy(d['topics']['main']['messages']);d['revision']+=1;self.save(subject,d,v);return {'state':self.snapshot(d),'message':'Тема обновлена. Общие подтверждённые настройки сохранены.'}
     def reminders(self,subject,action='list',reminder_id=None,values=None,confirmed=False,expected_revision=None,kind='personal'):
         from .domain import storage_consent

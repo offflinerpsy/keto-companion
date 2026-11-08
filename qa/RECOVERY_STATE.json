@@ -1,16 +1,15 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T10:27:44.127334+00:00",
+  "updated_at": "2026-11-08T11:57:16.427573+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
-  "active_task": null,
-  "last_completed": "KETO-ONBOARDING-05",
-  "next_task": {
-    "id": "KETO-SETUP-ACCEPTANCE",
-    "status": "owner_acceptance",
-    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT.",
-    "github_issue": 10
+  "active_task": {
+    "id": "KETO-KITCHEN-06",
+    "github_issue": 11,
+    "stage": "final_release_verification"
   },
+  "last_completed": "KETO-ONBOARDING-05",
+  "next_task": null,
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",
     "sha256": "4c881831908438751fa4a0277754f430d18cf4d85804a81e468347a26d69a2ff"
@@ -36,7 +35,7 @@
   },
   "operating_rules": "AGENTS.md",
   "platform_failure_exact_cause": "not determined; no server-side chat telemetry",
-  "source_version": "0.5.0-guided-pilot",
+  "source_version": "0.6.0-kitchen-pilot",
   "history": [
     {
       "previous_last_completed": {
@@ -161,5 +160,15 @@
     "report": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json",
     "source_archive_current": false
   },
-  "onboarding_cloud_effects": "not_delivered; no cloud operations attempted"
+  "onboarding_cloud_effects": "not_delivered; no cloud operations attempted",
+  "kitchen_checkpoint": {
+    "phase": "implementation_and_focused_checks_complete",
+    "branch": "feature/kitchen-configurator",
+    "python_focused": 36,
+    "evidence": "qa/kitchen-focused-python-final.log",
+    "node_focused": 5,
+    "next_action": "Run the single final local regression on the final source, then write qa/KITCHEN_IMPLEMENTATION_RESULT.json.",
+    "external_effects": "not_delivered; no cloud or model calls",
+    "processes": []
+  }
 }

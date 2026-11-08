@@ -1,3 +1,449 @@
+// cloudflare-saas/public/kitchen-ui.js
+var kitchenModes = [["pantry_only", "\u0422\u043E\u043B\u044C\u043A\u043E \u043C\u043E\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", "\u0411\u0435\u0437 \u0441\u043A\u0440\u044B\u0442\u044B\u0445 \u043C\u0430\u0441\u043B\u0430, \u0441\u043E\u043B\u0438 \u0438 \u043F\u043E\u043A\u0443\u043F\u043E\u043A"], ["pantry_plus", "\u041C\u043E\u0436\u043D\u043E \u0434\u043E\u043A\u0443\u043F\u0438\u0442\u044C", "\u0414\u043E \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E \u0447\u0438\u0441\u043B\u0430 \u043D\u0435\u0434\u043E\u0441\u0442\u0430\u044E\u0449\u0438\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432"], ["inspiration", "\u041D\u0443\u0436\u043D\u044B \u0438\u0434\u0435\u0438", "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043D\u0435 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u0430"]];
+var kitchenActionLabels = { pantry: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E", remember: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", forget: "\u0417\u0430\u0431\u044B\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", save: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", favorite: "\u0412 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", rate: "\u041E\u0446\u0435\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", diary: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0434\u043E\u043B\u044E \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", accept_day: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C" };
+function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, notify: notify2, setView: setView2, epoch }) {
+  let pantry = [], foods = [], result = null, busy2 = false, localEpoch = 0, dirty = false;
+  const host = $3("kitchen-studio");
+  if (!host) return { render() {
+  }, load: async () => {
+  }, reset() {
+  }, card: () => null };
+  const button = (label, fn, cls = "secondary") => {
+    const b2 = el2("button", cls, label);
+    b2.type = "button";
+    b2.onclick = () => run2(fn);
+    return b2;
+  };
+  const decimal = (v2, min, max) => {
+    const raw = String(v2).trim().replace(",", ".");
+    if (!/^\d+(?:\.\d+)?$/.test(raw)) throw Error("\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0447\u0438\u0441\u043B\u043E, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u044072,5");
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n < min || n > max) throw Error(`\u0414\u043E\u043F\u0443\u0441\u0442\u0438\u043C\u043E \u043E\u0442 ${min} \u0434\u043E ${max}`);
+    return n;
+  };
+  const number = (n) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(n);
+  const states = { raw: "\u0441\u044B\u0440\u043E\u0439", ready_to_eat: "\u0433\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E", cooked_roasted: "\u0437\u0430\u043F\u0435\u0447\u0451\u043D\u043D\u044B\u0439", cooked: "\u0433\u043E\u0442\u043E\u0432\u044B\u0439", cooked_dry_heat: "\u0433\u043E\u0442\u043E\u0432\u044B\u0439, \u0441\u0443\u0445\u043E\u0439 \u0436\u0430\u0440", cooked_boiled: "\u0432\u0430\u0440\u0451\u043D\u044B\u0439", frozen: "\u0437\u0430\u043C\u043E\u0440\u043E\u0436\u0435\u043D\u043D\u044B\u0439", dry: "\u0441\u0443\u0445\u043E\u0439", canned: "\u043A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439", canned_drained: "\u0431\u0435\u0437 \u0436\u0438\u0434\u043A\u043E\u0441\u0442\u0438", ready_to_cook: "\u0434\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F" };
+  const form = el2("form", "kitchen-composer");
+  form.dataset.testid = "kitchen-composer";
+  const modes = el2("fieldset", "kitchen-modes");
+  modes.append(el2("legend", "", "\u041A\u0430\u043A \u0433\u043E\u0442\u043E\u0432\u0438\u043C?"));
+  for (const [id, title, note] of kitchenModes) {
+    const label = el2("label", "kitchen-mode"), input = el2("input");
+    input.type = "radio";
+    input.name = "mode";
+    input.value = id;
+    input.checked = id === "pantry_only";
+    input.dataset.testid = "mode-" + id;
+    label.append(input, el2("strong", "", title), el2("span", "muted", note));
+    modes.append(label);
+  }
+  form.append(modes);
+  const picker = el2("div", "kitchen-picker"), product = el2("input"), datalist = el2("datalist");
+  product.id = "kitchen-product";
+  product.setAttribute("list", "kitchen-food-list");
+  product.placeholder = "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430";
+  product.autocomplete = "off";
+  product.dataset.testid = "kitchen-food-input";
+  datalist.id = "kitchen-food-list";
+  const productLabel = el2("label", "", "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0438\u0437 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430");
+  productLabel.htmlFor = product.id;
+  const chips = el2("div", "kitchen-chips");
+  chips.dataset.testid = "pantry-chips";
+  const status = el2("p", "muted");
+  status.setAttribute("role", "status");
+  status.dataset.testid = "kitchen-status";
+  function foodOptions() {
+    datalist.replaceChildren(...foods.map((f) => {
+      const o2 = el2("option");
+      o2.value = f.food_id + " \xB7 " + f.name_ru + " \xB7 " + (states[f.state] || f.state);
+      return o2;
+    }));
+  }
+  let searchNumber = 0;
+  product.oninput = () => {
+    const token = ++searchNumber;
+    clearTimeout(product.timer);
+    product.timer = setTimeout(() => run2(async () => {
+      const e = epoch(), d2 = await call2("keto_kitchen", { action: "foods", query: product.value.slice(0, 200) });
+      if (token !== searchNumber || e !== epoch()) return;
+      foods = d2.foods;
+      foodOptions();
+    }), 250);
+  };
+  function addFood(food) {
+    if (pantry.some((i) => i.food_id === food.food_id)) return;
+    pantry.push({ food_id: food.food_id, state: food.state, grams: null, name_ru: food.name_ru });
+    dirty = true;
+    renderChips();
+  }
+  const add = button("\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C", async () => {
+    const code = product.value.split(" \xB7 ")[0];
+    const food = foods.find((f) => f.food_id === code);
+    if (!food) {
+      status.textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C. \u0414\u043B\u044F \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0433\u043E \u0441\u043F\u0438\u0441\u043A\u0430 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \xAB\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\xBB. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u043C\u0443 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0443 \u043D\u0443\u0436\u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430.";
+      return;
+    }
+    addFood(food);
+    product.value = "";
+  });
+  picker.append(productLabel, product, datalist, add);
+  form.append(picker);
+  const free = el2("textarea");
+  free.id = "kitchen-free";
+  free.placeholder = "\u0415\u0441\u0442\u044C \u044F\u0439\u0446\u0430, \u043A\u0430\u0431\u0430\u0447\u043E\u043A \u0438 \u0448\u0430\u043C\u043F\u0438\u043D\u044C\u043E\u043D\u044B";
+  free.maxLength = 1e3;
+  free.rows = 2;
+  free.dataset.testid = "kitchen-free-products";
+  const freeLabel = el2("label", "", "\u0418\u043B\u0438 \u043F\u0435\u0440\u0435\u0447\u0438\u0441\u043B\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441\u0432\u043E\u0438\u043C\u0438 \u0441\u043B\u043E\u0432\u0430\u043C\u0438");
+  freeLabel.htmlFor = free.id;
+  const questions = el2("div", "kitchen-questions");
+  questions.dataset.testid = "product-questions";
+  form.append(freeLabel, free, button("\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+    const e = epoch(), d2 = await call2("keto_kitchen", { action: "parse", query: free.value });
+    if (e !== epoch()) return;
+    questions.replaceChildren();
+    for (const i of d2.pantry) {
+      let f = foods.find((f2) => f2.food_id === i.food_id) || i;
+      addFood({ ...f, ...i });
+      const item = pantry.find((x) => x.food_id === i.food_id);
+      item.grams = i.grams;
+    }
+    renderChips();
+    for (const q2 of d2.questions) {
+      const row = el2("div", "notice");
+      row.append(el2("p", "", q2.text));
+      for (const f of q2.choices) row.append(button(f.name_ru + " \xB7 " + (states[f.state] || f.state), async () => {
+        addFood(f);
+        row.remove();
+      }));
+      row.append(button("\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u044D\u0442\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", async () => row.remove()));
+      questions.append(row);
+    }
+  }), questions, chips);
+  function renderChips() {
+    chips.replaceChildren();
+    for (const item of pantry) {
+      const chip = el2("div", "kitchen-chip");
+      chip.dataset.foodId = item.food_id;
+      chip.append(el2("strong", "", item.name_ru || item.food_id), el2("span", "muted", (states[item.state] || item.state) + " \xB7 " + item.food_id));
+      const label = el2("label", "", "\u0417\u0430\u043F\u0430\u0441, \u0433 (\u043D\u0435\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E)"), input = el2("input");
+      input.type = "text";
+      input.inputMode = "decimal";
+      input.value = item.grams ?? "";
+      input.setAttribute("aria-label", (item.name_ru || item.food_id) + ": \u0433\u0440\u0430\u043C\u043C\u044B");
+      input.onchange = () => {
+        item.grams = input.value === "" ? null : input.value;
+        dirty = true;
+      };
+      label.append(input);
+      chip.append(label, button("\u0423\u0431\u0440\u0430\u0442\u044C", async () => {
+        pantry = pantry.filter((i) => i !== item);
+        dirty = true;
+        renderChips();
+      }));
+      chips.append(chip);
+    }
+    if (!pantry.length) chips.append(el2("p", "muted", "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043F\u0443\u0441\u0442\u0430. \u0412 \u0440\u0435\u0436\u0438\u043C\u0435 \u0438\u0434\u0435\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u043D\u0435 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B."));
+  }
+  const stockNote = el2("p", "muted", "\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0432 \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u043C \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0438. \u0428\u0442\u0443\u043A\u0438 \u043D\u0435 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u044B\u0432\u0430\u044E\u0442\u0441\u044F \u0432 \u0433\u0440\u0430\u043C\u043C\u044B. \u041F\u0440\u043E\u0441\u043C\u043E\u0442\u0440 \u0440\u0435\u0446\u0435\u043F\u0442\u0430 \u043D\u0435 \u0441\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u0442 \u0437\u0430\u043F\u0430\u0441.");
+  form.append(stockNote, button("\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E", () => act("pantry", null, { items: cleanPantry() })), button("\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0443\u044E", async () => {
+    dirty = false;
+    pantry = (getState()?.kitchen?.pantry || []).map((i) => ({ ...i }));
+    renderChips();
+  }));
+  const controls = el2("div", "kitchen-controls");
+  function field(id, label, type, value, min, max) {
+    const box = el2("label", "", label), input = el2("input");
+    input.id = "kitchen-" + id;
+    input.name = id;
+    input.type = type;
+    input.value = value;
+    if (min != null) input.min = min;
+    if (max != null) input.max = max;
+    if (type === "number") {
+      input.type = "text";
+      input.inputMode = "numeric";
+      const step = id === "time" ? 5 : 1, wrap2 = el2("div", "number-control");
+      for (const [symbol, delta] of [["\u2212", -1], ["+", 1]]) {
+        const b2 = button(symbol, async () => {
+          input.value = String(Math.max(min, Math.min(max, decimal(input.value, min, max) + delta * step)));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        b2.setAttribute("aria-label", (delta < 0 ? "\u0423\u043C\u0435\u043D\u044C\u0448\u0438\u0442\u044C " : "\u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0442\u044C ") + label);
+        if (delta < 0) wrap2.append(b2, input);
+        else wrap2.append(b2);
+      }
+      box.append(wrap2);
+    } else box.append(input);
+    controls.append(box);
+    return input;
+  }
+  function select(id, label, options) {
+    const box = el2("label", "", label), input = el2("select");
+    input.name = id;
+    input.id = "kitchen-" + id;
+    for (const [v2, t] of options) {
+      const o2 = el2("option", "", t);
+      o2.value = v2;
+      input.append(o2);
+    }
+    box.append(input);
+    controls.append(box);
+    return input;
+  }
+  const meal = select("meal", "\u041F\u0440\u0438\u0451\u043C \u043F\u0438\u0449\u0438", [["dinner", "\u0423\u0436\u0438\u043D"], ["breakfast", "\u0417\u0430\u0432\u0442\u0440\u0430\u043A"], ["lunch", "\u041E\u0431\u0435\u0434"], ["snack", "\u041F\u0435\u0440\u0435\u043A\u0443\u0441"], ["day", "\u0417\u0430\u0432\u0442\u0440\u0430\u043A, \u043E\u0431\u0435\u0434, \u0443\u0436\u0438\u043D"]]);
+  const servings = field("servings", "\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u0441\u0435\u0433\u043E", "number", 1, 1, 6), time = field("time", "\u041C\u0438\u043D\u0443\u0442 \u043D\u0430 \u0431\u043B\u044E\u0434\u043E", "number", 20, 5, 120), missing = field("missing", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430: \u0440\u0430\u0437\u043D\u044B\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "number", 2, 0, 5);
+  const equipment = select("equipment", "\u041E\u0431\u043E\u0440\u0443\u0434\u043E\u0432\u0430\u043D\u0438\u0435", [["pan", "\u0421\u043A\u043E\u0432\u043E\u0440\u043E\u0434\u0430"], ["stove", "\u041F\u043B\u0438\u0442\u0430"], ["oven", "\u0414\u0443\u0445\u043E\u0432\u043A\u0430"], ["no_cook", "\u0411\u0435\u0437 \u043D\u0430\u0433\u0440\u0435\u0432\u0430"]]);
+  const cuisine = field("cuisine", "\u0421\u0442\u0438\u043B\u044C \u043A\u0443\u0445\u043D\u0438", "text", "\u0414\u043E\u043C\u0430\u0448\u043D\u044F\u044F \u043A\u0443\u0445\u043D\u044F \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438");
+  cuisine.maxLength = 100;
+  const avoid = el2("input");
+  avoid.id = "kitchen-avoid";
+  avoid.placeholder = "\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0441\u044B\u0440";
+  avoid.maxLength = 200;
+  const avoidLabel = el2("label", "", "\u0412\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u0431\u0435\u0437 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430 (\u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043D\u0438\u0436\u0435)");
+  avoidLabel.htmlFor = avoid.id;
+  const avoidList = el2("datalist");
+  avoidList.id = "kitchen-avoid-list";
+  let avoidFoods = [];
+  avoid.setAttribute("list", avoidList.id);
+  avoid.oninput = () => {
+    clearTimeout(avoid.timer);
+    const value = avoid.value;
+    avoid.timer = setTimeout(() => run2(async () => {
+      const e = epoch(), d2 = await call2("keto_kitchen", { action: "foods", query: value.slice(0, 200) });
+      if (e !== epoch() || value !== avoid.value) return;
+      avoidFoods = d2.foods;
+      avoidList.replaceChildren(...avoidFoods.map((f) => {
+        const o2 = el2("option");
+        o2.value = f.food_id + " \xB7 " + f.name_ru;
+        return o2;
+      }));
+    }), 250);
+  };
+  controls.append(avoidList);
+  controls.append(avoidLabel, avoid);
+  form.append(controls);
+  const generate = el2("button", "primary", "\u041F\u0440\u0435\u0434\u043B\u043E\u0436\u0438\u0442\u044C \u0431\u043B\u044E\u0434\u0430");
+  generate.type = "submit";
+  generate.dataset.testid = "kitchen-generate";
+  form.append(generate, status);
+  const results = el2("div");
+  results.dataset.testid = "kitchen-results";
+  host.replaceChildren(form, results);
+  const cleanPantry = () => pantry.map(({ food_id, state: state2, grams }) => ({ food_id, state: state2, grams: grams === null || grams === "" ? null : decimal(grams, 0.1, 3e4) }));
+  async function act(action, rid, values2 = {}) {
+    const state2 = getState();
+    const d2 = await call2("keto_kitchen", { action, thread_id: state2.active_thread || "main", expected_revision: state2.revision, ...rid ? { recipe_id: rid } : {}, values: values2 });
+    accept2(d2);
+    if (d2.proposal) {
+      $3("proposals").dataset.testid = "kitchen-confirmation";
+      const surface = document.body.dataset.view === "chat" ? $3("chat-confirmations") || $3("chat-extras") : document.body.dataset.view === "memory" ? memory : host;
+      surface.append($3("proposals"));
+      $3("proposals").setAttribute("tabindex", "-1");
+      $3("proposals").focus();
+      $3("proposals").scrollIntoView({ block: "nearest" });
+    }
+    return d2;
+  }
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    if (busy2) return;
+    run2(async () => {
+      busy2 = true;
+      generate.disabled = true;
+      if (questions.children.length) {
+        busy2 = false;
+        generate.disabled = false;
+        throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438\u043B\u0438 \u044F\u0432\u043D\u043E \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435 \u0431\u0435\u0437 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0445.");
+      }
+      const e2 = epoch(), token = ++localEpoch;
+      status.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u044E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438 \u0441\u043F\u043E\u0441\u043E\u0431\u044B \u0433\u043E\u0442\u043E\u0432\u043A\u0438\u2026";
+      try {
+        const fid = avoid.value.split(" \xB7 ")[0];
+        if (avoid.value && !avoidFoods.some((f) => f.food_id === fid)) throw Error("\u0414\u043B\u044F \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0433\u043E \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430.");
+        const spec = { mode: new FormData(form).get("mode"), meal: meal.value, servings: decimal(servings.value, 1, 6), time_budget: decimal(time.value, 5, 120), equipment: equipment.value, cuisine: cuisine.value, max_missing_items: decimal(missing.value, 0, 5), pantry: cleanPantry(), avoid: fid ? [fid] : [] };
+        const d2 = await call2("keto_kitchen", { action: "generate", spec, thread_id: getState().active_thread || "main", expected_revision: getState().revision, request_id: crypto.randomUUID().replaceAll("-", "") });
+        if (e2 !== epoch() || token !== localEpoch) return;
+        accept2(d2);
+        show(d2);
+        status.textContent = d2.message || "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D\u043D\u044B\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B.";
+      } finally {
+        if (e2 === epoch()) {
+          busy2 = false;
+          generate.disabled = false;
+        }
+      }
+    });
+  };
+  function listItems(items) {
+    const list = el2("ul", "ingredient-list");
+    for (const i of items) list.append(el2("li", "", i.name_ru + " \xB7 " + number(i.grams_edible) + " \u0433 \xB7 " + (states[i.state] || i.state)));
+    return list;
+  }
+  function card(r) {
+    const c2 = el2("article", "panel kitchen-candidate");
+    c2.dataset.testid = "kitchen-candidate";
+    c2.dataset.recipeId = r.recipe_id;
+    c2.append(el2("span", "tag", r.draft_label || "\u0421\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442"), el2("h3", "", r.name_ru), el2("p", "muted", r.ingredients.map((i) => i.name_ru).slice(0, 3).join(" \xB7 ")), el2("p", "muted", r.active_minutes + " \u043C\u0438\u043D \xB7 " + number(r.servings || 1) + " \u043F\u043E\u0440\u0446\u0438\u0439 \u0432\u0441\u0435\u0433\u043E"));
+    const fit = el2("details"), fitSummary = el2("summary", "", "\u041F\u043E\u0447\u0435\u043C\u0443 \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0442");
+    fit.append(fitSummary, el2("p", "", r.fit_note || "\u0421\u043E\u0441\u0442\u0430\u0432 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D \u043F\u043E \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0443."));
+    c2.append(fit);
+    if (r.meal_role === "side_or_light") c2.append(el2("p", "notice", "\u041D\u0435\u0431\u043E\u043B\u044C\u0448\u043E\u0435 \u0431\u043B\u044E\u0434\u043E / \u0433\u0430\u0440\u043D\u0438\u0440 \u2014 \u043D\u0435 \u0432\u0435\u0441\u044C \u043F\u0440\u0438\u0451\u043C \u043F\u0438\u0449\u0438."));
+    const n = r.nutrition;
+    c2.append(el2("p", "nutrition", "\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E: " + number(n.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + number(n.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u043E\u0431\u0449\u0438\u0435 " + number(n.carbohydrate_total_g) + " \u0433 \xB7 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 " + number(n.fiber_g) + " \u0433"));
+    const batch = r.whole_batch;
+    if (batch) c2.append(el2("p", "nutrition", "\u0412\u0441\u0451 \u0431\u043B\u044E\u0434\u043E: " + number(batch.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + number(batch.nutrition.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + number(batch.nutrition.carbohydrate_total_g) + " \u0433"));
+    c2.append(el2("h4", "", "\u041D\u0430 \u043E\u0434\u043D\u0443 \u043F\u043E\u0440\u0446\u0438\u044E"), listItems(r.ingredients));
+    if (batch) {
+      const b2 = el2("details");
+      b2.append(el2("summary", "", "\u0413\u0440\u0430\u043C\u043C\u044B \u043D\u0430 \u0432\u0441\u0451 \u0431\u043B\u044E\u0434\u043E"), listItems(batch.ingredients));
+      c2.append(b2);
+    }
+    const steps = el2("details");
+    steps.append(el2("summary", "", "\u041F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435"));
+    for (const step of String(r.steps_ru).split("\n")) steps.append(el2("p", "", step));
+    c2.append(steps);
+    c2.append(el2("h4", "", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u2014 \u0442\u043E\u043B\u044C\u043A\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0430\u044E\u0449\u0435\u0435"), r.missing?.length ? listItems(r.missing) : el2("p", "muted", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u043D\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043F\u043E \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u043C\u0443 \u0437\u0430\u043F\u0430\u0441\u0443. \u041D\u0435\u0443\u043A\u0430\u0437\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C."));
+    const source = el2("details");
+    source.append(el2("summary", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0438 \u0438 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F"));
+    source.append(el2("p", "muted", r.quantity_note || "\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043D\u0435 \u0440\u0430\u0432\u043D\u044B \u043D\u0443\u043B\u044E."));
+    for (const s2 of r.sources || []) {
+      const a2 = el2("a", "", s2.source_id);
+      a2.href = s2.url;
+      a2.target = "_blank";
+      a2.rel = "noopener noreferrer";
+      source.append(a2, el2("br"));
+    }
+    c2.append(source);
+    const actions = el2("div", "kitchen-actions");
+    actions.append(button("\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0434\u043B\u044F \u0447\u0430\u0442\u0430", async () => {
+      accept2(await call2("keto_kitchen", { action: "select", recipe_id: r.recipe_id, thread_id: getState().active_thread || "main", expected_revision: getState().revision }));
+      notify2("\u0412\u044B\u0431\u0440\u0430\u043D\u043E. \u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u0447\u0430\u0442\u0430 \u043E\u0442\u043D\u043E\u0441\u044F\u0442\u0441\u044F \u043A \u044D\u0442\u043E\u043C\u0443 \u0440\u0435\u0446\u0435\u043F\u0442\u0443.");
+    }));
+    for (const a2 of ["save", "favorite"]) actions.append(button(kitchenActionLabels[a2], () => act(a2, r.recipe_id)));
+    actions.append(button("\u0412 \u0434\u043D\u0435\u0432\u043D\u0438\u043A: \xBD \u043F\u043E\u0440\u0446\u0438\u0438", () => act("diary", r.recipe_id, { fraction: 0.5, basis: "portion" })), button("\u0412 \u0434\u043D\u0435\u0432\u043D\u0438\u043A: \xBD \u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430", () => act("diary", r.recipe_id, { fraction: 0.5, basis: "batch" })));
+    const rating = el2("select");
+    rating.setAttribute("aria-label", "\u041E\u0446\u0435\u043D\u043A\u0430 \u0440\u0435\u0446\u0435\u043F\u0442\u0430");
+    for (let n2 = 1; n2 <= 5; n2++) {
+      const o2 = el2("option", "", String(n2));
+      o2.value = n2;
+      rating.append(o2);
+    }
+    rating.value = "5";
+    actions.append(rating, button("\u041E\u0446\u0435\u043D\u0438\u0442\u044C", () => act("rate", r.recipe_id, { rating: Number(rating.value) })));
+    c2.append(actions);
+    return c2;
+  }
+  function show(data) {
+    result = data;
+    results.replaceChildren();
+    if (data.fallback_reason) results.append(el2("p", "notice", "Azure-\u0434\u0438\u0437\u0430\u0439\u043D \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0438\u043B\u0438 \u043E\u0442\u043A\u043B\u043E\u043D\u0451\u043D. \u042D\u0442\u043E \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u0438\u0437 \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C\u044B\u0445 \u0448\u0430\u0431\u043B\u043E\u043D\u043E\u0432."));
+    for (const q2 of data.questions || []) results.append(el2("p", "notice", q2));
+    const grid = el2("div", "recipe-grid kitchen-grid");
+    grid.append(...(data.recipes || []).map(card));
+    results.append(grid);
+    if (data.day) results.append(dayCard(data));
+  }
+  function dayCard(data) {
+    const box = el2("div", "panel");
+    box.dataset.testid = "kitchen-day";
+    box.append(el2("h2", "", "\u0414\u0435\u043D\u044C \u043F\u0438\u0442\u0430\u043D\u0438\u044F"), el2("p", "", data.day.status === "calculated_draft" ? "\u041F\u043E\u043B\u043D\u044B\u0435 \u0434\u043D\u0435\u0432\u043D\u044B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 \u043F\u0440\u043E\u0439\u0434\u0435\u043D\u044B; \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435." : "\u0414\u0435\u043D\u044C \u043F\u043E\u043A\u0430 \u043D\u0435 \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0442: " + data.day.issues.map((x) => ({ "three_meals_unavailable": "\u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u043E\u0431\u0440\u0430\u0442\u044C \u0442\u0440\u0438 \u043F\u0440\u0438\u0451\u043C\u0430 \u043F\u0438\u0449\u0438", "global_inventory_shortfall": "\u0437\u0430\u043F\u0430\u0441\u0430 \u043D\u0435 \u0445\u0432\u0430\u0442\u0430\u0435\u0442 \u043D\u0430 \u0432\u0435\u0441\u044C \u0434\u0435\u043D\u044C", "global_missing_item_limit": "\u0441\u043B\u0438\u0448\u043A\u043E\u043C \u043C\u043D\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432 \u0434\u043B\u044F \u0434\u043E\u043A\u0443\u043F\u043A\u0438", "confirmed_targets_required": "\u0441\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "safety_or_screening": "\u043D\u0443\u0436\u043D\u043E \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044C \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u0439", "stale_targets": "\u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043D\u0443\u0436\u043D\u043E \u043F\u0435\u0440\u0435\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C", "outside_target:energy_kcal": "\u044D\u043D\u0435\u0440\u0433\u0438\u044F \u0432\u043D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E \u0434\u0438\u0430\u043F\u0430\u0437\u043E\u043D\u0430", "outside_target:protein_g": "\u0431\u0435\u043B\u043E\u043A \u0432\u043D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E \u0434\u0438\u0430\u043F\u0430\u0437\u043E\u043D\u0430", "fiber_below_target": "\u043D\u0435\u0434\u043E\u0441\u0442\u0430\u0442\u043E\u0447\u043D\u043E \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438", "saturated_fat_excess": "\u043C\u043D\u043E\u0433\u043E \u043D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u044B\u0445 \u0436\u0438\u0440\u043E\u0432", "carb_limit:net_carbohydrate_g": "\u043F\u0440\u0435\u0432\u044B\u0448\u0435\u043D \u043B\u0438\u043C\u0438\u0442 net-\u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", "carb_limit:carbohydrate_total_g": "\u043F\u0440\u0435\u0432\u044B\u0448\u0435\u043D \u043B\u0438\u043C\u0438\u0442 \u043E\u0431\u0449\u0438\u0445 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432" })[x] || "\u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u0443\u0442\u043E\u0447\u043D\u0435\u043D\u0438\u0435 \u0441\u043E\u0441\u0442\u0430\u0432\u0430").join("; ")), el2("h3", "", "\u041E\u0431\u0449\u0430\u044F \u0434\u043E\u043A\u0443\u043F\u043A\u0430"), listItems(data.day.shopping || []));
+    if (data.day.status === "calculated_draft") box.append(button("\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C", () => act("accept_day", data.recipes[0].recipe_id)));
+    return box;
+  }
+  const memory = $3("kitchen-memory");
+  function renderMemory() {
+    if (!memory) return;
+    const state2 = getState(), info = state2?.kitchen;
+    memory.replaceChildren(el2("h1", "", "\u0427\u0442\u043E \u044F \u043F\u043E\u043C\u043D\u044E"));
+    if (!info) return;
+    memory.append(el2("p", "muted", info.memory_limits));
+    for (const fact of info.preferences) {
+      const row = el2("article", "panel");
+      row.dataset.testid = "memory-fact";
+      row.append(el2("h3", "", fact.text), el2("p", "muted", "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u043E \u0432\u0430\u043C\u0438 \xB7 " + fact.at), button("\u0417\u0430\u0431\u044B\u0442\u044C", () => act("forget", null, { fact_id: fact.id })));
+      memory.append(row);
+    }
+    for (const fact of info.legacy_disliked || []) {
+      const row = el2("article", "panel");
+      row.append(el2("h3", "", "\u041D\u0435 \u043B\u044E\u0431\u043B\u044E: " + fact.name_ru), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438. \u0414\u0430\u0442\u0430 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0444\u0430\u043A\u0442\u0430 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0430."), button("\u0417\u0430\u0431\u044B\u0442\u044C", async () => {
+        accept2(await call2("keto_propose_change", { event_type: "settings.update", payload: { disliked_food_ids: getState().profile.settings.disliked_food_ids.filter((id) => id !== fact.food_id) }, expected_revision: getState().revision }));
+        memory.append($3("proposals"));
+      }));
+      memory.append(row);
+    }
+    for (const favorite of info.favorites_details || []) {
+      const row = el2("article", "panel");
+      row.append(el2("h3", "", "\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435: " + favorite.name_ru), button("\u0423\u0431\u0440\u0430\u0442\u044C \u0438\u0437 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E", async () => {
+        accept2(await call2("keto_propose_change", { event_type: "settings.update", payload: { favorites: getState().profile.settings.favorites.filter((id) => id !== favorite.recipe_id) }, expected_revision: getState().revision }));
+        memory.append($3("proposals"));
+      }));
+      memory.append(row);
+    }
+    if (info.pantry_origin) memory.append(el2("p", "muted", "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0430 \u0432\u0430\u043C\u0438: " + info.pantry_origin.at));
+    const pref = el2("input");
+    pref.placeholder = "\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0440\u044B\u0431\u0443";
+    pref.setAttribute("aria-label", "\u041A\u0430\u043A\u043E\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u043D\u0435 \u043B\u044E\u0431\u0438\u0442\u0435");
+    memory.append(pref, button("\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C: \u043D\u0435 \u043B\u044E\u0431\u043B\u044E", async () => {
+      const d2 = await call2("keto_chat", { message: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438, \u043D\u0435 \u043B\u044E\u0431\u043B\u044E " + pref.value, request_id: crypto.randomUUID().replaceAll("-", ""), thread_id: state2.active_thread || "main" });
+      accept2(d2);
+      if (d2.proposal) {
+        memory.append($3("proposals"));
+        $3("proposals").scrollIntoView({ block: "nearest" });
+      }
+    }));
+    for (const [title, value, view2] of [["\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", state2.profile.allergies.join(", ") || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B", "setup"], ["\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u0438\u0442\u0430\u043D\u0438\u044F", state2.profile.targets ? "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B" : "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D\u044B", "targets"], ["\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", state2.profile.settings.favorites.length + " \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", "recipes"], ["\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F", info.pantry.length + " \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "recipes"]]) {
+      const row = el2("article", "panel");
+      row.append(el2("h3", "", title), el2("p", "", value), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0439 \u043F\u0440\u043E\u0444\u0438\u043B\u044C; \u0434\u0430\u0442\u0430 \u043F\u0440\u0435\u0436\u043D\u0438\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u043C\u043E\u0436\u0435\u0442 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u043E\u0432\u0430\u0442\u044C."), button("\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C / \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C", async () => setView2(view2)));
+      memory.append(row);
+    }
+  }
+  return { render() {
+    const state2 = getState();
+    if (!dirty) {
+      pantry = (state2?.kitchen?.pantry || []).map((i) => ({ ...i }));
+      renderChips();
+    }
+    renderMemory();
+  }, async load() {
+    const e = epoch();
+    try {
+      const [d2, f] = await Promise.all([call2("keto_kitchen", { action: "status", thread_id: getState()?.active_thread || "main" }), call2("keto_kitchen", { action: "foods" })]);
+      if (e !== epoch()) return;
+      foods = f.foods;
+      foodOptions();
+      if (d2.spec) {
+        for (const name2 of ["meal", "servings", "equipment", "cuisine"]) {
+          const node = form.elements.namedItem(name2);
+          if (node) node.value = d2.spec[name2];
+        }
+        time.value = d2.spec.time_budget;
+        missing.value = d2.spec.max_missing_items;
+        form.elements.namedItem("mode").value = d2.spec.mode;
+        pantry = d2.spec.pantry.map((i) => ({ ...i, name_ru: foods.find((f2) => f2.food_id === i.food_id)?.name_ru || getState().kitchen.pantry.find((f2) => f2.food_id === i.food_id)?.name_ru || i.food_id }));
+        renderChips();
+      }
+      if (d2.recipes) show(d2);
+    } catch (e2) {
+      status.textContent = e2.message;
+    }
+  }, reset() {
+    pantry = [];
+    result = null;
+    dirty = false;
+    busy2 = false;
+    localEpoch++;
+    clearTimeout(product.timer);
+    clearTimeout(avoid.timer);
+    results.replaceChildren();
+    questions.replaceChildren();
+    product.value = "";
+    free.value = "";
+    if (memory) memory.replaceChildren();
+    renderChips();
+  }, card, show, dayCard };
+}
+
 // cloudflare-saas/public/knowledge-data.js
 var knowledge = { "version": "starter-v1", "checked": "2026-11-08", "topics": [{ "id": "energy", "title": "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "text": "Mifflin \u043E\u0446\u0435\u043D\u0438\u0432\u0430\u0435\u0442 \u0440\u0430\u0441\u0445\u043E\u0434 \u0432 \u043F\u043E\u043A\u043E\u0435. \u0410\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u044C \u2014 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0435 \u043F\u0440\u0438\u0431\u043B\u0438\u0437\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0435 \u0434\u043E\u043F\u0443\u0449\u0435\u043D\u0438\u0435; \u044D\u0442\u043E \u043D\u0435 \u0434\u0438\u043D\u0430\u043C\u0438\u0447\u0435\u0441\u043A\u0430\u044F \u043C\u043E\u0434\u0435\u043B\u044C NIDDK. \u0414\u0438\u0430\u043F\u0430\u0437\u043E\u043D \xB110%, \u043C\u044F\u0433\u043A\u043E\u0435 \u0441\u043D\u0438\u0436\u0435\u043D\u0438\u0435 10%/\u0434\u043E 300 \u043A\u043A\u0430\u043B \u0438 \u0433\u0440\u0430\u043D\u0438\u0446\u044B \u043F\u0438\u043B\u043E\u0442\u0430 \u2014 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432\u0430\u044F \u043F\u043E\u043B\u0438\u0442\u0438\u043A\u0430.", "sources": ["ENGINE01", "S_ENERGY", "START_ENERGY_2013", "START_USDA_DRI"], "evidence": [{ "source_ids": ["S01", "S04", "S07", "S10"] }] }, { "id": "protein", "title": "\u0411\u0435\u043B\u043E\u043A", "text": "\u041F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435 1,2\u20131,6 \u0433/\u043A\u0433 \u0442\u0435\u043A\u0443\u0449\u0435\u0439 \u043C\u0430\u0441\u0441\u044B \u043E\u0441\u043D\u043E\u0432\u0430\u043D\u044B \u043D\u0430 \u043E\u0431\u0437\u043E\u0440\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445 \u043F\u043E \u043A\u043E\u043D\u0442\u0440\u043E\u043B\u044E \u0432\u0435\u0441\u0430. \u041F\u0435\u0440\u0435\u043D\u043E\u0441 \u043D\u0430 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435 \u043C\u0430\u0441\u0441\u044B \u2014 \u0434\u043E\u043F\u0443\u0449\u0435\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430, \u043D\u0435 \u0443\u043D\u0438\u0432\u0435\u0440\u0441\u0430\u043B\u044C\u043D\u0430\u044F \u043D\u043E\u0440\u043C\u0430. \u041F\u0440\u0438 \u043F\u043E\u0447\u0435\u0447\u043D\u044B\u0445 \u0438 \u0434\u0440\u0443\u0433\u0438\u0445 \u0444\u043B\u0430\u0433\u0430\u0445 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0440\u0430\u0441\u0447\u0451\u0442 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D.", "sources": ["START_PROTEIN", "S20", "S11"], "evidence": [{ "source_ids": ["S01", "S05", "S11"] }] }, { "id": "carbs", "title": "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u0438 net", "text": "\u0420\u0435\u0436\u0438\u043C\u044B 100 \u0438 50 \u0433 \u043E\u0431\u0449\u0438\u0445 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432 \u2014 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430, \u043D\u0435 \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u044F \u043A\u0435\u0442\u043E\u0437\u0430. Net \u2014 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u0430\u044F \u043E\u0446\u0435\u043D\u043A\u0430; \u043F\u043E\u043B\u0438\u043E\u043B\u044B \u043D\u0435 \u0432\u044B\u0447\u0438\u0442\u0430\u044E\u0442\u0441\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438. \u041C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u0430\u044F \u0441\u0445\u0435\u043C\u0430 4:1 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0441\u044F.", "sources": ["S11", "S_NET", "S_LABEL", "S_USDA"], "evidence": [{ "source_ids": ["S_NET", "S_LABEL", "S_USDA"] }] }, { "id": "fat", "title": "\u041A\u0430\u0447\u0435\u0441\u0442\u0432\u043E \u0436\u0438\u0440\u043E\u0432 \u0438 LDL", "text": "\u041E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u0435 \u043D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u044B\u0445 \u0436\u0438\u0440\u043E\u0432 10% \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442 \u043E\u0431\u0449\u0443\u044E \u043F\u043E\u043B\u0438\u0442\u0438\u043A\u0443 \u0431\u0438\u0431\u043B\u0438\u043E\u0442\u0435\u043A\u0438. \u042D\u0442\u043E \u043D\u0435 \u0446\u0435\u043B\u044C \u0441\u044A\u0435\u0441\u0442\u044C \u043C\u0430\u0441\u043B\u043E \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E. \u0418\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u0430\u044F \u0440\u0435\u0430\u043A\u0446\u0438\u044F \u043B\u0438\u043F\u0438\u0434\u043E\u0432 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043E\u0446\u0435\u043D\u043A\u0438, \u043F\u0440\u0435\u0438\u043C\u0443\u0449\u0435\u0441\u0442\u0432\u0430 \u0434\u043B\u044F \u0432\u0441\u0435\u0445 \u043D\u0435 \u043E\u0431\u0435\u0449\u0430\u044E\u0442\u0441\u044F.", "sources": ["S06", "S17", "S11"], "evidence": [{ "source_ids": ["S03", "S06", "S17"] }] }, { "id": "fiber", "title": "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "text": "\u0421\u0442\u0430\u0440\u0442\u043E\u0432\u044B\u0439 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440 14 \u0433/1000 \u043A\u043A\u0430\u043B \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u0442\u0441\u044F \u0432 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u043A\u0430\u043A \u043F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u0430\u044F \u0446\u0435\u043B\u044C. \u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0432\u0430\u0439\u0442\u0435 \u043F\u043E\u0441\u0442\u0435\u043F\u0435\u043D\u043D\u043E \u0441 \u0443\u0447\u0451\u0442\u043E\u043C \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u043C\u043E\u0441\u0442\u0438; \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430 \u043D\u0435 \u0441\u0447\u0438\u0442\u0430\u0435\u0442\u0441\u044F \u043D\u0443\u043B\u0451\u043C.", "sources": ["S11"], "evidence": [{ "source_ids": ["S01", "S05", "S11"] }] }, { "id": "safety", "title": "\u041E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E\u0441\u0442\u0438", "text": "\u0411\u0435\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0441\u0442\u044C, \u043A\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435, SGLT2, \u0434\u0438\u0430\u0431\u0435\u0442 1 \u0442\u0438\u043F\u0430, \u043F\u043E\u0447\u0435\u0447\u043D\u044B\u0435 \u0438 \u0434\u0440\u0443\u0433\u0438\u0435 \u0444\u043B\u0430\u0433\u0438, \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u043B\u0435\u043A\u0430\u0440\u0441\u0442\u0432\u0430 \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0440\u0430\u0437\u0431\u043E\u0440\u0430. \u0420\u0435\u0446\u0435\u043F\u0442\u044B \u043E\u0441\u0442\u0430\u044E\u0442\u0441\u044F \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u044B\u043C\u0438; \u0430\u043D\u043A\u0435\u0442\u0430 \u043D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u0438\u043C \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u0435\u043C.", "sources": ["S11", "S12", "S13", "S14", "S20"], "evidence": [{ "source_ids": ["S11", "S12", "S13"] }] }, { "id": "monitoring", "title": "\u041A\u043E\u0433\u0434\u0430 \u043F\u0435\u0440\u0435\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C", "text": "\u0421\u0442\u0430\u0440\u043E\u0435 \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435 30 \u0434\u043D\u0435\u0439 \u0438 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435 \u043C\u0430\u0441\u0441\u044B \u043D\u0430 5% \u0442\u043E\u043B\u044C\u043A\u043E \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u044E\u0442 \u043E \u043F\u0435\u0440\u0435\u0441\u043C\u043E\u0442\u0440\u0435. \u042D\u0442\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432\u044B\u0435 \u043F\u0440\u0430\u0432\u0438\u043B\u0430, \u0431\u0435\u0437 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u043A\u0430\u043B\u043E\u0440\u0438\u0439 \u0438 \u0431\u0435\u0437 \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043B\u0430\u0431\u043E\u0440\u0430\u0442\u043E\u0440\u043D\u043E\u0433\u043E \u0440\u0430\u0441\u043F\u0438\u0441\u0430\u043D\u0438\u044F.", "sources": ["S11", "START_USDA_DRI"], "evidence": [{ "source_ids": ["S_OPENAI2", "S_OPENAI3"] }] }], "sources": [{ "id": "S01", "title": "Low-carbohydrate versus balanced-carbohydrate diets for reducing weight and cardiovascular risk", "url": "https://www.cochrane.org/evidence/CD013334_low-carbohydrate-diets-or-balanced-carbohydrate-diets-which-works-better-weight-loss-and-heart", "year": 2022, "date": "2026-11-07", "status": "included", "scope": "\u0420\u0430\u0437\u043D\u044B\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0438\u044F low-carb; \u044D\u0442\u043E \u043D\u0435 \u043E\u0431\u0437\u043E\u0440 \u0438\u0441\u043A\u043B\u044E\u0447\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u043E\u0433\u043E \u043A\u0435\u0442\u043E\u0437\u0430. \u041F\u043E \u043D\u0435\u0436\u0435\u043B\u0430\u0442\u0435\u043B\u044C\u043D\u044B\u043C \u044F\u0432\u043B\u0435\u043D\u0438\u044F\u043C \u0434\u0430\u043D\u043D\u044B\u0445 \u043C\u0435\u043D\u044C\u0448\u0435." }, { "id": "S02", "title": "Efficacy and safety of low and very low carbohydrate diets for type 2 diabetes remission", "url": "https://pubmed.ncbi.nlm.nih.gov/33441384/", "year": 2021, "date": "2026-11-07", "status": "included", "scope": "\u041F\u043E\u0440\u043E\u0433 HbA1c \u0441 \u0440\u0430\u0437\u0440\u0435\u0448\u0451\u043D\u043D\u044B\u043C\u0438 \u043B\u0435\u043A\u0430\u0440\u0441\u0442\u0432\u0430\u043C\u0438 \u043D\u0435\u043B\u044C\u0437\u044F \u043D\u0430\u0437\u044B\u0432\u0430\u0442\u044C \u0440\u0435\u043C\u0438\u0441\u0441\u0438\u0435\u0439 \u0431\u0435\u0437 \u0442\u0435\u0440\u0430\u043F\u0438\u0438. \u0414\u0430\u043D\u043D\u044B\u0435 12 \u043C\u0435\u0441\u044F\u0446\u0435\u0432 \u043C\u0435\u043D\u0435\u0435 \u0443\u0431\u0435\u0434\u0438\u0442\u0435\u043B\u044C\u043D\u044B." }, { "id": "S03", "title": "Effect of a ketogenic diet versus Mediterranean diet on glycated hemoglobin: the Keto-Med randomized crossover trial", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9437985/", "year": 2022, "date": "2026-11-07", "status": "included", "scope": "\u041A\u043E\u0440\u043E\u0442\u043A\u0438\u0435 \u043F\u0435\u0440\u0438\u043E\u0434\u044B, \u043D\u0435\u0431\u043E\u043B\u044C\u0448\u0430\u044F \u0432\u044B\u0431\u043E\u0440\u043A\u0430, \u0432\u043E\u0437\u043C\u043E\u0436\u043D\u044B\u0439 \u044D\u0444\u0444\u0435\u043A\u0442 \u043F\u043E\u0440\u044F\u0434\u043A\u0430; \u0435\u0441\u0442\u044C \u0441\u0432\u044F\u0437\u0430\u043D\u043D\u043E\u0435 \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 S03E, \u0435\u0433\u043E \u0441\u043E\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435 \u043D\u0435 \u0438\u0437\u0432\u043B\u0435\u0447\u0435\u043D\u043E." }, { "id": "S03E", "title": "Erratum to Keto-Med randomized crossover trial", "url": "https://pubmed.ncbi.nlm.nih.gov/36349565/", "year": 2022, "date": "2026-11-07", "status": "correction_pending_full_review", "scope": "\u041F\u043E\u043B\u043D\u043E\u0435 \u0441\u043E\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435 \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u043E; \u043F\u0435\u0440\u0435\u0434 \u043A\u043B\u0438\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u043C \u0432\u043D\u0435\u0434\u0440\u0435\u043D\u0438\u0435\u043C \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0438\u0437\u0434\u0430\u0442\u0435\u043B\u044C\u0441\u043A\u0443\u044E \u0430\u043A\u0442\u0443\u0430\u043B\u044C\u043D\u0443\u044E \u0432\u0435\u0440\u0441\u0438\u044E." }, { "id": "S04", "title": "Effect of Low-Fat vs Low-Carbohydrate Diet on 12-Month Weight Loss: DIETFITS", "url": "https://pubmed.ncbi.nlm.nih.gov/29466592/", "year": 2018, "date": "2026-11-07", "status": "included", "scope": "\u041A 12 \u043C\u0435\u0441\u044F\u0446\u0430\u043C low-carb \u043E\u043A\u043E\u043B\u043E 30% \u044D\u043D\u0435\u0440\u0433\u0438\u0438 \u0438\u0437 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432: \u044D\u0442\u043E \u043D\u0435 \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0435 \u0434\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0441\u0442\u0440\u043E\u0433\u043E\u0433\u043E \u043A\u0435\u0442\u043E." }, { "id": "S05", "title": "Effect of a plant-based, low-fat diet versus an animal-based, ketogenic diet on ad libitum energy intake", "url": "https://pubmed.ncbi.nlm.nih.gov/33479499/", "year": 2021, "date": "2026-11-07", "status": "included", "scope": "\u0412\u0441\u0435\u0433\u043E 2 \u043D\u0435\u0434\u0435\u043B\u0438 \u043D\u0430 \u0444\u0430\u0437\u0443, \u0431\u0435\u0437 washout; \u0441\u043E\u0441\u0442\u0430\u0432 \u0438 \u043F\u0440\u043E\u0438\u0441\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432 \u0442\u043E\u0436\u0435 \u0440\u0430\u0437\u043B\u0438\u0447\u0430\u043B\u0438\u0441\u044C. \u041D\u0435 \u0434\u043E\u043B\u0433\u043E\u0441\u0440\u043E\u0447\u043D\u044B\u0439 \u0442\u0435\u0441\u0442 \u043F\u043E\u0445\u0443\u0434\u0435\u043D\u0438\u044F." }, { "id": "S06", "title": "A Ketogenic Low-Carbohydrate High-Fat Diet Increases LDL Cholesterol in Healthy, Young, Normal-Weight Women", "url": "https://pubmed.ncbi.nlm.nih.gov/33801247/", "year": 2021, "date": "2026-11-07", "status": "included", "scope": "\u041C\u0430\u043B\u0430\u044F \u0432\u044B\u0431\u043E\u0440\u043A\u0430, 4 \u043D\u0435\u0434\u0435\u043B\u0438, \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u044B\u0439 \u0441\u043E\u0441\u0442\u0430\u0432 \u0436\u0438\u0440\u043E\u0432. \u041D\u0435\u043B\u044C\u0437\u044F \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u0442\u044C \u0440\u0430\u0437\u043C\u0435\u0440 \u044D\u0444\u0444\u0435\u043A\u0442\u0430 \u043D\u0430 \u043B\u044E\u0431\u043E\u0439 \u043A\u0435\u0442\u043E\u0433\u0435\u043D\u043D\u044B\u0439 \u0440\u0430\u0446\u0438\u043E\u043D." }, { "id": "S07", "title": "Effects of an energy-restricted low-carbohydrate, high unsaturated fat/low saturated fat diet versus a high-carbohydrate diet in type 2 diabetes: 2-year trial", "url": "https://pubmed.ncbi.nlm.nih.gov/29178536/", "year": 2018, "date": "2026-11-07", "status": "included", "scope": "61 \u0438\u0437 115 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u043B\u0438; low-carb 14% \u044D\u043D\u0435\u0440\u0433\u0438\u0438 \u0438\u0437 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432, \u043D\u0435 \u0434\u043E\u043A\u0430\u0437\u0430\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u043E \u043F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u043E\u0433\u043E \u043A\u0435\u0442\u043E\u0437\u0430. \u041D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u044B\u0435 \u0436\u0438\u0440\u044B \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0438\u0432\u0430\u043B\u0438\u0441\u044C." }, { "id": "S08", "title": "5-Year Effects of a Novel Continuous Remote Care Model With Carbohydrate Restriction in Type 2 Diabetes", "url": "https://pubmed.ncbi.nlm.nih.gov/39433217/", "year": 2024, "date": "2026-11-07", "status": "included", "scope": "\u0418\u0437 262 \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0445 \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u043E\u0432 \u043D\u0430 5-\u043B\u0435\u0442\u043D\u0435\u0439 \u0442\u043E\u0447\u043A\u0435 122. \u041D\u0435 \u0440\u0430\u043D\u0434\u043E\u043C\u0438\u0437\u0438\u0440\u043E\u0432\u0430\u043D\u043E, \u0431\u0435\u0437 \u0441\u043E\u043F\u043E\u0441\u0442\u0430\u0432\u0438\u043C\u043E\u0433\u043E 5-\u043B\u0435\u0442\u043D\u0435\u0433\u043E \u043A\u043E\u043D\u0442\u0440\u043E\u043B\u044F; \u044D\u0444\u0444\u0435\u043A\u0442 \u043F\u0440\u043E\u0433\u0440\u0430\u043C\u043C\u044B \u0441\u043E\u043F\u0440\u043E\u0432\u043E\u0436\u0434\u0435\u043D\u0438\u044F \u043D\u0435 \u043E\u0442\u0434\u0435\u043B\u0451\u043D \u043E\u0442 \u043F\u0438\u0442\u0430\u043D\u0438\u044F." }, { "id": "S09", "title": "Effects of ketogenic diet on health outcomes: an umbrella review of meta-analyses of randomized clinical trials", "url": "https://pubmed.ncbi.nlm.nih.gov/37231411/", "year": 2023, "date": "2026-11-07", "status": "included", "scope": "\u041C\u0435\u0434\u0438\u0430\u043D\u043D\u0430\u044F \u0434\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0445 \u0438\u0441\u043F\u044B\u0442\u0430\u043D\u0438\u0439 13 \u043D\u0435\u0434\u0435\u043B\u044C; \u043F\u0435\u0440\u0435\u043A\u0440\u044B\u0432\u0430\u044E\u0449\u0438\u0435\u0441\u044F \u043C\u0435\u0442\u0430\u0430\u043D\u0430\u043B\u0438\u0437\u044B \u043D\u0435 \u0434\u0430\u044E\u0442 \u043D\u043E\u0432\u044B\u0445 \u043D\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043C\u044B\u0445 \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u043E\u0432." }, { "id": "S10", "title": "Ketogenic versus non-ketogenic diets with comparable energy prescriptions: systematic review and meta-analysis", "url": "https://pubmed.ncbi.nlm.nih.gov/42588148/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "6 \u043E\u0431\u044A\u0435\u0434\u0438\u043D\u0451\u043D\u043D\u044B\u0445 \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0439, 259 \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u043E\u0432; \u043D\u0438\u0437\u043A\u0430\u044F \u0443\u0432\u0435\u0440\u0435\u043D\u043D\u043E\u0441\u0442\u044C. \u041F\u0440\u0435\u0434\u043F\u0438\u0441\u0430\u043D\u043D\u0430\u044F \u044D\u043D\u0435\u0440\u0433\u0438\u044F \u043D\u0435 \u0440\u0430\u0432\u043D\u0430 \u0440\u0435\u0430\u043B\u044C\u043D\u043E \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0439; \u0432 protein-matched \u043F\u043E\u0434\u0433\u0440\u0443\u043F\u043F\u0435 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043D\u0435\u0442\u043E\u0447\u0435\u043D." }, { "id": "S11", "title": "Facilitating Positive Health Behaviors and Well-being to Improve Health Outcomes: Standards of Care in Diabetes\u20142026", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12690188/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0435 \u0443\u043D\u0438\u0432\u0435\u0440\u0441\u0430\u043B\u044C\u043D\u043E\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u0435 \u0438\u043B\u0438 \u0437\u0430\u043F\u0440\u0435\u0442 \u043A\u0435\u0442\u043E \u0434\u043B\u044F \u043A\u0430\u0436\u0434\u043E\u0433\u043E \u0432\u0437\u0440\u043E\u0441\u043B\u043E\u0433\u043E; \u0434\u0438\u0430\u0431\u0435\u0442 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043A\u043B\u0438\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u0432\u0435\u0434\u0435\u043D\u0438\u044F." }, { "id": "S12", "title": "Pharmacologic Approaches to Glycemic Treatment: Standards of Care in Diabetes\u20142026", "url": "https://doi.org/10.2337/dc26-S009", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0435 \u043E\u0441\u043D\u043E\u0432\u0430\u043D\u0438\u0435 \u0434\u043B\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u0440\u0430\u0441\u0447\u0451\u0442\u0430 \u0434\u043E\u0437 \u0438\u043D\u0441\u0443\u043B\u0438\u043D\u0430 \u0447\u0430\u0442-\u0431\u043E\u0442\u043E\u043C." }, { "id": "S13", "title": "SEGLUROMET prescribing information: ketoacidosis warning", "url": "https://www.dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=a6aeb99a-ce49-4125-90ce-642df3f1ebad&type=display", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u044B\u0439 \u043F\u0440\u0435\u043F\u0430\u0440\u0430\u0442; \u0434\u043B\u044F \u043A\u0430\u0436\u0434\u043E\u0433\u043E \u043B\u0435\u043A\u0430\u0440\u0441\u0442\u0432\u0430 \u043D\u0443\u0436\u043D\u0430 \u0430\u043A\u0442\u0443\u0430\u043B\u044C\u043D\u0430\u044F \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F." }, { "id": "S14", "title": "International Recommendations for the Management of Adults Treated With Ketogenic Diet Therapies", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8610544/", "year": 2021, "date": "2026-11-07", "status": "included", "scope": "\u042D\u043A\u0441\u043F\u0435\u0440\u0442\u043D\u044B\u0439 \u043A\u043E\u043D\u0441\u0435\u043D\u0441\u0443\u0441 \u0446\u0435\u043D\u0442\u0440\u043E\u0432 \u043B\u0435\u0447\u0435\u043D\u0438\u044F, \u043D\u0435 \u0420\u041A\u0418; \u0435\u0433\u043E \u0440\u0435\u0436\u0438\u043C \u0430\u043D\u0430\u043B\u0438\u0437\u043E\u0432 \u043D\u0435\u043B\u044C\u0437\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043D\u0430\u0437\u043D\u0430\u0447\u0430\u0442\u044C \u0432\u0441\u0435\u043C \u0445\u0443\u0434\u0435\u044E\u0449\u0438\u043C." }, { "id": "S15", "title": "Ketogenic diets for drug-resistant epilepsy", "url": "https://pubmed.ncbi.nlm.nih.gov/32588435/", "year": 2020, "date": "2026-11-07", "status": "included", "scope": "\u0420\u041A\u0418 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u044B, \u0443\u0432\u0435\u0440\u0435\u043D\u043D\u043E\u0441\u0442\u044C \u043D\u0438\u0437\u043A\u0430\u044F/\u043E\u0447\u0435\u043D\u044C \u043D\u0438\u0437\u043A\u0430\u044F \u0434\u043B\u044F \u0440\u044F\u0434\u0430 \u0438\u0441\u0445\u043E\u0434\u043E\u0432. \u041D\u0435\u043B\u044C\u0437\u044F \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u0442\u044C \u043B\u0435\u0447\u0435\u0431\u043D\u043E\u0435 \u0441\u043E\u043E\u0442\u043D\u043E\u0448\u0435\u043D\u0438\u0435 4:1 \u0432 \u0431\u044B\u0442\u043E\u0432\u043E\u0435 \u043F\u043E\u0445\u0443\u0434\u0435\u043D\u0438\u0435." }, { "id": "S16", "title": "Popular Dietary Patterns: Alignment With American Heart Association 2021 Dietary Guidance", "url": "https://professional.heart.org/en/science-news/popular-dietary-patterns-alignment-with-american-heart-association-2021-dietary-guidance/top-things-to-know", "year": 2023, "date": "2026-11-07", "status": "included", "scope": "\u042D\u0442\u043E \u043E\u0446\u0435\u043D\u043A\u0430 \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u044F \u043F\u0438\u0449\u0435\u0432\u043E\u0433\u043E \u0448\u0430\u0431\u043B\u043E\u043D\u0430 \u0440\u0435\u043A\u043E\u043C\u0435\u043D\u0434\u0430\u0446\u0438\u044F\u043C, \u043D\u0435 \u043F\u0440\u044F\u043C\u043E\u0435 \u0440\u0430\u043D\u0434\u043E\u043C\u0438\u0437\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0435 \u0441\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u0435 \u0441\u043C\u0435\u0440\u0442\u043D\u043E\u0441\u0442\u0438." }, { "id": "S17", "title": "2026 Guideline on the Management of Dyslipidemia", "url": "https://professional.heart.org/en/science-news/2026-guideline-on-the-management-of-dyslipidemia", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0420\u0435\u0448\u0435\u043D\u0438\u0435 \u0437\u0430\u0432\u0438\u0441\u0438\u0442 \u043E\u0442 \u043E\u0431\u0449\u0435\u0433\u043E \u0440\u0438\u0441\u043A\u0430 \u0438 \u0432\u0442\u043E\u0440\u0438\u0447\u043D\u044B\u0445 \u043F\u0440\u0438\u0447\u0438\u043D; \u0430\u0441\u0441\u0438\u0441\u0442\u0435\u043D\u0442 \u043D\u0435 \u043D\u0430\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043B\u0438\u043F\u0438\u0434\u0441\u043D\u0438\u0436\u0430\u044E\u0449\u0438\u0435 \u043F\u0440\u0435\u043F\u0430\u0440\u0430\u0442\u044B." }, { "id": "S18", "title": "Longitudinal Data From the KETO-CTA Study: Plaque Predicts Plaque, ApoB Does Not", "url": "https://pubmed.ncbi.nlm.nih.gov/40192608/", "year": 2025, "date": "2026-11-07", "status": "excluded_retracted", "scope": "\u0418\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0430 \u0438\u0437 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u044E\u0449\u0435\u0433\u043E \u043A\u043E\u0440\u043F\u0443\u0441\u0430. \u0421\u0432\u044F\u0437\u0430\u043D\u043D\u043E\u0435 \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u0435 S19." }, { "id": "S19", "title": "Retraction notice: Longitudinal Data from the KETO-CTA Study", "url": "https://pubmed.ncbi.nlm.nih.gov/42206798/", "year": 2026, "date": "2026-11-07", "status": "integrity_control", "scope": "\u041E\u0442\u0437\u044B\u0432 \u043E\u0442\u043D\u043E\u0441\u0438\u0442\u0441\u044F \u043A \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u043E\u0439 \u0441\u0442\u0430\u0442\u044C\u0435 2025 \u0433\u043E\u0434\u0430, \u0430 \u043D\u0435 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043A\u043E \u0432\u0441\u0435\u043C \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u044F\u043C KETO." }, { "id": "S20", "title": "Incidence and Characteristics of Kidney Stones in Patients on Ketogenic Diet: A Systematic Review and Meta-Analysis", "url": "https://pubmed.ncbi.nlm.nih.gov/34070285/", "year": 2021, "date": "2026-11-07", "status": "included", "scope": "\u0421\u0440\u0435\u0434\u043D\u0435\u0435 \u043D\u0430\u0431\u043B\u044E\u0434\u0435\u043D\u0438\u0435 \u043E\u043A\u043E\u043B\u043E 3.7 \u0433\u043E\u0434\u0430; \u043C\u043D\u043E\u0433\u043E \u043B\u0435\u0447\u0435\u0431\u043D\u044B\u0445/\u044D\u043F\u0438\u043B\u0435\u043F\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0445 \u043F\u043E\u043F\u0443\u043B\u044F\u0446\u0438\u0439. \u041D\u0435 \u0433\u043E\u0434\u043E\u0432\u043E\u0439 \u0440\u0438\u0441\u043A \u0434\u043B\u044F \u0437\u0434\u043E\u0440\u043E\u0432\u043E\u0439 \u0436\u0435\u043D\u0449\u0438\u043D\u044B." }, { "id": "S21", "title": "KDIGO 2024 Clinical Practice Guideline for the Evaluation and Management of Chronic Kidney Disease", "url": "https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf", "year": 2024, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0435\u043B\u044C\u0437\u044F \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u0442\u044C \u0432\u044B\u0441\u043E\u043A\u043E\u0431\u0435\u043B\u043A\u043E\u0432\u043E\u0435 \u0431\u044B\u0442\u043E\u0432\u043E\u0435 \u043C\u0435\u043D\u044E \u043D\u0430 \u0425\u0411\u041F. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D\u0430 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0430 S157, \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u0430\u044F \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442\u043E\u043C." }, { "id": "S22", "title": "EASL\u2013EASD\u2013EASO Clinical Practice Guidelines on the management of MASLD", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11299976/", "year": 2024, "date": "2026-11-07", "status": "included", "scope": "\u0415\u0441\u0442\u044C \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 DOI 10.1159/000541386, \u0441\u043E\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435 \u043D\u0435 \u0438\u0437\u0432\u043B\u0435\u0447\u0435\u043D\u043E; \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0430\u043A\u0442\u0443\u0430\u043B\u044C\u043D\u043E\u0439 \u0432\u0435\u0440\u0441\u0438\u0438." }, { "id": "S23", "title": "Recommendations from the 2023 International Evidence-based Guideline for the Assessment and Management of PCOS", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10477934/", "year": 2023, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0435 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442, \u0447\u0442\u043E \u043F\u0438\u0442\u0430\u043D\u0438\u0435 \u043D\u0435 \u043F\u043E\u043C\u043E\u0433\u0430\u0435\u0442; \u0430\u043A\u0446\u0435\u043D\u0442 \u043D\u0430 \u0443\u0441\u0442\u043E\u0439\u0447\u0438\u0432\u043E\u043C \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u043E\u043C \u043F\u043E\u0434\u0445\u043E\u0434\u0435." }, { "id": "S24", "title": "Ketogenic dietary intervention in women with polycystic ovary syndrome: randomized trial", "url": "https://www.frontiersin.org/journals/nutrition/articles/10.3389/fnut.2026.1920489/full", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041E\u0442\u043A\u0440\u044B\u0442\u043E\u0435 \u043E\u0434\u043D\u043E\u0446\u0435\u043D\u0442\u0440\u043E\u0432\u043E\u0435 \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0435, \u043E\u0447\u0435\u043D\u044C \u0431\u043E\u043B\u044C\u0448\u0438\u0435 \u044D\u0444\u0444\u0435\u043A\u0442\u044B \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043D\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043C\u043E\u0439 \u0440\u0435\u043F\u043B\u0438\u043A\u0430\u0446\u0438\u0438; \u043D\u0435 \u0434\u043E\u043A\u0430\u0437\u0430\u043D\u043E \u0443\u043B\u0443\u0447\u0448\u0435\u043D\u0438\u0435 \u0436\u0438\u0432\u043E\u0440\u043E\u0436\u0434\u0435\u043D\u0438\u0439. \u041D\u0435 \u0437\u0430\u043C\u0435\u043D\u044F\u0435\u0442 \u043E\u0431\u0449\u0438\u0439 guideline." }, { "id": "S25", "title": "International society of sports nutrition position stand: ketogenic diets", "url": "https://pubmed.ncbi.nlm.nih.gov/38934469/", "year": 2024, "date": "2026-11-07", "status": "included", "scope": "\u0420\u0430\u0437\u043B\u0438\u0447\u0430\u044E\u0442\u0441\u044F \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0441\u0442\u044C, \u0432\u0438\u0434 \u0441\u043F\u043E\u0440\u0442\u0430, \u0434\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0430\u0434\u0430\u043F\u0442\u0430\u0446\u0438\u0438 \u0438 \u044D\u043D\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u0430\u044F \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E\u0441\u0442\u044C." }, { "id": "S26", "title": "Ketogenic Diets Alter the Gut Microbiome Resulting in Decreased Intestinal Th17 Cells", "url": "https://pubmed.ncbi.nlm.nih.gov/32437658/", "year": 2020, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0435\u043B\u044C\u0437\u044F \u043F\u0440\u0435\u0432\u0440\u0430\u0449\u0430\u0442\u044C \u043C\u0438\u043A\u0440\u043E\u0431\u0438\u043E\u043C\u043D\u044B\u0435 \u0441\u0434\u0432\u0438\u0433\u0438 \u0432 \u0434\u043E\u043A\u0430\u0437\u0430\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u043E \u043B\u0435\u0447\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u044F \u043A\u0438\u0448\u0435\u0447\u043D\u0438\u043A\u0430 \u0443 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u043E\u0433\u043E \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430." }, { "id": "S_USDA", "title": "FoodData Central API Guide and SR Legacy food records", "url": "https://fdc.nal.usda.gov/api-guide/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0418\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D \u0438\u0441\u0442\u043E\u0440\u0438\u0447\u0435\u0441\u043A\u0438\u0439 SR Legacy, \u043F\u0443\u0431\u043B\u0438\u043A\u0430\u0446\u0438\u044F 2019, \u0430 \u043D\u0435 \u043D\u043E\u0432\u0435\u0439\u0448\u0430\u044F Foundation. API-\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043E\u043A\u0440\u0443\u0433\u043B\u0435\u043D\u044B; \u0440\u0435\u0430\u043B\u044C\u043D\u044B\u0435 \u0431\u0440\u0435\u043D\u0434\u044B \u043C\u043E\u0433\u0443\u0442 \u043E\u0442\u043B\u0438\u0447\u0430\u0442\u044C\u0441\u044F." }, { "id": "S_LABEL", "title": "How to Understand and Use the Nutrition Facts Label", "url": "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0410\u043C\u0435\u0440\u0438\u043A\u0430\u043D\u0441\u043A\u0430\u044F \u043C\u0430\u0440\u043A\u0438\u0440\u043E\u0432\u043A\u0430; \u043D\u0435 \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u0442\u044C \u043F\u0440\u0430\u0432\u0438\u043B\u0430 \u0432\u044B\u0447\u0438\u0442\u0430\u043D\u0438\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438 \u043D\u0430 \u0438\u043D\u0443\u044E \u044E\u0440\u0438\u0441\u0434\u0438\u043A\u0446\u0438\u044E." }, { "id": "S_NET", "title": "Get to Know Carbs", "url": "https://diabetes.org/food-nutrition/understanding-carbs/get-to-know-carbs", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u043C\u0435\u0445\u0430\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435 \u0432\u044B\u0447\u0438\u0442\u0430\u043D\u0438\u0435 \u0432\u0441\u0435\u0445 \u0441\u0430\u0445\u0430\u0440\u043D\u044B\u0445 \u0441\u043F\u0438\u0440\u0442\u043E\u0432 \u0434\u043B\u044F \u0438\u043D\u0441\u0443\u043B\u0438\u043D\u0430 \u0438\u043B\u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F \u043A\u0435\u0442\u043E\u0437\u0430." }, { "id": "S_FOODSAFE", "title": "Safe Food Handling", "url": "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0420\u0435\u0446\u0435\u043F\u0442\u044B \u0431\u0438\u0431\u043B\u0438\u043E\u0442\u0435\u043A\u0438 \u043D\u0435 \u043F\u0440\u043E\u0448\u043B\u0438 \u043A\u0443\u0445\u043E\u043D\u043D\u043E\u0435 \u0442\u0435\u0441\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435; \u0432\u0440\u0435\u043C\u044F \u043F\u0440\u0438\u0431\u043B\u0438\u0437\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0435." }, { "id": "S_FISH", "title": "Advice about Eating Fish", "url": "https://www.fda.gov/food/consumers/advice-about-eating-fish", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0421\u043F\u0435\u0446\u0438\u0430\u043B\u044C\u043D\u044B\u0435 \u0447\u0430\u0441\u0442\u043E\u0442\u043D\u044B\u0435 \u043D\u043E\u0440\u043C\u044B \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B \u043E\u0442\u043D\u043E\u0441\u044F\u0442\u0441\u044F \u043F\u0440\u0435\u0436\u0434\u0435 \u0432\u0441\u0435\u0433\u043E \u043A \u0431\u0435\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0441\u0442\u0438/\u0434\u0435\u0442\u044F\u043C; \u0431\u0438\u0431\u043B\u0438\u043E\u0442\u0435\u043A\u0430 \u043D\u0435 \u043F\u0440\u0435\u0434\u043B\u0430\u0433\u0430\u0435\u0442 \u0431\u0435\u0440\u0435\u043C\u0435\u043D\u043D\u044B\u043C \u043A\u0435\u0442\u043E." }, { "id": "S_ENERGY", "title": "Body Weight Planner", "url": "https://www.niddk.nih.gov/health-information/weight-management/body-weight-planner", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0418\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442 \u0434\u043B\u044F \u0432\u0437\u0440\u043E\u0441\u043B\u044B\u0445, \u043D\u0435 \u0431\u0435\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0441\u0442\u0438/\u043A\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u044F; \u043D\u0435 \u0442\u043E\u0447\u043D\u043E\u0435 \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435 \u043C\u0435\u0442\u0430\u0431\u043E\u043B\u0438\u0437\u043C\u0430." }, { "id": "S_CA", "title": "Calcium \u2014 Health Professional Fact Sheet", "url": "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0413\u043E\u0434 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E\u0439 \u0432\u0435\u0440\u0441\u0438\u0438, \u043D\u0435 \u0433\u043E\u0434 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u044F \u043D\u043E\u0440\u043C\u044B; \u043D\u043E\u0440\u043C\u044B \u043D\u0435 \u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u043C \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435\u043C." }, { "id": "S_MG", "title": "Magnesium \u2014 Health Professional Fact Sheet", "url": "https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0413\u043E\u0434 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E\u0439 \u0432\u0435\u0440\u0441\u0438\u0438, \u043D\u0435 \u0433\u043E\u0434 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u044F \u043D\u043E\u0440\u043C\u044B; \u043D\u043E\u0440\u043C\u044B \u043D\u0435 \u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u043C \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435\u043C." }, { "id": "S_K", "title": "Potassium \u2014 Health Professional Fact Sheet", "url": "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0413\u043E\u0434 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E\u0439 \u0432\u0435\u0440\u0441\u0438\u0438, \u043D\u0435 \u0433\u043E\u0434 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u044F \u043D\u043E\u0440\u043C\u044B; \u043D\u043E\u0440\u043C\u044B \u043D\u0435 \u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u043C \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435\u043C." }, { "id": "S_FE", "title": "Iron \u2014 Health Professional Fact Sheet", "url": "https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0413\u043E\u0434 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E\u0439 \u0432\u0435\u0440\u0441\u0438\u0438, \u043D\u0435 \u0433\u043E\u0434 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u044F \u043D\u043E\u0440\u043C\u044B; \u043D\u043E\u0440\u043C\u044B \u043D\u0435 \u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u043C \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435\u043C." }, { "id": "S_D", "title": "Vitamin D \u2014 Health Professional Fact Sheet", "url": "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0413\u043E\u0434 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E\u0439 \u0432\u0435\u0440\u0441\u0438\u0438, \u043D\u0435 \u0433\u043E\u0434 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u044F \u043D\u043E\u0440\u043C\u044B; \u043D\u043E\u0440\u043C\u044B \u043D\u0435 \u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u043C \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435\u043C." }, { "id": "S_FOL", "title": "Folate \u2014 Health Professional Fact Sheet", "url": "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0413\u043E\u0434 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E\u0439 \u0432\u0435\u0440\u0441\u0438\u0438, \u043D\u0435 \u0433\u043E\u0434 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u044F \u043D\u043E\u0440\u043C\u044B; \u043D\u043E\u0440\u043C\u044B \u043D\u0435 \u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u043C \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435\u043C." }, { "id": "S_B12", "title": "Vitamin B12 \u2014 Health Professional Fact Sheet", "url": "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0413\u043E\u0434 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E\u0439 \u0432\u0435\u0440\u0441\u0438\u0438, \u043D\u0435 \u0433\u043E\u0434 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u044F \u043D\u043E\u0440\u043C\u044B; \u043D\u043E\u0440\u043C\u044B \u043D\u0435 \u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u043C \u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435\u043C." }, { "id": "S_OPENAI1", "title": "Creating and editing GPTs", "url": "https://help.openai.com/en/articles/8554397-creating-and-editing-gpts", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u0412\u043E\u0437\u043C\u043E\u0436\u043D\u043E\u0441\u0442\u0438 \u043C\u0435\u043D\u044F\u044E\u0442\u0441\u044F \u0438 \u0437\u0430\u0432\u0438\u0441\u044F\u0442 \u043E\u0442 \u0430\u043A\u043A\u0430\u0443\u043D\u0442\u0430/workspace. \u041F\u0435\u0440\u0435\u0434 \u0440\u0435\u0430\u043B\u0438\u0437\u0430\u0446\u0438\u0435\u0439 \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u043E." }, { "id": "S_OPENAI2", "title": "GPTs in ChatGPT", "url": "https://help.openai.com/en/articles/8554407-gpts-in-chatgpt", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041E\u0431\u0441\u0443\u0436\u0434\u0430\u0435\u0442\u0441\u044F \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0449\u0438\u0439 \u043F\u0435\u0440\u0435\u0445\u043E\u0434 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430; \u043D\u0435 \u043E\u0441\u043D\u043E\u0432\u0430 \u0434\u043B\u044F \u043E\u0431\u0435\u0449\u0430\u043D\u0438\u044F \u043F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u043E\u0439 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0439 \u043F\u0430\u043C\u044F\u0442\u0438." }, { "id": "S_OPENAI3", "title": "Projects in ChatGPT", "url": "https://help.openai.com/en/articles/10169521-projects-in-chatgpt", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041F\u0430\u043C\u044F\u0442\u044C \u043F\u0440\u043E\u0435\u043A\u0442\u0430 \u043D\u0435 \u0437\u0430\u043C\u0435\u043D\u044F\u0435\u0442 \u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u0443\u044E \u0431\u0430\u0437\u0443, \u0436\u0443\u0440\u043D\u0430\u043B \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0439 \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0447\u0438\u0441\u0435\u043B." }, { "id": "S_OPENAI4", "title": "Your data \u2014 API documentation", "url": "https://developers.openai.com/api/docs/guides/your-data", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0435 \u043E\u0431\u0435\u0449\u0430\u0442\u044C zero retention, \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u0438\u043C \u0442\u0440\u0435\u0431\u043E\u0432\u0430\u043D\u0438\u044F\u043C \u0438\u043B\u0438 \u043F\u043E\u043B\u043D\u043E\u0435 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u0434\u043E\u0441\u0442\u0443\u043F\u0430 \u0431\u0435\u0437 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u043E\u0439 \u043A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u0438." }, { "id": "S_OPENAI5", "title": "Data Controls FAQ", "url": "https://help.openai.com/en/articles/7730893-data-controls-in-chatgpt", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u043F\u043E\u0442\u0440\u0435\u0431\u0438\u0442\u0435\u043B\u044C\u0441\u043A\u043E\u0433\u043E ChatGPT, API \u0438 \u0431\u0438\u0437\u043D\u0435\u0441-\u0430\u043A\u043A\u0430\u0443\u043D\u0442\u0430 \u0440\u0430\u0437\u043B\u0438\u0447\u0430\u044E\u0442\u0441\u044F." }, { "id": "S_STORAGE", "title": "How do I handle leftovers safely?", "url": "https://ask.fsis.usda.gov/article/How-do-I-handle-leftovers-safely/", "year": 2024, "date": "2026-11-07", "status": "included", "scope": "\u041D\u0435 \u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0433\u043E\u0442\u043E\u0432\u0443\u044E \u043F\u0442\u0438\u0446\u0443 \u0432\u0441\u044E \u043D\u0435\u0434\u0435\u043B\u044E \u0432 \u0445\u043E\u043B\u043E\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0435; \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u0435 2 \u0447\u0430\u0441\u0430 \u0432\u043D\u0435 \u0445\u043E\u043B\u043E\u0434\u0430, 1 \u0447\u0430\u0441 \u043F\u0440\u0438 \u0436\u0430\u0440\u0435 \u0432\u044B\u0448\u0435 32 \xB0C." }, { "id": "S_ALLERGY", "title": "Food Allergies", "url": "https://www.fda.gov/food/nutrition-food-labeling-and-critical-foods/food-allergies", "year": 2026, "date": "2026-11-07", "status": "included", "scope": "\u041E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043B\u043E\u0432\u0430 \u0432 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0438 \u0440\u0435\u0446\u0435\u043F\u0442\u0430 \u043D\u0435 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u0430. \u041F\u0435\u0440\u0435\u0447\u0435\u043D\u044C \u0432 \u0431\u0430\u0437\u0435 \u043D\u0435 \u0437\u0430\u043C\u0435\u043D\u044F\u0435\u0442 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443." }, { "id": "ENGINE01", "title": "A new predictive equation for resting energy expenditure in healthy individuals", "url": "https://pubmed.ncbi.nlm.nih.gov/2305711/", "year": 1990, "date": "2026-11-08", "status": "included", "scope": "resting energy estimate only; 498 healthy adults19\u201378; activity multiplier separate assumption; no deficit prescription" }, { "id": "S_ENERGY", "title": "NIDDK Body Weight Planner \u2014 activity context, not this algorithm", "url": "https://www.niddk.nih.gov/health-information/weight-management/body-weight-planner", "year": null, "date": "2026-11-08", "status": "included", "scope": "PAL context only; this product does not implement Hall's dynamic model." }, { "id": "START_PROTEIN", "title": "Leidy et al. The role of protein in weight loss and maintenance", "url": "https://pubmed.ncbi.nlm.nih.gov/25926512/", "year": 2015, "date": "2026-11-08", "status": "included", "scope": "Review of 1.2\u20131.6 g/kg in weight management; adherence and heterogeneous populations limit generalization. Maintenance carryover is product policy." }, { "id": "START_ENERGY_2013", "title": "2013 AHA/ACC/TOS Guideline for the Management of Overweight and Obesity in Adults", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5819889/", "year": 2013, "date": "2026-11-08", "status": "included", "scope": "Historical energy ranges, not a current 2026 guideline or our 10%/300 rule." }, { "id": "START_USDA_DRI", "title": "USDA DRI Calculator for Healthcare Professionals", "url": "https://www.nal.usda.gov/human-nutrition-and-food-safety/dri-calculator", "year": null, "date": "2026-11-08", "status": "included", "scope": "Individual requirements vary; this product does not implement the DRI calculator." }], "excluded": [{ "id": "S03E", "title": "Erratum to Keto-Med randomized crossover trial", "url": "https://pubmed.ncbi.nlm.nih.gov/36349565/", "year": 2022, "date": "2026-11-07", "status": "correction_pending_full_review", "scope": "\u041F\u043E\u043B\u043D\u043E\u0435 \u0441\u043E\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435 \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u043E; \u043F\u0435\u0440\u0435\u0434 \u043A\u043B\u0438\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u043C \u0432\u043D\u0435\u0434\u0440\u0435\u043D\u0438\u0435\u043C \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0438\u0437\u0434\u0430\u0442\u0435\u043B\u044C\u0441\u043A\u0443\u044E \u0430\u043A\u0442\u0443\u0430\u043B\u044C\u043D\u0443\u044E \u0432\u0435\u0440\u0441\u0438\u044E." }, { "id": "S18", "title": "Longitudinal Data From the KETO-CTA Study: Plaque Predicts Plaque, ApoB Does Not", "url": "https://pubmed.ncbi.nlm.nih.gov/40192608/", "year": 2025, "date": "2026-11-07", "status": "excluded_retracted", "scope": "\u0418\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0430 \u0438\u0437 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u044E\u0449\u0435\u0433\u043E \u043A\u043E\u0440\u043F\u0443\u0441\u0430. \u0421\u0432\u044F\u0437\u0430\u043D\u043D\u043E\u0435 \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u0435 S19." }, { "id": "S19", "title": "Retraction notice: Longitudinal Data from the KETO-CTA Study", "url": "https://pubmed.ncbi.nlm.nih.gov/42206798/", "year": 2026, "date": "2026-11-07", "status": "integrity_control", "scope": "\u041E\u0442\u0437\u044B\u0432 \u043E\u0442\u043D\u043E\u0441\u0438\u0442\u0441\u044F \u043A \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u043E\u0439 \u0441\u0442\u0430\u0442\u044C\u0435 2025 \u0433\u043E\u0434\u0430, \u0430 \u043D\u0435 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043A\u043E \u0432\u0441\u0435\u043C \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u044F\u043C KETO." }], "assumptions": ["Activity choices 1.4/1.6/1.8 are approximate product mappings, separate from Mifflin RMR.", "Maintenance \xB110% is an interface uncertainty illustration, not a confidence interval.", "Gentle loss min(300 kcal,10% maintenance), \xB15% target band, rounding to 10 kcal: product policy.", "Female 1200/male 1500 lower-intake safeguard and BMI/age eligibility are product scope, not universal safe thresholds.", "100/50 g TOTAL carbohydrate modes do not guarantee ketosis; no automatic polyol subtraction.", "30 days/5% weight change prompts review only; no automatic calorie adaptation."] };
 
@@ -1925,7 +2371,7 @@ function linkSlider(element, inputs, { min, max, step, labels, localWindow = fal
 }
 
 // cloudflare-saas/public/routes.js
-var ROUTES = ["chat", "today", "diary", "more", "recipes", "settings", "sources", "reminders", "admin", "targets", "knowledge", "setup-consent", "setup-about", "setup-restrictions", "setup-targets"];
+var ROUTES = ["chat", "today", "diary", "more", "recipes", "settings", "sources", "reminders", "admin", "targets", "knowledge", "memory", "setup-consent", "setup-about", "setup-restrictions", "setup-targets"];
 var MAIN = ["chat", "today", "diary", "more"];
 function routeValue(hash, fallback = "chat") {
   const value = String(hash || "").replace(/^#/, "");
@@ -7840,6 +8286,7 @@ async function call(name2, args = {}, options = {}) {
 }
 function clearScreen() {
   screenEpoch++;
+  kitchen.reset();
   guided.reset();
   router.reset();
   busy = false;
@@ -7897,7 +8344,10 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
     b2.classList.toggle("active", b2.dataset.view === (["chat", "today", "diary"].includes(next) ? next : "more"));
     b2.setAttribute("aria-current", b2.dataset.view === (["chat", "today", "diary"].includes(next) ? next : "more") ? "page" : "false");
   });
-  if (next === "recipes" && reason !== "history") run(loadRecipes);
+  if (next === "recipes" && reason !== "history") {
+    run(loadRecipes);
+    run(() => kitchen.load());
+  }
   if (route === "setup-restrictions") fillOnboard();
   if (next === "settings") fillSettings();
   if (next === "sources" && reason !== "history") run(sources);
@@ -7928,6 +8378,7 @@ function accept(d2) {
   return d2;
 }
 function renderState() {
+  kitchen.render();
   $2("login").hidden = true;
   $2("workspace").hidden = false;
   $2("version").textContent = state.mobile_version || state.version;
@@ -7979,7 +8430,7 @@ function renderProposals() {
     const card = el("div", "proposal");
     card.setAttribute("role", "region");
     card.setAttribute("aria-label", "\u0418\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F");
-    card.append(el("span", "eyebrow", "\u041D\u0410 \u041F\u0420\u041E\u0412\u0415\u0420\u041A\u0423"), el("h3", "", { "ui": "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", "configuration": "\u041F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0438 \u0440\u0435\u0436\u0438\u043C", "profile.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0442\u0432\u0435\u0442\u044B", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "plan.accept": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E", "catalog.recipe.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442", "guidance.setup": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0438 \u0432\u044B\u0431\u043E\u0440", "guidance.targets": "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "targets.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0443\u0447\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "feature.request": "\u041F\u043E\u0436\u0435\u043B\u0430\u043D\u0438\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0443", "ui.rollback": "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0432\u0438\u0434" }[p.type] || "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435"));
+    card.append(el("span", "eyebrow", "\u041D\u0410 \u041F\u0420\u041E\u0412\u0415\u0420\u041A\u0423"), el("h3", "", { "ui": "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", "configuration": "\u041F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0438 \u0440\u0435\u0436\u0438\u043C", "profile.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0442\u0432\u0435\u0442\u044B", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "plan.accept": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E", "catalog.recipe.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442", "guidance.setup": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0438 \u0432\u044B\u0431\u043E\u0440", "guidance.targets": "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "targets.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0443\u0447\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "feature.request": "\u041F\u043E\u0436\u0435\u043B\u0430\u043D\u0438\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0443", "ui.rollback": "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0432\u0438\u0434" }[p.type] || kitchenActionLabels[p.type.replace("kitchen.", "")] || "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435"));
     const dl = el("dl");
     const pairs = p.type === "plan.accept" ? [["\u0414\u043D\u0435\u0439", p.payload.days?.length], ["\u0421\u0442\u0430\u0442\u0443\u0441", "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0439 \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"]] : p.type === "guidance.targets" ? flatten(p.payload.candidate) : flatten(p.payload);
     for (const [key, val] of pairs.slice(0, 22)) {
@@ -7988,6 +8439,11 @@ function renderProposals() {
       dl.append(el("dt", "", label), el("dd", "", Array.isArray(val) ? val.map((x) => typeof x === "object" ? x.name || x.recipe_id || (x.food_id ? x.food_id + " \xB7 " + numberRu(x.grams_edible) + " \u0433 \xB7 " + foodState(x.state) : "\u0437\u0430\u043F\u0438\u0441\u044C") : ALLERGENS.find((a2) => a2[0] === x)?.[1] || human(x)).join(", ") : human(val)));
     }
     card.append(dl);
+    if (p.preview) {
+      card.append(el("h4", "", p.preview.name_ru + " \xB7 " + numberRu(p.preview.portions) + " \u043F\u043E\u0440\u0446\u0438\u0438"));
+      for (const i of p.preview.ingredients) card.append(el("p", "", i.name_ru + " \u2014 " + numberRu(i.grams_edible) + " \u0433 \xB7 " + foodState(i.state)));
+      card.append(el("p", "nutrition", "\u0420\u0430\u0441\u0447\u0451\u0442: " + numberRu(p.preview.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + numberRu(p.preview.nutrition.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + numberRu(p.preview.nutrition.carbohydrate_total_g) + " \u0433"));
+    }
     if (p.type === "plan.accept") {
       const details = el("details"), summary = el("summary", "", "\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0431\u043B\u044E\u0434\u0430 \u0438 \u0433\u0440\u0430\u043C\u043C\u043E\u0432\u043A\u0438 \u043F\u0435\u0440\u0435\u0434 \u0432\u044B\u0431\u043E\u0440\u043E\u043C");
       details.append(summary);
@@ -8066,7 +8522,7 @@ function openRecipe(r) {
 async function loadRecipes() {
   const d2 = await call("keto_recipes", { query: $2("recipe-query").value, limit: 24 });
   $2("recipe-note").textContent = d2.note;
-  $2("recipes").replaceChildren(...d2.recipes.map(recipeCard));
+  $2("recipes").replaceChildren(...d2.recipes.map((r) => r.draft_label ? kitchen.card(r) : recipeCard(r)));
   if (!d2.recipes.length) $2("recipes").append(el("div", "panel", "\u041D\u0435 \u043D\u0430\u0448\u043B\u043E\u0441\u044C \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u044F. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430."));
 }
 function renderDiary() {
@@ -8218,7 +8674,7 @@ async function send(message) {
     markSafetyHold(d2);
     if ($2("message").value === submittedDraft) $2("message").value = "";
     if (image === submittedImage) mobile.resetPhoto();
-    const actionLabels = { reminders: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u044F", setup: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0437\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E", targets: "\u0412\u0430\u0448 \u043F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", today: "\u041C\u0435\u043D\u044E", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439" };
+    const actionLabels = { reminders: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u044F", setup: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0437\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E", targets: "\u0412\u0430\u0448 \u043F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", today: "\u041C\u0435\u043D\u044E", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439", memory: "\u0427\u0442\u043E \u044F \u043F\u043E\u043C\u043D\u044E" };
     for (const action of d2.actions || (d2.open_view ? [{ view: d2.open_view, label: actionLabels[d2.open_view] || "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0440\u0430\u0437\u0434\u0435\u043B" }] : [])) {
       const open = el("button", "secondary", actionLabels[action.view] || action.label);
       open.onclick = () => setView(action.view);
@@ -8226,8 +8682,9 @@ async function send(message) {
     }
     if (d2.recipes) {
       const cards = el("div", "recipe-grid");
-      cards.append(...d2.recipes.map(recipeCard));
-      $2("chat-extras").replaceChildren(el("h2", "", "\u0418\u0434\u0435\u0438 \u0434\u043B\u044F \u0432\u0430\u0441"), cards);
+      cards.append(...d2.recipes.map((r) => r.draft_label ? kitchen.card(r) : recipeCard(r)));
+      $2("chat-extras").replaceChildren(el("h2", "", d2.day ? "\u0418\u0434\u0435\u0438 \u043D\u0430 \u0434\u0435\u043D\u044C" : "\u0418\u0434\u0435\u0438 \u0434\u043B\u044F \u0432\u0430\u0441"), cards);
+      if (d2.day) $2("chat-extras").append(kitchen.dayCard(d2));
     }
     if (d2.plan) {
       renderPlan(d2.plan);
@@ -8637,4 +9094,5 @@ var guided = setupGuidance({ $: $2, el, getState: () => state, call, accept, not
 var router = createRouter({ location, history, listen: (name2, fn) => window.addEventListener(name2, fn), render: renderView, closeDialog: () => {
   if ($2("recipe-dialog").open) $2("recipe-dialog").close();
 }, fallback: () => state?.guidance?.ready ? state.ui.home || "chat" : guided.resolve("setup") });
+var kitchen = setupKitchen({ $: $2, el, call, getState: () => state, accept, run, notify, setView, epoch: () => screenEpoch });
 run(start);

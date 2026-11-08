@@ -1,17 +1,16 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T10:27:44.126105+00:00",
-  "source_version": "0.5.0-guided-pilot",
+  "updated_at": "2026-11-08T11:57:16.427573+00:00",
+  "source_version": "0.6.0-kitchen-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
-  "active_task": null,
-  "last_completed": "KETO-ONBOARDING-05",
-  "next_task": {
-    "id": "KETO-SETUP-ACCEPTANCE",
-    "status": "owner_acceptance",
-    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT.",
-    "github_issue": 10
+  "active_task": {
+    "id": "KETO-KITCHEN-06",
+    "github_issue": 11,
+    "stage": "final_release_verification"
   },
+  "last_completed": "KETO-ONBOARDING-05",
+  "next_task": null,
   "staging": {
     "deployed": true,
     "compute_connected": true,

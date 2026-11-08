@@ -1,0 +1,625 @@
+{
+  "version": "kitchen-v1",
+  "region": "Belarus",
+  "limits": {
+    "pantry_items": 30,
+    "drafts": 30,
+    "candidates": 3,
+    "groups": 12,
+    "requests": 100,
+    "food_context": 40,
+    "recall_snippets": 5,
+    "recall_chars": 500,
+    "evidence": 3,
+    "saved_recipes": 30,
+    "max_recipe_grams_per_person": 1000,
+    "designer_timeout_seconds": 40,
+    "combined_timeout_seconds": 50,
+    "request_bytes": 16000,
+    "state_bytes": 1400000
+  },
+  "defaults": {
+    "max_missing_items": 2
+  },
+  "group_max_per_person": {
+    "vegetable": 700,
+    "nuts_seeds": 80,
+    "dairy": 400,
+    "fish": 350,
+    "fruit": 300,
+    "berry": 250,
+    "soy": 350,
+    "spice": 5,
+    "poultry": 350,
+    "egg": 250,
+    "condiment": 20,
+    "seafood": 350,
+    "herb": 40,
+    "legume": 350,
+    "meat": 350,
+    "oil": 35,
+    "coconut": 150,
+    "cocoa": 15,
+    "organ_meat": 200
+  },
+  "repetition_weights": {
+    "accepted_recent": 3,
+    "confirmed_diary": 2,
+    "favorite": -1
+  },
+  "source_allowlist": [
+    "S01",
+    "S11",
+    "S12",
+    "S13",
+    "S17",
+    "S20",
+    "S_NET",
+    "S_USDA"
+  ],
+  "safety_source": {
+    "source_id": "COOK_FSC",
+    "url": "https://www.foodsafety.gov/food-safety-charts/safe-minimum-internal-temperatures",
+    "temperatures_c": {
+      "poultry": 74,
+      "ground_meat": 71,
+      "fish": 63,
+      "egg": 71,
+      "casserole_leftovers": 74
+    }
+  },
+  "aliases": [
+    {
+      "pattern": "яйц|яиц|яичн|яйч",
+      "ids": [
+        "F171287"
+      ]
+    },
+    {
+      "pattern": "кабач|цукини",
+      "ids": [
+        "F169291"
+      ]
+    },
+    {
+      "pattern": "шампиньон",
+      "ids": [
+        "F169251"
+      ]
+    },
+    {
+      "pattern": "куриц|курин",
+      "ids": [
+        "F171077",
+        "F171477"
+      ],
+      "ambiguous_state": true
+    },
+    {
+      "pattern": "индейк|индюш",
+      "ids": [
+        "F174515",
+        "F171496"
+      ],
+      "ambiguous_state": true
+    },
+    {
+      "pattern": "брокколи",
+      "ids": [
+        "F170379"
+      ]
+    },
+    {
+      "pattern": "цветн.*капуст",
+      "ids": [
+        "F169986"
+      ]
+    },
+    {
+      "pattern": "капуст",
+      "ids": [
+        "F169975"
+      ]
+    },
+    {
+      "pattern": "помидор|томат",
+      "ids": [
+        "F170457"
+      ]
+    },
+    {
+      "pattern": "огур",
+      "ids": [
+        "F168409"
+      ]
+    },
+    {
+      "pattern": "шпинат",
+      "ids": [
+        "F168462"
+      ]
+    },
+    {
+      "pattern": "укроп",
+      "ids": [
+        "F172233"
+      ]
+    },
+    {
+      "pattern": "йогурт",
+      "ids": [
+        "F171304"
+      ]
+    },
+    {
+      "pattern": "оливков.*масл",
+      "ids": [
+        "F171413"
+      ]
+    },
+    {
+      "pattern": "сливочн.*масл",
+      "ids": [
+        "F173410"
+      ]
+    },
+    {
+      "pattern": "соль",
+      "ids": [
+        "F173468"
+      ]
+    },
+    {
+      "pattern": "\\bсыр(?:а|у|ом|е|ы|ов)?\\b|моцарелл|фета|чеддер",
+      "ids": [
+        "F173414",
+        "F173420",
+        "F173418",
+        "F170845",
+        "F170855"
+      ],
+      "ambiguous_state": true
+    },
+    {
+      "pattern": "рыб",
+      "ids": [
+        "F175167",
+        "F171955",
+        "F175168",
+        "F175139",
+        "F173706",
+        "F173709"
+      ],
+      "ambiguous_state": true
+    },
+    {
+      "pattern": "лосос",
+      "ids": [
+        "F175167",
+        "F175168"
+      ],
+      "ambiguous_state": true
+    },
+    {
+      "pattern": "творог",
+      "ids": [
+        "L_SAV_SOFT_5",
+        "L_SAV_SOFT_01"
+      ],
+      "ambiguous_state": true
+    },
+    {
+      "pattern": "минтай",
+      "ids": [
+        "F173725"
+      ],
+      "ambiguous_state": true
+    },
+    {
+      "pattern": "скумбри",
+      "ids": [
+        "F175119"
+      ],
+      "ambiguous_state": true
+    },
+    {
+      "pattern": "сметан",
+      "ids": [
+        "F171257"
+      ]
+    },
+    {
+      "pattern": "подсолнечн.*масл",
+      "ids": [
+        "F171025"
+      ]
+    },
+    {
+      "pattern": "рапсов.*масл|канола",
+      "ids": [
+        "F172336"
+      ]
+    }
+  ],
+  "groups": {
+    "egg": [
+      "F171287",
+      "F172183"
+    ],
+    "vegetable": [
+      "F169291",
+      "F169251",
+      "F169975",
+      "F169986",
+      "F170379",
+      "F170457",
+      "F168462",
+      "F168409",
+      "F169247",
+      "F169387",
+      "F170108",
+      "F168389",
+      "F169961"
+    ],
+    "cabbage": [
+      "F169975",
+      "F169986",
+      "F170383"
+    ],
+    "zucchini": [
+      "F169291"
+    ],
+    "cauliflower": [
+      "F169986"
+    ],
+    "mushroom": [
+      "F169251"
+    ],
+    "raw_fish": [
+      "F175167",
+      "F171955",
+      "F173706",
+      "F173725",
+      "F175119"
+    ],
+    "raw_poultry": [
+      "F171077",
+      "F174515"
+    ],
+    "cooked_protein": [
+      "F171477",
+      "F171496",
+      "F175168",
+      "F175180",
+      "F175139",
+      "F173709"
+    ],
+    "dairy": [
+      "F171304",
+      "F170903",
+      "F173414",
+      "F173420",
+      "L_SAV_SOFT_5",
+      "L_SAV_SOFT_01",
+      "F171257"
+    ],
+    "herb": [
+      "F172233",
+      "F170416"
+    ],
+    "salad_veg": [
+      "F168409",
+      "F170457",
+      "F169247",
+      "F169387",
+      "F168462"
+    ],
+    "plant_protein": [
+      "F174272",
+      "F172475"
+    ],
+    "oil": [
+      "F171413",
+      "F171025",
+      "F172336"
+    ],
+    "yogurt": [
+      "F171304"
+    ]
+  },
+  "common_ids": [
+    "F171287",
+    "F169291",
+    "F169251",
+    "F169975",
+    "F169986",
+    "F170379",
+    "F171477",
+    "F171496",
+    "F175167",
+    "F175168",
+    "F171955",
+    "F171304",
+    "F170457",
+    "F168409",
+    "F168462",
+    "F172233",
+    "F173414",
+    "F173420",
+    "F172475",
+    "F174272",
+    "F171413",
+    "F173468",
+    "F170416",
+    "F171077",
+    "F174515",
+    "F173725",
+    "F175119",
+    "F171257",
+    "F171025",
+    "F172336"
+  ],
+  "methods": [
+    {
+      "id": "omelette",
+      "title": "Омлет с овощами",
+      "equipment": [
+        "pan",
+        "stove"
+      ],
+      "minutes": 12,
+      "roles": [
+        "egg",
+        "vegetable"
+      ],
+      "temperature_c": 71,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "frittata",
+      "title": "Запечённая фриттата",
+      "equipment": [
+        "oven"
+      ],
+      "minutes": 25,
+      "roles": [
+        "egg",
+        "vegetable"
+      ],
+      "temperature_c": 71,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "cabbage_pan",
+      "title": "Домашняя капуста на сковороде",
+      "equipment": [
+        "pan",
+        "stove"
+      ],
+      "minutes": 20,
+      "roles": [
+        "cabbage",
+        "vegetable"
+      ],
+      "temperature_c": null,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "fish_bake",
+      "title": "Рыба с овощами в духовке",
+      "equipment": [
+        "oven"
+      ],
+      "minutes": 30,
+      "roles": [
+        "raw_fish",
+        "vegetable"
+      ],
+      "temperature_c": 63,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "poultry_pan",
+      "title": "Птица с овощами",
+      "equipment": [
+        "pan",
+        "stove"
+      ],
+      "minutes": 25,
+      "roles": [
+        "raw_poultry",
+        "vegetable"
+      ],
+      "temperature_c": 74,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "stuffed_zucchini",
+      "title": "Кабачок с начинкой",
+      "equipment": [
+        "oven"
+      ],
+      "minutes": 40,
+      "roles": [
+        "zucchini",
+        "egg"
+      ],
+      "temperature_c": 74,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "cauliflower_bake",
+      "title": "Запеканка с цветной капустой",
+      "equipment": [
+        "oven"
+      ],
+      "minutes": 35,
+      "roles": [
+        "cauliflower",
+        "egg"
+      ],
+      "temperature_c": 74,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "mushroom_pan",
+      "title": "Шампиньоны с овощами",
+      "equipment": [
+        "pan",
+        "stove"
+      ],
+      "minutes": 18,
+      "roles": [
+        "mushroom",
+        "vegetable"
+      ],
+      "temperature_c": null,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "cold_salad",
+      "title": "Салат с готовым белковым продуктом",
+      "equipment": [
+        "no_cook"
+      ],
+      "minutes": 10,
+      "roles": [
+        "cooked_protein",
+        "salad_veg"
+      ],
+      "temperature_c": null,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy"
+      ],
+      "no_cook": true
+    },
+    {
+      "id": "yogurt_herb",
+      "title": "Йогуртовая миска с зеленью",
+      "equipment": [
+        "no_cook"
+      ],
+      "minutes": 5,
+      "roles": [
+        "yogurt",
+        "herb"
+      ],
+      "temperature_c": null,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy"
+      ],
+      "no_cook": true
+    },
+    {
+      "id": "tofu_pan",
+      "title": "Тофу или темпе с овощами",
+      "equipment": [
+        "pan",
+        "stove"
+      ],
+      "minutes": 18,
+      "roles": [
+        "plant_protein",
+        "vegetable"
+      ],
+      "temperature_c": null,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    },
+    {
+      "id": "fish_pan",
+      "title": "Рыба с овощами на сковороде",
+      "equipment": [
+        "pan",
+        "stove"
+      ],
+      "minutes": 20,
+      "roles": [
+        "raw_fish",
+        "vegetable"
+      ],
+      "temperature_c": 63,
+      "optional_groups": [
+        "vegetable",
+        "herb",
+        "dairy",
+        "oil"
+      ],
+      "no_cook": false
+    }
+  ],
+  "substitutions": {
+    "raw_poultry": [
+      "F171077",
+      "F174515"
+    ],
+    "raw_fish": [
+      "F175167",
+      "F171955",
+      "F175119",
+      "F173725"
+    ],
+    "oil": [
+      "F171413",
+      "F171025",
+      "F172336"
+    ]
+  }
+}
