@@ -1,14 +1,12 @@
 {
-  "source_commit": "5304e7fc7db589cda35980bdaee77cf325d22de3",
-  "build_uuid": "9e06359e-31c1-4b22-81c3-75d5c056c4d5",
-  "full_trusted_gate_passed": true,
-  "python_passed": 520,
-  "python_skipped": 0,
+  "status": "passed",
+  "latest_verified_build": "ea73e12b-ba11-440d-84fe-4c7f5db4731f",
+  "source_commit": "726b2cbbbdb9a4598e1c8119631f11c04d70b63d",
+  "python_passed": 522,
   "node_passed": 145,
-  "gate_stages": 16,
-  "gate_seconds": 216.48,
-  "GitHub_Actions_required": false,
-  "current_release_stage": "official_registry_push; container acceptance and app release pending",
-  "new_health_data": false,
-  "evidence_origin": "native Cloudflare Builds logs"
+  "fixed_gate_stages": 16,
+  "seconds": 174.96,
+  "isolated_candidate_runtime": "passed4stages; see CF_DEV_CLOUD_RUNTIME_ACCEPTANCE.json",
+  "publication": "next separate verified promotion",
+  "GitHub_Actions_required": false
 }

@@ -1,0 +1,17 @@
+{
+  "full_gate_build": "cbd0fc2d-5805-4d5f-8072-05032e14487f",
+  "source": "726b2cbbbdb9a4598e1c8119631f11c04d70b63d",
+  "python_passed": 522,
+  "node_passed": 145,
+  "gate_stages": 16,
+  "gate_seconds": 144.17,
+  "container_application_created": true,
+  "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+  "image_digest": "sha256:e8767f24fd63eaa69805742a613368fb714833ed15ad03c47fddc596293b1444",
+  "acceptance": "failed; exact error hidden by parent wrapper, separate native diagnostic active",
+  "main_app_release": "not delivered",
+  "direct_tool_probe": "network policy denied HTTP403; temporary resource deleted, not retried through alternate transport",
+  "diagnostic_build": "ea73e12b-ba11-440d-84fe-4c7f5db4731f",
+  "diagnostic_full_gate_retained": true,
+  "trigger_restore_required": true
+}
