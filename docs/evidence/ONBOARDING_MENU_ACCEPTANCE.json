@@ -1,0 +1,40 @@
+{
+  "synthetic_only": true,
+  "manual_targets_provided": false,
+  "cases": [
+    {
+      "profile": "synthetic-keto",
+      "candidate": {
+        "energy_min_kcal": 1640,
+        "energy_max_kcal": 1810,
+        "protein_min_g": 80,
+        "protein_max_g": 115,
+        "carb_basis": "total",
+        "carb_max_g": 50,
+        "fiber_min_g": 24,
+        "saturated_fat_max_pct": 10
+      },
+      "one_day_menu_found": true,
+      "all_constraints_passed": true,
+      "recipe_count": 3,
+      "model_calls": 0
+    },
+    {
+      "profile": "synthetic-starter",
+      "candidate": {
+        "energy_min_kcal": 2010,
+        "energy_max_kcal": 2220,
+        "protein_min_g": 95,
+        "protein_max_g": 130,
+        "carb_basis": "total",
+        "carb_max_g": 100,
+        "fiber_min_g": 30,
+        "saturated_fat_max_pct": 10
+      },
+      "one_day_menu_found": true,
+      "all_constraints_passed": true,
+      "recipe_count": 4,
+      "model_calls": 0
+    }
+  ]
+}

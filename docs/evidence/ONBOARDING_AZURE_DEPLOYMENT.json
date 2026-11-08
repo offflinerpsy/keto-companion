@@ -1,0 +1,12 @@
+{
+  "task": "KETO-ONBOARDING-05",
+  "source_commit": "c86ed6b59f28b2e8fd95be4b95beee667e753d1a",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "3ed4e6ec4a3c79758a39820e62db517d7b6d3da9bb5f7b52f68cfb52f7ccc2ca",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "status": 4,
+  "complete": true,
+  "deployment_id": "0899036b-01a1-4630-8071-7fdfb9a1a5c4",
+  "checked_at": "2026-11-08T10:11:34.655291+00:00"
+}

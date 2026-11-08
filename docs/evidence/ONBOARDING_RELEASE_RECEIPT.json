@@ -1,0 +1,150 @@
+{
+  "task": "KETO-ONBOARDING-05",
+  "version": "0.5.0-guided-pilot",
+  "status": "implemented_deployed_user_acceptance_pending",
+  "updated_at": "2026-11-08T10:26:42.949401+00:00",
+  "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/",
+  "frontend_commit": "cad763dbafb1b1e38d9b6703e8ce3eef269ea7a8",
+  "azure_commit": "c86ed6b59f28b2e8fd95be4b95beee667e753d1a",
+  "cloudflare_build": "4b5d66f5-b4a0-430a-b38b-bcfa48d05180",
+  "cloudflare_version": "9f814522b3d64decb3d47b3fa9a12d93",
+  "azure_deployment": "0899036b-01a1-4630-8071-7fdfb9a1a5c4",
+  "python_tests": {
+    "passed": 424,
+    "skipped": 1,
+    "skip_reason": "Existing Linux-only mobile audio RAM descriptor test skipped on macOS; no new audio changes"
+  },
+  "node_tests": {
+    "passed": 82,
+    "skipped": 0
+  },
+  "legacy_ui_and_oauth_suites": "passed",
+  "actual_deployed_component_checks": {
+    "source_first": "c86ed6b",
+    "first_pass": 42,
+    "final_source": "cad763dbafb1b1e38d9b6703e8ce3eef269ea7a8",
+    "final_pass": 15,
+    "viewports": [
+      [
+        440,
+        956
+      ],
+      [
+        375,
+        812
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "scope": "Actual compiled setupGuidance, noUiSlider, router, renderView, markup/styles in isolated remote Chromium; synthetic inputs and preview; no real auth, server writes or whole-app authenticated flow",
+    "uncaught_errors": 0,
+    "verified": [
+      "empty patient values remain empty",
+      "decimal comma input real slider sync",
+      "48px steppers",
+      "browser Back and Forward",
+      "visible knowledge",
+      "reviewed target cards",
+      "separated calorie handles",
+      "no horizontal overflow",
+      "final Back text unclipped",
+      "balanced2x2 mobile stages/four desktop stages"
+    ]
+  },
+  "catalogue_menu_acceptance": {
+    "synthetic_only": true,
+    "manual_targets_provided": false,
+    "cases": [
+      {
+        "profile": "synthetic-keto",
+        "candidate": {
+          "energy_min_kcal": 1640,
+          "energy_max_kcal": 1810,
+          "protein_min_g": 80,
+          "protein_max_g": 115,
+          "carb_basis": "total",
+          "carb_max_g": 50,
+          "fiber_min_g": 24,
+          "saturated_fat_max_pct": 10
+        },
+        "one_day_menu_found": true,
+        "all_constraints_passed": true,
+        "recipe_count": 3,
+        "model_calls": 0
+      },
+      {
+        "profile": "synthetic-starter",
+        "candidate": {
+          "energy_min_kcal": 2010,
+          "energy_max_kcal": 2220,
+          "protein_min_g": 95,
+          "protein_max_g": 130,
+          "carb_basis": "total",
+          "carb_max_g": 100,
+          "fiber_min_g": 30,
+          "saturated_fat_max_pct": 10
+        },
+        "one_day_menu_found": true,
+        "all_constraints_passed": true,
+        "recipe_count": 4,
+        "model_calls": 0
+      }
+    ]
+  },
+  "live_asset_hashes": {
+    "index.html": true,
+    "style.css": true,
+    "app.bundle.js": true,
+    "health": {
+      "version": "0.5.0-guided-pilot",
+      "build": "mobile-chat",
+      "capabilities": {
+        "firebase_google": true,
+        "direct_google": false,
+        "storage": true,
+        "compute": true
+      }
+    },
+    "unauthenticated_session_status": 401
+  },
+  "policy": {
+    "version": "starter-v1",
+    "sources_are_not_product_assumptions": true,
+    "approximate_not_prescription": true,
+    "no_llm_arithmetic": true,
+    "unknown_or_medical_flags_block_automatic_targets": true,
+    "explicit_confirmation_required": true,
+    "manual_existing_targets_preserved": true,
+    "computed_targets_stale_after_material_input_change": true,
+    "catalogue_feasibility_bounded_one_day_not_week_guarantee": true,
+    "individual_portions_bounds": [
+      0.65,
+      1.65
+    ],
+    "clinical_validation": false
+  },
+  "library": {
+    "name": "noUiSlider",
+    "version": "15.8.1",
+    "license": "MIT",
+    "queried_through_Context7": true,
+    "vendored_official_integrity_checked": true,
+    "runtime_CDN": false
+  },
+  "known_limits": [
+    "Actual user Google-authenticated new setup flow not exercised by agent",
+    "Physical iPhone/Safari and native Back gesture not verified; Chromium component tests are not device acceptance",
+    "Automatic starter targets have explicit supported-scope limits and are not medical approval",
+    "Only two synthetic profiles have positive end-to-end setup-to-one-day menu acceptance; no guarantee for all profiles/allergies/weeks",
+    "Reference recipes remain available when personalized menu cannot be calculated",
+    "No automatic calorie adjustment or clinical diagnosis",
+    "No new Instagram/Google integrations added in this release"
+  ],
+  "existing_real_user_profile_read": false,
+  "existing_real_user_profile_changed": false,
+  "database_schema_migrations": false,
+  "owner_mac_browser_or_ComputerUse_started": false,
+  "agent_processes_finished": true
+}

@@ -1,15 +1,14 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-07T22:55:06.196899+00:00",
+  "updated_at": "2026-11-08T10:26:42.949401+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
-  "version": "0.4.0-mobile-pilot",
+  "version": "0.5.0-guided-pilot",
   "active_task": null,
-  "last_completed": "KETO-MOBILE-006",
+  "last_completed": "KETO-ONBOARDING-05",
   "next_task": {
-    "id": "KETO-MOBILE-ACCEPTANCE",
-    "status": "requires_owner_device",
-    "action": "Reload the app on iPhone, tap microphone, speak, stop, confirm text appears without sending.",
-    "github_issue": 5
+    "id": "KETO-SETUP-ACCEPTANCE",
+    "status": "owner_acceptance",
+    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT."
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",
@@ -31,11 +30,12 @@
     "recorded_prior_jobs_running": [],
     "mobile_owned_checks_running": [],
     "mobile_browser_started": false,
-    "mobile_runtime_started": false
+    "mobile_runtime_started": false,
+    "onboarding_owned_checks_running": []
   },
   "operating_rules": "AGENTS.md",
   "platform_failure_exact_cause": "not determined; no server-side chat telemetry",
-  "source_version": "0.4.0-mobile-pilot",
+  "source_version": "0.5.0-guided-pilot",
   "history": [
     {
       "previous_last_completed": {
@@ -46,6 +46,13 @@
       },
       "stage": "mobile_source_completed",
       "at": "2026-11-07T22:24:23.859652+00:00"
+    },
+    {
+      "previous_last_completed": "KETO-MOBILE-006",
+      "task": "KETO-ONBOARDING-05",
+      "stage": "completed_source",
+      "at": "2026-11-08T10:01:01.705364+00:00",
+      "evidence": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json"
     }
   ],
   "mobile_checks": [
@@ -89,73 +96,15 @@
     }
   ],
   "source_hashes": {
-    ".gitignore": "31b4890b3c87dee8cf5587e25d4c19495cbe85131dbd4e315032278c1e5d6fc1",
-    "artifacts/files_manifest.json": "8b33e1f83225e5c21a4a75aff1da549c29f4cb3067f5e1b5a26c4442fea4ad5c",
-    "cloudflare-saas/DEPLOYMENT_GUIDE_RU.md": "fff6f7ba75edd6ec598a6c68607abfb39571ac622e39f6d0e572396200896aa0",
-    "cloudflare-saas/README.md": "2693c2a956ed111b33079ad00f22985d8ca38984900536888f0c19c57f42aad6",
-    "cloudflare-saas/build.cjs": "e43cb4ba3b53d1fffbb99017726aa890fdbce4cb9b8371fdbcb19e4f4a6023ff",
-    "cloudflare-saas/config.example.json": "f9451a435ce8111f7ae90ea933eea43f1ef7f82b9e366ec863b7b8ce1bcbc85b",
-    "cloudflare-saas/dist/assets/app.bundle.js": "f43b3fd0ad972f0fb0b57b4656feb14aad0d2fa7b0c62162653049c257b81d83",
-    "cloudflare-saas/dist/assets/help.html": "03b1067b65adc96aa7caf26256e9966844cf19a80af9d6ac3bcf10be4d650f96",
-    "cloudflare-saas/dist/assets/icon-180.png": "96ff87508937b391321d87fc0500fd912b430c4e68e41b6ef6c23190e43101b1",
-    "cloudflare-saas/dist/assets/icon-192.png": "5cea9f5d37df071521cfc4fa1ca7000da0724448743a09d8d9207cf38538cddf",
-    "cloudflare-saas/dist/assets/icon-512.png": "e3c9de7f42935571a0dc5e873b6ade3a3d0c32115c2b8ea1f75a84efae010dcf",
-    "cloudflare-saas/dist/assets/icon.svg": "2d74bec5a1143e91ae0f003c9800f49f847b547d6ddde50d8ec4b1d7e2cd9417",
-    "cloudflare-saas/dist/assets/index.html": "2efa68e23e7a2354f4303afa00ac11104e73f246506cb8f85b098cf3ea1c0dd0",
-    "cloudflare-saas/dist/assets/manifest.webmanifest": "81048072ef146d5f75274b4f7d182c80d655ebd6e6f23165ebe1cebd92258b5f",
-    "cloudflare-saas/dist/assets/style.css": "6e35809f760e244f1faa877434763c07b4fedbd707dae3a2aefd115a88626956",
-    "cloudflare-saas/dist/worker-modules.mjs": "c42720e12879e0be1ec7b46e65c5a2e98ea801aca040c0bf5a452f660519f37f",
-    "cloudflare-saas/dist/worker.mjs": "fad28d25d8d309b76b85883f80bd06aa4bcd549c800469378703f502ac94cc2f",
-    "cloudflare-saas/package-lock.json": "a157752762a1c2525f2e006440dde8dcf9fccb8e77f284aa7ce5fd9c0b2a5a9e",
-    "cloudflare-saas/package.json": "9b66cb5efd1b2da52c18d4958ddccdb327b408f7ce0a8d4fa8a57ff9f2c0a7b4",
-    "cloudflare-saas/public/app.bundle.js": "f43b3fd0ad972f0fb0b57b4656feb14aad0d2fa7b0c62162653049c257b81d83",
-    "cloudflare-saas/public/app.js": "7ea7190cd2f82287cfcedd9cd90e75a74b731430395d321d0d88ac236521ff03",
-    "cloudflare-saas/public/delete.html": "82b6cde59cb0fdf7ed78391ab84e47a010948f520d89966057ed7a9080d07179",
-    "cloudflare-saas/public/firebase-flow.js": "cea550ebe555486872ed0c62ecb9be03b83328c0904bbd96ed6ae2ba34427597",
-    "cloudflare-saas/public/firebase-login.js": "dc02f7d713ce8bf8facaf9ff60b67183ba71a52fa7f95617948ecabb1ecf0a98",
-    "cloudflare-saas/public/help.html": "03b1067b65adc96aa7caf26256e9966844cf19a80af9d6ac3bcf10be4d650f96",
-    "cloudflare-saas/public/icon-180.png": "fceb87b00d86106382396a579f0a77f05e94f7d7f3bd3e7c16ef9122ad592f69",
-    "cloudflare-saas/public/icon-192.png": "f52280b82e24273caa4f12e0253f2060fc434d6f4ccfeef645a8deb89a827cd9",
-    "cloudflare-saas/public/icon-512.png": "84f5e68dfc1e625923ef4d79cc965a23c0233dc19a22d4614934b4388dc8464f",
-    "cloudflare-saas/public/icon.svg": "2d74bec5a1143e91ae0f003c9800f49f847b547d6ddde50d8ec4b1d7e2cd9417",
-    "cloudflare-saas/public/index.html": "2efa68e23e7a2354f4303afa00ac11104e73f246506cb8f85b098cf3ea1c0dd0",
-    "cloudflare-saas/public/manifest.webmanifest": "81048072ef146d5f75274b4f7d182c80d655ebd6e6f23165ebe1cebd92258b5f",
-    "cloudflare-saas/public/media.js": "869f8dcd47dadae33a8f616d378d56850282d6c23d6dd2d463a900f526691cf6",
-    "cloudflare-saas/public/mobile-ui.js": "e0b8358810923bdb5573b0645947ae245acf3faf80c024aa0eec87fa2d121381",
-    "cloudflare-saas/public/privacy.html": "74ca6f6dd2db4bad44495754eead5ae1e92c9553b5104daa904203f8a7b99f96",
-    "cloudflare-saas/public/style.css": "6e35809f760e244f1faa877434763c07b4fedbd707dae3a2aefd115a88626956",
-    "cloudflare-saas/src/compute.mjs": "f5ba03d5ea5a13befded7b914a06023804f0f62662c74bbf94b3af32cbed083a",
-    "cloudflare-saas/src/embedded-assets.mjs": "b752884be25d8021bb2fc4c5fd0bdf9cc535a5409746ac8904001f079f7df781",
-    "cloudflare-saas/src/standalone.mjs": "11395e1eb1cead2649e2af89c370e86478d359bf99e38db215a9950379f1b7b8",
-    "cloudflare-saas/src/worker.mjs": "f232c0cd808e6b1a280e3c2f63db0f8436d5d08505dffc17e00ae483eec9d66c",
-    "cloudflare-saas/tests/media.test.mjs": "4edd76190e53cca60ccf9e5561022e288daac12512cbf7036daddb64ab1629f8",
-    "cloudflare-saas/tests/static.test.mjs": "6a85a5e9651ed3d437d7212fa30e9ef12b21ff43aacc1d719c1e9a6c8b9a97ec",
-    "cloudflare-saas/tests/worker.test.mjs": "005a4e3a880601a504f38a2f828bc4c4aa67f3cd4836a6ffbb010133fe223e52",
-    "docs/CURRENT_STATUS.json": "f1316dba042528a7e5199be6d29e1c445afbb2c87f784867d3d7a0bd2da67b13",
-    "docs/en/MOBILE.md": "fac1c18a5b3d8bc7c72f2dca7f0b676a28824ef227b12f66d8e237c83995d484",
-    "docs/ru/MOBILE.md": "6044b5f8d06c742c291d50ba8909ce59cd3fec45232a44d7e4bac3387647b6c3",
-    "qa/MOBILE_IMPLEMENTATION_REPORT_RU.md": "2fb8768656c367a7543b22dba4dbd1037e0811c18494d5bcc476a05a1282585d",
-    "qa/mobile-fixtures.json": "798d262f6d0bc9fffa85b5c47cc7215b14e703f3c14cc6253b08d1391f69eadf",
-    "requirements.txt": "21215078ed4be98eebb42f9ec98de019cb1d2b57bb639f74eb687132b57aea40",
-    "scripts/deploy_azure_compute.py": "9f82da51567e94f0d915a695a190e9e2026cf05115436f9f8a406fca495ed5a4",
-    "scripts/deploy_cloudflare_staging.mjs": "d4aaf5b6244047fc5464d9574c36a2bbc7c2cc63d2b6d38df8ce55c369e3f7b4",
-    "scripts/prepare_pdf_fonts.py": "6559d8c60cfca75fef934527a795f708d5f11d918f8b92b899761817fdfda283",
-    "service/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "service/app.py": "de680d36f02d9bc908716eb547e2439e0abcb954f5981b57775852a7821e58fb",
-    "service/brain.py": "7b366a5a3cd0681b29603d86024f00826a1868b37c01c35190afac098402d7e1",
-    "service/confirmation.py": "ea6775eee8f28cd28babc741f891db5bd54ac0cc05a6fc9b2cfe06c9e547239d",
-    "service/domain.py": "f2408f991cfedc3c7bfcdf5866b11ea9b0b5ccc9b9efe375813d5e4ea800441f",
-    "service/edge_bridge.py": "2db60034f26482618d6ef8ad15e5802d4d003eb3f996067535e3a16b0f0ececd",
-    "service/entra.py": "25a8992109d0503592da5ea532a3c13454f37d6766bd079a82dc15b21cb816f2",
-    "service/mobile.py": "b367c6cab02e7c0af79503ae9768074606d397b648c482a62b6cc3258f9033f8",
-    "service/mobile_exports.py": "198630a8c84e1e533896c54e0229313f1b6cad656e6fc3cba8bad461300a7b43",
-    "service/oauth_bridge.py": "1809ce1a1a68ffeae4e16e504e20cf06b05fb9fbc0fb2734f5d81e86d9c79f12",
-    "service/speech.py": "338aa7ca4e61a170bc13db141bb733f70985b8ca74d5f66158810f2720da3bab",
-    "service/store.py": "0a236d617f5f417b17a5e3b7616b4972c5e0bc0ae8a07d859467b3f9dec32cf4",
-    "tests/browser/mobile.spec.mjs": "3b687f9dceb06251725afb928572caa76ec02f650a481590945412eb49d53229",
-    "tests/browser/playwright.config.mjs": "5ee63e9e21f68f39efde66aeb9982c16eb9ab9060dc010dd7ac35847587263ab",
-    "tests/browser/serve.mjs": "4573f3eb004429b0f574fd2158fa46d6147a5af891b2a31bb2bfed594c7bdf1a",
-    "tests/test_mobile.py": "b858d20adb9524275da890917ad6f9235454cbb1abfdb59ef1f44c423a691890"
+    "service/planning.py": "a6a88428abdfc17c35571f0aa3eaccd9e6fb3ab8018406a48238a0ff8d3ab426",
+    "service/domain.py": "299ee74bf93a2165f51b40ff36d0ffa28b7486ef5296aec5e6b5aa7ab2c7fbd1",
+    "service/data/starter_policy_sources.json": "8672cbfcde6048c52a7d9126c8a2c1f753635e5b075739f4256c0d9e287d6fb7",
+    "cloudflare-saas/public/setup-ui.js": "14099d60e836e76d35c57b50602395196df47e33a9d018e21f514e7d3ed79beb",
+    "cloudflare-saas/public/setup-controls.js": "cefa15d87cccb0c8ff22282eca754d9a519b77a41ec1998f28967390aeadd724",
+    "cloudflare-saas/public/routes.js": "e26a5a2519970e6cbe00d140031669937c68b91bbf1d1e08c99f0364dfe61dc2",
+    "cloudflare-saas/public/knowledge-data.js": "35133aa8f7a20ff9da4e2a64f78d7cf85b0537be7489ee0602d820388764fd0f",
+    "cloudflare-saas/public/app.js": "e1074e235c0126ddd551ce62e357b397cfcf7583c2c56152acdf7df527b31dac",
+    "artifacts/files_manifest.json": "fe4b022170f0e21d01393900b07a864be2b78631cac9915bc497e811f1aebee3"
   },
   "blockers": [
     "HEIC requires browser decoding or JPEG/PNG export; low signal recordings may be rejected",
@@ -165,5 +114,51 @@
     "Exact recipe combinations may not exist; partial results disclose differences and never relax hard exclusions",
     "New runtime/device/visual/model/clinical acceptance remains with parent; earlier 0.3.0 cloud/runtime receipts are not this build"
   ],
-  "mobile_cloud_effects": "not_delivered; no cloud writes attempted"
+  "mobile_cloud_effects": "not_delivered; no cloud writes attempted",
+  "owner_feedback": {
+    "dictation": "user confirms works",
+    "environment": "desktop Chrome in current feedback; not physical iPhone acceptance"
+  },
+  "onboarding_checks": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests library/skills/keto-companion/tests --junitxml=qa/onboarding-final-python.xml",
+      "result": "420 passed, 1 skipped, 1 warning",
+      "evidence": "qa/onboarding-final-python.log"
+    },
+    {
+      "command": "node --test cloudflare-saas/tests/*.test.mjs",
+      "result": "81 passed",
+      "evidence": "qa/onboarding-final-node.log"
+    },
+    {
+      "command": "node tests/test_ui_no_browser.cjs && node tests/test_oauth_ui.cjs",
+      "result": "passed",
+      "evidence": "qa/onboarding-final-legacy-ui.log"
+    },
+    {
+      "command": "node cloudflare-saas/build.cjs",
+      "result": "passed; 13 modules",
+      "evidence": "qa/onboarding-final-build.log"
+    },
+    {
+      "command": "Repository artifact/content check; git diff --check; container script syntax",
+      "result": "passed; static scope only",
+      "evidence": "qa/onboarding-final-repository.json"
+    }
+  ],
+  "onboarding_limits": [
+    "Both synthetic healthy automatically targeted profiles returned catalog_infeasible; constraints were retained and the UI provides explicit reference/support paths",
+    "Container DOM/visual tests prepared and syntax-checked only; parent must run them",
+    "Current 0.5 build not run in workerd/cloud or on a physical device; prior runtime/release receipts apply to older builds",
+    "Starter-v1 is a bounded product policy, not individualized medical approval; manual targets are preserved until explicit replacement",
+    "One Linux-only MP4 RAM descriptor test skipped on Mac; parent Linux/runtime check remains",
+    "One non-failing JUnit record_property/xunit2 warning; recorded menu outcomes remain available"
+  ],
+  "current_source_delivery": {
+    "kind": "existing_worktree",
+    "manifest": "artifacts/files_manifest.json",
+    "report": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json",
+    "source_archive_current": false
+  },
+  "onboarding_cloud_effects": "not_delivered; no cloud operations attempted"
 }

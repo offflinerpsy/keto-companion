@@ -1,43 +1,43 @@
 {
-  "status": "0.4.0-mobile-pilot candidate; parent runtime and device acceptance pending",
+  "status": "0.5.0-guided-pilot candidate; parent runtime and device acceptance pending",
   "main_module": "worker-modules.mjs",
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "25663c8704f17c942e37e0a264964251d3abb25509268eab3568d909e01ccb28",
-      "bytes": 504335,
+      "sha256": "5595240fa8404ddfb28b1af4c97867a626914f1afd385d7ae90a08b23c82d8f9",
+      "bytes": 702487,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "c42720e12879e0be1ec7b46e65c5a2e98ea801aca040c0bf5a452f660519f37f",
-      "bytes": 64576,
+      "sha256": "ace4c827e6c80ca7c1a96604c71be5e7a26d5ce7ff624ab04cf1294f3948aeb4",
+      "bytes": 64726,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/assets/index.html",
-      "sha256": "3c30539c2bf1500b15d8e3681633e373c17dca9ae72787704b1e58284c750ff6",
-      "bytes": 26901,
+      "sha256": "13671ef2c3572b46c8168970f0f5e88dffd0c5abd97c350bcb7e9a7feb98c565",
+      "bytes": 34084,
       "mime": "text/plain",
       "module_name": "assets/index.html",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "25506479241d8a71f6f66c7bb84c5219add359b4dd40b4f859f7860fb91dad97",
-      "bytes": 311980,
+      "sha256": "8f7ee63cb9904a55edb19781df0a9f4a2d4555ec34bd3078c8527c9952931f71",
+      "bytes": 476878,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/style.css",
-      "sha256": "e400e1cd499192c117f222e68629038211b6599ceb0c3cdb62d7ac3f95c759bf",
-      "bytes": 12324,
+      "sha256": "cb8a37ab9bc4fcfcbdf9dca85ec230f1ec35f8180644a460acf90f6c840367cf",
+      "bytes": 19089,
       "mime": "text/plain",
       "module_name": "assets/style.css",
       "module_type": "text"

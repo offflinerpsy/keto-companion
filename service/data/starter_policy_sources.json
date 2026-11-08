@@ -1,0 +1,43 @@
+{
+  "version": "starter-v1",
+  "checked_by_parent": "2026-11-08",
+  "sources": [
+    {
+      "source_id": "S_ENERGY",
+      "title": "NIDDK Body Weight Planner — activity context, not this algorithm",
+      "year": null,
+      "url": "https://www.niddk.nih.gov/health-information/weight-management/body-weight-planner",
+      "scope": "PAL context only; this product does not implement Hall's dynamic model."
+    },
+    {
+      "source_id": "START_PROTEIN",
+      "title": "Leidy et al. The role of protein in weight loss and maintenance",
+      "year": 2015,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25926512/",
+      "doi": "10.3945/ajcn.114.084038",
+      "scope": "Review of 1.2–1.6 g/kg in weight management; adherence and heterogeneous populations limit generalization. Maintenance carryover is product policy."
+    },
+    {
+      "source_id": "START_ENERGY_2013",
+      "title": "2013 AHA/ACC/TOS Guideline for the Management of Overweight and Obesity in Adults",
+      "year": 2013,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5819889/",
+      "scope": "Historical energy ranges, not a current 2026 guideline or our 10%/300 rule."
+    },
+    {
+      "source_id": "START_USDA_DRI",
+      "title": "USDA DRI Calculator for Healthcare Professionals",
+      "year": null,
+      "url": "https://www.nal.usda.gov/human-nutrition-and-food-safety/dri-calculator",
+      "scope": "Individual requirements vary; this product does not implement the DRI calculator."
+    }
+  ],
+  "product_assumptions": [
+    "Activity choices 1.4/1.6/1.8 are approximate product mappings, separate from Mifflin RMR.",
+    "Maintenance ±10% is an interface uncertainty illustration, not a confidence interval.",
+    "Gentle loss min(300 kcal,10% maintenance), ±5% target band, rounding to 10 kcal: product policy.",
+    "Female 1200/male 1500 lower-intake safeguard and BMI/age eligibility are product scope, not universal safe thresholds.",
+    "100/50 g TOTAL carbohydrate modes do not guarantee ketosis; no automatic polyol subtraction.",
+    "30 days/5% weight change prompts review only; no automatic calorie adaptation."
+  ]
+}

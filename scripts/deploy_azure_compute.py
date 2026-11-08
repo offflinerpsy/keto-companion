@@ -27,8 +27,8 @@ with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,strict_timestamps=False) a
   for path in (ROOT/folder).rglob('*'):
    if path.is_file() and not any(x in path.parts for x in ['__pycache__','.pytest_cache','server']) and path.suffix not in ['.pyc','.sqlite','.db']:z.write(path,path.relative_to(ROOT))
  for path in ['function_app.py','host.json','requirements.txt']:z.write(ROOT/path,path)
-receipt={'task':'KETO-MOBILE-006','source_commit':commit,'azure_app':APP,'archive_sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'public_key_only_transferred':True,'personal_state_migration':False}
+receipt={'task':'KETO-ONBOARDING-05','source_commit':commit,'azure_app':APP,'archive_sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'public_key_only_transferred':True,'personal_state_migration':False}
 (ROOT/'qa/azure-compute-release-pending.json').write_text(json.dumps(receipt,indent=2))
 raw=run([AZ,'functionapp','deployment','source','config-zip','-g',GROUP,'-n',APP,'--src',str(archive),'--build-remote','true','--timeout','600','--only-show-errors','-o','json'],timeout=660)
 d=json.loads(raw);receipt.update({'status':d.get('status'),'complete':d.get('complete'),'deployment_id':d.get('id'),'checked_at':datetime.datetime.now(datetime.timezone.utc).isoformat()})
-(ROOT/'docs/evidence/MOBILE_AZURE_DEPLOYMENT.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt))
+(ROOT/'docs/evidence/ONBOARDING_AZURE_DEPLOYMENT.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt))

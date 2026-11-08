@@ -29,3 +29,9 @@ The deployed Cloudflare → Azure Terra path passed 20 end-to-end checks using t
 Chat-first layout with four bottom tabs, dictation into an editable draft, images, and separate conversation topics. Accepted menus export as PDF for the system share sheet. Reminders persist in the app; closed-page notifications require manually importing the ICS into Calendar. Contextual hints explain settings and personal fields. Technical JSON/CSV actions remain under Advanced.
 
 Source checks, deployed asset hashes and mobile-component rendering are verified. Physical iPhone Safari microphone, native sharing and Calendar import remain acceptance gates. Exact scope and limitations: `docs/evidence/MOBILE_RELEASE_RECEIPT.json`.
+
+## Guided introduction and explained targets 0.5
+
+New or incomplete profiles resume a four-stage introduction: consent → baseline → restrictions → preliminary targets. Admin accounts follow the same rules. Targets are calculated from saved answers with visible formulas, sources and separately labelled product assumptions; explicit confirmation is required. Recipes are directly reachable from Chat and Menu, and secondary pages support Back and browser history. Large step buttons, decimal-comma input and locally vendored noUiSlider replace tiny number spinners.
+
+Material baseline changes mark calculated targets stale; existing manual targets are never automatically replaced. Preview checks one-day feasibility in the bounded catalogue, not a guarantee of weekly variety or a medical prescription. Details: `docs/en/ONBOARDING.md`; exact release boundaries: `docs/evidence/ONBOARDING_RELEASE_RECEIPT.json`.

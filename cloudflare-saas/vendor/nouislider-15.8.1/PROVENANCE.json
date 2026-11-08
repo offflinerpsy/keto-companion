@@ -1,0 +1,15 @@
+{
+  "library": "noUiSlider",
+  "version": "15.8.1",
+  "source": "https://registry.npmjs.org/nouislider/-/nouislider-15.8.1.tgz",
+  "npm_sha512": "93TweAi8kqntHJSPiSWQ1o/uZ29VWOmal9YKb6KKGGlCkugaNfAupT7o1qTHqdJvNQ7S0su5rO6qRFCjP8fxtw==",
+  "documentation": "https://refreshless.com/nouislider/",
+  "context7_id": "/leongersen/nouislider",
+  "license": "MIT",
+  "files": {
+    "LICENSE.md": "0d1fc6e9892bfb1946c780f040578a4d17060182f7721df77b8e068ac19d1ce4",
+    "nouislider.mjs": "79959c4431263f81776bd2bdf7b591fc1e00c1b1d523897f42451afe4c690740",
+    "package.json": "d523cd5d2973c6bfd7104f2565997af955e2fa95a5ccd7a30fa54c0a17d069bb",
+    "nouislider.min.css": "9dc9155cfd6331d1f5629881ac0bc63928243fa4c1d83b17ce4921b5200be0ae"
+  }
+}

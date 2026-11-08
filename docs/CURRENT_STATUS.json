@@ -1,47 +1,47 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-07T22:55:06.195179+00:00",
-  "source_version": "0.4.0-mobile-pilot",
+  "updated_at": "2026-11-08T10:26:42.949401+00:00",
+  "source_version": "0.5.0-guided-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
   "active_task": null,
-  "last_completed": "KETO-MOBILE-006",
+  "last_completed": "KETO-ONBOARDING-05",
   "next_task": {
-    "id": "KETO-MOBILE-ACCEPTANCE",
-    "status": "requires_owner_device",
-    "action": "Reload the app on iPhone, tap microphone, speak, stop, confirm text appears without sending.",
-    "github_issue": 5
+    "id": "KETO-SETUP-ACCEPTANCE",
+    "status": "owner_acceptance",
+    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT."
   },
   "staging": {
     "deployed": true,
     "compute_connected": true,
     "google_real_user_login_verified": false,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "7c0c2390c47d211e35cb4ed1a3c9066b5db99f94",
+    "source_commit": "cad763dbafb1b1e38d9b6703e8ce3eef269ea7a8",
     "http_checks_passed": 24,
     "synthetic_e2e_checks": 20,
     "synthetic_cleanup_verified": true,
     "mobile_deployed": true,
-    "mobile_backend_source_commit": "74e5e0fc0410b3d4fec54c144348e2300f420783"
+    "mobile_backend_source_commit": "74e5e0fc0410b3d4fec54c144348e2300f420783",
+    "backend_source_commit": "c86ed6b59f28b2e8fd95be4b95beee667e753d1a"
   },
   "production": {
     "saas_deployed": false,
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 383,
-    "node_synthetic_tests": 75,
+    "python_tests": 424,
+    "node_synthetic_tests": 82,
     "local_workerd_checks": 30,
     "workerd_compatibility_date": "2026-10-03",
     "target_cloud_compatibility_date": "2026-11-07",
     "cloud_synthetic_e2e_checks": 20,
     "actual_cloud_compatibility_date": "2026-11-07",
-    "python_skipped": 1
+    "python_skipped": 1,
+    "onboarding_component_checks": 57
   },
   "not_verified": [
-    "Physical iPhone Safari microphone/keyboard/share sheet",
-    "Actual Calendar import and notifications",
-    "New full authenticated Cloudflare mobile roundtrip",
+    "Actual new setup flow in owner Google session",
+    "Physical iPhone/Safari acceptance",
     "Clinical suitability"
   ],
   "repository": "https://github.com/offflinerpsy/keto-companion",
@@ -75,5 +75,21 @@
     "cloud_changes": false
   },
   "mobile_stage": "deployed_physical_iPhone_acceptance_pending",
-  "mobile_receipt": "docs/evidence/MOBILE_RELEASE_RECEIPT.json"
+  "mobile_receipt": "docs/evidence/MOBILE_RELEASE_RECEIPT.json",
+  "owner_feedback": {
+    "dictation": "user confirms works",
+    "environment": "desktop Chrome in current feedback; not physical iPhone acceptance"
+  },
+  "onboarding_source": {
+    "status": "completed_locally",
+    "independent_acceptance": "pending",
+    "python_passed": 420,
+    "python_skipped": 1,
+    "node_passed": 81,
+    "automatic_menu_outcomes": "['catalog_infeasible', 'catalog_infeasible']",
+    "release_performed": false,
+    "evidence": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json"
+  },
+  "onboarding_stage": "deployed_user_acceptance_pending",
+  "onboarding_receipt": "docs/evidence/ONBOARDING_RELEASE_RECEIPT.json"
 }

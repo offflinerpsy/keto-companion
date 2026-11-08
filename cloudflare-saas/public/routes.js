@@ -1,0 +1,12 @@
+export const ROUTES=['chat','today','diary','more','recipes','settings','sources','reminders','admin','targets','knowledge','setup-consent','setup-about','setup-restrictions','setup-targets'];
+const MAIN=['chat','today','diary','more'];
+export function routeValue(hash,fallback='chat'){const value=String(hash||'').replace(/^#/,'');return ROUTES.includes(value)?value:fallback}
+export function initialRoute(state,hash){const g=state.guidance;if(g&&!g.ready){if(routeValue(hash,'')==='recipes')return 'recipes';return 'setup-'+g.stage}return routeValue(hash,state.ui?.home||'chat')}
+export function createRouter({location,history,listen,render,closeDialog=()=>{},fallback=()=> 'chat'}){
+ let current='',depth=0,origin='more';
+ function display(route,reason){depth=history.state?.ketoDepth||0;origin=history.state?.ketoOrigin||origin;if(!history.state?.ketoDialog)closeDialog();if(route===current&&reason==='history')return;current=route;depth=history.state?.ketoDepth||0;render(route,{reason,origin,depth})}
+ function go(value,{replace=false,reason='user'}={}){const route=routeValue('#'+value,fallback());if(route!==current&&!MAIN.includes(route))origin=current||'more';if(route===current)return;const swap=replace||(MAIN.includes(current)&&MAIN.includes(route));const nextDepth=swap?depth:depth+1;history[swap?'replaceState':'pushState']({ketoRoute:route,ketoDepth:nextDepth,ketoOrigin:origin},'','#'+route);display(route,reason)}
+ function back(){if(depth>0){history.back();return}go(current==='recipes'?origin:current==='setup-consent'?'recipes':current.startsWith('setup-')?['setup-consent','setup-about','setup-restrictions','setup-targets'][Math.max(0,['setup-consent','setup-about','setup-restrictions','setup-targets'].indexOf(current)-1)]:'more',{replace:true})}
+ listen('popstate',()=>display(routeValue(location.hash,fallback()),'history'));listen('hashchange',()=>{const valid=routeValue(location.hash,fallback());if(location.hash!=='#'+valid)history.replaceState({ketoRoute:valid,ketoDepth:depth},'','#'+valid);display(valid,'history')});
+ return {go,back,openDialog(){history.pushState({ketoRoute:current,ketoDepth:depth+1,ketoOrigin:origin,ketoDialog:'recipe'},'','#'+current);depth++},closeDialog(){if(history.state?.ketoDialog)history.back();else closeDialog()},get current(){return current},reset(){current='';depth=0;origin='more';history.replaceState(null,'',location.pathname+location.search)},parent(){return current==='recipes'?origin:current.startsWith('setup-')?'setup':'more'}};
+}

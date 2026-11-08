@@ -1,0 +1,1296 @@
+{
+  "synthetic_only": true,
+  "not_deployed": true,
+  "consent": {
+    "version": "0.2.1",
+    "revision": 0,
+    "subject_kind": "personal",
+    "profile": {
+      "schema_version": 1,
+      "subject_id": "synthetic-one",
+      "owner_account_id": "synthetic-one",
+      "subject_kind": "personal",
+      "profile_revision": 0,
+      "display_name": null,
+      "timezone": null,
+      "goal": null,
+      "consent": {
+        "storage": false,
+        "health_data": false,
+        "media_storage": false,
+        "recorded_at": null
+      },
+      "screening": {
+        "adult": null,
+        "pregnant": null,
+        "breastfeeding": null,
+        "type1_diabetes": null,
+        "sglt2": null,
+        "hypoglycemia_medication": null,
+        "kidney_disease": null,
+        "liver_pancreas_gallbladder_disease": null,
+        "metabolic_contraindication": null,
+        "eating_disorder_risk": null,
+        "other_clinical_restrictions": null,
+        "medications_reviewed": null,
+        "allergies_reviewed": null
+      },
+      "medications": [],
+      "allergies": [],
+      "settings": {
+        "language": "ru",
+        "theme": "ivory-plum",
+        "meals_per_day": 3,
+        "max_active_minutes": 30,
+        "budget_level": "balanced",
+        "max_recipe_repeats_per_week": 2,
+        "favorites": [],
+        "disliked_food_ids": [],
+        "excluded_food_ids": [],
+        "favorite_cuisines": [],
+        "weight_tracking": "off",
+        "show_calories": true,
+        "display_units": "metric",
+        "photo_storage": false,
+        "email_enabled": false,
+        "reminders_enabled": false,
+        "preferred_checkin": "weekly",
+        "remote_images": false,
+        "adaptive_preferences": true
+      },
+      "targets": null,
+      "last_screened_at": null,
+      "baseline": {}
+    },
+    "ui": {
+      "theme": "ivory-plum",
+      "text_size": "normal",
+      "density": "comfortable",
+      "simple_mode": false,
+      "home": "chat",
+      "show_nutrition": true
+    },
+    "processing_consent": false,
+    "screening": {
+      "status": "onboarding_required",
+      "can_plan": false,
+      "reasons": [
+        "adult",
+        "allergies_reviewed",
+        "breastfeeding",
+        "eating_disorder_risk",
+        "hypoglycemia_medication",
+        "kidney_disease",
+        "liver_pancreas_gallbladder_disease",
+        "medications_reviewed",
+        "metabolic_contraindication",
+        "other_clinical_restrictions",
+        "pregnant",
+        "sglt2",
+        "type1_diabetes"
+      ],
+      "message_ru": "Это проверка сообщённых данных, не медицинское разрешение и не диагноз."
+    },
+    "holds": [],
+    "diary": [],
+    "plans": [],
+    "checklists": {},
+    "pending": [],
+    "chat": [],
+    "active_thread": "main",
+    "topics": [
+      {
+        "id": "main",
+        "title": "Основной разговор",
+        "messages": 0
+      }
+    ],
+    "reminders": [],
+    "guidance": {
+      "stage": "consent",
+      "stages": [
+        "consent",
+        "about",
+        "restrictions",
+        "targets"
+      ],
+      "ready": false,
+      "missing": [
+        "age_years",
+        "height_cm",
+        "weight_kg",
+        "equation_category",
+        "activity_factor",
+        "activity_note",
+        "measured_at",
+        "timezone",
+        "goal",
+        "mode"
+      ],
+      "reasons": [
+        "adult",
+        "allergies_reviewed",
+        "breastfeeding",
+        "consent_required",
+        "eating_disorder_risk",
+        "hypoglycemia_medication",
+        "kidney_disease",
+        "liver_pancreas_gallbladder_disease",
+        "medications_reviewed",
+        "metabolic_contraindication",
+        "other_clinical_restrictions",
+        "pregnant",
+        "sglt2",
+        "type1_diabetes"
+      ],
+      "review": [],
+      "choices": {},
+      "targets_stale": false,
+      "provenance": null
+    },
+    "mobile_version": "0.5.0-guided-pilot",
+    "ui_history": [],
+    "catalog": {
+      "foods": 78,
+      "recipes": 72
+    },
+    "capabilities": {
+      "model": "Azure GPT-6.1 Terra",
+      "native_voice": "ChatGPT host only; not Terra audio",
+      "storage": "local SQLite",
+      "google_sync": "explicit exports through connected Google tools; no automatic two-way sync",
+      "background_monitoring": false,
+      "self_modification": "validated preferences only, never arbitrary code"
+    },
+    "usage": {}
+  },
+  "about": {
+    "version": "0.2.1",
+    "revision": 1,
+    "subject_kind": "personal",
+    "profile": {
+      "schema_version": 1,
+      "subject_id": "synthetic-one",
+      "owner_account_id": "synthetic-one",
+      "subject_kind": "personal",
+      "profile_revision": 1,
+      "display_name": null,
+      "timezone": null,
+      "goal": null,
+      "consent": {
+        "storage": true,
+        "health_data": true,
+        "media_storage": false,
+        "recorded_at": "2026-11-08T09:51:30+00:00"
+      },
+      "screening": {
+        "adult": null,
+        "pregnant": null,
+        "breastfeeding": null,
+        "type1_diabetes": null,
+        "sglt2": null,
+        "hypoglycemia_medication": null,
+        "kidney_disease": null,
+        "liver_pancreas_gallbladder_disease": null,
+        "metabolic_contraindication": null,
+        "eating_disorder_risk": null,
+        "other_clinical_restrictions": null,
+        "medications_reviewed": null,
+        "allergies_reviewed": null
+      },
+      "medications": [],
+      "allergies": [],
+      "settings": {
+        "language": "ru",
+        "theme": "ivory-plum",
+        "meals_per_day": 3,
+        "max_active_minutes": 30,
+        "budget_level": "balanced",
+        "max_recipe_repeats_per_week": 2,
+        "favorites": [],
+        "disliked_food_ids": [],
+        "excluded_food_ids": [],
+        "favorite_cuisines": [],
+        "weight_tracking": "off",
+        "show_calories": true,
+        "display_units": "metric",
+        "photo_storage": false,
+        "email_enabled": false,
+        "reminders_enabled": false,
+        "preferred_checkin": "weekly",
+        "remote_images": false,
+        "adaptive_preferences": true
+      },
+      "targets": null,
+      "last_screened_at": null,
+      "baseline": {}
+    },
+    "ui": {
+      "theme": "ivory-plum",
+      "text_size": "normal",
+      "density": "comfortable",
+      "simple_mode": false,
+      "home": "chat",
+      "show_nutrition": true
+    },
+    "processing_consent": true,
+    "screening": {
+      "status": "onboarding_required",
+      "can_plan": false,
+      "reasons": [
+        "adult",
+        "allergies_reviewed",
+        "breastfeeding",
+        "eating_disorder_risk",
+        "hypoglycemia_medication",
+        "kidney_disease",
+        "liver_pancreas_gallbladder_disease",
+        "medications_reviewed",
+        "metabolic_contraindication",
+        "other_clinical_restrictions",
+        "pregnant",
+        "sglt2",
+        "type1_diabetes"
+      ],
+      "message_ru": "Это проверка сообщённых данных, не медицинское разрешение и не диагноз."
+    },
+    "holds": [],
+    "diary": [],
+    "plans": [],
+    "checklists": {},
+    "pending": [],
+    "chat": [],
+    "active_thread": "main",
+    "topics": [
+      {
+        "id": "main",
+        "title": "Основной разговор",
+        "messages": 0
+      }
+    ],
+    "reminders": [],
+    "guidance": {
+      "stage": "about",
+      "stages": [
+        "consent",
+        "about",
+        "restrictions",
+        "targets"
+      ],
+      "ready": false,
+      "missing": [
+        "age_years",
+        "height_cm",
+        "weight_kg",
+        "equation_category",
+        "activity_factor",
+        "activity_note",
+        "measured_at",
+        "timezone",
+        "goal",
+        "mode"
+      ],
+      "reasons": [
+        "adult",
+        "allergies_reviewed",
+        "breastfeeding",
+        "eating_disorder_risk",
+        "hypoglycemia_medication",
+        "kidney_disease",
+        "liver_pancreas_gallbladder_disease",
+        "medications_reviewed",
+        "metabolic_contraindication",
+        "other_clinical_restrictions",
+        "pregnant",
+        "sglt2",
+        "type1_diabetes"
+      ],
+      "review": [],
+      "choices": {},
+      "targets_stale": false,
+      "provenance": null
+    },
+    "mobile_version": "0.5.0-guided-pilot",
+    "ui_history": [],
+    "catalog": {
+      "foods": 78,
+      "recipes": 72
+    },
+    "capabilities": {
+      "model": "Azure GPT-6.1 Terra",
+      "native_voice": "ChatGPT host only; not Terra audio",
+      "storage": "local SQLite",
+      "google_sync": "explicit exports through connected Google tools; no automatic two-way sync",
+      "background_monitoring": false,
+      "self_modification": "validated preferences only, never arbitrary code"
+    },
+    "usage": {}
+  },
+  "restrictions": {
+    "version": "0.2.1",
+    "revision": 2,
+    "subject_kind": "personal",
+    "profile": {
+      "schema_version": 1,
+      "subject_id": "synthetic-one",
+      "owner_account_id": "synthetic-one",
+      "subject_kind": "personal",
+      "profile_revision": 2,
+      "display_name": null,
+      "timezone": "Europe/Minsk",
+      "goal": null,
+      "consent": {
+        "storage": true,
+        "health_data": true,
+        "media_storage": false,
+        "recorded_at": "2026-11-08T09:51:30+00:00"
+      },
+      "screening": {
+        "adult": true,
+        "pregnant": null,
+        "breastfeeding": false,
+        "type1_diabetes": false,
+        "sglt2": false,
+        "hypoglycemia_medication": false,
+        "kidney_disease": false,
+        "liver_pancreas_gallbladder_disease": false,
+        "metabolic_contraindication": false,
+        "eating_disorder_risk": false,
+        "other_clinical_restrictions": false,
+        "medications_reviewed": true,
+        "allergies_reviewed": true
+      },
+      "medications": [],
+      "allergies": [],
+      "settings": {
+        "language": "ru",
+        "theme": "ivory-plum",
+        "meals_per_day": 3,
+        "max_active_minutes": 30,
+        "budget_level": "balanced",
+        "max_recipe_repeats_per_week": 2,
+        "favorites": [],
+        "disliked_food_ids": [],
+        "excluded_food_ids": [],
+        "favorite_cuisines": [],
+        "weight_tracking": "off",
+        "show_calories": true,
+        "display_units": "metric",
+        "photo_storage": false,
+        "email_enabled": false,
+        "reminders_enabled": false,
+        "preferred_checkin": "weekly",
+        "remote_images": false,
+        "adaptive_preferences": true
+      },
+      "targets": null,
+      "last_screened_at": null,
+      "baseline": {
+        "age_years": 40.0,
+        "height_cm": 170.0,
+        "weight_kg": 70.0,
+        "equation_category": "female",
+        "activity_factor": 1.6,
+        "activity_note": "Есть ходьба/лёгкая активность: ориентировочно 1,6",
+        "measured_at": "2026-11-08"
+      }
+    },
+    "ui": {
+      "theme": "ivory-plum",
+      "text_size": "normal",
+      "density": "comfortable",
+      "simple_mode": false,
+      "home": "chat",
+      "show_nutrition": true
+    },
+    "processing_consent": true,
+    "screening": {
+      "status": "onboarding_required",
+      "can_plan": false,
+      "reasons": [
+        "pregnant"
+      ],
+      "message_ru": "Это проверка сообщённых данных, не медицинское разрешение и не диагноз."
+    },
+    "holds": [],
+    "diary": [],
+    "plans": [],
+    "checklists": {},
+    "pending": [],
+    "chat": [],
+    "active_thread": "main",
+    "topics": [
+      {
+        "id": "main",
+        "title": "Основной разговор",
+        "messages": 0
+      }
+    ],
+    "reminders": [],
+    "guidance": {
+      "stage": "restrictions",
+      "stages": [
+        "consent",
+        "about",
+        "restrictions",
+        "targets"
+      ],
+      "ready": false,
+      "missing": [],
+      "reasons": [
+        "pregnant"
+      ],
+      "review": [],
+      "choices": {
+        "goal": "maintain",
+        "mode": "starter"
+      },
+      "targets_stale": false,
+      "provenance": null
+    },
+    "mobile_version": "0.5.0-guided-pilot",
+    "ui_history": [],
+    "catalog": {
+      "foods": 78,
+      "recipes": 72
+    },
+    "capabilities": {
+      "model": "Azure GPT-6.1 Terra",
+      "native_voice": "ChatGPT host only; not Terra audio",
+      "storage": "local SQLite",
+      "google_sync": "explicit exports through connected Google tools; no automatic two-way sync",
+      "background_monitoring": false,
+      "self_modification": "validated preferences only, never arbitrary code"
+    },
+    "usage": {}
+  },
+  "preview": {
+    "policy_version": "starter-v1",
+    "timestamp": "2026-11-08T09:51:30.753246+00:00",
+    "fingerprint": "5f43aba2bc290b58b9d23b37abc23fd5f723612988b4b05fc85171770f759d1e",
+    "source_ids": [
+      "ENGINE01",
+      "S_ENERGY",
+      "START_PROTEIN",
+      "S11",
+      "START_ENERGY_2013",
+      "START_USDA_DRI"
+    ],
+    "missing": [],
+    "reasons": [],
+    "bmi": 24.221,
+    "candidate": {
+      "energy_min_kcal": 2130,
+      "energy_max_kcal": 2350,
+      "protein_min_g": 80,
+      "protein_max_g": 115,
+      "carb_basis": "total",
+      "carb_max_g": 100,
+      "fiber_min_g": 31,
+      "saturated_fat_max_pct": 10
+    },
+    "warnings": [
+      "Предварительные ориентиры, не назначение и не одобрение специалиста.",
+      "Область пилота — продуктовая граница, не диагноз и не доказательство опасности за её пределами.",
+      "Жиры поступают из продуктов; не нужно отдельно есть масло или назначать себе электролиты/добавки."
+    ],
+    "review": [],
+    "calculation": {
+      "resting_energy_estimate_kcal": 1402,
+      "activity_factor_assumed": 1.6,
+      "maintenance_estimate_kcal": 2242,
+      "target_prescription": null,
+      "method": "Mifflin–St Jeor simplified; activity multiplier is an explicit assumption, not part of the original equation",
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/2305711/",
+      "doi": "10.1093/ajcn/51.2.241",
+      "caveat": "Расчётная оценка, не измеренный расход и не рекомендация дефицита. Точность индивидуально ограничена; цели обсуждаются отдельно.",
+      "bmi": 24.22145328719723,
+      "loss_product_deduction_kcal": 0.0,
+      "center_kcal": 2242.0,
+      "maintenance_uncertainty_kcal": [
+        2020,
+        2470
+      ],
+      "uncertainty_note": "±10% — допущение интерфейса, не статистический доверительный интервал",
+      "lower_intake_product_floor": 1200,
+      "equation": "10 × вес(кг) + 6,25 × рост(см) − 5 × возраст + (5 male / −161 female)",
+      "rounding": "Energy to nearest 10, half up; protein outward to 5 g; fiber nearest whole g, half up",
+      "activity_note": "Есть ходьба/лёгкая активность: ориентировочно 1,6"
+    },
+    "preview_hash": "9dfcad2fa6bf6b8398685e1d3546081cfb2e7f82312512f62e70666cd0c24ad9"
+  },
+  "ready": {
+    "version": "0.2.1",
+    "revision": 4,
+    "subject_kind": "personal",
+    "profile": {
+      "schema_version": 1,
+      "subject_id": "synthetic-one",
+      "owner_account_id": "synthetic-one",
+      "subject_kind": "personal",
+      "profile_revision": 4,
+      "display_name": null,
+      "timezone": "Europe/Minsk",
+      "goal": null,
+      "consent": {
+        "storage": true,
+        "health_data": true,
+        "media_storage": false,
+        "recorded_at": "2026-11-08T09:51:30+00:00"
+      },
+      "screening": {
+        "adult": true,
+        "pregnant": false,
+        "breastfeeding": false,
+        "type1_diabetes": false,
+        "sglt2": false,
+        "hypoglycemia_medication": false,
+        "kidney_disease": false,
+        "liver_pancreas_gallbladder_disease": false,
+        "metabolic_contraindication": false,
+        "eating_disorder_risk": false,
+        "other_clinical_restrictions": false,
+        "medications_reviewed": true,
+        "allergies_reviewed": true
+      },
+      "medications": [],
+      "allergies": [],
+      "settings": {
+        "language": "ru",
+        "theme": "ivory-plum",
+        "meals_per_day": 3,
+        "max_active_minutes": 30,
+        "budget_level": "balanced",
+        "max_recipe_repeats_per_week": 2,
+        "favorites": [],
+        "disliked_food_ids": [],
+        "excluded_food_ids": [],
+        "favorite_cuisines": [],
+        "weight_tracking": "off",
+        "show_calories": true,
+        "display_units": "metric",
+        "photo_storage": false,
+        "email_enabled": false,
+        "reminders_enabled": false,
+        "preferred_checkin": "weekly",
+        "remote_images": false,
+        "adaptive_preferences": true
+      },
+      "targets": {
+        "energy_min_kcal": 2130.0,
+        "energy_max_kcal": 2350.0,
+        "protein_min_g": 80.0,
+        "protein_max_g": 115.0,
+        "carb_basis": "total",
+        "carb_max_g": 100.0,
+        "fiber_min_g": 31.0,
+        "saturated_fat_max_pct": 10.0,
+        "status": "agreed",
+        "agreed_at": "2026-11-08T09:51:30+00:00",
+        "basis_note": "starter-v1; подтверждено пользователем; не назначение и не согласование специалистом"
+      },
+      "last_screened_at": null,
+      "baseline": {
+        "age_years": 40.0,
+        "height_cm": 170.0,
+        "weight_kg": 70.0,
+        "equation_category": "female",
+        "activity_factor": 1.6,
+        "activity_note": "Есть ходьба/лёгкая активность: ориентировочно 1,6",
+        "measured_at": "2026-11-08"
+      }
+    },
+    "ui": {
+      "theme": "ivory-plum",
+      "text_size": "normal",
+      "density": "comfortable",
+      "simple_mode": false,
+      "home": "chat",
+      "show_nutrition": true
+    },
+    "processing_consent": true,
+    "screening": {
+      "status": "screened_no_reported_flags",
+      "can_plan": true,
+      "reasons": [],
+      "message_ru": "Это проверка сообщённых данных, не медицинское разрешение и не диагноз."
+    },
+    "holds": [],
+    "diary": [],
+    "plans": [],
+    "checklists": {},
+    "pending": [],
+    "chat": [],
+    "active_thread": "main",
+    "topics": [
+      {
+        "id": "main",
+        "title": "Основной разговор",
+        "messages": 0
+      }
+    ],
+    "reminders": [],
+    "guidance": {
+      "stage": "ready",
+      "stages": [
+        "consent",
+        "about",
+        "restrictions",
+        "targets"
+      ],
+      "ready": true,
+      "missing": [],
+      "reasons": [],
+      "review": [],
+      "choices": {
+        "goal": "maintain",
+        "mode": "starter"
+      },
+      "targets_stale": false,
+      "provenance": {
+        "source": "starter_policy",
+        "policy_version": "starter-v1",
+        "fingerprint": "5f43aba2bc290b58b9d23b37abc23fd5f723612988b4b05fc85171770f759d1e",
+        "source_ids": [
+          "ENGINE01",
+          "S_ENERGY",
+          "START_PROTEIN",
+          "S11",
+          "START_ENERGY_2013",
+          "START_USDA_DRI"
+        ],
+        "weight_kg": 70.0,
+        "applied_at": "2026-11-08T09:51:30+00:00",
+        "candidate": {
+          "energy_min_kcal": 2130,
+          "energy_max_kcal": 2350,
+          "protein_min_g": 80,
+          "protein_max_g": 115,
+          "carb_basis": "total",
+          "carb_max_g": 100,
+          "fiber_min_g": 31,
+          "saturated_fat_max_pct": 10
+        }
+      }
+    },
+    "mobile_version": "0.5.0-guided-pilot",
+    "ui_history": [],
+    "catalog": {
+      "foods": 78,
+      "recipes": 72
+    },
+    "capabilities": {
+      "model": "Azure GPT-6.1 Terra",
+      "native_voice": "ChatGPT host only; not Terra audio",
+      "storage": "local SQLite",
+      "google_sync": "explicit exports through connected Google tools; no automatic two-way sync",
+      "background_monitoring": false,
+      "self_modification": "validated preferences only, never arbitrary code"
+    },
+    "usage": {}
+  },
+  "recipes": {
+    "recipes": [
+      {
+        "nutrition": {
+          "energy_kcal": 462.1,
+          "protein_g": 30.07,
+          "fat_g": 29.354,
+          "carbohydrate_total_g": 25.013,
+          "fiber_g": 11.035,
+          "saturated_fat_g": 4.9819,
+          "calcium_mg": 343.5,
+          "iron_mg": 2.3755,
+          "magnesium_mg": 155.3,
+          "potassium_mg": 673.65,
+          "sodium_mg": 81.9,
+          "vitamin_d_ug": 0.0,
+          "folate_dfe_ug": 80.9,
+          "vitamin_b12_ug": 1.144,
+          "vitamin_c_mg": 17.925,
+          "net_carbohydrate_g": 13.978
+        },
+        "coverage": {
+          "energy_kcal": {
+            "complete": true,
+            "known_subtotal": 462.1,
+            "missing_food_ids": []
+          },
+          "protein_g": {
+            "complete": true,
+            "known_subtotal": 30.07,
+            "missing_food_ids": []
+          },
+          "fat_g": {
+            "complete": true,
+            "known_subtotal": 29.354,
+            "missing_food_ids": []
+          },
+          "carbohydrate_total_g": {
+            "complete": true,
+            "known_subtotal": 25.013,
+            "missing_food_ids": []
+          },
+          "fiber_g": {
+            "complete": true,
+            "known_subtotal": 11.035,
+            "missing_food_ids": []
+          },
+          "saturated_fat_g": {
+            "complete": true,
+            "known_subtotal": 4.9819,
+            "missing_food_ids": []
+          },
+          "calcium_mg": {
+            "complete": true,
+            "known_subtotal": 343.5,
+            "missing_food_ids": []
+          },
+          "iron_mg": {
+            "complete": true,
+            "known_subtotal": 2.3755,
+            "missing_food_ids": []
+          },
+          "magnesium_mg": {
+            "complete": true,
+            "known_subtotal": 155.3,
+            "missing_food_ids": []
+          },
+          "potassium_mg": {
+            "complete": true,
+            "known_subtotal": 673.65,
+            "missing_food_ids": []
+          },
+          "sodium_mg": {
+            "complete": true,
+            "known_subtotal": 81.9,
+            "missing_food_ids": []
+          },
+          "vitamin_d_ug": {
+            "complete": true,
+            "known_subtotal": 0.0,
+            "missing_food_ids": []
+          },
+          "folate_dfe_ug": {
+            "complete": true,
+            "known_subtotal": 80.9,
+            "missing_food_ids": []
+          },
+          "vitamin_b12_ug": {
+            "complete": true,
+            "known_subtotal": 1.144,
+            "missing_food_ids": []
+          },
+          "vitamin_c_mg": {
+            "complete": true,
+            "known_subtotal": 17.925,
+            "missing_food_ids": []
+          },
+          "net_carbohydrate_g": {
+            "complete": true,
+            "known_subtotal": 13.978,
+            "missing_food_ids": []
+          }
+        },
+        "allergens": [
+          "milk",
+          "tree_nut"
+        ],
+        "ingredients": [
+          {
+            "food_id": "F170903",
+            "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+            "grams_edible": 220.0,
+            "state": "ready_to_eat",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+          },
+          {
+            "food_id": "F167755",
+            "name_ru": "Малина",
+            "grams_edible": 60.0,
+            "state": "raw",
+            "source_url": "https://fdc.nal.usda.gov/food-details/167755/nutrients"
+          },
+          {
+            "food_id": "F169414",
+            "name_ru": "Семена льна",
+            "grams_edible": 20.0,
+            "state": "dry",
+            "source_url": "https://fdc.nal.usda.gov/food-details/169414/nutrients"
+          },
+          {
+            "food_id": "F170187",
+            "name_ru": "Грецкий орех",
+            "grams_edible": 25.0,
+            "state": "ready_to_eat",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170187/nutrients"
+          }
+        ],
+        "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+        "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+        "recipe_id": "B02",
+        "name_ru": "Йогурт с малиной, льном и грецким орехом",
+        "portions": 1.0,
+        "steps_ru": "Измельчить лён непосредственно перед едой. Смешать йогурт со льном, добавить малину и нарубленный орех. Подать сразу.",
+        "active_minutes": 5,
+        "category": "breakfast",
+        "protein_family": "yogurt",
+        "kitchen_tested": false
+      },
+      {
+        "nutrition": {
+          "energy_kcal": 462.06,
+          "protein_g": 31.475,
+          "fat_g": 28.459,
+          "carbohydrate_total_g": 29.404,
+          "fiber_g": 14.009,
+          "saturated_fat_g": 5.1352,
+          "calcium_mg": 357.94,
+          "iron_mg": 3.8404,
+          "magnesium_mg": 189.43,
+          "potassium_mg": 861.54,
+          "sodium_mg": 82.58,
+          "vitamin_d_ug": 0.0,
+          "folate_dfe_ug": 90.37,
+          "vitamin_b12_ug": 1.144,
+          "vitamin_c_mg": 18.143,
+          "net_carbohydrate_g": 15.395
+        },
+        "coverage": {
+          "energy_kcal": {
+            "complete": true,
+            "known_subtotal": 462.06,
+            "missing_food_ids": []
+          },
+          "protein_g": {
+            "complete": true,
+            "known_subtotal": 31.475,
+            "missing_food_ids": []
+          },
+          "fat_g": {
+            "complete": true,
+            "known_subtotal": 28.459,
+            "missing_food_ids": []
+          },
+          "carbohydrate_total_g": {
+            "complete": true,
+            "known_subtotal": 29.404,
+            "missing_food_ids": []
+          },
+          "fiber_g": {
+            "complete": true,
+            "known_subtotal": 14.009,
+            "missing_food_ids": []
+          },
+          "saturated_fat_g": {
+            "complete": true,
+            "known_subtotal": 5.1352,
+            "missing_food_ids": []
+          },
+          "calcium_mg": {
+            "complete": true,
+            "known_subtotal": 357.94,
+            "missing_food_ids": []
+          },
+          "iron_mg": {
+            "complete": true,
+            "known_subtotal": 3.8404,
+            "missing_food_ids": []
+          },
+          "magnesium_mg": {
+            "complete": true,
+            "known_subtotal": 189.43,
+            "missing_food_ids": []
+          },
+          "potassium_mg": {
+            "complete": true,
+            "known_subtotal": 861.54,
+            "missing_food_ids": []
+          },
+          "sodium_mg": {
+            "complete": true,
+            "known_subtotal": 82.58,
+            "missing_food_ids": []
+          },
+          "vitamin_d_ug": {
+            "complete": true,
+            "known_subtotal": 0.0,
+            "missing_food_ids": []
+          },
+          "folate_dfe_ug": {
+            "complete": true,
+            "known_subtotal": 90.37,
+            "missing_food_ids": []
+          },
+          "vitamin_b12_ug": {
+            "complete": true,
+            "known_subtotal": 1.144,
+            "missing_food_ids": []
+          },
+          "vitamin_c_mg": {
+            "complete": true,
+            "known_subtotal": 18.143,
+            "missing_food_ids": []
+          },
+          "net_carbohydrate_g": {
+            "complete": true,
+            "known_subtotal": 15.395,
+            "missing_food_ids": []
+          }
+        },
+        "allergens": [
+          "milk",
+          "tree_nut"
+        ],
+        "ingredients": [
+          {
+            "food_id": "F170903",
+            "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+            "grams_edible": 220.0,
+            "state": "ready_to_eat",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+          },
+          {
+            "food_id": "F173946",
+            "name_ru": "Ежевика",
+            "grams_edible": 70.0,
+            "state": "raw",
+            "source_url": "https://fdc.nal.usda.gov/food-details/173946/nutrients"
+          },
+          {
+            "food_id": "F169593",
+            "name_ru": "Какао-порошок без сахара",
+            "grams_edible": 8.0,
+            "state": "dry",
+            "source_url": "https://fdc.nal.usda.gov/food-details/169593/nutrients"
+          },
+          {
+            "food_id": "F169414",
+            "name_ru": "Семена льна",
+            "grams_edible": 18.0,
+            "state": "dry",
+            "source_url": "https://fdc.nal.usda.gov/food-details/169414/nutrients"
+          },
+          {
+            "food_id": "F170581",
+            "name_ru": "Фундук",
+            "grams_edible": 25.0,
+            "state": "ready_to_eat",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170581/nutrients"
+          }
+        ],
+        "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+        "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+        "recipe_id": "B09",
+        "name_ru": "Какао-йогурт с ежевикой и фундуком",
+        "portions": 1.0,
+        "steps_ru": "Смешать йогурт с какао и свежемолотым льном без сахара. Добавить ежевику и измельчённый фундук. Это не сладкий десерт: подсластитель в расчёт не включён.",
+        "active_minutes": 5,
+        "category": "breakfast",
+        "protein_family": "yogurt",
+        "kitchen_tested": false
+      },
+      {
+        "nutrition": {
+          "energy_kcal": 564.05,
+          "protein_g": 33.4795,
+          "fat_g": 39.418,
+          "carbohydrate_total_g": 25.874,
+          "fiber_g": 9.415,
+          "saturated_fat_g": 5.947,
+          "calcium_mg": 356.95,
+          "iron_mg": 2.884,
+          "magnesium_mg": 188.25,
+          "potassium_mg": 783.65,
+          "sodium_mg": 88.5,
+          "vitamin_d_ug": 0.0,
+          "folate_dfe_ug": 107.15,
+          "vitamin_b12_ug": 1.248,
+          "vitamin_c_mg": 37.845,
+          "net_carbohydrate_g": 16.459
+        },
+        "coverage": {
+          "energy_kcal": {
+            "complete": true,
+            "known_subtotal": 564.05,
+            "missing_food_ids": []
+          },
+          "protein_g": {
+            "complete": true,
+            "known_subtotal": 33.4795,
+            "missing_food_ids": []
+          },
+          "fat_g": {
+            "complete": true,
+            "known_subtotal": 39.418,
+            "missing_food_ids": []
+          },
+          "carbohydrate_total_g": {
+            "complete": true,
+            "known_subtotal": 25.874,
+            "missing_food_ids": []
+          },
+          "fiber_g": {
+            "complete": true,
+            "known_subtotal": 9.415,
+            "missing_food_ids": []
+          },
+          "saturated_fat_g": {
+            "complete": true,
+            "known_subtotal": 5.947,
+            "missing_food_ids": []
+          },
+          "calcium_mg": {
+            "complete": true,
+            "known_subtotal": 356.95,
+            "missing_food_ids": []
+          },
+          "iron_mg": {
+            "complete": true,
+            "known_subtotal": 2.884,
+            "missing_food_ids": []
+          },
+          "magnesium_mg": {
+            "complete": true,
+            "known_subtotal": 188.25,
+            "missing_food_ids": []
+          },
+          "potassium_mg": {
+            "complete": true,
+            "known_subtotal": 783.65,
+            "missing_food_ids": []
+          },
+          "sodium_mg": {
+            "complete": true,
+            "known_subtotal": 88.5,
+            "missing_food_ids": []
+          },
+          "vitamin_d_ug": {
+            "complete": true,
+            "known_subtotal": 0.0,
+            "missing_food_ids": []
+          },
+          "folate_dfe_ug": {
+            "complete": true,
+            "known_subtotal": 107.15,
+            "missing_food_ids": []
+          },
+          "vitamin_b12_ug": {
+            "complete": true,
+            "known_subtotal": 1.248,
+            "missing_food_ids": []
+          },
+          "vitamin_c_mg": {
+            "complete": true,
+            "known_subtotal": 37.845,
+            "missing_food_ids": []
+          },
+          "net_carbohydrate_g": {
+            "complete": true,
+            "known_subtotal": 16.459,
+            "missing_food_ids": []
+          }
+        },
+        "allergens": [
+          "milk",
+          "tree_nut"
+        ],
+        "ingredients": [
+          {
+            "food_id": "F170903",
+            "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+            "grams_edible": 240.0,
+            "state": "ready_to_eat",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+          },
+          {
+            "food_id": "F167762",
+            "name_ru": "Клубника",
+            "grams_edible": 60.0,
+            "state": "raw",
+            "source_url": "https://fdc.nal.usda.gov/food-details/167762/nutrients"
+          },
+          {
+            "food_id": "F170182",
+            "name_ru": "Пекан",
+            "grams_edible": 25.0,
+            "state": "ready_to_eat",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170182/nutrients"
+          },
+          {
+            "food_id": "F170562",
+            "name_ru": "Семена подсолнечника, очищенные сухие",
+            "grams_edible": 20.0,
+            "state": "dry",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170562/nutrients"
+          },
+          {
+            "food_id": "F169414",
+            "name_ru": "Семена льна",
+            "grams_edible": 15.0,
+            "state": "dry",
+            "source_url": "https://fdc.nal.usda.gov/food-details/169414/nutrients"
+          }
+        ],
+        "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+        "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+        "recipe_id": "B15",
+        "name_ru": "Йогурт с пеканом, клубникой и семенами",
+        "portions": 1.0,
+        "steps_ru": "Измельчить лён и пекан. Смешать йогурт со льном, сверху выложить клубнику, орехи и семена. Проверить, что йогурт без добавленного сахара.",
+        "active_minutes": 5,
+        "category": "breakfast",
+        "protein_family": "yogurt",
+        "kitchen_tested": false
+      },
+      {
+        "nutrition": {
+          "energy_kcal": 335.9,
+          "protein_g": 21.56,
+          "fat_g": 21.345,
+          "carbohydrate_total_g": 18.55,
+          "fiber_g": 9.115,
+          "saturated_fat_g": 3.5035,
+          "calcium_mg": 252.7,
+          "iron_mg": 1.9525,
+          "magnesium_mg": 128.6,
+          "potassium_mg": 521.25,
+          "sodium_mg": 57.8,
+          "vitamin_d_ug": 0.0,
+          "folate_dfe_ug": 62.6,
+          "vitamin_b12_ug": 0.78,
+          "vitamin_c_mg": 12.015,
+          "net_carbohydrate_g": 9.435
+        },
+        "coverage": {
+          "energy_kcal": {
+            "complete": true,
+            "known_subtotal": 335.9,
+            "missing_food_ids": []
+          },
+          "protein_g": {
+            "complete": true,
+            "known_subtotal": 21.56,
+            "missing_food_ids": []
+          },
+          "fat_g": {
+            "complete": true,
+            "known_subtotal": 21.345,
+            "missing_food_ids": []
+          },
+          "carbohydrate_total_g": {
+            "complete": true,
+            "known_subtotal": 18.55,
+            "missing_food_ids": []
+          },
+          "fiber_g": {
+            "complete": true,
+            "known_subtotal": 9.115,
+            "missing_food_ids": []
+          },
+          "saturated_fat_g": {
+            "complete": true,
+            "known_subtotal": 3.5035,
+            "missing_food_ids": []
+          },
+          "calcium_mg": {
+            "complete": true,
+            "known_subtotal": 252.7,
+            "missing_food_ids": []
+          },
+          "iron_mg": {
+            "complete": true,
+            "known_subtotal": 1.9525,
+            "missing_food_ids": []
+          },
+          "magnesium_mg": {
+            "complete": true,
+            "known_subtotal": 128.6,
+            "missing_food_ids": []
+          },
+          "potassium_mg": {
+            "complete": true,
+            "known_subtotal": 521.25,
+            "missing_food_ids": []
+          },
+          "sodium_mg": {
+            "complete": true,
+            "known_subtotal": 57.8,
+            "missing_food_ids": []
+          },
+          "vitamin_d_ug": {
+            "complete": true,
+            "known_subtotal": 0.0,
+            "missing_food_ids": []
+          },
+          "folate_dfe_ug": {
+            "complete": true,
+            "known_subtotal": 62.6,
+            "missing_food_ids": []
+          },
+          "vitamin_b12_ug": {
+            "complete": true,
+            "known_subtotal": 0.78,
+            "missing_food_ids": []
+          },
+          "vitamin_c_mg": {
+            "complete": true,
+            "known_subtotal": 12.015,
+            "missing_food_ids": []
+          },
+          "net_carbohydrate_g": {
+            "complete": true,
+            "known_subtotal": 9.435,
+            "missing_food_ids": []
+          }
+        },
+        "allergens": [
+          "milk",
+          "tree_nut"
+        ],
+        "ingredients": [
+          {
+            "food_id": "F170903",
+            "name_ru": "Йогурт греческий натуральный, пониженной жирности",
+            "grams_edible": 150.0,
+            "state": "ready_to_eat",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170903/nutrients"
+          },
+          {
+            "food_id": "F173946",
+            "name_ru": "Ежевика",
+            "grams_edible": 50.0,
+            "state": "raw",
+            "source_url": "https://fdc.nal.usda.gov/food-details/173946/nutrients"
+          },
+          {
+            "food_id": "F169414",
+            "name_ru": "Семена льна",
+            "grams_edible": 20.0,
+            "state": "dry",
+            "source_url": "https://fdc.nal.usda.gov/food-details/169414/nutrients"
+          },
+          {
+            "food_id": "F170187",
+            "name_ru": "Грецкий орех",
+            "grams_edible": 15.0,
+            "state": "ready_to_eat",
+            "source_url": "https://fdc.nal.usda.gov/food-details/170187/nutrients"
+          }
+        ],
+        "net_method": "USDA total carbohydrate minus fiber; no blanket polyol subtraction",
+        "calculation": "sum(edible grams * nutrient per 100 g / 100); no retention/yield correction",
+        "recipe_id": "S01",
+        "name_ru": "Йогурт с ежевикой и льном",
+        "portions": 1.0,
+        "steps_ru": "Лён измельчить и смешать с йогуртом. Добавить ягоды и орехи.",
+        "active_minutes": 5,
+        "category": "component",
+        "protein_family": "yogurt",
+        "kitchen_tested": false
+      }
+    ],
+    "personalized": true,
+    "note": "Справочные рецепты. Подбор не является медицинским назначением; состав рассчитан по ингредиентам."
+  }
+}

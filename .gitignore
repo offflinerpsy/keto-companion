@@ -50,3 +50,8 @@ qa/mobile-browser/
 !qa/mobile-fixtures.json
 !qa/MOBILE_IMPLEMENTATION_RESULT.json
 !qa/MOBILE_IMPLEMENTATION_REPORT_RU.md
+
+# Synthetic guided setup input and terminal implementation evidence
+!qa/setup-fixtures.json
+!qa/ONBOARDING_IMPLEMENTATION_RESULT.json
+!qa/ONBOARDING_IMPLEMENTATION_REPORT_RU.md
