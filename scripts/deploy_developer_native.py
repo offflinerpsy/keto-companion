@@ -56,20 +56,8 @@ def main():
         # Trusted pinned dependency build needs the CI host network for nested-Docker DNS.
         # Candidate code is NOT part of Dockerfile instructions and still runs --network=none.
         run('image_build',['docker','build','--network=host','--platform','linux/amd64','--provenance=false','--build-arg','NODE_IMAGE='+NODE,'--build-arg','PYTHON_IMAGE='+PYTHON,'-f',str(context/'developer-runtime/Dockerfile'),'-t',tag,str(context)],timeout=900,env=safe)
-        original=next(x for x in manifest['sources'] if x['path'].endswith('help.html'))
-        files=[{'path':original['path'],'before_sha256':original['sha256'],'content':original['content']+'\n<!-- synthetic Cloudflare isolated acceptance -->\n'}]
-        patch_hash=hashlib.sha256(json.dumps(files,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
-        job={'job_id':str(uuid.uuid4()),'baseline':baseline,'patch_hash':patch_hash,'files':files}
-        program="import sys,json,importlib.util;spec=importlib.util.spec_from_file_location('runner','/opt/trusted/runner.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);print(json.dumps(m.execute(json.load(sys.stdin))))"
-        command=['docker','run','--rm','--platform','linux/amd64','--network','none','--read-only','--cap-drop','ALL']
-        for cap in ['CHOWN','SETUID','SETGID','KILL','DAC_OVERRIDE','FOWNER']:command+=['--cap-add',cap]
-        # Cloudflare Builds already bounds host CPU; nested Docker CFS quota is unavailable.
-        # Preserve network-none, memory/PID caps, read-only root, non-root candidate and240s deadline.
-        command+=['--security-opt','no-new-privileges','--memory','2g','--pids-limit','128','--tmpfs','/tmp:rw,nosuid,nodev,size=768m','-i','--entrypoint','/opt/venv/bin/python',tag,'-I','-c',program]
-        result=json.loads(run('network_none_acceptance',command,timeout=270,input=json.dumps(job),env=safe))
-        assert result['status']=='passed' and result['baseline']==baseline and result['patch_hash']==patch_hash and [s['name'] for s in result['stages']]==['syntax','build','product','python'] and all(s['exit_code']==0 for s in result['stages'])
-        for stage in result['stages']:
-            if stage['name'] in ('product','python'):assert stage['passed_count']>0
+        # Cloudflare Builds can build images but its nested cgroup runtime cannot launch
+        # Docker containers. Execute the acceptance in actual Cloudflare Containers below.
         # Official CLI handles the normal private registry push entirely inside CI.
         # No manual credential endpoint, credential relay, decryption or new token.
         authenv={**safe,'CLOUDFLARE_API_TOKEN':os.environ['CLOUDFLARE_API_TOKEN'],'CLOUDFLARE_ACCOUNT_ID':ACCOUNT,'CI':'true','DOCKER_CONFIG':str(Path(td)/'docker-auth')}
@@ -92,7 +80,10 @@ def main():
         app=existing
     else:
         app=api('POST',prefix,{'name':NAME,'scheduling_policy':'default','instances':0,'max_instances':1,'durable_objects':{'script_name':NAME,'class_name':'KetoTester'},'configuration':{'image':image,'instance_type':'standard-1'},'observability':{'logs':{'enabled':False}}})
-    receipt={'task':'CF-DEV-MEDIA-08','baseline':baseline,'image_digest':digest,'application_id':app['id'],'max_instances':1,'network_policy':'Container class enableInternet=false; no egress exceptions','stages':[{k:v for k,v in s.items() if k!='log'} for s in result['stages']],'private_credentials_transported_to_agent':False,'publication_broker':False,'runtime_user_flow_tested':False}
+    run('cloud_container_acceptance',['node','scripts/verify_developer_cloud_runtime.mjs'],timeout=390)
+    result=json.loads((ROOT/'docs/evidence/CF_DEV_CLOUD_RUNTIME_ACCEPTANCE.json').read_text())
+    if result['baseline']!=baseline or result['image_digest']!=digest or result['status']!='passed' or not result['temporary_probe_deleted']:raise RuntimeError('Cloud runtime acceptance incomplete')
+    receipt={'task':'CF-DEV-MEDIA-08','baseline':baseline,'image_digest':digest,'application_id':app['id'],'max_instances':1,'network_policy':'Container class enableInternet=false; no egress exceptions','stages':[{k:v for k,v in s.items() if k!='log'} for s in result['stages']],'private_credentials_transported_to_agent':False,'publication_broker':False,'runtime_user_flow_tested':False,'actual_cloud_container_acceptance':True,'temporary_probe_deleted':result['temporary_probe_deleted']}
     (ROOT/'docs/evidence/CF_NATIVE_DEVELOPER_IMAGE.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print('KETO_NATIVE_RUNNER_READY '+json.dumps(receipt),flush=True)
 if __name__=='__main__':main()

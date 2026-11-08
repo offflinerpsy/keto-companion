@@ -49,8 +49,8 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "daab548220ea557aacb529c25c2bc6e80ce2707d479edfdd429496dc4ad62f5f",
-    "cloudflare-saas/public/index.html": "ea34530563c32856a1ddcc6013c61ff2f7d091fd595643ce69ed822ae0a169d6",
+    "cloudflare-saas/public/app.css": "47b121cd3b549188e5d2a72f10c52a1c8ce9e7c17a8838d55c1cd8b3ae9c2347",
+    "cloudflare-saas/public/index.html": "1c02a20b380a46740c2604a5c13e55f8a7f0a356158325696b5ad9f12f5b5948",
     "cloudflare-saas/public/routes.js": "04c6882a4f13978182a2b8aa27d0556cb1cfbde8010fdacb9a5f6411145167e1",
     "cloudflare-saas/src/compute.mjs": "f1f1ddf7344550ca0c64a08fc6fb17a440ad1dbd976da0a84136bf69f6ecb9a1",
     "cloudflare-saas/src/worker.mjs": "1d6cd3310a2b33c21fcbadfeeb6a8115f1e014b73c29c5b80fb459e37327cf94",
@@ -288,16 +288,7 @@
       "type": "button"
     },
     {
-      "id": "image-link-details",
-      "tag": "details"
-    },
-    {
-      "id": "image-link-url",
-      "tag": "input",
-      "type": "text"
-    },
-    {
-      "id": "image-link-load",
+      "id": "image-link-open",
       "tag": "button",
       "type": "button"
     },
@@ -1178,6 +1169,29 @@
     {
       "id": "close-help",
       "tag": "button"
+    },
+    {
+      "id": "image-link-details",
+      "tag": "dialog"
+    },
+    {
+      "id": "image-link-title",
+      "tag": "h2"
+    },
+    {
+      "id": "image-link-url",
+      "tag": "input",
+      "type": "text"
+    },
+    {
+      "id": "image-link-load",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "image-link-close",
+      "tag": "button",
+      "type": "button"
     }
   ]
 }

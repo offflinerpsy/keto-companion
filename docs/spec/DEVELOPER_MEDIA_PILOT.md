@@ -30,3 +30,7 @@ Direct image URLs are restricted to the listed public CDNs and explicit loading.
 A manual encrypted registry-credential transfer was blocked and not retried; no credential was returned. Normal release is attempted only through the already-authorized native Cloudflare build and official cf CLI, keeping credentials inside that platform. A permission error stops the release; no new token/role is granted to work around it.
 
 Native Docker-in-Docker dependency installation uses the documented host network only while building the reviewed pinned image: bridge-DNS failed in the build environment. The actual candidate tests still use `--network none`, and the deployed Container class has `enableInternet=false`. No model-supplied Dockerfile, package list or command is accepted.
+
+Final platform boundary: Builds executes the full trusted regression and builds/pushes the immutable image; its nested Docker runtime lacks cgroups, so candidate acceptance is executed in the real Cloudflare Container through a short-lived token-gated synthetic service probe. The main site receives the service binding only after that probe passes and is deleted. The image and candidate runtime have no nutrition data/secrets or internet access. A failure leaves developer mode unavailable; never run generated code in the main Worker as a fallback.
+
+The direct-image URL loader is a scrollable top-layer dialog rather than an expanding chat form: this prevents obstruction of navigation on short/narrow screens. Cancellation/session reset rejects late image responses.
