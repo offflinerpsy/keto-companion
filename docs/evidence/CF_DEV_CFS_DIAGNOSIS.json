@@ -1,0 +1,13 @@
+{
+  "build_uuid": "cd0ccdeb-cf6f-4e33-8e4a-01907d7c3885",
+  "full_native_CI": "passed520Python133Node",
+  "image_build": "passed",
+  "exact_error": "Docker NanoCPUs cannot be set: CPU CFS scheduler/cgroup not mounted in nested CI",
+  "fix": "Remove unsupported nested --cpus flag; host Cloudflare CI has bounded CPU; preserve memory2g,pids128,networknone,readonly,nonrootcandidate,240sdeadline",
+  "deployment_container_policy_unchanged": {
+    "max_instances": 1,
+    "instance_type": "standard-1",
+    "enableInternet": false
+  },
+  "registry_auth_attempted": false
+}

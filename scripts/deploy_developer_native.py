@@ -63,7 +63,9 @@ def main():
         program="import sys,json,importlib.util;spec=importlib.util.spec_from_file_location('runner','/opt/trusted/runner.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);print(json.dumps(m.execute(json.load(sys.stdin))))"
         command=['docker','run','--rm','--platform','linux/amd64','--network','none','--read-only','--cap-drop','ALL']
         for cap in ['CHOWN','SETUID','SETGID','KILL','DAC_OVERRIDE','FOWNER']:command+=['--cap-add',cap]
-        command+=['--security-opt','no-new-privileges','--memory','2g','--cpus','2','--pids-limit','128','--tmpfs','/tmp:rw,nosuid,nodev,size=768m','-i','--entrypoint','/opt/venv/bin/python',tag,'-I','-c',program]
+        # Cloudflare Builds already bounds host CPU; nested Docker CFS quota is unavailable.
+        # Preserve network-none, memory/PID caps, read-only root, non-root candidate and240s deadline.
+        command+=['--security-opt','no-new-privileges','--memory','2g','--pids-limit','128','--tmpfs','/tmp:rw,nosuid,nodev,size=768m','-i','--entrypoint','/opt/venv/bin/python',tag,'-I','-c',program]
         result=json.loads(run('network_none_acceptance',command,timeout=270,input=json.dumps(job),env=safe))
         assert result['status']=='passed' and result['baseline']==baseline and result['patch_hash']==patch_hash and [s['name'] for s in result['stages']]==['syntax','build','product','python'] and all(s['exit_code']==0 for s in result['stages'])
         for stage in result['stages']:
