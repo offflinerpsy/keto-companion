@@ -1,25 +1,14 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T10:01:01.705364+00:00",
+  "updated_at": "2026-11-08T10:26:42.949401+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
-  "active_task": {
-    "id": "KETO-ONBOARDING-05",
-    "github_issue": 8,
-    "stage": "completed_source",
-    "status": "completed"
-  },
-  "last_completed": {
-    "id": "KETO-ONBOARDING-05",
-    "status": "completed",
-    "scope": "source/local regression; independent release acceptance pending",
-    "evidence": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json"
-  },
+  "active_task": null,
+  "last_completed": "KETO-ONBOARDING-05",
   "next_task": {
-    "id": "KETO-ONBOARDING-05",
-    "github_issue": 8,
-    "stage": "parent_independent_acceptance",
-    "action": "Run the exact manifest in the authorized container/runtime, review both catalog-infeasible automatic profile outcomes and starter policy suitability, then decide release through the existing parent contour."
+    "id": "KETO-SETUP-ACCEPTANCE",
+    "status": "owner_acceptance",
+    "action": "Reload existing account and follow the resumed introduction; check suggested targets before confirming. No values need to be sent in ChatGPT."
   },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",

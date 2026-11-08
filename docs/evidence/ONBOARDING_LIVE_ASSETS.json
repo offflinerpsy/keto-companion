@@ -1,0 +1,16 @@
+{
+  "index.html": true,
+  "style.css": true,
+  "app.bundle.js": true,
+  "health": {
+    "version": "0.5.0-guided-pilot",
+    "build": "mobile-chat",
+    "capabilities": {
+      "firebase_google": true,
+      "direct_google": false,
+      "storage": true,
+      "compute": true
+    }
+  },
+  "unauthenticated_session_status": 401
+}

@@ -1,0 +1,15 @@
+{
+  "task": "KETO-ONBOARDING-05",
+  "checkpoint": "source and final regression complete; parent takes single-writer ownership for acceptance fixes",
+  "source_writer_stopped": true,
+  "python": 420,
+  "python_platform_skip": 1,
+  "node": 81,
+  "source_hashes": {
+    "service/planning.py": "a6a88428abdfc17c35571f0aa3eaccd9e6fb3ab8018406a48238a0ff8d3ab426",
+    "service/domain.py": "299ee74bf93a2165f51b40ff36d0ffa28b7486ef5296aec5e6b5aa7ab2c7fbd1",
+    "cloudflare-saas/public/setup-ui.js": "14099d60e836e76d35c57b50602395196df47e33a9d018e21f514e7d3ed79beb",
+    "cloudflare-saas/public/app.js": "e1074e235c0126ddd551ce62e357b397cfcf7583c2c56152acdf7df527b31dac"
+  },
+  "browser_started_on_owner_mac": false
+}
