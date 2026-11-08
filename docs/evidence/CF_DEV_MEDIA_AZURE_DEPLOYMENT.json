@@ -1,0 +1,12 @@
+{
+  "task": "CF-DEV-MEDIA-08",
+  "source_commit": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "f4eb92075e80425c43d00dc3314ce35174ce627304b6cb2b39995c2a82c1c77a",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "status": 4,
+  "complete": true,
+  "deployment_id": "a536cc0e-9ef4-4078-9295-18dd57af808d",
+  "checked_at": "2026-11-08T15:17:24.614312+00:00"
+}

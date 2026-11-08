@@ -1,0 +1,69 @@
+{
+  "files": [
+    {
+      "name": "favicon-16.png",
+      "format": "PNG",
+      "size": [
+        16,
+        16
+      ],
+      "bytes": 807
+    },
+    {
+      "name": "favicon-32.png",
+      "format": "PNG",
+      "size": [
+        32,
+        32
+      ],
+      "bytes": 1978
+    },
+    {
+      "name": "favicon-48.png",
+      "format": "PNG",
+      "size": [
+        48,
+        48
+      ],
+      "bytes": 3121
+    },
+    {
+      "name": "icon-180.png",
+      "format": "PNG",
+      "size": [
+        180,
+        180
+      ],
+      "bytes": 12826
+    },
+    {
+      "name": "icon-192.png",
+      "format": "PNG",
+      "size": [
+        192,
+        192
+      ],
+      "bytes": 13740
+    },
+    {
+      "name": "icon-512.png",
+      "format": "PNG",
+      "size": [
+        512,
+        512
+      ],
+      "bytes": 42419
+    },
+    {
+      "name": "favicon.ico",
+      "format": "ICO",
+      "size": [
+        48,
+        48
+      ],
+      "bytes": 5929
+    }
+  ],
+  "visual_preview_inspected": true,
+  "font_files_shared": false
+}

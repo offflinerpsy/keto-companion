@@ -1,0 +1,17 @@
+{
+  "status": "failed",
+  "baseline": "1d55bf44222b02d15787d989ba1eb94844005bf3d442a80f2b1979665a2b4b36",
+  "patch_hash": "9c733f48b23d86ce7ff2f7b3982df7776727c2e56852c96c3fcd34b522158bb1",
+  "exit_code": 1,
+  "stages": [
+    {
+      "name": "syntax",
+      "exit_code": 1,
+      "passed_count": null,
+      "truncated": false
+    }
+  ],
+  "scope": "Actual invalid generated code rejected at fixed syntax stage in isolated Linux; no model call, no app data",
+  "passed_negative_test": true,
+  "candidate_egress_blocked": true
+}

@@ -1,0 +1,17 @@
+{
+  "source_baseline": "1d55bf44222b02d15787d989ba1eb94844005bf3d442a80f2b1979665a2b4b36",
+  "scope": "one real Azure Sol/high call, approved technical-only UI source; no user profile or history; not actual website login",
+  "actual_model_calls": 1,
+  "passed": true,
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "usage": {
+    "input_tokens": 6590,
+    "output_tokens": 810
+  },
+  "changed_paths": [
+    "cloudflare-saas/public/help.html"
+  ],
+  "patch_sha256": "e148722cc74cac6ecf92837ce322422732eb733f0f2162b4fc419a12fa5664b0",
+  "seconds": 15.16
+}

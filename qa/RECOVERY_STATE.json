@@ -1,12 +1,16 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T15:15:23.748279+00:00",
+  "updated_at": "2026-11-08T16:05:19.031606+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
   "active_task": {
     "id": "CF-DEV-MEDIA-08",
-    "stage": "recovered_source_release_verification",
-    "status": "in_progress"
+    "github_issue": 16,
+    "stage": "native_cloudflare_isolated_runtime_release",
+    "source_commit": "5305ca1aea0e9b68cbf83a7b6b53b885dea9188b",
+    "build_uuid": "e36e994f-e3a3-4ee9-9036-dc292affc322",
+    "logs_cursor": "WzAsMzczXQ",
+    "next_action": "Read this running native build and its concrete Docker result. No duplicate source/model/build jobs. Preserve fail-closed Developer mode; verify/deploy media UI only if runtime cannot be accepted."
   },
   "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
   "next_task": null,
@@ -198,5 +202,21 @@
     "publication_broker": "not_configured",
     "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
   },
-  "release_blocker_legacy": "GitHub Actions not required: nativeCloudflare verified baseline; final0.7 gate pending"
+  "release_blocker_legacy": "GitHub Actions not required: nativeCloudflare verified baseline; final0.7 gate pending",
+  "recovery_boundaries": {
+    "ordinary_web_version_last_verified": "0.6.2-audit-pilot",
+    "azure_backend_source": "fc12604029bd4e6920f4ef774d91b1cbc3495518",
+    "new_personal_data_read": false,
+    "new_personal_data_written": false,
+    "new_auth_identity_created": false,
+    "Mac_browser_started": false,
+    "native_full_gate_verified": {
+      "python": 520,
+      "node": 133,
+      "stages": 16
+    },
+    "manual_registry_credential_export": "blocked; not retried",
+    "native_official_registry_push": "not yet reached",
+    "auto_publication": "not implemented; preview/diff only"
+  }
 }
