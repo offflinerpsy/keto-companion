@@ -2,7 +2,7 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-08T18:18:33.191882+00:00",
+  "updated_at": "2026-11-08T18:21:13.045770+00:00",
   "active_task": null,
   "last_completed": {
     "id": "CF-DEV-MEDIA-08",
@@ -11,7 +11,10 @@
     "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
     "build_uuid": "2185581c-26fd-49c0-b93c-df4dabc8c3e9",
     "build_status": "success",
-    "developer_auto_publication": false
+    "developer_auto_publication": false,
+    "merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
+    "pull_request": 17,
+    "github_issue_state": "closed"
   },
   "next_task": {
     "id": "OWNER-DEVELOPER-ACCEPTANCE",

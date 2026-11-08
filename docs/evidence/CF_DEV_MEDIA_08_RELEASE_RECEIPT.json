@@ -154,5 +154,10 @@
     "No credentials copied from social/browser sessions, no new medical rules or automatic nutrition changes",
     "Candidate tests are fixed narrow trusted stages; they are not full medical/security/clinical certification",
     "Existing Cloudflare credits and exact bills not verified; resource and request limits do not imply free usage"
-  ]
+  ],
+  "merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
+  "pull_request_state": "MERGED",
+  "repository_visibility": "PRIVATE",
+  "implementation_issue_closed": 16,
+  "single_next_acceptance_issue": 10
 }

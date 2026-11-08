@@ -1,6 +1,6 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T18:18:33.191882+00:00",
+  "updated_at": "2026-11-08T18:21:13.043605+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
@@ -85,7 +85,9 @@
     "kitchen_pr": 12,
     "audit_pr": 14,
     "audit_merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0",
-    "active_release_pr": null
+    "active_release_pr": null,
+    "developer_media_release_pr": 17,
+    "developer_media_merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca"
   },
   "mobile_acceptance": "Owner previously reported dictation works; current complete real-device regression not performed by agent.",
   "mobile_source": {
