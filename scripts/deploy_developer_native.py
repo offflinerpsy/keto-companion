@@ -17,12 +17,12 @@ def run(stage,args,timeout=120,input=None,env=None):
         # Logs may contain deployment credentials. Keep them inside the ephemeral build.
         (ROOT/'qa').mkdir(exist_ok=True)
         (ROOT/'qa'/('native-runner-'+stage+'.log')).write_text(result.stdout+'\n'+result.stderr)
-        if stage=='image_build':
+        if stage in ('image_build','network_none_acceptance'):
             # This stage receives a credential-free environment and a sanitized context.
             # Expose only its dependency/compiler diagnostics, never auth-stage output.
             diagnostic=(result.stdout+'\n'+result.stderr)[-7000:]
             diagnostic=re.sub(r'(?i)(token|password|authorization|secret)([=: ]+)[^\s]+',r'\1\2[redacted]',diagnostic)
-            print('KETO_IMAGE_BUILD_DIAGNOSTIC '+diagnostic,flush=True)
+            print('KETO_SAFE_STAGE_DIAGNOSTIC '+stage+' '+diagnostic,flush=True)
         elif stage=='official_registry_push':
             output=(result.stdout+'\n'+result.stderr).lower()
             reason='authorization_or_permission' if any(x in output for x in ['unauthorized','permission','forbidden','authentication','403','401']) else 'registry_transport_or_cli'

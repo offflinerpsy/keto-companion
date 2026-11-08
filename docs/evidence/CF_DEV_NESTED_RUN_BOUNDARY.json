@@ -1,0 +1,11 @@
+{
+  "build_uuid": "f2aefe7f-a75e-43d7-973f-8c175f8b1c1e",
+  "source_commit": "130701dba17286995d9e20642a03412cd029ccc1",
+  "full_native_gate_passed": true,
+  "python": 520,
+  "node": 133,
+  "trusted_image_build": "passed after documented host-network fix",
+  "candidate_launch": "Docker exit125 before runner execution",
+  "no_candidate_network_relaxation": true,
+  "next_step": "Expose sanitized Docker launch error; do not remove isolation blindly or publish without runtime receipt"
+}
