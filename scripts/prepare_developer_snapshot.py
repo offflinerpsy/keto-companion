@@ -8,7 +8,7 @@ ROOT_FILES={'requirements.txt','requirements-dev.txt','pytest.ini','pyproject.to
 PREFIXES=('service/','library/','tests/','scripts/','cloudflare-saas/','ui-sdk/','developer-runtime/')
 EXCLUDED={'node_modules','.git','.private','.venv','__pycache__','.pytest_cache','dist','generated','build','.cache'}
 GENERATED={'developer-runtime/release.json','cloudflare-saas/src/embedded-assets.mjs','cloudflare-saas/public/app.bundle.js','cloudflare-saas/public/style.css','cloudflare-saas/public/knowledge-data.js','service/static/app.bundle.js'}
-SUFFIXES={'.py','.mjs','.cjs','.js','.json','.css','.html','.sql','.toml','.txt','.yaml','.yml','.md','.svg','.png','.ico','.webmanifest','.csv','.ts'}
+SUFFIXES={'.py','.mjs','.cjs','.js','.json','.css','.html','.sql','.toml','.txt','.yaml','.yml','.md','.svg','.png','.webp','.ico','.webmanifest','.csv','.ts'}
 def permitted(name):
     p=Path(name)
     return not p.is_absolute() and not any(x in EXCLUDED or x.startswith('.') or x in ('qa','data-private','health') for x in p.parts) and name not in GENERATED and (name in ROOT_FILES or name.startswith(PREFIXES)) and p.suffix in SUFFIXES and not any(word in p.name.lower() for word in ('credential','token-state','local.settings','firebase-admin','service-account'))

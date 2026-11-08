@@ -28,7 +28,7 @@
   ],
   "notice": "Inventory from literal routes and OPS, not full OpenAPI. Dynamic admin/source/upload/deletion routes and all authorization conditions must be read in source.",
   "schema": "keto-worker-inventory-v1",
-  "source_sha256": "1d6cd3310a2b33c21fcbadfeeb6a8115f1e014b73c29c5b80fb459e37327cf94",
+  "source_sha256": "92ad655dda283889fdd0a4834867c67e8bd4f1fc9ca5dfff4e66085dde1fc85b",
   "tool_operations": {
     "keto_apply_proposal": "apply",
     "keto_chat": "chat",

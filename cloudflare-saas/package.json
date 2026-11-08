@@ -1,6 +1,6 @@
 {
   "name": "keto-companion-cloudflare-saas",
-  "version": "0.7.0-dev-media-pilot",
+  "version": "0.7.1-tranquil-dev-pilot",
   "private": true,
   "type": "module",
   "scripts": {

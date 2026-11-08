@@ -1,13 +1,13 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-08T15:15:23.747182+00:00",
-  "source_version": "0.7.0-dev-media-pilot",
+  "updated_at": "2026-11-08T16:49:52.365729+00:00",
+  "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "CF-DEV-MEDIA-08",
-    "stage": "recovered_source_release_verification",
-    "status": "in_progress"
+    "github_issue": 16,
+    "stage": "TranquilDawn_source_complete_full_release_gates"
   },
   "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
   "next_task": null,

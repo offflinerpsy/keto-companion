@@ -1,16 +1,15 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T16:05:19.031606+00:00",
+  "updated_at": "2026-11-08T16:39:23.465411+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
   "active_task": {
     "id": "CF-DEV-MEDIA-08",
     "github_issue": 16,
-    "stage": "native_cloudflare_isolated_runtime_release",
-    "source_commit": "5305ca1aea0e9b68cbf83a7b6b53b885dea9188b",
-    "build_uuid": "e36e994f-e3a3-4ee9-9036-dc292affc322",
-    "logs_cursor": "WzAsMzczXQ",
-    "next_action": "Read this running native build and its concrete Docker result. No duplicate source/model/build jobs. Preserve fail-closed Developer mode; verify/deploy media UI only if runtime cannot be accepted."
+    "stage": "TranquilDawn_UI_and_existing_runner_release",
+    "writer_pid": 99163,
+    "source_baseline": "ef36b97613e1b06335faf973c3d8deebf56ec496",
+    "source_task": "qa/TRANQUIL_DAWN_TASK.md"
   },
   "last_completed": "SPEC-AUDIT-07 specifications, local review/regression and staging corrections",
   "next_task": null,

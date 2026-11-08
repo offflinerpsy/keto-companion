@@ -1,0 +1,120 @@
+{
+  "schema": "keto-tranquil-dawn-result-v1",
+  "task_id": "CF-DEV-MEDIA-08",
+  "status": "completed_source_focused_tests",
+  "baseline": "ef36b97613e1b06335faf973c3d8deebf56ec496",
+  "deliverable": "Tranquil Dawn on existing UI with consent-gated saved-state overview, preserved media/developer controls and EN/RU handoff",
+  "changed_files": [
+    "cloudflare-saas/public/app.css",
+    "cloudflare-saas/public/index.html",
+    "cloudflare-saas/public/app.js",
+    "cloudflare-saas/public/manifest.webmanifest",
+    "cloudflare-saas/public/help.html",
+    "cloudflare-saas/tests/tranquil-design.test.mjs",
+    "docs/design/IMPLEMENTATION.md",
+    "docs/design/DESIGN_TOKENS.json",
+    "docs/en/TRANQUIL_DAWN.md",
+    "docs/ru/TRANQUIL_DAWN.md",
+    "qa/TRANQUIL_DAWN_RESULT.json"
+  ],
+  "sourcehash": {
+    "algorithm": "SHA-256",
+    "normalized_design": {
+      "path": "docs/design/DESIGN.md",
+      "sha256": "5596c3688ed8a633fc12342d354fc92828ea0a2132ac2a1fe410787a8fe7470f"
+    },
+    "uploaded_original_sha256_from_task": "8d48d35bcdba847ebf2975c8a2dc12ac3489561e4b3e1b197b7feeaad9eb09fe",
+    "files": {
+      "cloudflare-saas/public/app.css": "36f36fd4689df1963cb8a2a381606be0dc863418e884ef84ef0ec371c75d2d7c",
+      "cloudflare-saas/public/index.html": "a7791cd3b1d17a1800685053c598fcbb824b46d2bfbcee676783e4cdbe72ca13",
+      "cloudflare-saas/public/app.js": "cec157ca2b6670ff58af3b74d1b5abc922df1a1e3ad219f5022f3cd964808042",
+      "cloudflare-saas/public/manifest.webmanifest": "a9339060e10a984e6b3ac5bb618febc584c25c516a8da606a7e765500ae39b15",
+      "cloudflare-saas/public/help.html": "541d76c4dc0efdf12871d050f01d23569f978c300c80338eb1b920f89d41cca4",
+      "cloudflare-saas/tests/tranquil-design.test.mjs": "080c269b7dff86f5bcdbbe55da961a28b9802aef6e3a413c686f3eb84876cfe4",
+      "docs/design/IMPLEMENTATION.md": "0e91b5b3fa27a79d0827d49759c83e4ec7ef7751b0c0e36c421c626c89137618",
+      "docs/design/DESIGN_TOKENS.json": "acf1924ad9a275a2f222b6bf2e73b5a87b0a0bc6b6cee2acab9daa67a706d476",
+      "docs/en/TRANQUIL_DAWN.md": "7feb7d375dfd4fbf22bfb44888c2ee0778f7d686b5924b72310c36117f3ba718",
+      "docs/ru/TRANQUIL_DAWN.md": "c49c35b5f362d8a4250c443742b0125ee4a8db0d8416a3c40fdb1687853b479a"
+    }
+  },
+  "tests": [
+    {
+      "command": "node --test --test-reporter=tap cloudflare-saas/tests/tranquil-design.test.mjs cloudflare-saas/tests/setup.test.mjs cloudflare-saas/tests/kitchen.test.mjs cloudflare-saas/tests/media.test.mjs cloudflare-saas/tests/chat-images.test.mjs cloudflare-saas/tests/developer-ui.test.mjs cloudflare-saas/tests/allergy-editor.test.mjs",
+      "result": "passed",
+      "tests": 52,
+      "passed": 52,
+      "failed": 0,
+      "skipped": 0,
+      "log": "/tmp/keto-tranquil-focused.tap"
+    },
+    {
+      "command": "node --test --test-name-pattern='standalone client sends' cloudflare-saas/tests/static.test.mjs",
+      "result": "passed",
+      "tests": 1,
+      "note": "Source CSRF/clearScreen/late-response test only; generated Worker tests excluded because parent owns build."
+    },
+    {
+      "command": "node --check cloudflare-saas/public/app.js",
+      "result": "passed"
+    },
+    {
+      "command": "Existing ui-sdk/node_modules/esbuild transform of final app.css (css loader) and app.js (js loader, es2020), in memory",
+      "result": "passed",
+      "css_warnings": 0,
+      "generated_files_written": false
+    },
+    {
+      "command": "git diff --check -- owned tracked UI files",
+      "result": "passed"
+    },
+    {
+      "command": "New documentation relative-link and JSON/hash validation",
+      "result": "passed",
+      "relative_links_checked": 10,
+      "owned_hashes_verified": 10
+    }
+  ],
+  "earlier_check_attempts": [
+    {
+      "check": "Initial tranquil-design.test.mjs",
+      "result": "5 passed, 5 failed",
+      "cause": "New test harness omitted history (four cases); visibility regex incorrectly rejected pre-existing #proposals:empty rule (one case).",
+      "remedy": "Added history stub and restricted visibility assertion to unconditional suppression; all 10 design tests subsequently passed. No application behavior weakened."
+    }
+  ],
+  "adaptations": [
+    "17px application body/input; 14–15px help with 1.5 leading",
+    "Named source slate #6C7A76 retained; small secondary text #5E6F68 for contrast",
+    "48px controls including slider handles and labelled checkbox/radio rows",
+    "2x2 status cards on narrow/large text instead of four unreadable columns",
+    "428px mobile content token with practical gutters; existing desktop workspace retained",
+    "Saved dark enum retained as explicit application adaptation",
+    "Status cards instead of unsupported biometrics or date-dependent nutrition; progress uses four explicit saved-state conditions",
+    "No new tranquil-ui.js module needed; integrated existing app.js lifecycle"
+  ],
+  "boundaries": {
+    "writes": "Only listed UI/doc/test/result files; parent changes to runtime/assets/dependencies are separate",
+    "browser_used": false,
+    "computer_use_used": false,
+    "cloud_operations": false,
+    "subagents": false,
+    "installs": false,
+    "git_writes": false,
+    "health_storage_added": false,
+    "real_personal_data_read": false,
+    "backend_or_medical_logic_changed": false,
+    "generated_build_run": false,
+    "release_claim": false,
+    "external_effects": "not_delivered; no external operation attempted",
+    "full_access_mode": "Existing workspace-write sandbox retained; no launcher or permission change attempted."
+  },
+  "parent_acceptance_remaining": [
+    "Supply/license/package /tranquil-dawn.webp and current icon assets in exact build",
+    "Regenerate bundled UI/embedded assets and source-derived contracts as needed using parent-owned release workflow",
+    "Full suites and exact runtime/build readback",
+    "Isolated visual/device QA at 375/390/440 widths, 440x540 large text, 956x440 landscape, desktop; verify chat scroll >=120px and >=80px respectively, overflow, focus and modes",
+    "Cloud release and publication remain parent-owned"
+  ],
+  "processes_started": [],
+  "next_action": "Parent integrates these UI sources with the supplied photograph in the existing release build and verifies that exact build using authorized isolated visual/release checks."
+}

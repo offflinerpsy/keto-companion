@@ -1,7 +1,7 @@
 {
   "schema": "keto-agent-context-v1",
   "language": "English canonical; Russian index and design handoff available",
-  "release": "0.7.0-dev-media-pilot",
+  "release": "0.7.1-tranquil-dev-pilot",
   "read_first": [
     "AGENTS.md",
     "docs/CURRENT_STATUS.json",
@@ -61,5 +61,7 @@
     "Do not publish private repository or share font files"
   ],
   "current_external_blocker": "GitHub-hosted jobs fail before execution; see docs/evidence/SPEC_AUDIT_GITHUB_EXECUTION.json",
-  "historical_review_commit": "055938ef42b1ba15e2ef568de17e8e01f883a31f"
+  "historical_review_commit": "055938ef42b1ba15e2ef568de17e8e01f883a31f",
+  "authoritative_design": "docs/design/DESIGN.md",
+  "design_adaptations": "docs/design/IMPLEMENTATION.md"
 }
