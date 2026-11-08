@@ -20,3 +20,6 @@ Validation here is local and synthetic. Parent must perform a real full-schema S
 
 ## Recovery and provenance
 The original72 reference recipes remain unchanged. USDA records increased78→85;12 validated cooking-method families generate new combinations, not40 newly published recipes. Local branded label references remain partial and are not automatically normalized into complete USDA-style records. Verified real Sol-high tests use synthetic local state, not the authenticated hosted user flow. Final release evidence is separate. Runtime quotas do not establish free service or verify account credits.
+
+## Verified release
+Version0.6 is deployed to the existing staging environment. Actual client assets passed64isolated browser checks with synthetic APIs, and the initial-screen screenshot was visually inspected. Current Service+realSolhigh produced2model-origin options plus1explicit template;10provider roundtrip checks passed. Existing personal profiles were neither read nor modified. Full receipt: `docs/evidence/KITCHEN_RELEASE_RECEIPT.json`.

@@ -1,0 +1,308 @@
+{
+  "source_commit": "c6c65d4c6da7b4e07e0a2f944b503aba89ae8d04",
+  "scope": "Actual deployed full HTML/CSS/JavaScript in isolated remote Cloudflare Chromium; synthetic API, media-free and local-storage adapters. No real account, login, backend save or personal data.",
+  "cases": [
+    {
+      "width": 440,
+      "height": 956,
+      "large_dark": false,
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "studio_not_just_catalogue",
+          "passed": true
+        },
+        {
+          "name": "three_modes",
+          "passed": true
+        },
+        {
+          "name": "three_product_chips",
+          "passed": true
+        },
+        {
+          "name": "typing_does_not_store_pantry",
+          "passed": true
+        },
+        {
+          "name": "decimal_comma_passed_to_api",
+          "passed": true
+        },
+        {
+          "name": "three_recipe_cards",
+          "passed": true
+        },
+        {
+          "name": "strict_mode_sent",
+          "passed": true
+        },
+        {
+          "name": "extra_item_limit_sent",
+          "passed": true
+        },
+        {
+          "name": "studio_save_has_visible_confirmation",
+          "passed": true
+        },
+        {
+          "name": "same_cards_in_chat",
+          "passed": true
+        },
+        {
+          "name": "chat_confirmation_stays_in_chat",
+          "passed": true
+        },
+        {
+          "name": "memory_view_accessible",
+          "passed": true
+        },
+        {
+          "name": "forget_requires_confirmation",
+          "passed": true
+        },
+        {
+          "name": "no_horizontal_overflow",
+          "passed": true
+        },
+        {
+          "name": "visible_controls_44px",
+          "passed": true
+        }
+      ],
+      "uncaught_errors": []
+    },
+    {
+      "width": 375,
+      "height": 812,
+      "large_dark": false,
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "studio_not_just_catalogue",
+          "passed": true
+        },
+        {
+          "name": "three_modes",
+          "passed": true
+        },
+        {
+          "name": "three_product_chips",
+          "passed": true
+        },
+        {
+          "name": "typing_does_not_store_pantry",
+          "passed": true
+        },
+        {
+          "name": "decimal_comma_passed_to_api",
+          "passed": true
+        },
+        {
+          "name": "three_recipe_cards",
+          "passed": true
+        },
+        {
+          "name": "strict_mode_sent",
+          "passed": true
+        },
+        {
+          "name": "extra_item_limit_sent",
+          "passed": true
+        },
+        {
+          "name": "studio_save_has_visible_confirmation",
+          "passed": true
+        },
+        {
+          "name": "same_cards_in_chat",
+          "passed": true
+        },
+        {
+          "name": "chat_confirmation_stays_in_chat",
+          "passed": true
+        },
+        {
+          "name": "memory_view_accessible",
+          "passed": true
+        },
+        {
+          "name": "forget_requires_confirmation",
+          "passed": true
+        },
+        {
+          "name": "no_horizontal_overflow",
+          "passed": true
+        },
+        {
+          "name": "visible_controls_44px",
+          "passed": true
+        }
+      ],
+      "uncaught_errors": []
+    },
+    {
+      "width": 1280,
+      "height": 900,
+      "large_dark": false,
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "studio_not_just_catalogue",
+          "passed": true
+        },
+        {
+          "name": "three_modes",
+          "passed": true
+        },
+        {
+          "name": "three_product_chips",
+          "passed": true
+        },
+        {
+          "name": "typing_does_not_store_pantry",
+          "passed": true
+        },
+        {
+          "name": "decimal_comma_passed_to_api",
+          "passed": true
+        },
+        {
+          "name": "three_recipe_cards",
+          "passed": true
+        },
+        {
+          "name": "strict_mode_sent",
+          "passed": true
+        },
+        {
+          "name": "extra_item_limit_sent",
+          "passed": true
+        },
+        {
+          "name": "studio_save_has_visible_confirmation",
+          "passed": true
+        },
+        {
+          "name": "same_cards_in_chat",
+          "passed": true
+        },
+        {
+          "name": "chat_confirmation_stays_in_chat",
+          "passed": true
+        },
+        {
+          "name": "memory_view_accessible",
+          "passed": true
+        },
+        {
+          "name": "forget_requires_confirmation",
+          "passed": true
+        },
+        {
+          "name": "no_horizontal_overflow",
+          "passed": true
+        },
+        {
+          "name": "visible_controls_44px",
+          "passed": true
+        }
+      ],
+      "uncaught_errors": []
+    },
+    {
+      "width": 440,
+      "height": 540,
+      "large_dark": true,
+      "checks": [
+        {
+          "name": "app_booted",
+          "passed": true
+        },
+        {
+          "name": "studio_not_just_catalogue",
+          "passed": true
+        },
+        {
+          "name": "three_modes",
+          "passed": true
+        },
+        {
+          "name": "three_product_chips",
+          "passed": true
+        },
+        {
+          "name": "typing_does_not_store_pantry",
+          "passed": true
+        },
+        {
+          "name": "decimal_comma_passed_to_api",
+          "passed": true
+        },
+        {
+          "name": "three_recipe_cards",
+          "passed": true
+        },
+        {
+          "name": "strict_mode_sent",
+          "passed": true
+        },
+        {
+          "name": "extra_item_limit_sent",
+          "passed": true
+        },
+        {
+          "name": "studio_save_has_visible_confirmation",
+          "passed": true
+        },
+        {
+          "name": "same_cards_in_chat",
+          "passed": true
+        },
+        {
+          "name": "chat_confirmation_stays_in_chat",
+          "passed": true
+        },
+        {
+          "name": "memory_view_accessible",
+          "passed": true
+        },
+        {
+          "name": "forget_requires_confirmation",
+          "passed": true
+        },
+        {
+          "name": "no_horizontal_overflow",
+          "passed": true
+        },
+        {
+          "name": "visible_controls_44px",
+          "passed": true
+        }
+      ],
+      "uncaught_errors": []
+    }
+  ],
+  "total_checks": 64,
+  "passed": 64,
+  "screenshot_inspected": {
+    "source": "actual deployed initial kitchen view, synthetic empty profile",
+    "viewport": [
+      440,
+      956
+    ],
+    "scale": 0.45,
+    "format": "webp",
+    "scope": "Visual hierarchy, three mode choices, bottom navigation and initial input; low-resolution screenshot, not full screen-by-screen visual acceptance"
+  },
+  "physical_iPhone_or_Safari": false,
+  "owner_Mac_browser_started": false
+}

@@ -1,0 +1,117 @@
+{
+  "task": "KETO-KITCHEN-06",
+  "source_version": "0.6.0-kitchen-pilot",
+  "status": "implemented_and_deployed_owner_acceptance_pending",
+  "checked_at": "2026-11-08T12:11:22.295564+00:00",
+  "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/",
+  "source_commit": "c6c65d4c6da7b4e07e0a2f944b503aba89ae8d04",
+  "cloudflare": {
+    "build_uuid": "d7c7cfa2-1dad-4386-9569-e4ae21f633b1",
+    "outcome": "success",
+    "version_id": "895c607f91994a13a8f61d10debeed06",
+    "modules": 13,
+    "main_module_sha256": "842aaab38e1649b58961ed298e64994e1ef1c1d4cf494abe4f9600135bf43dc9"
+  },
+  "azure": {
+    "task": "KETO-KITCHEN-06",
+    "source_commit": "c6c65d4c6da7b4e07e0a2f944b503aba89ae8d04",
+    "azure_app": "keto-companion-ay-20261107",
+    "archive_sha256": "429dba44ef35417c0a5a1d8ac362f8e5fcf909a9851f05ca79b0196e03d657df",
+    "public_key_only_transferred": true,
+    "personal_state_migration": false,
+    "status": 4,
+    "complete": true,
+    "deployment_id": "1276edc6-1f7a-40a4-b073-51037d613025",
+    "checked_at": "2026-11-08T11:59:15.854208+00:00"
+  },
+  "roles": {
+    "chat": "keto-terra-61",
+    "recipe": "gpt-6.1-sol",
+    "recipe_reasoning": "high",
+    "recipe_max_output_tokens": 5000,
+    "new_model_deployed": false
+  },
+  "tests": {
+    "python_passed": 479,
+    "python_skipped": 1,
+    "skip_reason": "Existing Linux-specific in-memory speech descriptor test on macOS; no speech changes in this release",
+    "node_passed": 88,
+    "legacy_ui_no_browser": "passed",
+    "legacy_oauth_ui_no_browser": "passed",
+    "actual_compiled_UI_synthetic_checks": 64,
+    "actual_Azure_Sol_with_local_synthetic_service": {
+      "passed": true,
+      "checks": 10,
+      "seconds": 20.0,
+      "origins": [
+        "sol",
+        "sol",
+        "template"
+      ],
+      "fallback_reason": null,
+      "model_call_count": 1
+    },
+    "UI_api_mode": "synthetic adapters; not real cloud user session"
+  },
+  "catalogue": {
+    "USDA_foods": 85,
+    "reference_recipes": 72,
+    "controlled_cooking_method_families": 12,
+    "new_generated_combinations_not_counted_as_published_recipes": true,
+    "brand_label_references": 2,
+    "brand_labels_are_complete_normalized_records": false
+  },
+  "state_and_memory": {
+    "authoritative": "existing per-user Cloudflare D1 document",
+    "shared_confirmed_pantry_preferences_favorites": true,
+    "recent_messages": 8,
+    "retrieved_own_quotes_max": 5,
+    "quote_characters_max": 500,
+    "public_source_retrieval_separate": true,
+    "no_new_vector_service": true,
+    "all_changes_require_explicit_confirmation_except_ephemeral_selection": true
+  },
+  "live_assets": {
+    "index.html": {
+      "status": 200,
+      "matches_source": true
+    },
+    "app.bundle.js": {
+      "status": 200,
+      "matches_source": true
+    },
+    "style.css": {
+      "status": 200,
+      "matches_source": true
+    },
+    "health": {
+      "version": "0.6.0-kitchen-pilot",
+      "build": "mobile-chat",
+      "capabilities": {
+        "firebase_google": true,
+        "direct_google": false,
+        "storage": true,
+        "compute": true
+      }
+    },
+    "unauthenticated_session_status": 401
+  },
+  "known_limits": [
+    "New end-to-end authenticated Google→Cloudflare→Azure kitchen flow not exercised in a real family account",
+    "Remote Chromium and mocked APIs do not establish physical iPhone/Safari acceptance",
+    "Recipe combinations are calculated drafts within12methods, not kitchen-tested meals or medical prescriptions",
+    "Complete day is accepted only after existing nutrient/inventory/safety checks; feasible menus not guaranteed for all profiles or weeks",
+    "Manufacturer label references are partial; unknown nutrients not converted to zero or generalized to brands",
+    "Bounded keyword/morphology recall, not unlimited semantic memory",
+    "No automatic private Instagram access or expanded Google OAuth scopes",
+    "Credits/billing balance not verified; request quotas do not mean free compute",
+    "GitHub-hosted Actions success not claimed; native Cloudflare Build and explicit suites are evidenced"
+  ],
+  "existing_personal_state_read": false,
+  "existing_personal_state_changed": false,
+  "database_migration": false,
+  "new_identity_or_token_provisioned": false,
+  "owner_Mac_browser_or_ComputerUse": false,
+  "remaining_recorded_jobs": [],
+  "clinical_validation": false
+}

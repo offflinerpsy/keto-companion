@@ -35,3 +35,13 @@ Source checks, deployed asset hashes and mobile-component rendering are verified
 New or incomplete profiles resume a four-stage introduction: consent → baseline → restrictions → preliminary targets. Admin accounts follow the same rules. Targets are calculated from saved answers with visible formulas, sources and separately labelled product assumptions; explicit confirmation is required. Recipes are directly reachable from Chat and Menu, and secondary pages support Back and browser history. Large step buttons, decimal-comma input and locally vendored noUiSlider replace tiny number spinners.
 
 Material baseline changes mark calculated targets stale; existing manual targets are never automatically replaced. Preview checks one-day feasibility in the bounded catalogue, not a guarantee of weekly variety or a medical prescription. Details: `docs/en/ONBOARDING.md`; exact release boundaries: `docs/evidence/ONBOARDING_RELEASE_RECEIPT.json`.
+
+## Kitchen configurator0.6
+
+“What shall we cook?” now assembles calculated combinations from pantry-only, bounded shopping, or inspiration modes. Select a meal/day, servings, time and equipment. The server checks food identity/state, quantities, inventory, shopping and nutrients; small vegetable sides are not presented as full dinners.
+
+Terra retains ordinary conversation routing; the existing AzureSolhigh deployment proposes compositions within12controlled cooking families. The72reference recipes remain;85USDArecords are foods, not a claimed number of published recipes. Model failures/rejections use explicitly labelled template fallback.
+
+Pantry, candidates, favourites, confirmed preferences and diary share state between chat and Studio. Selection, recipe saving, fractional intake and daily summaries use validated tools and confirmation. Memory is editable structured facts plus bounded retrieval, not unlimited recall.
+
+Acceptance:479Python tests,88Node tests,64actual-client UI checks using synthetic APIs,10realSol checks with a synthetic local profile. This does not establish the new authenticated family cloud flow, physicaliPhone or clinical suitability. [Exact release evidence](docs/evidence/KITCHEN_RELEASE_RECEIPT.json).

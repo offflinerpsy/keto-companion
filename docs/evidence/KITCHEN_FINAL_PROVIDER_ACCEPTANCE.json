@@ -1,0 +1,95 @@
+{
+  "scope": "current Service plus actual Azure Sol/high; synthetic local SQLite only; NOT authenticated hosted browser or clinical testing",
+  "checks": [
+    {
+      "name": "actual_provider_called_once",
+      "passed": true
+    },
+    {
+      "name": "actual_Sol_high",
+      "passed": true
+    },
+    {
+      "name": "calculated_candidates_returned",
+      "passed": true
+    },
+    {
+      "name": "no_hidden_ingredients_or_shortage",
+      "passed": true
+    },
+    {
+      "name": "replay_not_paid_again",
+      "passed": true
+    },
+    {
+      "name": "save_needs_confirmation",
+      "passed": true
+    },
+    {
+      "name": "same_recipe_saved",
+      "passed": true
+    },
+    {
+      "name": "diary_needs_confirmation",
+      "passed": true
+    },
+    {
+      "name": "half_portion_uses_calculation",
+      "passed": true
+    },
+    {
+      "name": "technical_chat_model_not_required",
+      "passed": true
+    }
+  ],
+  "source_sha256": "852ec2bdfa09d1ed4251aa7c032af6f782ce99bd80e1d0824977a479cf13bada",
+  "model_roles": [
+    {
+      "role": "recipe",
+      "deployment": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "attempted": true,
+      "input_tokens": 1632,
+      "output_tokens": 746,
+      "status": "completed",
+      "latency_ms": 19558
+    }
+  ],
+  "fallback_reason": null,
+  "candidate_origins": [
+    "sol",
+    "sol",
+    "template"
+  ],
+  "recipe_titles": [
+    "Омлет с овощами",
+    "Шампиньоны с овощами",
+    "Омлет с овощами"
+  ],
+  "day_summary": {
+    "date": "2026-11-08",
+    "known_entries": 1,
+    "unquantified_entries": 0,
+    "nutrition": {
+      "energy_kcal": 140.75,
+      "protein_g": 12.9775,
+      "fat_g": 7.7075,
+      "carbohydrate_total_g": 6.095,
+      "fiber_g": 1.75,
+      "saturated_fat_g": 2.469,
+      "calcium_mg": 60.25,
+      "iron_mg": 2.0575,
+      "magnesium_mg": 33.75,
+      "potassium_mg": 603.0,
+      "sodium_mg": 118.25,
+      "vitamin_d_ug": 1.65,
+      "folate_dfe_ug": 72.0,
+      "vitamin_b12_ug": 0.6975,
+      "vitamin_c_mg": 19.475,
+      "net_carbohydrate_g": 4.345
+    },
+    "note": "Сумма только подтверждённых записей с известными порциями, не вся фактически съеденная еда. Неизвестные значения не считаются нулём."
+  },
+  "seconds": 20.0,
+  "passed": true
+}
