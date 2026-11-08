@@ -97,3 +97,7 @@ Do not interpret document completion as absence of defects or permission to rele
 ## Source-derived machine contracts
 
 [Generated contracts](../contracts/) contain API schemas, deterministic OpenAPI, D1 columns/relations, route/control inventories and kitchen limits. `scripts/export_contracts.py --check` detects drift. [Review resolutions](../review/SPEC_AUDIT_RESOLUTIONS.md) and [GitHub execution evidence](../evidence/SPEC_AUDIT_GITHUB_EXECUTION.json) distinguish current corrections from historical findings.
+
+## Proposed additions — not deployed
+
+[Instagram personal import and chat-assisted development](INSTAGRAM_IMPORT_AND_ASSISTED_DEVELOPMENT.md) · [Русский](../ru/INSTAGRAM_AND_DEV_MODE.md). This is a feasibility/design decision, not an enabled Instagram connector or coding runner.

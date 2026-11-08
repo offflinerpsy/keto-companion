@@ -1,0 +1,28 @@
+{
+  "task": "INSTAGRAM-DEV-FEASIBILITY",
+  "checked_at": "2026-11-08T13:44:34.445991+00:00",
+  "inspected_commit": "b592c7e3c01dabb34a7415bf41def8415eda9749",
+  "runtime_version_unchanged": "0.6.2-audit-pilot",
+  "existing_behavior_tests": {
+    "python_selected": 2,
+    "python_deselected": 94,
+    "node_selected": 3,
+    "passed": true,
+    "scope": "synthetic private-source/feature paths, not live Instagram or new coding executor"
+  },
+  "developer_mode_enabled": false,
+  "instagram_connected": false,
+  "instagram_credentials_accessed": false,
+  "private_records_read": false,
+  "runtime_files_changed": false,
+  "new_cloud_resources": false,
+  "new_paid_provider_calls": 0,
+  "sandbox_provider_account_entitlements_verified": false,
+  "github_ci_issue": 13,
+  "github_ci_state": "OPEN; latest startup_failure before jobs",
+  "research_limit": "Direct Meta documentation endpoints returned429; official Meta Postman documentation used; no live Instagram account API tested",
+  "docs": [
+    "docs/spec/INSTAGRAM_IMPORT_AND_ASSISTED_DEVELOPMENT.md",
+    "docs/ru/INSTAGRAM_AND_DEV_MODE.md"
+  ]
+}
