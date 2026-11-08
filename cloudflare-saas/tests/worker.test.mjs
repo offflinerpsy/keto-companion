@@ -247,3 +247,13 @@ test('PDF bridge response does not replace existing private state or persist fil
  const e=env(),owner=(await login(e)).cookie;let restore=useBridge(e);try{await tool(e,owner,'keto_consent',{processing:true,storage:true,health:true,confirmed:true})}finally{restore()}
  const previous=globalThis.fetch,before=e.DB.db.prepare('SELECT payload FROM private_state').get().payload;globalThis.fetch=async()=>new Response(JSON.stringify({response:{mime:'application/pdf',filename:'synthetic.pdf',base64:'JVBERi1TWU5USEVUSUM='},state:null}));try{const r=await tool(e,owner,'keto_export',{format:'pdf'});assert.equal(r.status,200);assert.equal(e.DB.db.prepare('SELECT payload FROM private_state').get().payload,before);assert(!JSON.stringify(e.DB.db.prepare('SELECT response_json FROM jobs').all()).includes('JVBERi1TWU5USEVUSUM='))}finally{globalThis.fetch=previous}
 });
+test('guidance status is role-neutral, requires explicit baseline confirmation and never calls a paid model',async()=>{
+ const e=env(),owner=(await login(e)).cookie;const restore=useBridge(e);try{
+ let r=await tool(e,owner,'keto_guidance',{action:'status'});assert.equal(r.status,200);assert.equal((await r.json()).guidance.stage,'consent');
+ const values={baseline:{age_years:'40',height_cm:'170',weight_kg:'70,5',equation_category:'female',activity:'light',measured_at:'2026-11-07'},choices:{goal:'maintain',mode:'starter'},timezone:'Europe/Minsk'};
+ assert.equal((await tool(e,owner,'keto_guidance',{action:'baseline',values})).status,422);
+ r=await tool(e,owner,'keto_consent',{processing:true,storage:true,health:true,confirmed:true});let s=(await r.json()).state;
+ r=await tool(e,owner,'keto_guidance',{action:'baseline',values});assert.equal(r.status,200);let proposed=await r.json();assert.deepEqual(proposed.state.profile.baseline,{});r=await tool(e,owner,'keto_apply_proposal',{proposal_id:proposed.proposal.id,expected_revision:s.revision,approved:true});assert.equal(r.status,200);s=(await r.json()).state;assert.equal(s.profile.baseline.weight_kg,70.5);assert.equal(s.guidance.stage,'restrictions');assert.equal(s.profile.screening.pregnant,null);assert.equal(e.DB.db.prepare('SELECT SUM(requests) n FROM usage').get().n,null);
+ assert.equal((await tool(e,owner,'keto_guidance',{action:'status',subject:'another-user'})).status,400);
+ }finally{restore()}
+});

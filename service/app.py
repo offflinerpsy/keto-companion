@@ -45,11 +45,12 @@ for definition in TOOLS:
         definition['inputSchema']['properties']['ui_confirmation']={'type':'string','minLength':32,'maxLength':100}
         definition['inputSchema']['required'].append('ui_confirmation')
 TOOLS.extend([
+ tool('keto_guidance','Знакомство и ориентиры','Детерминированные предварительные ориентиры по сохранённым данным; только отдельное подтверждение.',{'action':{'type':'string','enum':['status','preview','baseline','propose']},'values':O,'preview_hash':S},['action']),
  tool('keto_topics','Темы разговора','Личные темы; изменение только по явному подтверждению.',{'action':{'type':'string','enum':['list','create','select','rename','delete','clear']},'thread_id':S,'title':{'type':'string','maxLength':80},'confirmed':B,'expected_revision':I},['action']),
  tool('keto_reminders','Личные напоминания','Напоминания и экспорт в Календарь; сайт не отправляет push в фоне.',{'action':{'type':'string','enum':['list','create','update','delete','complete','ics']},'reminder_id':S,'values':O,'confirmed':B,'expected_revision':I},['action']),
  tool('keto_transcribe','Распознать запись','До 60 секунд, аудио до 1 МБ. Текст только черновик, не отправляется автоматически.',{'audio_base64':{'type':'string','maxLength':1400000},'mime':{'type':'string','enum':['audio/mp4','audio/webm','audio/wav','audio/x-wav']},'request_id':{'type':'string','minLength':8,'maxLength':100}},['audio_base64','mime','request_id'])
 ])
-MOBILE_HTTP_TOOLS={'keto_topics','keto_reminders','keto_transcribe'}
+MOBILE_HTTP_TOOLS={'keto_guidance','keto_topics','keto_reminders','keto_transcribe'}
 TOOL_MAP={x['name']:x for x in TOOLS}
 
 def image_clean(value):
@@ -309,6 +310,7 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
         if name=='keto_apply_proposal':return svc.apply(sub,args['proposal_id'],args['expected_revision'],args['approved'],kind)
         if name=='keto_consent':return svc.consent(sub,args['processing'],args['storage'],args['health'],args['confirmed'],kind)
         if name=='keto_menu':return svc.menu(sub,args['start'],args['days'],kind)
+        if name=='keto_guidance':return svc.guidance(sub,kind=kind,**args)
         if name=='keto_topics':return svc.topics(sub,kind=kind,**args)
         if name=='keto_reminders':return svc.reminders(sub,kind=kind,**args)
         if name=='keto_transcribe':return svc.transcribe(sub,kind=kind,**args)

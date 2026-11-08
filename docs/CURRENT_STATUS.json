@@ -1,16 +1,21 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-07T22:55:06.195179+00:00",
-  "source_version": "0.4.0-mobile-pilot",
+  "updated_at": "2026-11-08T10:01:01.705364+00:00",
+  "source_version": "0.5.0-guided-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1",
-  "active_task": null,
+  "active_task": {
+    "id": "KETO-ONBOARDING-05",
+    "github_issue": 8,
+    "stage": "completed_source",
+    "status": "completed"
+  },
   "last_completed": "KETO-MOBILE-006",
   "next_task": {
-    "id": "KETO-MOBILE-ACCEPTANCE",
-    "status": "requires_owner_device",
-    "action": "Reload the app on iPhone, tap microphone, speak, stop, confirm text appears without sending.",
-    "github_issue": 5
+    "id": "KETO-ONBOARDING-05",
+    "github_issue": 8,
+    "stage": "parent_independent_acceptance",
+    "action": "Run the exact manifest in the authorized container/runtime, review both catalog-infeasible automatic profile outcomes and starter policy suitability, then decide release through the existing parent contour."
   },
   "staging": {
     "deployed": true,
@@ -75,5 +80,19 @@
     "cloud_changes": false
   },
   "mobile_stage": "deployed_physical_iPhone_acceptance_pending",
-  "mobile_receipt": "docs/evidence/MOBILE_RELEASE_RECEIPT.json"
+  "mobile_receipt": "docs/evidence/MOBILE_RELEASE_RECEIPT.json",
+  "owner_feedback": {
+    "dictation": "user confirms works",
+    "environment": "desktop Chrome in current feedback; not physical iPhone acceptance"
+  },
+  "onboarding_source": {
+    "status": "completed_locally",
+    "independent_acceptance": "pending",
+    "python_passed": 420,
+    "python_skipped": 1,
+    "node_passed": 81,
+    "automatic_menu_outcomes": "['catalog_infeasible', 'catalog_infeasible']",
+    "release_performed": false,
+    "evidence": "qa/ONBOARDING_IMPLEMENTATION_RESULT.json"
+  }
 }
