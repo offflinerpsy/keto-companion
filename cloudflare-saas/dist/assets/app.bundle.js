@@ -7906,7 +7906,10 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
   $2("nav-back").hidden = ["chat", "today", "diary", "more"].includes(next);
   const parents = { "setup-consent": "recipes", "setup-about": "setup-consent", "setup-restrictions": "setup-about", "setup-targets": "setup-restrictions" };
   const parent = depth > 0 ? origin : parents[route] || "more";
-  $2("nav-back").textContent = "\u041D\u0430\u0437\u0430\u0434 \xB7 " + ({ chat: "\u0427\u0430\u0442", today: "\u041C\u0435\u043D\u044E", more: "\u0415\u0449\u0451", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", targets: "\u041F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439", "setup-consent": "\u0421\u043E\u0433\u043B\u0430\u0441\u0438\u0435", "setup-about": "\u041E \u0432\u0430\u0441", "setup-restrictions": "\u041E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F", "setup-targets": "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" }[parent] || "\u0415\u0449\u0451");
+  const parentLabel = { chat: "\u0427\u0430\u0442", today: "\u041C\u0435\u043D\u044E", more: "\u0415\u0449\u0451", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", targets: "\u041F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439", "setup-consent": "\u0421\u043E\u0433\u043B\u0430\u0441\u0438\u0435", "setup-about": "\u041E \u0432\u0430\u0441", "setup-restrictions": "\u041E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F", "setup-targets": "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" }[parent] || "\u0415\u0449\u0451";
+  $2("nav-back").textContent = "\u2039 \u041D\u0430\u0437\u0430\u0434";
+  $2("nav-back").setAttribute("aria-label", "\u041D\u0430\u0437\u0430\u0434: " + parentLabel);
+  $2("nav-back").title = "\u041D\u0430\u0437\u0430\u0434: " + parentLabel;
 }
 function setState(next) {
   if (state && state.profile.owner_account_id !== next.profile.owner_account_id) clearScreen();
