@@ -1,0 +1,16 @@
+name: Platform smoke (no application or credentials)
+on:
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: keto-platform-smoke
+  cancel-in-progress: true
+jobs:
+  availability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Confirm hosted runner starts
+        shell: bash
+        run: |
+          printf '%s\n' 'GitHub-hosted runner started. No repository checkout, dependency install, cloud request or application tests.'

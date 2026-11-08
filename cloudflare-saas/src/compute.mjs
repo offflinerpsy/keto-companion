@@ -67,8 +67,9 @@ export async function handleTool(req,env,h){
  if(existing){if(existing.request_hash!==requestHash)h.fail(409,'REQUEST_ID_MISMATCH');if(existing.status==='completed'){if(transient)h.fail(409,'ALREADY_PROCESSED');let c=await h.dbfirst(env,'SELECT consent_revision FROM consents WHERE user_id=?',u.id);if((c?.consent_revision||0)!==existing.consent_revision)h.fail(409,'CONSENT_CHANGED');return h.json(JSON.parse(existing.response_json))}h.fail(409,existing.status==='pending'?'REQUEST_PENDING':'REQUEST_FAILED')}
  if(operation==='consent'&&(!args.storage||!args.health||!args.processing))await consentChange(env,u,args);
  await h.dbrun(env,"INSERT INTO private_state(user_id,revision,payload,updated_at) VALUES(?,0,'{}',?) ON CONFLICT(user_id) DO NOTHING",u.id,t);
- const localEstimate=operation==='chat'&&/сколько.*калор|рассчитай|рассчитайте/i.test(args.message||'');
- const paid=(!localEstimate&&['chat','transcribe'].includes(operation))||(operation==='kitchen'&&args.action==='generate')?1:0;
+ // Reserve all potentially paid chat requests; refund only after a verified no-model result.
+ // A user phrase such as 'рассчитай ужин' may invoke recipe design before local guidance.
+ const paid=['chat','transcribe'].includes(operation)||(operation==='kitchen'&&args.action==='generate')?1:0;
  const db=env.DB,stmts=[
   db.prepare("UPDATE jobs SET status='failed',finished_at=? WHERE user_id=? AND status='pending' AND EXISTS(SELECT 1 FROM private_state WHERE user_id=? AND lock_until<=?)").bind(t,u.id,u.id,t),
   db.prepare("INSERT INTO jobs(user_id,request_id,request_hash,status,revision,created_at,consent_revision) SELECT ?,?,?,'pending',s.revision,?,COALESCE(c.consent_revision,0) FROM private_state s JOIN users u ON u.id=s.user_id JOIN sessions z ON z.user_id=u.id AND z.token_hash=? AND z.expires_at>? LEFT JOIN consents c ON c.user_id=u.id WHERE s.user_id=? AND u.status='active' AND (s.lock_id IS NULL OR s.lock_until<=?) AND (?=0 OR (c.storage=1 AND c.health=1 AND c.processing=1 AND COALESCE((SELECT requests FROM usage WHERE user_id=? AND day=?),0)<30 AND COALESCE((SELECT requests FROM global_usage WHERE day=?),0)<500)) AND (? IN ('open','recipes','consent','export','guidance') OR (c.storage=1 AND c.health=1)) ON CONFLICT(user_id,request_id) DO NOTHING").bind(u.id,requestId,requestHash,t,sessionHash,t,u.id,t,paid,u.id,date,date,operation),

@@ -1,19 +1,19 @@
 {
-  "status": "0.6.0-kitchen-pilot candidate; parent runtime and device acceptance pending",
+  "status": "0.6.2-audit-pilot source artifacts; runtime/device acceptance is separate",
   "main_module": "worker-modules.mjs",
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "f5afd8d3261687bede8d13de2fa15432f3afd954b821a19224ac323f5967b67b",
-      "bytes": 750370,
+      "sha256": "edb232f6207925f41400c20b8bf7fd823223106bcfb677500b334a5e93caf0a6",
+      "bytes": 750786,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "58da78cec8bc69dc8b2531ce9fd68ad52e74dcbfdb7c20c4bb7c94d7841cfc09",
-      "bytes": 65082,
+      "sha256": "86edb899ed905af8a98ee9985018d6fa09dff67ebd1389848306b304e952ffcc",
+      "bytes": 64966,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
@@ -28,8 +28,8 @@
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "f6513c581f8a1885a7f433072c6a98d12f427e47a33590f3791cda8dd5927b42",
-      "bytes": 518110,
+      "sha256": "88adc422c2d9a15200de22cbaada75d23fce67c8216ad308b3c15669fc49ec52",
+      "bytes": 518638,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"

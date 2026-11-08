@@ -1,0 +1,789 @@
+{
+  "migrations": [
+    {
+      "path": "cloudflare-saas/migrations/0001_initial.sql",
+      "sha256": "8c15dea11cf267fe91b4919e28d0d92101d4827ba3b5625a927354b8f78eb177"
+    },
+    {
+      "path": "cloudflare-saas/migrations/0002_integration.sql",
+      "sha256": "919b82dd0b9bab3cf7a0db57fab985b1e2af99c7632cf40fe03aa07f27ba1c7f"
+    },
+    {
+      "path": "cloudflare-saas/migrations/0003_global_usage.sql",
+      "sha256": "b6c5e324da480634aea369ac11aa3fe2585618c7c75b77a9b8fd2d48c70bb148"
+    },
+    {
+      "path": "cloudflare-saas/migrations/0004_firebase_challenges.sql",
+      "sha256": "8792013359128e7759237dff78d2a321ceaba5114a78ea9d0729d52aa5ee9811"
+    }
+  ],
+  "notice": "Actual SQLite-compatible D1 migration result; no user data or database connection.",
+  "schema": "keto-d1-schema-v1",
+  "tables": [
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "actor_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "action",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "target_id",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "audit"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "storage",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "health",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "processing",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "updated_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": "0",
+          "name": "consent_revision",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "CASCADE",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "consents"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "receipt_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "status",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "updated_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "NO ACTION",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "deletion_jobs"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "transaction_hash",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "cookie_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "invite_hash",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "ip_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "expires_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "consumed_at",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "firebase_challenges"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "day",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": "0",
+          "name": "requests",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "global_usage"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "token_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "email",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "expires_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "created_by",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "revoked_at",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "claimed_by",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "claimed_at",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "claimed_by",
+          "on_delete": "NO ACTION",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        },
+        {
+          "from": "created_by",
+          "on_delete": "NO ACTION",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "invites"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": true,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "request_id",
+          "not_null": true,
+          "primary_key_order": 2,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "request_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "status",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "revision",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "response_json",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "0",
+          "name": "consent_revision",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "finished_at",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "CASCADE",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "jobs"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "state_hash",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "verifier",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "nonce_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "invite_hash",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "expires_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "oauth_attempts"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": "0",
+          "name": "revision",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": "'{}'",
+          "name": "payload",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "updated_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "lock_id",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "lock_until",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "CASCADE",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "private_state"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "token_hash",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "expires_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "CASCADE",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "sessions"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "title",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "author",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "source_url",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "access_method",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "content_hash",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "excerpt",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "object_key",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "mime",
+          "not_null": false,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "status",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "rights_attested",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "CASCADE",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "sources"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "object_key",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "status",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "NO ACTION",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "upload_reservations"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": true,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "day",
+          "not_null": true,
+          "primary_key_order": 2,
+          "type": "TEXT"
+        },
+        {
+          "default": "0",
+          "name": "requests",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "CASCADE",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "usage"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "google_sub",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "email",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "role",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "status",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "joined_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "last_active",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "users"
+    }
+  ]
+}

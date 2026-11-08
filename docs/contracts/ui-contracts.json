@@ -1,0 +1,1052 @@
+{
+  "css_tokens": {
+    ":root": {
+      "--accent": "#6b4265",
+      "--bg": "#f7f3f6",
+      "--ink": "#312b33",
+      "--line": "#ded4df",
+      "--muted": "#655c68",
+      "--paper": "#fff",
+      "--radius": "20px",
+      "--soft": "#f0e7ee",
+      "--warn": "#8b322f"
+    },
+    "body.dark": {
+      "--accent": "#ddb4d5",
+      "--bg": "#211c24",
+      "--ink": "#f7eff6",
+      "--line": "#64556a",
+      "--muted": "#cbbdcb",
+      "--paper": "#302936",
+      "--soft": "#463449",
+      "--warn": "#ffc0b5"
+    },
+    "body.light": {
+      "--bg": "#f4f5f8",
+      "--paper": "#fff",
+      "--soft": "#eceaf4"
+    }
+  },
+  "notice": "Static markup only. Additional DOM elements are constructed by setup-ui.js, kitchen-ui.js and mobile-ui.js; see design handoff. Preserve ids, data attributes and event contracts during redesign.",
+  "routes": [
+    "chat",
+    "today",
+    "diary",
+    "more",
+    "recipes",
+    "settings",
+    "sources",
+    "reminders",
+    "admin",
+    "targets",
+    "knowledge",
+    "memory",
+    "setup-consent",
+    "setup-about",
+    "setup-restrictions",
+    "setup-targets"
+  ],
+  "schema": "keto-ui-contract-v1",
+  "source_files": {
+    "cloudflare-saas/public/app.css": "609c3bd1d8d71c174f9b586aa38efd938bd13a853bc6f93cd6d4c064d133064f",
+    "cloudflare-saas/public/index.html": "6152364b012db6804fe48e181eba5c03bde283800eae7c1408247d4934eaf7a1",
+    "cloudflare-saas/public/routes.js": "0414f2be4b0de5e8f2fa41344bec7cab183f682a8a9080284f4010ec42c8d2e2",
+    "cloudflare-saas/src/compute.mjs": "f1f1ddf7344550ca0c64a08fc6fb17a440ad1dbd976da0a84136bf69f6ecb9a1",
+    "cloudflare-saas/src/worker.mjs": "4e555fa06d00529b4a0a6b2ff686002ea829b6d877f0cf85cba8ca6c9febe59e",
+    "service/app.py": "07d315a7d31d8225a47a03914ec8d99a51ced39f8bb143081d376b7db56714df"
+  },
+  "static_elements": [
+    {
+      "name": "viewport",
+      "tag": "meta"
+    },
+    {
+      "name": "color-scheme",
+      "tag": "meta"
+    },
+    {
+      "name": "theme-color",
+      "tag": "meta"
+    },
+    {
+      "id": "app",
+      "tag": "div"
+    },
+    {
+      "data-testid": "app-header",
+      "tag": "header"
+    },
+    {
+      "data-testid": "nav-back",
+      "id": "nav-back",
+      "tag": "button"
+    },
+    {
+      "id": "connection",
+      "tag": "span"
+    },
+    {
+      "aria-label": "Помощь",
+      "id": "help",
+      "tag": "button"
+    },
+    {
+      "aria-label": "Обновить данные",
+      "id": "refresh",
+      "tag": "button"
+    },
+    {
+      "id": "login",
+      "tag": "section"
+    },
+    {
+      "id": "cf-login",
+      "tag": "button"
+    },
+    {
+      "id": "cf-claim",
+      "tag": "div"
+    },
+    {
+      "id": "cf-claim-button",
+      "tag": "button"
+    },
+    {
+      "id": "cf-switch",
+      "tag": "button"
+    },
+    {
+      "id": "cf-login-message",
+      "tag": "p"
+    },
+    {
+      "id": "deletion-recovery",
+      "tag": "div"
+    },
+    {
+      "id": "deletion-code",
+      "tag": "input"
+    },
+    {
+      "id": "continue-deletion",
+      "tag": "button"
+    },
+    {
+      "id": "deletion-status",
+      "tag": "p"
+    },
+    {
+      "id": "workspace",
+      "tag": "div"
+    },
+    {
+      "aria-label": "Основные разделы",
+      "data-testid": "bottom-nav",
+      "id": "nav",
+      "tag": "nav"
+    },
+    {
+      "data-view": "chat",
+      "tag": "button"
+    },
+    {
+      "data-view": "today",
+      "tag": "button"
+    },
+    {
+      "data-view": "diary",
+      "tag": "button"
+    },
+    {
+      "data-view": "more",
+      "tag": "button"
+    },
+    {
+      "id": "demo-banner",
+      "tag": "div"
+    },
+    {
+      "id": "content",
+      "tag": "main"
+    },
+    {
+      "id": "consent-panel",
+      "tag": "section"
+    },
+    {
+      "id": "consent-form",
+      "tag": "form"
+    },
+    {
+      "id": "c-processing",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "c-storage",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "c-health",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "toast",
+      "tag": "div"
+    },
+    {
+      "id": "holds",
+      "tag": "div"
+    },
+    {
+      "id": "proposals",
+      "tag": "div"
+    },
+    {
+      "data-page": "chat",
+      "tag": "section"
+    },
+    {
+      "data-testid": "recipes-shortcut",
+      "data-view": "recipes",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "data-testid": "topic-picker",
+      "id": "topic-picker",
+      "tag": "select"
+    },
+    {
+      "aria-label": "Новая тема",
+      "id": "topic-new",
+      "tag": "button"
+    },
+    {
+      "aria-label": "Изменить тему",
+      "id": "topic-edit",
+      "tag": "button"
+    },
+    {
+      "data-testid": "chat-scroll",
+      "tag": "div"
+    },
+    {
+      "id": "messages",
+      "tag": "div"
+    },
+    {
+      "id": "chat-extras",
+      "tag": "div"
+    },
+    {
+      "id": "chat-confirmations",
+      "tag": "div"
+    },
+    {
+      "id": "suggestions",
+      "tag": "div"
+    },
+    {
+      "data-testid": "chat-composer",
+      "id": "chat-form",
+      "tag": "form"
+    },
+    {
+      "data-testid": "photo-preview",
+      "id": "photo-preview",
+      "tag": "div"
+    },
+    {
+      "id": "photo-preview-image",
+      "tag": "img"
+    },
+    {
+      "id": "photo-remove",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "aria-describedby": "composer-help",
+      "id": "message",
+      "tag": "textarea"
+    },
+    {
+      "id": "photo-status",
+      "tag": "p"
+    },
+    {
+      "id": "photo",
+      "tag": "input",
+      "type": "file"
+    },
+    {
+      "aria-label": "Начать диктовку",
+      "data-testid": "mic-button",
+      "id": "mic-button",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "send",
+      "tag": "button",
+      "type": "submit"
+    },
+    {
+      "id": "voice-controls",
+      "tag": "div"
+    },
+    {
+      "id": "voice-timer",
+      "tag": "span"
+    },
+    {
+      "id": "voice-stop",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "voice-cancel",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "voice-status",
+      "tag": "p"
+    },
+    {
+      "id": "composer-help",
+      "tag": "p"
+    },
+    {
+      "id": "state-summary",
+      "tag": "span"
+    },
+    {
+      "id": "onboard-open",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "data-page": "setup",
+      "tag": "section"
+    },
+    {
+      "aria-label": "Этапы знакомства",
+      "data-testid": "setup-progress",
+      "id": "setup-progress",
+      "tag": "nav"
+    },
+    {
+      "data-testid": "setup-stage",
+      "id": "setup-stage",
+      "tag": "p"
+    },
+    {
+      "data-view": "recipes",
+      "tag": "button"
+    },
+    {
+      "data-view": "knowledge",
+      "tag": "button"
+    },
+    {
+      "id": "setup-consent-slot",
+      "tag": "div"
+    },
+    {
+      "id": "setup-about",
+      "tag": "div"
+    },
+    {
+      "data-testid": "baseline-form",
+      "id": "baseline-form",
+      "tag": "form"
+    },
+    {
+      "id": "baseline-name",
+      "tag": "input"
+    },
+    {
+      "id": "baseline-zone",
+      "tag": "input"
+    },
+    {
+      "id": "baseline-age",
+      "tag": "input"
+    },
+    {
+      "id": "baseline-height",
+      "tag": "input"
+    },
+    {
+      "id": "baseline-weight",
+      "tag": "input"
+    },
+    {
+      "id": "baseline-measured",
+      "tag": "input",
+      "type": "date"
+    },
+    {
+      "id": "baseline-weight-help",
+      "tag": "p"
+    },
+    {
+      "aria-describedby": "baseline-weight-help",
+      "id": "baseline-weight-slider",
+      "tag": "div"
+    },
+    {
+      "id": "baseline-category",
+      "tag": "select"
+    },
+    {
+      "id": "activity-choices",
+      "tag": "div"
+    },
+    {
+      "name": "activity",
+      "tag": "input",
+      "type": "radio"
+    },
+    {
+      "name": "activity",
+      "tag": "input",
+      "type": "radio"
+    },
+    {
+      "name": "activity",
+      "tag": "input",
+      "type": "radio"
+    },
+    {
+      "name": "planning-goal",
+      "tag": "input",
+      "type": "radio"
+    },
+    {
+      "name": "planning-goal",
+      "tag": "input",
+      "type": "radio"
+    },
+    {
+      "name": "planning-goal",
+      "tag": "input",
+      "type": "radio"
+    },
+    {
+      "name": "planning-mode",
+      "tag": "input",
+      "type": "radio"
+    },
+    {
+      "name": "planning-mode",
+      "tag": "input",
+      "type": "radio"
+    },
+    {
+      "id": "setup-restrictions-slot",
+      "tag": "div"
+    },
+    {
+      "id": "setup-targets",
+      "tag": "div"
+    },
+    {
+      "data-view": "targets",
+      "tag": "button"
+    },
+    {
+      "data-view": "knowledge",
+      "tag": "button"
+    },
+    {
+      "id": "setup-confirmations",
+      "tag": "div"
+    },
+    {
+      "data-page": "targets",
+      "tag": "section"
+    },
+    {
+      "id": "saved-targets",
+      "tag": "div"
+    },
+    {
+      "id": "calculate-guidance",
+      "tag": "button"
+    },
+    {
+      "data-view": "setup-about",
+      "tag": "button"
+    },
+    {
+      "data-view": "knowledge",
+      "tag": "button"
+    },
+    {
+      "data-testid": "target-preview",
+      "id": "target-preview",
+      "tag": "div"
+    },
+    {
+      "data-testid": "apply-targets",
+      "id": "apply-targets",
+      "tag": "button"
+    },
+    {
+      "id": "target-confirmations",
+      "tag": "div"
+    },
+    {
+      "id": "manual-targets",
+      "tag": "details"
+    },
+    {
+      "id": "targets-form",
+      "tag": "form"
+    },
+    {
+      "name": "energy_min_kcal",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "name": "energy_max_kcal",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "name": "protein_min_g",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "name": "protein_max_g",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "name": "carb_basis",
+      "tag": "select"
+    },
+    {
+      "name": "carb_max_g",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "name": "fiber_min_g",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "name": "saturated_fat_max_pct",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "name": "basis_note",
+      "tag": "textarea"
+    },
+    {
+      "data-page": "knowledge",
+      "data-testid": "knowledge",
+      "tag": "section"
+    },
+    {
+      "id": "knowledge-cards",
+      "tag": "div"
+    },
+    {
+      "data-page": "more",
+      "tag": "section"
+    },
+    {
+      "data-testid": "more-list",
+      "tag": "div"
+    },
+    {
+      "data-view": "recipes",
+      "tag": "button"
+    },
+    {
+      "data-view": "memory",
+      "tag": "button"
+    },
+    {
+      "data-view": "reminders",
+      "tag": "button"
+    },
+    {
+      "data-view": "setup",
+      "tag": "button"
+    },
+    {
+      "data-view": "targets",
+      "tag": "button"
+    },
+    {
+      "data-view": "knowledge",
+      "tag": "button"
+    },
+    {
+      "data-view": "sources",
+      "tag": "button"
+    },
+    {
+      "data-view": "settings",
+      "tag": "button"
+    },
+    {
+      "data-view": "admin",
+      "id": "admin-tab",
+      "tag": "button"
+    },
+    {
+      "data-page": "reminders",
+      "tag": "section"
+    },
+    {
+      "id": "reminder-day-template",
+      "tag": "button"
+    },
+    {
+      "id": "reminder-menu-template",
+      "tag": "button"
+    },
+    {
+      "id": "reminder-list",
+      "tag": "div"
+    },
+    {
+      "data-testid": "reminder-form",
+      "id": "reminder-form",
+      "tag": "form"
+    },
+    {
+      "id": "reminder-id",
+      "tag": "input",
+      "type": "hidden"
+    },
+    {
+      "id": "reminder-title",
+      "tag": "input"
+    },
+    {
+      "id": "reminder-time",
+      "tag": "input",
+      "type": "time"
+    },
+    {
+      "id": "reminder-zone",
+      "tag": "input"
+    },
+    {
+      "id": "reminder-weekdays",
+      "tag": "div"
+    },
+    {
+      "id": "reminder-date",
+      "tag": "input",
+      "type": "date"
+    },
+    {
+      "id": "reminder-enabled",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "reminder-reset",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "data-page": "memory",
+      "tag": "section"
+    },
+    {
+      "data-testid": "kitchen-memory",
+      "id": "kitchen-memory",
+      "tag": "div"
+    },
+    {
+      "data-page": "recipes",
+      "tag": "section"
+    },
+    {
+      "data-testid": "kitchen-studio",
+      "id": "kitchen-studio",
+      "tag": "div"
+    },
+    {
+      "data-testid": "recipe-library",
+      "tag": "details"
+    },
+    {
+      "id": "recipe-search",
+      "tag": "form"
+    },
+    {
+      "id": "recipe-query",
+      "tag": "input"
+    },
+    {
+      "id": "recipe-note",
+      "tag": "p"
+    },
+    {
+      "id": "recipes",
+      "tag": "div"
+    },
+    {
+      "data-page": "diary",
+      "tag": "section"
+    },
+    {
+      "id": "diary-form",
+      "tag": "form"
+    },
+    {
+      "id": "diary-date",
+      "tag": "input",
+      "type": "date"
+    },
+    {
+      "id": "diary-note",
+      "tag": "textarea"
+    },
+    {
+      "id": "diary-entries",
+      "tag": "div"
+    },
+    {
+      "data-page": "today",
+      "tag": "section"
+    },
+    {
+      "data-view": "recipes",
+      "tag": "button"
+    },
+    {
+      "data-view": "targets",
+      "tag": "button"
+    },
+    {
+      "id": "menu-gate",
+      "tag": "div"
+    },
+    {
+      "id": "menu-form",
+      "tag": "form"
+    },
+    {
+      "id": "menu-start",
+      "tag": "input",
+      "type": "date"
+    },
+    {
+      "id": "menu-days",
+      "tag": "select"
+    },
+    {
+      "id": "menu-result",
+      "tag": "div"
+    },
+    {
+      "data-testid": "menu-pdf",
+      "id": "menu-pdf",
+      "tag": "button"
+    },
+    {
+      "data-testid": "menu-share",
+      "id": "menu-share",
+      "tag": "button"
+    },
+    {
+      "id": "menu-download",
+      "tag": "button"
+    },
+    {
+      "id": "pdf-status",
+      "tag": "p"
+    },
+    {
+      "id": "menu-import",
+      "tag": "input",
+      "type": "file"
+    },
+    {
+      "data-page": "settings",
+      "tag": "section"
+    },
+    {
+      "id": "settings-form",
+      "tag": "form"
+    },
+    {
+      "id": "theme",
+      "tag": "select"
+    },
+    {
+      "id": "text_size",
+      "tag": "select"
+    },
+    {
+      "id": "density",
+      "tag": "select"
+    },
+    {
+      "id": "home",
+      "tag": "select"
+    },
+    {
+      "id": "simple_mode",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "show_nutrition",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "meals_per_day",
+      "tag": "select"
+    },
+    {
+      "id": "max_active_minutes",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "id": "history",
+      "tag": "div"
+    },
+    {
+      "id": "open-onboarding-settings",
+      "tag": "button"
+    },
+    {
+      "id": "revoke",
+      "tag": "button"
+    },
+    {
+      "id": "logout",
+      "tag": "button"
+    },
+    {
+      "id": "delete-data",
+      "tag": "button"
+    },
+    {
+      "data-page": "onboarding",
+      "tag": "section"
+    },
+    {
+      "id": "profile-form",
+      "tag": "form"
+    },
+    {
+      "id": "display-name",
+      "tag": "input"
+    },
+    {
+      "id": "timezone",
+      "tag": "input"
+    },
+    {
+      "id": "goal",
+      "tag": "input"
+    },
+    {
+      "id": "medications",
+      "tag": "input"
+    },
+    {
+      "id": "question-progress",
+      "tag": "legend"
+    },
+    {
+      "id": "screen-questions",
+      "tag": "div"
+    },
+    {
+      "id": "question-prev",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "question-next",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "allergy-options",
+      "tag": "div"
+    },
+    {
+      "data-page": "sources",
+      "tag": "section"
+    },
+    {
+      "id": "source-form",
+      "tag": "form"
+    },
+    {
+      "name": "title",
+      "tag": "input"
+    },
+    {
+      "name": "author",
+      "tag": "input"
+    },
+    {
+      "name": "url",
+      "tag": "input",
+      "type": "url"
+    },
+    {
+      "name": "text",
+      "tag": "textarea"
+    },
+    {
+      "name": "upload",
+      "tag": "input",
+      "type": "file"
+    },
+    {
+      "name": "rights",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "source-list",
+      "tag": "div"
+    },
+    {
+      "data-page": "admin",
+      "tag": "section"
+    },
+    {
+      "id": "invite-form",
+      "tag": "form"
+    },
+    {
+      "name": "email",
+      "tag": "input",
+      "type": "email"
+    },
+    {
+      "id": "invite-link",
+      "tag": "p"
+    },
+    {
+      "id": "admin-summary",
+      "tag": "div"
+    },
+    {
+      "id": "version",
+      "tag": "span"
+    },
+    {
+      "id": "topic-dialog",
+      "tag": "dialog"
+    },
+    {
+      "id": "topic-heading",
+      "tag": "h2"
+    },
+    {
+      "id": "topic-title",
+      "tag": "input"
+    },
+    {
+      "id": "topic-rename",
+      "tag": "button"
+    },
+    {
+      "id": "topic-clear",
+      "tag": "button"
+    },
+    {
+      "id": "topic-delete",
+      "tag": "button"
+    },
+    {
+      "id": "topic-close",
+      "tag": "button"
+    },
+    {
+      "id": "source-recipe-dialog",
+      "tag": "dialog"
+    },
+    {
+      "id": "source-recipe-form",
+      "tag": "form"
+    },
+    {
+      "id": "sr-name",
+      "tag": "input"
+    },
+    {
+      "id": "sr-category",
+      "tag": "select"
+    },
+    {
+      "id": "sr-servings",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "id": "sr-minutes",
+      "tag": "input",
+      "type": "number"
+    },
+    {
+      "id": "sr-ingredients",
+      "tag": "textarea"
+    },
+    {
+      "id": "sr-steps",
+      "tag": "textarea"
+    },
+    {
+      "id": "sr-close",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "recipe-dialog",
+      "tag": "dialog"
+    },
+    {
+      "id": "recipe-detail",
+      "tag": "div"
+    },
+    {
+      "id": "close-recipe",
+      "tag": "button"
+    },
+    {
+      "id": "help-dialog",
+      "tag": "dialog"
+    },
+    {
+      "id": "help-search",
+      "tag": "input",
+      "type": "search"
+    },
+    {
+      "id": "help-results",
+      "tag": "div"
+    },
+    {
+      "id": "close-help",
+      "tag": "button"
+    }
+  ]
+}

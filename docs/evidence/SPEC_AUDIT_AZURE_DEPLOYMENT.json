@@ -1,0 +1,12 @@
+{
+  "task": "SPEC-AUDIT-07",
+  "source_commit": "e3f648d5313b68202336cda775ff7279556a2569",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "0835906ec6a17df6c79b8d56c9b4c81f7ad3f975d54a6dcbb21459bf01b71e35",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "status": 4,
+  "complete": true,
+  "deployment_id": "3b1fdd95-59ad-4d7d-a56b-23e96c4b1e32",
+  "checked_at": "2026-11-08T13:11:27.836131+00:00"
+}

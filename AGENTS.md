@@ -25,3 +25,7 @@ Preserve the medical safety and deterministic calculation rules. Do not modify t
 Existing 0.2.1 Azure plugin and new 0.3.0 SaaS are distinct release states. Local tests are not cloud deployment, real Google login, browser/popup/voice validation, or clinical validation. Verify the exact target/build, schema, private bindings and endpoint results before a release claim. A working public page is not a published public ChatGPT plugin. Keep staging and production separate. Do not create duplicate D1/R2/projects. Never migrate personal state silently.
 
 Stop at the current task's acceptance criteria and write the handoff. When only an actual person's sign-in/consent is missing, give one concrete user action rather than bypassing it or opening more technical work.
+
+## Specification and design handoff
+
+Start with `docs/AGENT_CONTEXT.json`, `docs/spec/README.md` and `docs/spec/CURRENT_CORRECTIONS.md`. English and Russian design handoffs are `docs/en/AI_DESIGN_HANDOFF.md` and `docs/ru/AI_DESIGN_HANDOFF.md`. Source-derived JSON contracts live in `docs/contracts/` and must pass `scripts/export_contracts.py --check`; verify documentation links/paths with `scripts/verify_specification.py`. Preserve current audit regressions when redesigning. `docs/spec/review_probes.py` intentionally reproduces old defects at its baseline commit, not desired current behavior. GitHub-hosted startup failure is an external execution blocker, never a passing test result.

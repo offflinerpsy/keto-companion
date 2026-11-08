@@ -1,0 +1,111 @@
+{
+  "task": "SPEC-AUDIT-07",
+  "version": "0.6.2-audit-pilot",
+  "runtime_source_commit": "e3f648d5313b68202336cda775ff7279556a2569",
+  "checked_at": "2026-11-08T13:18:58.106871+00:00",
+  "status": "specification_review_and_private_staging_fixes_complete; hosted_CI_and_family_acceptance_blocked_or_pending",
+  "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "cloudflare": {
+    "build_uuid": "2da63893-8e0d-438e-bb9e-bddb6b8f2101",
+    "outcome": "success",
+    "deployment_id": "68aa83f87c1c4726a58ad92cf603f77b",
+    "main_module_sha256": "86edb899ed905af8a98ee9985018d6fa09dff67ebd1389848306b304e952ffcc",
+    "modules": 13
+  },
+  "azure": {
+    "task": "SPEC-AUDIT-07",
+    "source_commit": "e3f648d5313b68202336cda775ff7279556a2569",
+    "azure_app": "keto-companion-ay-20261107",
+    "archive_sha256": "0835906ec6a17df6c79b8d56c9b4c81f7ad3f975d54a6dcbb21459bf01b71e35",
+    "public_key_only_transferred": true,
+    "personal_state_migration": false,
+    "status": 4,
+    "complete": true,
+    "deployment_id": "3b1fdd95-59ad-4d7d-a56b-23e96c4b1e32",
+    "checked_at": "2026-11-08T13:11:27.836131+00:00"
+  },
+  "public_readback": {
+    "index.html": {
+      "status": 200,
+      "matches_committed_source": true
+    },
+    "app.bundle.js": {
+      "status": 200,
+      "matches_committed_source": true
+    },
+    "style.css": {
+      "status": 200,
+      "matches_committed_source": true
+    },
+    "health": {
+      "version": "0.6.2-audit-pilot",
+      "build": "mobile-chat",
+      "capabilities": {
+        "firebase_google": true,
+        "direct_google": false,
+        "storage": true,
+        "compute": true
+      }
+    },
+    "unauthenticated_private_session_http": 401,
+    "azure_status": {
+      "service": "KETO Companion",
+      "version": "0.2.1",
+      "transport": "HTTP + MCP",
+      "authentication_required": true,
+      "medical_monitoring": false,
+      "source_commit": "e3f648d5313b68202336cda775ff7279556a2569",
+      "edge_signature": "Ed25519"
+    }
+  },
+  "independent_review": {
+    "baseline": "ee4b42707e138f677fb32e9dfb4602a26c1b5b63",
+    "findings": 4,
+    "P1": 2,
+    "P2": 2,
+    "baseline_snapshot_commit": "055938ef42b1ba15e2ef568de17e8e01f883a31f",
+    "fixes_independently_reproduced_and_regressed_by_parent": true,
+    "new_reviewer_postfix_pass": false
+  },
+  "regressions": {
+    "python_passed": 502,
+    "python_skipped": 1,
+    "node_passed": 93,
+    "legacy_ui": "passed",
+    "legacy_oauth_ui": "passed",
+    "GitHub_hosted_tests_executed": false
+  },
+  "documentation": {
+    "baseline_markdown_files": 20,
+    "baseline_markdown_lines": 3555,
+    "functional_requirements": 19,
+    "machine_contracts": 6,
+    "current_structural_checks": {
+      "passed": true,
+      "documents_checked": 22,
+      "local_links_checked": 857,
+      "findings": [],
+      "scope": "Required files, relative links, declared source paths and exact route-name inventory; not semantic or clinical certification"
+    }
+  },
+  "dependency_audit": {
+    "npm_before_high": 2,
+    "npm_after_known": 0,
+    "direct_python_packages_queried": 14,
+    "direct_python_known_advisories": 0,
+    "not_full_security_certification": true
+  },
+  "new_paid_AI_provider_calls": 0,
+  "cloud_personal_records_read_or_changed": false,
+  "owner_Mac_browser_or_ComputerUse": false,
+  "new_self_hosted_runner": false,
+  "payment_or_visibility_changes": false,
+  "full_new_real_account_cloud_flow_tested": false,
+  "physical_iPhone_or_clinical_acceptance": false,
+  "remaining_own_jobs": [],
+  "remaining_blockers": [
+    "GitHub-hosted startup_failure occurs before jobs even on echo-only workflow; root cause unavailable",
+    "Intended member consent/allergy roundtrip and device/file/calendar acceptance remain manual gates",
+    "Clinical suitability, appliance-specific kitchen trials and unknown flaws not established"
+  ]
+}

@@ -22,10 +22,10 @@ HELP=('Я помогу подобрать еду под ваш день, сос�
  'Сначала познакомимся и уточним ограничения. Затем вы сможете попросить меню, заменить блюдо или сказать, что было неудобно. '
  'Изменения показываются отдельно: вы подтверждаете их или отменяете. '
  'В разделе «Рецепты» — блюда с граммовками; в «Дневнике» — ваши записи; в «Настройках» — оформление и время на готовку. '
- 'Google автоматически не подключён и двусторонняя синхронизация не настроена; доступны собственные выгрузки. Голос зависит от возможностей приложения, здесь он не проверен. '
+ 'Google автоматически не подключён и двусторонняя синхронизация не настроена; доступны собственные выгрузки. В веб-приложении диктовка создаёт редактируемый черновик; сообщение отправляете вы. '
  'С чего удобнее начать: посмотреть блюда или познакомиться?')
 CONSENT_TEXT=('Это ваш личный помощник по питанию, не врач. Для персонального общения запросы обрабатывает модель в Azure. '
- 'Дневник и профиль сохраняются только с вашего согласия в приватном хранилище Azure. '
+ 'Дневник и профиль сохраняются только с вашего согласия в приватном пространстве приложения. '
  'Можно сначала изучить рецепты без личных данных. Фото, Google и напоминания подключаются отдельно.')
 class InputError(ValueError):pass
 class PermissionError(InputError):pass
@@ -79,10 +79,10 @@ class Service(KitchenService,MobileService,planning.PlanningService):
           'processing_consent':d['processing_consent'],'screening':screen,'holds':d['holds'],
           'diary':d['core']['diary'][-60:],'plans':list(d['core']['plans'].values())[-8:],
           'checklists':d['core']['checklists'],'pending':[dict(x,expired=x['expires_at']<=time.time()) for x in d['pending'].values()],
-          'chat':topic(d,d['active_thread'])['messages'][-60:],'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'kitchen':self.kitchen_snapshot(d),'mobile_version':'0.6.1-kitchen-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
-          'capabilities':{'model':'Azure GPT-6.1 Terra','native_voice':'ChatGPT host only; not Terra audio',
-          'storage':'Azure private Blob' if os.getenv('KETO_STORAGE_URL') else 'local SQLite',
-          'google_sync':'explicit exports through connected Google tools; no automatic two-way sync',
+          'chat':topic(d,d['active_thread'])['messages'][-60:],'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'kitchen':self.kitchen_snapshot(d),'mobile_version':'0.6.2-audit-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
+          'capabilities':{'model':'Azure GPT-6.1 Terra','native_voice':'No continuous voice in web app; dictation to editable draft',
+          'storage':getattr(self.store,'storage_scope','Azure private Blob' if os.getenv('KETO_STORAGE_URL') else 'local SQLite'),
+          'google_sync':'Google sign-in does not grant Drive/Gmail/Calendar access; PDF/ICS manual export only',
           'background_monitoring':False,'self_modification':'validated preferences only, never arbitrary code'},'usage':d['usage']}
     def opened(self,subject,kind='personal'):
         d,_=self.load(subject,kind);return {'state':self.snapshot(d),'message':HELP,**({'shopping':self.kitchen_shopping(d,list(d['core']['plans'].values())[-1])} if d['core']['plans'] else {})}

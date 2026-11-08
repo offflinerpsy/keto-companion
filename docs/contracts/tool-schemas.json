@@ -1,0 +1,831 @@
+{
+  "mobile_http_only": [
+    "keto_guidance",
+    "keto_reminders",
+    "keto_topics",
+    "keto_transcribe"
+  ],
+  "notice": "The listed Azure schemas are not a promise that all tools are exposed through every client. Cloudflare applies its own session/CSRF/operation map; UI-only capabilities remain mandatory.",
+  "schema": "keto-tool-inventory-v1",
+  "source": "service/app.py",
+  "source_sha256": "07d315a7d31d8225a47a03914ec8d99a51ced39f8bb143081d376b7db56714df",
+  "tools": [
+    {
+      "_meta": {
+        "openai/ui": {
+          "entrypoints": [
+            {
+              "type": "global"
+            },
+            {
+              "type": "thread"
+            }
+          ]
+        },
+        "ui": {
+          "resourceUri": "ui://keto-companion/workspace-v020",
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Открыть личную страницу, настройки, состояние и понятную справку.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "name": "keto_open",
+      "title": "KETO Companion"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Разобрать сообщение через Azure Terra. Создаёт только предложения, не применяет изменения. Может сохранять историю при согласии.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "image_data_url": {
+            "maxLength": 1500000,
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 6000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "request_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "type": "string"
+          },
+          "thread_id": {
+            "maxLength": 80,
+            "type": "string"
+          }
+        },
+        "required": [
+          "message",
+          "request_id"
+        ],
+        "type": "object"
+      },
+      "name": "keto_chat",
+      "title": "Обсудить питание"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Проверяемые рецепты из каталога с граммовками и рассчитанным составом.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "exclude_food_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 40,
+            "type": "array"
+          },
+          "include_food_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "type": "array"
+          },
+          "limit": {
+            "maximum": 72,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "max_minutes": {
+            "maximum": 180,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "name": "keto_recipes",
+      "title": "Подобрать рецепты"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Подготовить изменение профиля, дневника, настроек или меню. Показать для явного подтверждения в приложении.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "event_type": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer"
+          },
+          "payload": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "event_type",
+          "payload",
+          "expected_revision"
+        ],
+        "type": "object"
+      },
+      "name": "keto_propose_change",
+      "title": "Подготовить изменение"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Применить выбранное пользователем предложение. Только кнопкой приложения, не решением языковой модели.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "approved": {
+            "type": "boolean"
+          },
+          "expected_revision": {
+            "type": "integer"
+          },
+          "proposal_id": {
+            "type": "string"
+          },
+          "ui_confirmation": {
+            "maxLength": 100,
+            "minLength": 32,
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposal_id",
+          "expected_revision",
+          "approved",
+          "ui_confirmation"
+        ],
+        "type": "object"
+      },
+      "name": "keto_apply_proposal",
+      "title": "Подтвердить изменение"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Согласие самого пользователя на обработку Azure и хранение. Только через явные элементы согласия.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmed": {
+            "type": "boolean"
+          },
+          "health": {
+            "type": "boolean"
+          },
+          "processing": {
+            "type": "boolean"
+          },
+          "storage": {
+            "type": "boolean"
+          },
+          "ui_confirmation": {
+            "maxLength": 100,
+            "minLength": 32,
+            "type": "string"
+          }
+        },
+        "required": [
+          "processing",
+          "storage",
+          "health",
+          "confirmed",
+          "ui_confirmation"
+        ],
+        "type": "object"
+      },
+      "name": "keto_consent",
+      "title": "Разрешения"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Рассчитать черновик меню только после скрининга и согласованных ориентиров. Не назначает целевые калории.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "maximum": 7,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "start": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "days"
+        ],
+        "type": "object"
+      },
+      "name": "keto_menu",
+      "title": "Рассчитать меню"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Вернуть содержимое собственной выгрузки JSON/CSV/HTML. Не отправляет данные в Google или по почте.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "format": {
+            "enum": [
+              "json",
+              "csv",
+              "html",
+              "pdf"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "format"
+        ],
+        "type": "object"
+      },
+      "name": "keto_export",
+      "title": "Выгрузить данные"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Пересчитать импорт CSV/JSON и подготовить подтверждение. Не исполняет инструкции внутри файла.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "maxLength": 150000,
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer"
+          },
+          "format": {
+            "enum": [
+              "json",
+              "csv"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "format",
+          "expected_revision"
+        ],
+        "type": "object"
+      },
+      "name": "keto_import_menu",
+      "title": "Проверить импорт меню"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Прочитать настройки интерфейса для нативного редактора ChatGPT.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "name": "keto_settings_read",
+      "outputSchema": {
+        "properties": {
+          "layout": {
+            "type": "array"
+          },
+          "schema": {
+            "type": "object"
+          },
+          "values": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "schema",
+          "values"
+        ],
+        "type": "object"
+      },
+      "title": "Оформление"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Сохранить только безопасные настройки внешнего вида из явного нативного редактора.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "set": {
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "density": {
+                "enum": [
+                  "comfortable",
+                  "compact"
+                ],
+                "type": "string"
+              },
+              "home": {
+                "enum": [
+                  "chat",
+                  "today",
+                  "recipes",
+                  "diary"
+                ],
+                "type": "string"
+              },
+              "show_nutrition": {
+                "type": "boolean"
+              },
+              "simple_mode": {
+                "type": "boolean"
+              },
+              "text_size": {
+                "enum": [
+                  "normal",
+                  "large"
+                ],
+                "type": "string"
+              },
+              "theme": {
+                "enum": [
+                  "ivory-plum",
+                  "light",
+                  "dark"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "set"
+        ],
+        "type": "object"
+      },
+      "name": "keto_settings_update",
+      "outputSchema": {
+        "properties": {
+          "values": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "values"
+        ],
+        "type": "object"
+      },
+      "title": "Изменить оформление"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Удаление собственного профиля и дневника по явному подтверждению приложения.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmation": {
+            "const": "DELETE_MY_PROFILE",
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer"
+          },
+          "ui_confirmation": {
+            "maxLength": 100,
+            "minLength": 32,
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_revision",
+          "confirmation",
+          "ui_confirmation"
+        ],
+        "type": "object"
+      },
+      "name": "keto_delete_profile",
+      "title": "Удалить личные данные"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Детерминированные предварительные ориентиры по сохранённым данным; только отдельное подтверждение.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "status",
+              "preview",
+              "baseline",
+              "propose"
+            ],
+            "type": "string"
+          },
+          "preview_hash": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "type": "object"
+      },
+      "name": "keto_guidance",
+      "title": "Знакомство и ориентиры"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Личные темы; изменение только по явному подтверждению.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "list",
+              "create",
+              "select",
+              "rename",
+              "delete",
+              "clear"
+            ],
+            "type": "string"
+          },
+          "confirmed": {
+            "type": "boolean"
+          },
+          "expected_revision": {
+            "type": "integer"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 80,
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "type": "object"
+      },
+      "name": "keto_topics",
+      "title": "Темы разговора"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Напоминания и экспорт в Календарь; сайт не отправляет push в фоне.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "list",
+              "create",
+              "update",
+              "delete",
+              "complete",
+              "ics"
+            ],
+            "type": "string"
+          },
+          "confirmed": {
+            "type": "boolean"
+          },
+          "expected_revision": {
+            "type": "integer"
+          },
+          "reminder_id": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "type": "object"
+      },
+      "name": "keto_reminders",
+      "title": "Личные напоминания"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "До 60 секунд, аудио до 1 МБ. Текст только черновик, не отправляется автоматически.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "audio_base64": {
+            "maxLength": 1400000,
+            "type": "string"
+          },
+          "mime": {
+            "enum": [
+              "audio/mp4",
+              "audio/webm",
+              "audio/wav",
+              "audio/x-wav"
+            ],
+            "type": "string"
+          },
+          "request_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "audio_base64",
+          "mime",
+          "request_id"
+        ],
+        "type": "object"
+      },
+      "name": "keto_transcribe",
+      "title": "Распознать запись"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
+      "description": "Единая кладовая, рецепты и память. Генерация может вызвать Azure Sol high; сохранения только через отдельное подтверждение.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "status",
+              "foods",
+              "parse",
+              "generate",
+              "select",
+              "memory",
+              "pantry",
+              "remember",
+              "forget",
+              "save",
+              "favorite",
+              "rate",
+              "diary",
+              "accept_day"
+            ],
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer"
+          },
+          "query": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "recipe_id": {
+            "maxLength": 80,
+            "type": "string"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9_-]{8,100}$",
+            "type": "string"
+          },
+          "spec": {
+            "type": "object"
+          },
+          "thread_id": {
+            "maxLength": 80,
+            "type": "string"
+          },
+          "values": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "type": "object"
+      },
+      "name": "keto_kitchen",
+      "title": "Что приготовим"
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "baseline_commit": "ee4b42707e138f677fb32e9dfb4602a26c1b5b63",
+  "captured_at": "2026-11-08T13:10:02.534674+00:00",
+  "meaning": "Baseline git object hashes; current differences are concurrent parent work, not reviewer edits or accepted fixes",
+  "files": [
+    {
+      "path": "service/domain.py",
+      "baseline_sha256": "794c88158904c4e6daf6080f5236f93bef7c743e37ed6c3564e120d96abbf41f",
+      "baseline_lines": 482,
+      "current_sha256": "ee0b170beaa25168d9ac0624e55aec6254cf69f9b046f4f255dcf1a8d1f4a3a1",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "service/kitchen.py",
+      "baseline_sha256": "f58fa2c2655a261145f1b3e3eb3cc3a1c68911080fd88bc211ded439ea1aac02",
+      "baseline_lines": 723,
+      "current_sha256": "c06878126be3db736413b8facf61a67305b3ba03ef44f1e5167fbce59589d9cf",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "service/planning.py",
+      "baseline_sha256": "0d9d4f133fd33e4f1d35ba040b574b59a3c12cf9127c944c7e64966c0a4a258d",
+      "baseline_lines": 122,
+      "current_sha256": "0d9d4f133fd33e4f1d35ba040b574b59a3c12cf9127c944c7e64966c0a4a258d",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/portion_search.py",
+      "baseline_sha256": "389354184095982c545ab261afa2b4a15d28c66befba20bc36e099033a0f8fba",
+      "baseline_lines": 75,
+      "current_sha256": "389354184095982c545ab261afa2b4a15d28c66befba20bc36e099033a0f8fba",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/mobile.py",
+      "baseline_sha256": "c94b255937407c66596c5368b97ab3c9e618b66593b87f4a66eb5b398bb94615",
+      "baseline_lines": 153,
+      "current_sha256": "c94b255937407c66596c5368b97ab3c9e618b66593b87f4a66eb5b398bb94615",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/speech.py",
+      "baseline_sha256": "e8a70184611d7c54dc26b2331bb14fdbaf90343edecae8bcb71f8a8409163b9e",
+      "baseline_lines": 83,
+      "current_sha256": "e8a70184611d7c54dc26b2331bb14fdbaf90343edecae8bcb71f8a8409163b9e",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/mobile_exports.py",
+      "baseline_sha256": "a2a2ec137116bd36f56eb71699612e409fe27574870818ab6486215674c2ddde",
+      "baseline_lines": 55,
+      "current_sha256": "a2a2ec137116bd36f56eb71699612e409fe27574870818ab6486215674c2ddde",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/edge_bridge.py",
+      "baseline_sha256": "94284366e5d85bc9d9fbeef2484d6246be8f81a8596fba71468445c5d09ac98c",
+      "baseline_lines": 111,
+      "current_sha256": "9d76d71738cce1e691ba3beecb9a237b44c0947c2bd41ef18b65f3223b0231bf",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "service/confirmation.py",
+      "baseline_sha256": "ea6775eee8f28cd28babc741f891db5bd54ac0cc05a6fc9b2cfe06c9e547239d",
+      "baseline_lines": 25,
+      "current_sha256": "ea6775eee8f28cd28babc741f891db5bd54ac0cc05a6fc9b2cfe06c9e547239d",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/entra.py",
+      "baseline_sha256": "25a8992109d0503592da5ea532a3c13454f37d6766bd079a82dc15b21cb816f2",
+      "baseline_lines": 26,
+      "current_sha256": "25a8992109d0503592da5ea532a3c13454f37d6766bd079a82dc15b21cb816f2",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/oauth_bridge.py",
+      "baseline_sha256": "1809ce1a1a68ffeae4e16e504e20cf06b05fb9fbc0fb2734f5d81e86d9c79f12",
+      "baseline_lines": 165,
+      "current_sha256": "1809ce1a1a68ffeae4e16e504e20cf06b05fb9fbc0fb2734f5d81e86d9c79f12",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/brain.py",
+      "baseline_sha256": "15ce0cfd9c8abc9da1e518bb55b8bc4eaea4c62f201e2c911dbd79e5d500308b",
+      "baseline_lines": 78,
+      "current_sha256": "15ce0cfd9c8abc9da1e518bb55b8bc4eaea4c62f201e2c911dbd79e5d500308b",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/recipe_brain.py",
+      "baseline_sha256": "ea08723c1b0dbb87490cf3edff7e05b7aa0962ad1ad5a26fb12527210cac6eab",
+      "baseline_lines": 45,
+      "current_sha256": "ea08723c1b0dbb87490cf3edff7e05b7aa0962ad1ad5a26fb12527210cac6eab",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/app.py",
+      "baseline_sha256": "b5b18251d7a5f54a016f8ee7fbb8a6af5e75899d14b351567bb969eaf3f55292",
+      "baseline_lines": 388,
+      "current_sha256": "07d315a7d31d8225a47a03914ec8d99a51ced39f8bb143081d376b7db56714df",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "service/store.py",
+      "baseline_sha256": "0a236d617f5f417b17a5e3b7616b4972c5e0bc0ae8a07d859467b3f9dec32cf4",
+      "baseline_lines": 85,
+      "current_sha256": "0a236d617f5f417b17a5e3b7616b4972c5e0bc0ae8a07d859467b3f9dec32cf4",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/src/worker.mjs",
+      "baseline_sha256": "e552a8ac5c2abd57736cf6e2526188baad42e5d4b184310b09fcde3aba406e8a",
+      "baseline_lines": 180,
+      "current_sha256": "4e555fa06d00529b4a0a6b2ff686002ea829b6d877f0cf85cba8ca6c9febe59e",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "cloudflare-saas/src/compute.mjs",
+      "baseline_sha256": "5f42079388a1071a19d4741ddae71e17480763b89d5a7d6bf401b4a4b06bdf30",
+      "baseline_lines": 101,
+      "current_sha256": "f1f1ddf7344550ca0c64a08fc6fb17a440ad1dbd976da0a84136bf69f6ecb9a1",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "cloudflare-saas/src/deletion.mjs",
+      "baseline_sha256": "6bf054845d64360a05f57b0278c614c1e4b3a3e5377e54407e1a1c2105836ec4",
+      "baseline_lines": 27,
+      "current_sha256": "6bf054845d64360a05f57b0278c614c1e4b3a3e5377e54407e1a1c2105836ec4",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/src/firebase-identity.mjs",
+      "baseline_sha256": "1c3c7d53cce6b0204830aa4e39b655f1ea053eaeb664954374f7ed56703ac686",
+      "baseline_lines": 17,
+      "current_sha256": "1c3c7d53cce6b0204830aa4e39b655f1ea053eaeb664954374f7ed56703ac686",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/index.html",
+      "baseline_sha256": "6152364b012db6804fe48e181eba5c03bde283800eae7c1408247d4934eaf7a1",
+      "baseline_lines": 17,
+      "current_sha256": "6152364b012db6804fe48e181eba5c03bde283800eae7c1408247d4934eaf7a1",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/app.js",
+      "baseline_sha256": "4a46097929fe0eab47c7df59e4e6bd963563d01e7a6e5cebe769287ec3c7fbf3",
+      "baseline_lines": 103,
+      "current_sha256": "7c76b297ae76b9690f115ecdab29be51cc30defaf87b69215b34f514cf2f992d",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "cloudflare-saas/public/setup-ui.js",
+      "baseline_sha256": "5bf19d3a15affc6bf6f0da4e14d55f9a9f423958fa11fb10d38f436dcca9b756",
+      "baseline_lines": 32,
+      "current_sha256": "5bf19d3a15affc6bf6f0da4e14d55f9a9f423958fa11fb10d38f436dcca9b756",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/setup-controls.js",
+      "baseline_sha256": "66256ccb3f5a638190856caff9a51a7aafcd97eb2f60bc05e3c2aecc4d3f7860",
+      "baseline_lines": 10,
+      "current_sha256": "66256ccb3f5a638190856caff9a51a7aafcd97eb2f60bc05e3c2aecc4d3f7860",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/kitchen-ui.js",
+      "baseline_sha256": "99f354bd88d37666e174d77405e0b3f480509b3db0c56a54aeff79868e53b264",
+      "baseline_lines": 69,
+      "current_sha256": "99f354bd88d37666e174d77405e0b3f480509b3db0c56a54aeff79868e53b264",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/mobile-ui.js",
+      "baseline_sha256": "3a4aa7ce7f3e86112fb021d85a05ff4eab0440bb3ac1af856ad22d53d79b2fc4",
+      "baseline_lines": 33,
+      "current_sha256": "3a4aa7ce7f3e86112fb021d85a05ff4eab0440bb3ac1af856ad22d53d79b2fc4",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/media.js",
+      "baseline_sha256": "37e298f2e9491228f06ec33f0294aecf9add0db5b3929205855141274f45bc4e",
+      "baseline_lines": 22,
+      "current_sha256": "37e298f2e9491228f06ec33f0294aecf9add0db5b3929205855141274f45bc4e",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/routes.js",
+      "baseline_sha256": "0414f2be4b0de5e8f2fa41344bec7cab183f682a8a9080284f4010ec42c8d2e2",
+      "baseline_lines": 12,
+      "current_sha256": "0414f2be4b0de5e8f2fa41344bec7cab183f682a8a9080284f4010ec42c8d2e2",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/app.css",
+      "baseline_sha256": "609c3bd1d8d71c174f9b586aa38efd938bd13a853bc6f93cd6d4c064d133064f",
+      "baseline_lines": 43,
+      "current_sha256": "609c3bd1d8d71c174f9b586aa38efd938bd13a853bc6f93cd6d4c064d133064f",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/firebase-login.js",
+      "baseline_sha256": "dc02f7d713ce8bf8facaf9ff60b67183ba71a52fa7f95617948ecabb1ecf0a98",
+      "baseline_lines": 8,
+      "current_sha256": "dc02f7d713ce8bf8facaf9ff60b67183ba71a52fa7f95617948ecabb1ecf0a98",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/public/firebase-flow.js",
+      "baseline_sha256": "cea550ebe555486872ed0c62ecb9be03b83328c0904bbd96ed6ae2ba34427597",
+      "baseline_lines": 19,
+      "current_sha256": "cea550ebe555486872ed0c62ecb9be03b83328c0904bbd96ed6ae2ba34427597",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/build.cjs",
+      "baseline_sha256": "1908b84ebe7158b0515385ae98acdf15174570f954fd5380b54c1f130bdebd31",
+      "baseline_lines": 18,
+      "current_sha256": "d20910bd42e872b0a80a6b30a79209853e3197edfe658d51a7da18d0ac811b32",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "cloudflare-saas/knowledge.cjs",
+      "baseline_sha256": "9f5bc72948411824be3bacb8176e341c94fb6e8a2a4a7d7bbdb31e97a90f781a",
+      "baseline_lines": 5,
+      "current_sha256": "9f5bc72948411824be3bacb8176e341c94fb6e8a2a4a7d7bbdb31e97a90f781a",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "baseline_sha256": "6f7d100d9c29e438c1da7ffe7b4273bf00ddf33290e95feb78da9835dcdbe313",
+      "baseline_lines": 41,
+      "current_sha256": "6c975de370f6a8f8cb5a56d722846617d7fdba7ff5a18a4b94715034139ff948",
+      "parent_worktree_differs": true
+    },
+    {
+      "path": "library/skills/keto-companion/scripts/keto_core.py",
+      "baseline_sha256": "bd135da6960419c9e3375b47d73bc691d3f666712d055f36705b34dfc4c747d4",
+      "baseline_lines": 795,
+      "current_sha256": "bd135da6960419c9e3375b47d73bc691d3f666712d055f36705b34dfc4c747d4",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/data/kitchen_policy.json",
+      "baseline_sha256": "c706197819a0a684866f2b7a7645e3e92ee8a0bad2881e94cb833d6654c7cf2a",
+      "baseline_lines": 780,
+      "current_sha256": "c706197819a0a684866f2b7a7645e3e92ee8a0bad2881e94cb833d6654c7cf2a",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "service/data/starter_policy_sources.json",
+      "baseline_sha256": "8672cbfcde6048c52a7d9126c8a2c1f753635e5b075739f4256c0d9e287d6fb7",
+      "baseline_lines": 43,
+      "current_sha256": "8672cbfcde6048c52a7d9126c8a2c1f753635e5b075739f4256c0d9e287d6fb7",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "library/skills/keto-menu/data/foods.json",
+      "baseline_sha256": "8b881cfbcfb553c5cf84a932e078799c9d0ba53d5a16efda5028fed074ad0fe9",
+      "baseline_lines": 1,
+      "current_sha256": "8b881cfbcfb553c5cf84a932e078799c9d0ba53d5a16efda5028fed074ad0fe9",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "library/skills/keto-menu/data/recipes.json",
+      "baseline_sha256": "b876aa1ac0bdc0b6a35c896b3b62de7aac8a852cc2317f586f26f74fb4e049c3",
+      "baseline_lines": 1,
+      "current_sha256": "b876aa1ac0bdc0b6a35c896b3b62de7aac8a852cc2317f586f26f74fb4e049c3",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "library/skills/keto-evidence/references/sources.json",
+      "baseline_sha256": "51c30a82cf3f8d4176708f5b086fc34beeac75b1dcf9b02aebebdf4b76ba9294",
+      "baseline_lines": 989,
+      "current_sha256": "51c30a82cf3f8d4176708f5b086fc34beeac75b1dcf9b02aebebdf4b76ba9294",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "library/skills/keto-evidence/references/calculation_sources.json",
+      "baseline_sha256": "c58dc276de4fd0a4f74c99eab7b69191c6450ab2c44f37a672bd2acabf105135",
+      "baseline_lines": 13,
+      "current_sha256": "c58dc276de4fd0a4f74c99eab7b69191c6450ab2c44f37a672bd2acabf105135",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/migrations/0001_initial.sql",
+      "baseline_sha256": "8c15dea11cf267fe91b4919e28d0d92101d4827ba3b5625a927354b8f78eb177",
+      "baseline_lines": 14,
+      "current_sha256": "8c15dea11cf267fe91b4919e28d0d92101d4827ba3b5625a927354b8f78eb177",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/migrations/0002_integration.sql",
+      "baseline_sha256": "919b82dd0b9bab3cf7a0db57fab985b1e2af99c7632cf40fe03aa07f27ba1c7f",
+      "baseline_lines": 9,
+      "current_sha256": "919b82dd0b9bab3cf7a0db57fab985b1e2af99c7632cf40fe03aa07f27ba1c7f",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/migrations/0003_global_usage.sql",
+      "baseline_sha256": "b6c5e324da480634aea369ac11aa3fe2585618c7c75b77a9b8fd2d48c70bb148",
+      "baseline_lines": 2,
+      "current_sha256": "b6c5e324da480634aea369ac11aa3fe2585618c7c75b77a9b8fd2d48c70bb148",
+      "parent_worktree_differs": false
+    },
+    {
+      "path": "cloudflare-saas/migrations/0004_firebase_challenges.sql",
+      "baseline_sha256": "8792013359128e7759237dff78d2a321ceaba5114a78ea9d0729d52aa5ee9811",
+      "baseline_lines": 3,
+      "current_sha256": "8792013359128e7759237dff78d2a321ceaba5114a78ea9d0729d52aa5ee9811",
+      "parent_worktree_differs": false
+    }
+  ]
+}

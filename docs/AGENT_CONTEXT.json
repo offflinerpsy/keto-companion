@@ -1,0 +1,64 @@
+{
+  "schema": "keto-agent-context-v1",
+  "language": "English canonical; Russian index and design handoff available",
+  "release": "0.6.2-audit-pilot",
+  "read_first": [
+    "AGENTS.md",
+    "docs/CURRENT_STATUS.json",
+    "docs/spec/README.md",
+    "docs/spec/CURRENT_CORRECTIONS.md"
+  ],
+  "design_entrypoints": {
+    "en": "docs/en/AI_DESIGN_HANDOFF.md",
+    "ru": "docs/ru/AI_DESIGN_HANDOFF.md",
+    "screens": "docs/spec/SCREEN_MAP.md",
+    "tokens": "docs/spec/DESIGN_SYSTEM.md",
+    "contracts": "docs/contracts/ui-contracts.json"
+  },
+  "authoritative_sources": {
+    "web_ui": [
+      "cloudflare-saas/public/index.html",
+      "cloudflare-saas/public/app.css",
+      "cloudflare-saas/public/app.js",
+      "cloudflare-saas/public/setup-ui.js",
+      "cloudflare-saas/public/kitchen-ui.js",
+      "cloudflare-saas/public/mobile-ui.js",
+      "cloudflare-saas/public/routes.js"
+    ],
+    "worker": "cloudflare-saas/src/worker.mjs",
+    "orchestration": "service/domain.py",
+    "food_arithmetic": "library/skills/keto-companion/scripts/keto_core.py",
+    "personal_state": "private Cloudflare D1 document for SaaS; legacy Azure client separate"
+  },
+  "generated_files_do_not_hand_edit": [
+    "cloudflare-saas/public/style.css",
+    "cloudflare-saas/public/app.bundle.js",
+    "cloudflare-saas/src/embedded-assets.mjs",
+    "cloudflare-saas/dist/",
+    "service/static/app.bundle.js",
+    "docs/contracts/"
+  ],
+  "minimum_commands": [
+    ".venv/bin/python -m pytest -q tests library/skills/keto-companion/tests",
+    "node --test cloudflare-saas/tests/*.test.mjs",
+    "node tests/test_ui_no_browser.cjs",
+    "node tests/test_oauth_ui.cjs",
+    "node cloudflare-saas/build.cjs",
+    "node scripts/build_legacy_ui.cjs",
+    ".venv/bin/python scripts/export_contracts.py --check",
+    ".venv/bin/python scripts/verify_specification.py",
+    ".venv/bin/python scripts/verify_repository.py"
+  ],
+  "hard_invariants": [
+    "No real user records or secrets in tests/screenshots/docs",
+    "No browser or Computer Use on owner Mac without renewed explicit permission",
+    "Preserve all saved allergens, explicit confirmations, ownership checks, revision/CAS and source provenance",
+    "Unknown nutrients/intake are not zero",
+    "Personal nutrients and household shopping use different serving semantics",
+    "No model/medical-rule changes as incidental visual redesign",
+    "Do not claim CI success from startup_failure, or clinical/device validation from mocks",
+    "Do not publish private repository or share font files"
+  ],
+  "current_external_blocker": "GitHub-hosted jobs fail before execution; see docs/evidence/SPEC_AUDIT_GITHUB_EXECUTION.json",
+  "historical_review_commit": "055938ef42b1ba15e2ef568de17e8e01f883a31f"
+}

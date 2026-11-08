@@ -1,0 +1,45 @@
+{
+  "schema": "spec-audit-07-probes-v1",
+  "results": [
+    {
+      "id": "SA07-01",
+      "unquantified_entries": 1,
+      "reported_remaining_g": 40.0,
+      "reported_logged_g": 0
+    },
+    {
+      "id": "SA07-02",
+      "worker_paid_reservation": 0,
+      "synthetic_designer_attempts": 1,
+      "service_model_called": true,
+      "note": "Worker predicate evaluated verbatim; no real provider or full Worker execution"
+    },
+    {
+      "id": "SA07-03",
+      "batch_missing": [
+        {
+          "food_id": "F171287",
+          "grams_edible": 100.0
+        },
+        {
+          "food_id": "F169291",
+          "grams_edible": 120.0
+        }
+      ],
+      "saved_plan_shopping": [],
+      "scope": "Actual shopping function with kitchen_day per-person representation; not a full accepted-day E2E"
+    },
+    {
+      "id": "SA07-04",
+      "saved_before": [
+        "mustard"
+      ],
+      "visible_checkbox_count": 11,
+      "submitted_allergies": [],
+      "saved_after": [],
+      "scope": "Source-derived checkbox projection plus actual propose/apply; no rendered DOM"
+    }
+  ],
+  "provider_calls": 0,
+  "persistent_writes": 0
+}
