@@ -1,0 +1,12 @@
+{
+  "build": "46261be5-83ee-492c-911d-ae3ce91ac434",
+  "source_commit": "69cc8279eda62e8034e471b642ee8bbc13e3ccb5",
+  "all_16_native_CI_stages_passed": true,
+  "python": 520,
+  "node": 133,
+  "CI_seconds": 134.98,
+  "image_build_exit": 1,
+  "image_push_attempted": false,
+  "deployment_attempted": false,
+  "next_step": "Capture sanitized credential-free image compiler output; no authorization bypass or unchecked release"
+}
