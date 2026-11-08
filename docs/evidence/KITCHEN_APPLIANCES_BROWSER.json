@@ -1,0 +1,176 @@
+{
+  "source_commit": "6b2a9e27e56f6552d2d47d671703bddc06b90b93",
+  "scope": "Actual deployed HTML/CSS/JS in isolated remote Cloudflare Chromium with synthetic API and storage adapters; not physical device or authenticated user acceptance",
+  "cases": [
+    {
+      "width": 375,
+      "height": 812,
+      "large_dark": false,
+      "checks": [
+        {
+          "name": "boot",
+          "passed": true
+        },
+        {
+          "name": "choice_multicooker",
+          "passed": true
+        },
+        {
+          "name": "hint_multicooker",
+          "passed": true
+        },
+        {
+          "name": "request_multicooker",
+          "passed": true
+        },
+        {
+          "name": "choice_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "hint_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "request_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "choice_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "hint_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "request_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "no_horizontal_overflow",
+          "passed": true
+        },
+        {
+          "name": "back_and_touch_control",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 440,
+      "height": 540,
+      "large_dark": true,
+      "checks": [
+        {
+          "name": "boot",
+          "passed": true
+        },
+        {
+          "name": "choice_multicooker",
+          "passed": true
+        },
+        {
+          "name": "hint_multicooker",
+          "passed": true
+        },
+        {
+          "name": "request_multicooker",
+          "passed": true
+        },
+        {
+          "name": "choice_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "hint_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "request_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "choice_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "hint_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "request_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "no_horizontal_overflow",
+          "passed": true
+        },
+        {
+          "name": "back_and_touch_control",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 1280,
+      "height": 900,
+      "large_dark": false,
+      "checks": [
+        {
+          "name": "boot",
+          "passed": true
+        },
+        {
+          "name": "choice_multicooker",
+          "passed": true
+        },
+        {
+          "name": "hint_multicooker",
+          "passed": true
+        },
+        {
+          "name": "request_multicooker",
+          "passed": true
+        },
+        {
+          "name": "choice_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "hint_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "request_air_fryer",
+          "passed": true
+        },
+        {
+          "name": "choice_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "hint_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "request_waffle_iron",
+          "passed": true
+        },
+        {
+          "name": "no_horizontal_overflow",
+          "passed": true
+        },
+        {
+          "name": "back_and_touch_control",
+          "passed": true
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "passed": 36,
+  "owner_Mac_browser": false
+}

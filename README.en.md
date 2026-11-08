@@ -45,3 +45,6 @@ Terra retains ordinary conversation routing; the existing AzureSolhigh deploymen
 Pantry, candidates, favourites, confirmed preferences and diary share state between chat and Studio. Selection, recipe saving, fractional intake and daily summaries use validated tools and confirmation. Memory is editable structured facts plus bounded retrieval, not unlimited recall.
 
 Acceptance:479Python tests,88Node tests,64actual-client UI checks using synthetic APIs,10realSol checks with a synthetic local profile. This does not establish the new authenticated family cloud flow, physicaliPhone or clinical suitability. [Exact release evidence](docs/evidence/KITCHEN_RELEASE_RECEIPT.json).
+
+### Owner appliances: version0.6.1
+Multicooker (non-pressure steam only), air-fryer and waffle-iron choices now have dedicated methods and chat routing:18method families. Device models are unknown; no universal appliance settings are assigned. [Appliance support](docs/en/APPLIANCES.md), [release evidence](docs/evidence/KITCHEN_APPLIANCES_ADDENDUM.json).

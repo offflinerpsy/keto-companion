@@ -1,15 +1,16 @@
 {
   "schema": "keto-continuation-state-v1",
-  "updated_at": "2026-11-08T12:17:08.347898+00:00",
+  "updated_at": "2026-11-08T12:26:13.501442+00:00",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "version": "0.5.0-guided-pilot",
-  "active_task": {
-    "id": "KETO-KITCHEN-06",
-    "github_issue": 11,
-    "stage": "owner_appliance_addendum"
-  },
+  "active_task": null,
   "last_completed": "KETO-KITCHEN-06",
-  "next_task": null,
+  "next_task": {
+    "id": "KETO-KITCHEN-ACCEPTANCE",
+    "github_issue": 10,
+    "status": "owner_acceptance",
+    "action": "Reload usual account and select your appliance in What shall we cook; confirm the available mode matches your device manual before using a recipe."
+  },
   "source_archive": {
     "path": "deliverables/saas-identity-source.tar.gz",
     "sha256": "4c881831908438751fa4a0277754f430d18cf4d85804a81e468347a26d69a2ff"
@@ -35,7 +36,7 @@
   },
   "operating_rules": "AGENTS.md",
   "platform_failure_exact_cause": "not determined; no server-side chat telemetry",
-  "source_version": "0.6.0-kitchen-pilot",
+  "source_version": "0.6.1-kitchen-pilot",
   "history": [
     {
       "previous_last_completed": {
