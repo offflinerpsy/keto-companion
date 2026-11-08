@@ -1,0 +1,19 @@
+{
+  "task": "CF-DEV-MEDIA-08",
+  "checked_at": "2026-11-08T17:12:26.876014+00:00",
+  "stopped_build": "9e06359e-31c1-4b22-81c3-75d5c056c4d5",
+  "source_commit_before_fix": "5304e7fc7db589cda35980bdaee77cf325d22de3",
+  "verified_error": {
+    "http": 400,
+    "code": 1607,
+    "reason": "DURABLE_OBJECT_NOT_CONTAINER_ENABLED"
+  },
+  "verified_source_cause": "Worker upload metadata omitted containers:[{class_name:KetoTester}]. DOnamespace existed but was not container-enabled. Application code tests all passed.",
+  "remedy": "Declare container-enabled class at worker upload; preserve existing namespace and no delete/reset. Include bounded public error codes/reasons in future deployment diagnostics.",
+  "chat_platform_failure_root_cause": "Not available; this records the concrete release blocker, not a diagnosis of ChatGPT service failures.",
+  "new_agents_started": false,
+  "owner_browser_started": false,
+  "source_design_original_sha256": "8d48d35bcdba847ebf2975c8a2dc12ac3489561e4b3e1b197b7feeaad9eb09fe",
+  "next_gate": "one native full build, then exact deployed UI and isolated runtime acceptance",
+  "primary_doc": "https://developers.cloudflare.com/api/resources/workers/"
+}

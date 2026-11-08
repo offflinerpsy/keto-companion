@@ -36,7 +36,14 @@ def api(method,path,body=None):
     request=urllib.request.Request('https://api.cloudflare.com/client/v4'+path,method=method,data=None if body is None else json.dumps(body).encode(),headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
     try:
         with urllib.request.urlopen(request,timeout=30) as response:data=json.load(response)
-    except urllib.error.HTTPError as e:raise RuntimeError('Cloudflare operation failed '+method+' HTTP'+str(e.code)) from None
+    except urllib.error.HTTPError as e:
+        # Only public numeric codes and uppercase reason identifiers; never dump auth/input.
+        try:
+            payload=json.loads(e.read(8192));errors=payload.get('errors',[])
+            codes=[x.get('code') for x in errors if isinstance(x.get('code'),int)]
+            reasons=sorted(set(re.findall(r'\b[A-Z][A-Z0-9_]{5,100}\b',' '.join(str(x.get('message','')) for x in errors))))
+        except (ValueError,TypeError,AttributeError):codes=[];reasons=[]
+        raise RuntimeError('Cloudflare operation failed '+method+' HTTP'+str(e.code)+' codes='+str(codes)+' reasons='+','.join(reasons)) from None
     if data.get('success') is False:raise RuntimeError('Cloudflare operation unsuccessful')
     return data['result']
 def main():

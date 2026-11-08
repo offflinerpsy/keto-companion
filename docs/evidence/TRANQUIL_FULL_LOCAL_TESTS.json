@@ -1,0 +1,12 @@
+{
+  "source_commit": "5304e7fc7db589cda35980bdaee77cf325d22de3",
+  "checked_at": "2026-11-08T16:55:30.211476+00:00",
+  "python_passed": 519,
+  "python_skipped": 1,
+  "node_passed": 145,
+  "legacy_ui": "passed",
+  "legacy_oauth": "passed",
+  "scope": "Local synthetic tests only; no browser, paid model or family data",
+  "browser_visual_acceptance": "pending",
+  "cloud_native_build": "9e06359e-31c1-4b22-81c3-75d5c056c4d5"
+}
