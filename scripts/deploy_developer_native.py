@@ -39,7 +39,9 @@ def main():
         context=Path(td)/'context';context.mkdir()
         for relative in ['requirements.txt','requirements-dev.txt','ui-sdk/package.json','ui-sdk/package-lock.json','developer-runtime/build/source.tar.gz','developer-runtime/build/manifest.json','developer-runtime/runner.py','developer-runtime/Dockerfile']:
             target=context/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/relative,target)
-        shutil.copytree(ROOT/'.runtime-fonts',context/'.runtime-fonts')
+        fonts=next((p for p in [ROOT/'runtime-fonts',ROOT/'.runtime-fonts'] if (p/'NotoSans-Regular.ttf').is_file() and (p/'NotoSans-Bold.ttf').is_file()),None)
+        if fonts is None:raise RuntimeError('Verified runtime fonts must be prepared by the CI stage')
+        shutil.copytree(fonts,context/'.runtime-fonts')
         safe={k:v for k,v in os.environ.items() if k in ('PATH','HOME','LANG','LC_ALL','TMPDIR','DOCKER_HOST','DOCKER_CONTEXT')}
         run('image_build',['docker','build','--platform','linux/amd64','--provenance=false','--build-arg','NODE_IMAGE='+NODE,'--build-arg','PYTHON_IMAGE='+PYTHON,'-f',str(context/'developer-runtime/Dockerfile'),'-t',tag,str(context)],timeout=900,env=safe)
         original=next(x for x in manifest['sources'] if x['path'].endswith('help.html'))
