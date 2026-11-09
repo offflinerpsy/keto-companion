@@ -13,6 +13,7 @@ async function open(page,{large=false,dark=false,pending=false}={}){
  await page.route('**/api/tools/**',async route=>{
   const name=new URL(route.request().url()).pathname.split('/').at(-1),args=route.request().postDataJSON();requests.push({name,args});
   if(name==='keto_recipes'){await route.fulfill({json:fixture.recipes});return}
+  if(name==='keto_kitchen'&&args.action==='diary_history'){const entries=state.diary.filter(e=>!args.values.date||e.date===args.values.date).map(e=>({...e,name_ru:e.recipe_id?'Сохранённое блюдо':'Заметка',calculation:null,source_mode:'unquantified'}));await route.fulfill({json:{entries,total:entries.length,has_more:false,revision:state.revision,summary:{date:args.values.date,entry_count:entries.length,empty:!entries.length,nutrition:null,unquantified_entries:entries.length}}});return}
   if(name==='keto_apply_proposal'){
    state.pending=[];
    if(args.approved){state.revision++;state.diary.push({entry_id:'synthetic-entry',date:'2026-11-09',note:'Синтетическая заметка',intake_status:'unquantified'});}

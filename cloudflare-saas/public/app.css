@@ -298,3 +298,24 @@ body.large .inline-form,body.large .kitchen-controls{align-items:stretch}body.la
 @media(max-width:400px){.top{padding-inline:12px}.page-heading{flex-direction:row;align-items:center}.composer{padding-inline:8px}.composer .composer-row{gap:2px}#proposal-dialog .proposal dl{grid-template-columns:1fr;gap:4px}#proposal-dialog .proposal dd{margin-bottom:10px}}
 @media(max-height:650px){.top{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:4px}.topic-bar{padding-block:4px}.composer{padding-block:6px}.composer-row #message{min-height:48px;max-height:96px}#nav button{min-height:48px}}
 @media(min-width:850px){#nav{max-width:600px;border-radius:12px 12px 0 0}.composer{padding-inline:16px}.top{padding-inline:20px}}
+
+/* Consumed food: a short editor, a reviewed calculation, and the selected day. */
+.diary-day-controls{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:8px}
+.diary-day-controls label{margin:0;min-width:0}.diary-day-controls input{margin:0;min-width:0;width:100%}
+.diary-day-controls button{padding:4px;font-size:1.3em}.diary-filters{display:flex;justify-content:space-between;margin-bottom:12px}
+#diary-summary{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:16px}
+#diary-summary:empty{display:none}#diary-summary h2{font-size:1.12em;margin:0 0 8px}
+.intake-nutrients{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:6px 12px;margin:12px 0;font-size:.94em}
+.intake-nutrients dt,.intake-nutrients dd{margin:0;min-width:0}.intake-nutrients dd{text-align:right;font-weight:500}
+.diary-entry{padding:12px 16px;margin-bottom:10px;border-radius:12px}.diary-entry h3{font-size:1.06em;margin:6px 0}.diary-entry p{margin:6px 0}
+.diary-entry-meta{color:var(--muted);font-size:.85em}.diary-actions{display:flex;align-items:flex-start;flex-wrap:wrap;gap:8px}
+.diary-actions .text-btn,.diary-entry-more summary{min-height:44px;padding:8px 10px;font-size:.94em}.diary-entry-more{margin-left:auto}
+.diary-entry-more summary{cursor:pointer}.diary-entry-more button{display:block}#diary-more{width:100%;margin:8px 0 20px}
+#diary-note-details{margin-top:20px}#diary-receipt{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:6px 12px}#diary-receipt p{margin:0}
+#intake-fields{border:0;padding:0;margin:0;min-width:0}.intake-two-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.intake-two-fields label{min-width:0}.intake-two-fields input,.intake-two-fields select{width:100%;min-width:0}
+#intake-name{font-weight:600;margin:0 0 16px}.intake-time-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.intake-time-line p{margin:0;overflow-wrap:anywhere}.intake-time-line button{flex:none}#intake-review{width:100%;margin-top:8px}
+#intake-status:empty{display:none}#intake-form details{margin:12px 0}#intake-form summary{padding-block:8px;min-height:44px}
+body.large .intake-two-fields{grid-template-columns:1fr}body.large .diary-actions{gap:4px}
+@media(max-width:370px){.intake-two-fields{grid-template-columns:1fr}.intake-nutrients{font-size:.9em}}

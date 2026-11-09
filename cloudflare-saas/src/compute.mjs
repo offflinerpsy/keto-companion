@@ -6,6 +6,30 @@ const hex=b=>Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).joi
 const hash=async x=>hex(await crypto.subtle.digest('SHA-256',typeof x==='string'?te.encode(x):x));
 export const OPS={keto_label_extract:'label_extract',keto_kitchen:'kitchen',keto_guidance:'guidance',keto_topics:'topics',keto_reminders:'reminders',keto_transcribe:'transcribe',keto_open:'open',keto_recipes:'recipes',keto_consent:'consent',keto_propose_change:'propose',keto_apply_proposal:'apply',keto_menu:'menu',keto_chat:'chat',keto_export:'export',keto_import_menu:'import_menu'};
 export const bridgeConfigured=env=>Boolean(env.KETO_EDGE_BRIDGE_URL&&((typeof env.KETO_EDGE_SIGNING_JWK==='string'&&env.KETO_EDGE_SIGNING_JWK.length>50)||(typeof env.KETO_EDGE_BRIDGE_SECRET==='string'&&env.KETO_EDGE_BRIDGE_SECRET.length>=32)));
+const INTAKE_VALIDATION_MESSAGES=Object.freeze({
+ INTAKE_TIME_AMBIGUOUS:'Выбранное время встречается дважды при переводе часов. В «Уточнении времени» выберите первое или второе время.',
+ INTAKE_TIME_NONEXISTENT:'Такого местного времени нет из-за перевода часов. Выберите другое время еды.',
+ INTAKE_STALE:'Дневник, профиль или расчёт изменились. Обновите записи и подготовьте новое предложение.',
+ INTAKE_ENTRY_NOT_FOUND:'Запись больше не найдена в вашем дневнике. Обновите список и выберите запись заново.',
+ INTAKE_SOURCE_NOT_FOUND:'Блюдо или продукт больше не найдены. Выберите доступную еду заново.',
+ INTAKE_SOURCE_MISMATCH:'Этот вариант блюда устарел или относится к другой теме. Откройте его в исходной теме либо подберите новый.',
+ INTAKE_AMOUNT_BASIS:'Проверьте количество и единицу: для блюда — порции или доля всего блюда, для продукта — граммы. Готовая масса блюда не вычисляется из сырого веса.',
+ INTAKE_TIME_MISMATCH:'Дата, время или часовой пояс еды не совпадают. Проверьте их и уточнение перевода часов.',
+ INTAKE_TIMEZONE_REQUIRED:'Для времени еды нужен подтверждённый часовой пояс. Укажите его в профиле.'
+});
+function intakeValidationScope(subject,operation,state,args){
+ if(operation==='kitchen')return ['intake','intake_preview','diary_history'].includes(args?.action);
+ const owner=state?.core,proposal=state?.pending?.[args?.proposal_id];
+ return operation==='apply'&&owner?.owner_account_id===subject&&owner?.subject_id===subject&&['kitchen.intake','kitchen.diary','kitchen.own_dish_diary','diary.add','diary.update','diary.repeat','diary.delete'].includes(proposal?.type);
+}
+async function intakeValidationCode(response){
+ const reader=response.body?.getReader();if(!reader)return null;let size=0,parts=[];
+ try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>4096){await reader.cancel();return null}parts.push(value)}
+  const bytes=new Uint8Array(size);let offset=0;for(const part of parts){bytes.set(part,offset);offset+=part.length}
+  const body=JSON.parse(new TextDecoder().decode(bytes)),code=body?.validation_code;
+  return body?.error==='BRIDGE_REJECTED'&&typeof code==='string'&&Object.hasOwn(INTAKE_VALIDATION_MESSAGES,code)?code:null;
+ }catch{return null}
+}
 export async function bridgeCall(env,subject,operation,state,args){
  if(!bridgeConfigured(env))throw Error('BRIDGE_NOT_CONFIGURED');
  let url;try{url=new URL(env.KETO_EDGE_BRIDGE_URL)}catch{throw Error('BRIDGE_NOT_CONFIGURED')};
@@ -22,7 +46,11 @@ export async function bridgeCall(env,subject,operation,state,args){
   const key=await crypto.subtle.importKey('raw',te.encode(env.KETO_EDGE_BRIDGE_SECRET),{name:'HMAC',hash:'SHA-256'},false,['sign']);signature=hex(await crypto.subtle.sign('HMAC',key,te.encode(message)));
  }
  const r=await fetch(url.href,{method:'POST',headers:{'content-type':'application/json','x-keto-timestamp':stamp,'x-keto-nonce':n,'x-keto-signature':signature},body,signal:AbortSignal.timeout(55000)});
- if(!r.ok)throw Error(r.status===422?'BRIDGE_REJECTED':'BRIDGE_UNAVAILABLE');
+ if(!r.ok){
+  const error=Error(r.status===422?'BRIDGE_REJECTED':'BRIDGE_UNAVAILABLE');
+  if(r.status===422&&intakeValidationScope(subject,operation,state,args)){const code=await intakeValidationCode(r);if(code)error.intakeValidationCode=code}
+  throw error;
+ }
  const reader=r.body?.getReader();let nbytes=0,parts=[];if(!reader)throw Error('BRIDGE_UNAVAILABLE');while(true){let {done,value}=await reader.read();if(done)break;nbytes+=value.length;if(nbytes>2000000){await reader.cancel();throw Error('BRIDGE_UNAVAILABLE')}parts.push(value)}const bytes=new Uint8Array(nbytes);let pos=0;for(const p of parts){bytes.set(p,pos);pos+=p.length}
  let out;try{out=JSON.parse(new TextDecoder().decode(bytes))}catch{throw Error('BRIDGE_UNAVAILABLE')};if(!out||typeof out.response!=='object'||!('state' in out))throw Error('BRIDGE_UNAVAILABLE');return out;
 }
@@ -101,6 +129,6 @@ export async function handleTool(req,env,h){
   return h.json(out.response,out.response.error_code?422:200);
  }catch(e){
   await db.batch([db.prepare("UPDATE jobs SET status='failed',finished_at=? WHERE user_id=? AND request_id=? AND status='pending'").bind(now(),u.id,requestId),db.prepare('UPDATE private_state SET lock_id=NULL,lock_until=NULL WHERE user_id=? AND lock_id=?').bind(u.id,lock)]);
-  if(e instanceof h.Fail)throw e;if(e.message==='BRIDGE_REJECTED')h.fail(422,'VALIDATION_FAILED');h.fail(503,e.message==='BRIDGE_NOT_CONFIGURED'?'BRIDGE_NOT_CONFIGURED':'COMPUTE_UNAVAILABLE');
+  if(e instanceof h.Fail)throw e;if(Object.hasOwn(INTAKE_VALIDATION_MESSAGES,e.intakeValidationCode))return h.json({error:e.intakeValidationCode,message:INTAKE_VALIDATION_MESSAGES[e.intakeValidationCode]},422);if(e.message==='BRIDGE_REJECTED')h.fail(422,'VALIDATION_FAILED');h.fail(503,e.message==='BRIDGE_NOT_CONFIGURED'?'BRIDGE_NOT_CONFIGURED':'COMPUTE_UNAVAILABLE');
  }
 }

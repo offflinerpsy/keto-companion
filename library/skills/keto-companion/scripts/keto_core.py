@@ -415,20 +415,140 @@ def new_state(subject_id: str, owner_account_id: str, demo=False) -> dict:
 
 def validate_diary(entry: dict) -> dict:
     allowed={'date','meal','note','energy_1_5','hunger_1_5','sleep_hours','weight_kg','symptoms',
-             'photo_ref','recipe_id','portions','intake_status'}
+             'photo_ref','recipe_id','portions','intake_status','food_id','grams','amount',
+             'time','timezone','eaten_at','time_fold'}
     if not isinstance(entry,dict) or set(entry)-allowed:raise KetoError('Некорректные поля дневника')
-    out=copy.deepcopy(entry); date.fromisoformat(out['date'])
+    out=copy.deepcopy(entry)
+    diary_date(out.get('date'))
     if 'note' in out:out['note']=clean_text(out['note'],'note',4000)
-    for k in ('meal','recipe_id','photo_ref'):
+    for k in ('meal','recipe_id','food_id','photo_ref'):
         if k in out:out[k]=clean_text(out[k],k,500)
     if 'symptoms' in out and isinstance(out['symptoms'],list):out['symptoms']=[clean_text(x,'symptom',300) for x in out['symptoms']]
     for k in ('energy_1_5','hunger_1_5'):
         if k in out:out[k]=integer(out[k],k,1,5)
-    for k,lo,hi in [('sleep_hours',0,24),('weight_kg',20,400),('portions',0.05,20)]:
+    for k,lo,hi in [('sleep_hours',0,24),('weight_kg',20,400),('portions',0.05,20),('grams',0.001,5000)]:
         if k in out:out[k]=float(number(out[k],k,lo,hi))
+    if out.get('recipe_id') and out.get('food_id'):raise KetoError('Выберите одно блюдо или продукт')
+    if 'amount' in out:
+        amount=out['amount']
+        if not isinstance(amount,dict) or set(amount)!={'value','unit'} or amount['unit'] not in ('portion','batch','g'):raise KetoError('Укажите количество и основу')
+        out['amount']={'value':float(number(amount['value'],'amount',0.001,5000)),'unit':amount['unit']}
+    if 'timezone' in out:
+        try:ZoneInfo(out['timezone'])
+        except (ValueError,TypeError,KeyError):raise KetoError('Укажите часовой пояс IANA') from None
+    if 'time_fold' in out and (type(out['time_fold']) is not int or out['time_fold'] not in (0,1)):raise KetoError('Укажите вариант перехода часов 0 или 1')
+    if 'time' in out and out['time'] is not None:
+        if not isinstance(out['time'],str) or not re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d',out['time']):raise KetoError('Укажите время ЧЧ:ММ')
+        if not out.get('timezone'):raise KetoError('Для времени нужен часовой пояс')
+        if out.get('eaten_at'):
+            try:
+                consumed=datetime.fromisoformat(out['eaten_at']);local=consumed.astimezone(ZoneInfo(out['timezone']))
+                if consumed.tzinfo is None or consumed.utcoffset()!=local.utcoffset() or local.date().isoformat()!=out['date'] or local.strftime('%H:%M')!=out['time']:raise ValueError()
+            except (TypeError,ValueError):raise KetoError('Дата, время и часовой пояс еды не совпадают') from None
+        else:
+            consumed=local_time_to_utc(out['date']+'T'+out['time'],out['timezone'],out.get('time_fold'))
+            local=consumed.astimezone(ZoneInfo(out['timezone']))
+        if 'time_fold' in out and out['time_fold']!=local.fold:raise KetoError('Уточнение перехода часов не совпадает со временем')
+        out['eaten_at']=local.isoformat();out['time_fold']=local.fold
+    elif out.get('eaten_at'):
+        try:
+            consumed=datetime.fromisoformat(out['eaten_at']); zone=ZoneInfo(out['timezone'])
+            local=consumed.astimezone(zone)
+            if consumed.tzinfo is None or consumed.utcoffset()!=local.utcoffset() or local.date().isoformat()!=out['date']:raise ValueError()
+        except (KeyError,TypeError,ValueError):raise KetoError('Дата, время и часовой пояс еды не совпадают') from None
+        out['eaten_at']=consumed.isoformat();out['time']=local.strftime('%H:%M');out['time_fold']=local.fold
+    else:
+        out.pop('eaten_at',None);out.pop('time_fold',None)
     if out.get('intake_status','unquantified') not in ('confirmed','estimated','unquantified'):raise KetoError('Неверный статус записи')
     if 'symptoms' in out and (not isinstance(out['symptoms'],list) or len(out['symptoms'])>20):raise KetoError('Неверные симптомы')
     return out
+
+
+def diary_date(value):
+    if not isinstance(value,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}',value):raise KetoError('Укажите дату еды ГГГГ-ММ-ДД')
+    try:date.fromisoformat(value)
+    except ValueError:raise KetoError('Неверная дата еды') from None
+    return value
+
+
+def intake_snapshot(entry: dict, catalog: dict) -> dict:
+    """Create a compact immutable calculation basis from authoritative records only."""
+    if entry.get('recipe_id'):
+        rid=entry['recipe_id'];recipe=catalog['recipes'].get(rid)
+        if recipe is None:raise KetoError('Блюдо не найдено')
+        calc=calculate_recipe(catalog,rid,1)
+        kind='own_dish' if recipe.get('usage')=='observational' else 'generated_recipe' if rid.startswith('RK') else 'catalog_recipe'
+        records=[catalog['foods'][i['food_id']] for i in recipe['ingredients']]
+        source={'kind':kind,'id':rid,'name_ru':recipe['name_ru'],'composition_hash':digest([recipe,records]),'source_urls':sorted({i['source_url'] for i in calc['ingredients']})}
+        basis={'unit':'portion','quantity':1,'base_servings':recipe['base_servings']}
+        available=None
+    elif entry.get('food_id'):
+        fid=entry['food_id'];food=catalog['foods'].get(fid)
+        if food is None:raise KetoError('Продукт не найден')
+        result=calculate_food_portion(food,100);calc=result['calculation'];available=result['available_carbohydrate_g']
+        source={'kind':'product','id':fid,'name_ru':food['name_ru'],'state':food['state'],'composition_hash':digest(food),'source_urls':[food['source_url']]}
+        basis={'unit':'g','quantity':100}
+    else:raise KetoError('Выберите блюдо или продукт')
+    return {'version':1,'source':source,'basis':basis,'nutrition':calc['nutrition'],'allergens':copy.deepcopy(calc['allergens']),
+            'known_subtotals':{n:calc['coverage'][n]['known_subtotal'] for n in NUTRIENTS+(DERIVED,)},
+            'missing_food_ids':{n:calc['coverage'][n].get('missing_food_ids',[]) for n in NUTRIENTS+(DERIVED,) if not calc['coverage'][n]['complete']},
+            'available_carbohydrate_g':available}
+
+
+def prepare_diary_entry(value: dict, catalog: dict | None, previous: dict | None=None) -> dict:
+    """Normalize quantities and attach a server snapshot; callers cannot provide one."""
+    entry=validate_diary(value)
+    quantified=bool(entry.get('recipe_id') or entry.get('food_id')) and any(x in entry for x in ('amount','portions','grams'))
+    if not quantified:return entry
+    same_source=previous and all(previous.get(x)==entry.get(x) for x in ('recipe_id','food_id'))
+    snapshot=copy.deepcopy(previous['nutrition_snapshot']) if same_source and previous.get('nutrition_snapshot') else intake_snapshot(entry,catalog or {'recipes':{},'foods':{}})
+    amount=entry.get('amount') or {'value':entry.get('portions') if entry.get('recipe_id') else entry.get('grams'),'unit':'portion' if entry.get('recipe_id') else 'g'}
+    value=number(amount['value'],'amount',0.001,5000);unit=amount['unit']
+    if entry.get('recipe_id'):
+        if unit not in ('portion','batch') or 'grams' in entry:raise KetoError('Для блюда нужна порция или доля всего блюда; готовая масса неизвестна')
+        portions=value*(number(snapshot['basis']['base_servings'],'base_servings',0.1,30) if unit=='batch' else 1)
+        portions=float(number(portions,'portions',0.05,20))
+        if 'portions' in entry and abs(entry['portions']-portions)>1e-9:raise KetoError('Количество порций противоречит основе')
+        entry['portions']=portions
+    else:
+        if unit!='g' or 'portions' in entry:raise KetoError('Для продукта нужна масса в граммах')
+        grams=float(number(value,'grams',0.001,5000))
+        if 'grams' in entry and abs(entry['grams']-grams)>1e-9:raise KetoError('Масса противоречит количеству')
+        entry['grams']=grams
+    entry['amount']={'value':float(value),'unit':unit};entry['nutrition_snapshot']=snapshot
+    return entry
+
+
+def diary_calculation(entry: dict, catalog: dict) -> dict | None:
+    if entry.get('intake_status')!='confirmed':return None
+    snapshot=entry.get('nutrition_snapshot')
+    if snapshot:
+        amount=entry.get('portions') if snapshot['basis']['unit']=='portion' else entry.get('grams')
+        if amount is None:return None
+        factor=number(amount,'amount',0.001,5000)/number(snapshot['basis']['quantity'],'basis',0.001)
+        def scaled(value):return None if value is None else round(float(number(value,'nutrient',0)*factor),6)
+        nutrition={n:scaled(snapshot['nutrition'][n]) for n in NUTRIENTS+(DERIVED,)}
+        coverage={n:{'complete':nutrition[n] is not None,'known_subtotal':scaled(snapshot['known_subtotals'][n]),'missing_food_ids':snapshot['missing_food_ids'].get(n,[])} for n in nutrition}
+        return {'nutrition':nutrition,'coverage':coverage,'available_carbohydrate_g':scaled(snapshot.get('available_carbohydrate_g')),'legacy_estimate':False}
+    try:
+        if entry.get('recipe_id') and entry.get('portions') is not None:calc=calculate_recipe(catalog,entry['recipe_id'],entry['portions'])
+        elif entry.get('food_id') in catalog['foods'] and entry.get('grams') is not None:calc=calculate_food_portion(catalog['foods'][entry['food_id']],entry['grams'])['calculation']
+        else:return None
+    except KetoError:return None
+    return {**calc,'legacy_estimate':True}
+
+
+def diary_summary(entries: list, catalog: dict, day: str) -> dict:
+    diary_date(day);entries=[e for e in entries if e.get('date')==day]
+    calcs=[diary_calculation(e,catalog) for e in entries];known=[c for c in calcs if c is not None]
+    unknown=len(entries)-len(known);summed=sum_calculations(known) if known else None
+    coverage={n:{'complete':bool(known) and not unknown and summed['coverage'][n]['complete'],
+                 'known_subtotal':summed['coverage'][n]['known_subtotal'] if summed and any(c['coverage'][n].get('known_subtotal') is not None for c in known) else None} for n in NUTRIENTS+(DERIVED,)}
+    incomplete=unknown+sum(any(c['nutrition'][n] is None for n in NUTRIENTS+(DERIVED,)) for c in known)
+    return {'date':day,'entry_count':len(entries),'empty':not entries,'known_entries':len(known),'unquantified_entries':unknown,
+            'incomplete_entries':incomplete,'legacy_estimated_entries':sum(c.get('legacy_estimate',False) for c in known),
+            'nutrition':summed['nutrition'] if summed else None,'coverage':coverage,
+            'note':'Нет записей; фактическое потребление неизвестно.' if not entries else 'Сумма только подтверждённых записей с известными порциями, не вся фактически съеденная еда. Неизвестные значения не считаются нулём.'}
 
 def validate_measurement_session(value: dict) -> dict:
     if not isinstance(value,dict) or set(value)-{'measured_at','timezone','glucose','bhb','context'}:raise KetoError('Неверные поля измерения')
@@ -538,11 +658,11 @@ def apply_event(state: dict, event: dict, expected_revision: int, actor_account_
             if kind=='measurement.delete':records.pop(ix)
             else:records[ix]=dict(validate_measurement_session(payload['session']),measurement_id=previous['measurement_id'],recorded_at=previous['recorded_at'],updated_at=utc_now())
     elif kind=='diary.add':
-        entry=validate_diary(payload)
+        entry=prepare_diary_entry(dict(payload,**({'timezone':p['timezone']} if p.get('timezone') and 'timezone' not in payload else {})),catalog)
         if entry.get('photo_ref') and not p['consent']['media_storage']:raise SafetyError('Фото не разрешено сохранять')
         out['diary'].append(dict(entry,entry_id=eid,recorded_at=event.get('created_at') or utc_now()))
-    elif kind in ('diary.update','diary.delete'):
-        allowed={'entry_id','changes'} if kind=='diary.update' else {'entry_id'}
+    elif kind in ('diary.update','diary.delete','diary.repeat'):
+        allowed={'entry_id'} if kind=='diary.delete' else {'entry_id','changes'}
         if set(payload)-allowed or not payload.get('entry_id'):raise KetoError('Неверное исправление дневника')
         matches=[i for i,x in enumerate(out['diary']) if x['entry_id']==payload['entry_id']]
         if len(matches)!=1:raise KetoError('Запись дневника не найдена')
@@ -550,12 +670,31 @@ def apply_event(state: dict, event: dict, expected_revision: int, actor_account_
         if kind=='diary.delete':out['diary'].pop(ix)
         else:
             prev=out['diary'][ix]
-            old={a:b for a,b in prev.items() if a not in ('entry_id','recorded_at','updated_at')}
+            old={a:b for a,b in prev.items() if a not in ('entry_id','recorded_at','updated_at','nutrition_snapshot')}
             changes=payload.get('changes')
             if not isinstance(changes,dict):raise KetoError('changes должен быть объектом')
-            entry=validate_diary(dict(old,**changes))
+            if kind=='diary.repeat':
+                if 'date' not in changes:raise KetoError('Выберите дату повторной записи')
+                old={a:b for a,b in old.items() if a in {'date','meal','note','recipe_id','portions','food_id','grams','amount','intake_status','timezone'}}
+            clock_changed=any(key in changes and changes[key]!=old.get(key) for key in ('date','time','timezone'))
+            if (clock_changed or 'time_fold' in changes) and 'eaten_at' not in changes:old.pop('eaten_at',None)
+            if clock_changed and 'time_fold' not in changes:old.pop('time_fold',None)
+            if 'amount' in changes:
+                old.pop('portions',None);old.pop('grams',None)
+            elif set(changes)&{'portions','grams'}:old.pop('amount',None)
+            source_changed=any(key in changes and changes[key]!=old.get(key) for key in ('recipe_id','food_id'))
+            if source_changed:
+                if 'recipe_id' in changes:old.pop('food_id',None);old.pop('grams',None)
+                if 'food_id' in changes:old.pop('recipe_id',None);old.pop('portions',None)
+                if 'amount' not in changes:old.pop('amount',None)
+                merged=dict(old,**changes)
+                if merged.get('intake_status')=='confirmed' and (merged.get('recipe_id') or merged.get('food_id')) and not any(key in merged for key in ('amount','portions','grams')):raise KetoError('Укажите количество новой еды')
+            material=kind=='diary.repeat' or bool(set(changes)&{'amount','portions','grams','recipe_id','food_id','intake_status'})
+            entry=prepare_diary_entry(dict(old,**changes),catalog,prev) if material else validate_diary(dict(old,**changes))
+            if not material and prev.get('nutrition_snapshot'):entry['nutrition_snapshot']=copy.deepcopy(prev['nutrition_snapshot'])
             if entry.get('photo_ref') and not p['consent']['media_storage']:raise SafetyError('Фото не разрешено сохранять')
-            out['diary'][ix]=dict(entry,entry_id=prev['entry_id'],recorded_at=prev['recorded_at'],updated_at=utc_now())
+            if kind=='diary.repeat':out['diary'].append(dict(entry,entry_id=eid,recorded_at=event.get('created_at') or utc_now()))
+            else:out['diary'][ix]=dict(entry,entry_id=prev['entry_id'],recorded_at=prev['recorded_at'],updated_at=utc_now())
     elif kind=='feedback.add':
         if set(payload)-{'recipe_id','rating','note','would_repeat'}:raise KetoError('Неверные поля отзыва')
         rid=payload.get('recipe_id')

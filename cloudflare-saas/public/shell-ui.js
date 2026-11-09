@@ -16,7 +16,7 @@ export function chatScrollPosition({previousThread,nextThread,previousKey,nextKe
  return {render,bottom:render&&(submitted||height-clientHeight-top<80),top};
 }
 export function createDialogController({$,getRouter,activeElement=()=>document.activeElement}){
- const ids={recipe:'recipe-dialog',help:'help-dialog',proposal:'proposal-dialog',attachments:'attachments-dialog',topic:'topic-dialog',image:'image-link-details',source:'source-recipe-dialog'};
+ const ids={intake:'intake-dialog',recipe:'recipe-dialog',help:'help-dialog',proposal:'proposal-dialog',attachments:'attachments-dialog',topic:'topic-dialog',image:'image-link-details',source:'source-recipe-dialog'};
  let current=null,returnFocus=null;const visited=new Set();
  function sync(kind,{restore=true}={}){
   const previous=current;if(kind&&!visited.has(kind))kind=null;

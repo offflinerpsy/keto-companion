@@ -99,3 +99,48 @@ def test_label_image_is_sanitized_and_state_unchanged(tmp_path):
  out=bridge.execute('POST',PATH,h['x-keto-timestamp'],h['x-keto-nonce'],h['x-keto-signature'],b)
  assert out['state']==doc and out['response']['review_candidate']==CANDIDATE and len(calls)==1
  clean=base64.b64decode(calls[0]['input'][0]['content'][1]['image_url'].split(',')[1]);assert not Image.open(io.BytesIO(clean)).getexif();assert 'SYNTHETIC_PRIVATE_METADATA' not in json.dumps(out)
+
+
+def intake_document():
+ doc=new_document('synthetic-one');doc['processing_consent']=True
+ doc['core']['profile']['consent'].update(storage=True,health_data=True)
+ doc['core']['profile']['timezone']='America/New_York'
+ return doc
+
+
+@pytest.mark.parametrize('values,action,extra,code',[
+ ({'operation':'add','recipe_id':'B01','date':'2026-11-01','time':'01:30','amount':{'value':1,'unit':'portion'}},'intake',{},'INTAKE_TIME_AMBIGUOUS'),
+ ({'operation':'add','recipe_id':'B01','date':'2026-03-08','time':'02:30','amount':{'value':1,'unit':'portion'}},'intake',{},'INTAKE_TIME_NONEXISTENT'),
+ ({'operation':'add','food_id':'Uunknown_private_marker','date':'2026-01-03','amount':{'value':100,'unit':'g'}},'intake',{},'INTAKE_SOURCE_NOT_FOUND'),
+ ({'operation':'add','recipe_id':'RKunknown_private_marker','date':'2026-01-03','amount':{'value':1,'unit':'portion'}},'intake',{},'INTAKE_SOURCE_MISMATCH'),
+ ({'entry_id':'unknown_private_marker'},'diary_history',{},'INTAKE_ENTRY_NOT_FOUND'),
+ ({'date':'2026-01-03'},'diary_history',{'expected_revision':99},'INTAKE_STALE'),
+ ({'operation':'add','recipe_id':'B01','date':'2026-01-03','amount':{'value':100,'unit':'g'}},'intake',{},'INTAKE_AMOUNT_BASIS'),
+])
+def test_intake_bridge_returns_only_allowlisted_code(env,values,action,extra,code):
+ c,personal,_,_=env;args={'action':action,'values':values,'expected_revision':0,**extra}
+ r=call(c,payload('kitchen',intake_document(),args))
+ assert r.status_code==422 and r.json()=={'error':'BRIDGE_REJECTED','validation_code':code}
+ assert 'private_marker' not in r.text and personal.read('synthetic-one')==(None,None)
+
+
+def test_stale_owned_intake_apply_retains_actionable_code(env):
+ c,_,_,_=env;doc=intake_document();doc['revision']=1
+ doc['pending']['pending_0001']={'id':'pending_0001','type':'kitchen.intake','payload':{},'base_revision':0,'expires_at':time.time()+1000,'status':'pending'}
+ r=call(c,payload('apply',doc,{'proposal_id':'pending_0001','expected_revision':1,'approved':True}))
+ assert r.status_code==422 and r.json()=={'error':'BRIDGE_REJECTED','validation_code':'INTAKE_STALE'}
+
+
+@pytest.mark.parametrize('message,operation,args',[
+ ('PRIVATE_EXCEPTION_WITH_TOKEN_123','kitchen',{'action':'intake'}),
+ ('Двусмысленное время: нужно уточнить переход часов PRIVATE_INPUT','kitchen',{'action':'intake'}),
+ ('Двусмысленное время: нужно уточнить переход часов','chat',{'message':'x','request_id':'synthetic_0001'}),
+ ('Двусмысленное время: нужно уточнить переход часов','kitchen',{'action':'generate'}),
+])
+def test_bridge_unknown_and_out_of_scope_errors_remain_opaque(env,monkeypatch,message,operation,args):
+ c,_,_,_=env
+ def fail(*a,**kw):raise BridgeError(message)
+ monkeypatch.setattr(EdgeBridge,'execute',fail)
+ r=call(c,payload(operation,intake_document(),args))
+ assert r.status_code==422 and r.json()=={'error':'BRIDGE_REJECTED'}
+ assert message not in r.text

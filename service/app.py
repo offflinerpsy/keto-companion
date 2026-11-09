@@ -52,8 +52,50 @@ TOOLS.extend([
 ])
 TOOLS.append(tool('keto_label_extract','Прочитать этикетку','Только неподтверждённый черновик; без сохранения.',{'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'image_data_url':{'type':'string','maxLength':1500000},'note':{'type':'string','maxLength':500},'thread_id':{'type':'string','maxLength':80}},['request_id','image_data_url']))
 MOBILE_HTTP_TOOLS={'keto_guidance','keto_topics','keto_reminders','keto_transcribe','keto_label_extract'}
-TOOLS.append(tool('keto_kitchen','Что приготовим','Единая кладовая, рецепты и память. Генерация может вызвать Azure Sol high; сохранения только через отдельное подтверждение.',{'action':{'type':'string','enum':['status','foods','source_search','source_detail','source_import','food_portion','own_dish_calculate','own_dish_detail','own_dish_save','own_dish_diary','parse','generate','select','memory','pantry','remember','forget','save','favorite','rate','diary','accept_day']},'spec':O,'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'thread_id':{'type':'string','maxLength':80},'query':{'type':'string','maxLength':1000},'recipe_id':{'type':'string','maxLength':80},'values':O,'expected_revision':I},['action']))
+TOOLS.append(tool('keto_kitchen','Что приготовим','Единая кладовая, рецепты и память. Генерация может вызвать Azure Sol high; сохранения только через отдельное подтверждение.',{'action':{'type':'string','enum':['status','foods','source_search','source_detail','source_import','intake_preview','intake','diary_history','food_portion','own_dish_calculate','own_dish_detail','own_dish_save','own_dish_diary','parse','generate','select','memory','pantry','remember','forget','save','favorite','rate','diary','accept_day']},'spec':O,'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'thread_id':{'type':'string','maxLength':80},'query':{'type':'string','maxLength':1000},'recipe_id':{'type':'string','maxLength':80},'values':O,'expected_revision':I},['action']))
 TOOL_MAP={x['name']:x for x in TOOLS}
+
+# Only these fixed domain failures may cross the private compute boundary.
+# All other exception messages, source text and identifiers remain opaque.
+INTAKE_VALIDATION_CODES={
+ 'Двусмысленное время: нужно уточнить переход часов':'INTAKE_TIME_AMBIGUOUS',
+ 'Несуществующее время перехода на летнее время':'INTAKE_TIME_NONEXISTENT',
+ 'Устаревший экран дневника':'INTAKE_STALE',
+ 'Укажите актуальную ревизию дневника':'INTAKE_STALE',
+ 'Дневник изменился; обновите историю':'INTAKE_STALE',
+ 'Расчёт или запись изменились. Проверьте количество заново.':'INTAKE_STALE',
+ 'Расчёт изменился. Проверьте новое предложение перед сохранением.':'INTAKE_STALE',
+ 'Профиль изменился. Подготовьте предложение заново.':'INTAKE_STALE',
+ 'Предложение истекло; отмените и подготовьте заново':'INTAKE_STALE',
+ 'Запись не найдена в вашем дневнике':'INTAKE_ENTRY_NOT_FOUND',
+ 'Запись дневника не найдена':'INTAKE_ENTRY_NOT_FOUND',
+ 'Блюдо не найдено':'INTAKE_SOURCE_NOT_FOUND',
+ 'Продукт не найден':'INTAKE_SOURCE_NOT_FOUND',
+ 'Черновик не принадлежит выбранной теме или устарел':'INTAKE_SOURCE_MISMATCH',
+ 'Количество порций противоречит основе':'INTAKE_AMOUNT_BASIS',
+ 'Масса противоречит количеству':'INTAKE_AMOUNT_BASIS',
+ 'Для блюда нужна порция или доля всего блюда; готовая масса неизвестна':'INTAKE_AMOUNT_BASIS',
+ 'Для продукта нужна масса в граммах':'INTAKE_AMOUNT_BASIS',
+ 'Дата, время и часовой пояс еды не совпадают':'INTAKE_TIME_MISMATCH',
+ 'Уточнение перехода часов не совпадает со временем':'INTAKE_TIME_MISMATCH',
+ 'Подтвердите часовой пояс в профиле':'INTAKE_TIMEZONE_REQUIRED',
+ 'Укажите часовой пояс IANA':'INTAKE_TIMEZONE_REQUIRED',
+ 'Для времени нужен часовой пояс':'INTAKE_TIMEZONE_REQUIRED',
+}
+
+def intake_validation_code(message,body):
+    code=INTAKE_VALIDATION_CODES.get(message)
+    if code is None:return None
+    try:
+        request=json.loads(body);args=request.get('arguments',{});state=request.get('state') or {}
+        if not isinstance(args,dict) or not isinstance(state,dict):return None
+        if request.get('operation')=='kitchen' and args.get('action') in ('intake','intake_preview','diary_history'):return code
+        if request.get('operation')=='apply':
+            owner=state.get('core',{})
+            proposal=state.get('pending',{}).get(args.get('proposal_id'),{})
+            if owner.get('owner_account_id')==request.get('subject')==owner.get('subject_id') and proposal.get('type') in ('kitchen.intake','kitchen.diary','kitchen.own_dish_diary','diary.add','diary.update','diary.repeat','diary.delete'):return code
+    except (ValueError,TypeError,AttributeError):pass
+    return None
 
 def image_clean(value):
     if value is None:return None
@@ -264,7 +306,8 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
             except BridgeError as exc:
                 # Authentication and validation failures contain no input or credentials.
                 status=401 if str(exc) in ('invalid request','expired','invalid signature','replay') else 422
-                return JSONResponse({'error':'BRIDGE_REJECTED'},status_code=status)
+                code=intake_validation_code(str(exc),b''.join(pieces)) if status==422 else None
+                return JSONResponse({'error':'BRIDGE_REJECTED',**({'validation_code':code} if code else {})},status_code=status)
     @app.get('/api/auth-config')
     def auth_config():
         return {'mode':'entra' if entra_mode else 'local_test','clientId':os.getenv('KETO_ENTRA_CLIENT_ID'),'tenantId':os.getenv('KETO_ENTRA_TENANT_ID'),'scope':'api://'+os.getenv('KETO_ENTRA_CLIENT_ID','')+'/user_impersonation','redirectUri':public_url+'/'}

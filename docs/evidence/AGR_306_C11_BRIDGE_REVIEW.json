@@ -1,0 +1,55 @@
+{
+  "schema": "keto-isolated-intake-errors-v1",
+  "status": "completed",
+  "created_at": "2026-11-09T20:33:09.520941+00:00",
+  "authoritative_repository_modified": false,
+  "patch": "/workspace/scratch/bbdbdb895c38/keto-intake-errors.patch",
+  "patch_sha256": "f986bdc0b9ad87c2eb6bd5d4d81246c716a93f196fa09baf996bb130283f54b0",
+  "files": [
+    {
+      "path": "cloudflare-saas/src/compute.mjs",
+      "base_sha256": "45a6b5e7aeb2685fd418771459b027c9c97b74dfe9b839869ee0dd0566496ae5",
+      "candidate_sha256": "50dbeb05fce25d51b1141d3c974fd9774976ce912da8f7d074f8c296041ea97d"
+    },
+    {
+      "path": "cloudflare-saas/tests/ed25519-bridge.test.mjs",
+      "base_sha256": "b3939cacf7acc3d86dd8ed024c9e6ebc1a85f5b73549bbf9467c36624eeb1d85",
+      "candidate_sha256": "10d30dbc167d83cbacf3262062e7e4ee02f2c9e4d2e81634546a99b263adcb94"
+    },
+    {
+      "path": "cloudflare-saas/tests/worker.test.mjs",
+      "base_sha256": "a67483c6a47758f1c00132bcea8ac5b1bf27db61e645c2fa61d222a365daa72b",
+      "candidate_sha256": "9085af47cf048d77513f17c6775f0e0a97fe08af9778b11423af54bd54ea6ed1"
+    },
+    {
+      "path": "service/app.py",
+      "base_sha256": "923d590d0c90aee50928d3f8dd8f52305ab3545e4672687006663fd74c95955a",
+      "candidate_sha256": "95d672862a7db91b8a384200a1d4418ad0bf8c05b9d7d6cccec22ba00a1b3f5b"
+    },
+    {
+      "path": "tests/test_edge_bridge.py",
+      "base_sha256": "d68a25c4a5604628726b334ebb780863b0239979407ce99dcef0e0160c669ee8",
+      "candidate_sha256": "500bea3135130f9113a32c970c78936154411c324b5b48ba72c6b92a266e6fe8"
+    }
+  ],
+  "checks": [
+    {
+      "command": "python -m pytest -q tests/test_edge_bridge.py",
+      "result": "23 passed",
+      "duration_seconds": 1.5
+    },
+    {
+      "command": "node --test cloudflare-saas/tests/ed25519-bridge.test.mjs cloudflare-saas/tests/worker.test.mjs",
+      "result": "73 passed",
+      "duration_seconds": 32.631
+    }
+  ],
+  "runtime": "Existing project Python 3.12.14 and Node 24.22.1; synthetic testbed only; no installs/network/live accounts",
+  "semantics": [
+    "Azure exposes only a closed validation_code for exact allowlisted domain messages in intake/history or owned diary-apply scope",
+    "Unknown errors, unrelated operations, authentication failures, oversized/malformed bridge bodies and upstream message text remain opaque",
+    "Worker returns its own fixed safe Russian message; unlocks private state and marks failed job before sending error",
+    "Signed Python HTTP, Web Crypto→Python signatures, error parsing, real Worker auth/state locks and legacy worker regressions verified"
+  ],
+  "root_next_step": "Apply patch with C12 nonoverlapping app schema edits, rerun root browser intake and integrated transport checks, then checkpoint source. Contract export remains root-owned."
+}
