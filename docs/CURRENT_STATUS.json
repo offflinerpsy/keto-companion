@@ -1,13 +1,13 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-09T23:09:18.502767+00:00",
+  "updated_at": "2026-11-09T23:21:23.436397+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "AGR-306",
     "status": "In Progress",
-    "stage": "C15_ui_accepted_cloud_release_pending",
+    "stage": "C15_runtime_acceptance_failed_same_image_diagnostic_pending",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/keto-ui-polish-c15",
     "release_performed": true,
@@ -17,7 +17,7 @@
     "implementation_paused": false,
     "audit_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/owner-pause-audit/AUDIT_RESULT.md",
     "audit_linear_comment": "03b56ead-fa9a-44af-a3d8-0b7495ce4d2b",
-    "next_action": "Release accepted UI through the existing Cloudflare image and promotion gates; retain C14 Azure compute.",
+    "next_action": "Verify installed exact C15 candidate without rebuilding; ordinary trigger restored and approved runtime pin unchanged.",
     "physical_iPhone_acceptance": "C14 full spouse flow NOT performed. Previous partial C9 device observations are historical only.",
     "C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_BUILD_EVIDENCE.json",
     "C8_independent_control": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
@@ -32,7 +32,8 @@
     "ordinary_build": "72ee574c-cc97-4aa9-9932-11ffc1b2f32e",
     "implementation_completed": true,
     "final_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
-    "C15_acceptance": "docs/evidence/AGR_306_C15_UI_ACCEPTANCE.json"
+    "C15_acceptance": "docs/evidence/AGR_306_C15_UI_ACCEPTANCE.json",
+    "C15_failed_native_build": "14208a93-3d47-40bd-87fd-35069f338b6d"
   },
   "last_completed": "AGR-306-C14 technical release to existing private family staging; physical spouse acceptance remains separate.",
   "next_task": {

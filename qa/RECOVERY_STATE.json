@@ -3,11 +3,11 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/workspace/scratch/bbdbdb895c38/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T23:09:18.502767+00:00",
+  "updated_at": "2026-11-09T23:21:23.435969+00:00",
   "active_task": {
     "id": "AGR-306-C15-UI",
     "status": "in_progress",
-    "stage": "ui_accepted_prepare_cloud_image",
+    "stage": "native_failed_same_image_verification_pending",
     "source_base": "892e06363f7d04dcf795f6f56d8d9fdb245dc7ce",
     "branch": "codex/keto-ui-polish-c15",
     "scope": "Typography, spacing, local SVG icons and form/detail layouts; existing private-family frontend release",
@@ -30,7 +30,12 @@
     ],
     "baseline_evidence": "/workspace/scratch/7b30ca21ef3f/ui-baseline/report.json",
     "source_baseline": "4a555cb91706137e3bd58972a5dc6870a4210f733129a252548ed98110bcf614",
-    "acceptance_receipt": "docs/evidence/AGR_306_C15_UI_ACCEPTANCE.json"
+    "acceptance_receipt": "docs/evidence/AGR_306_C15_UI_ACCEPTANCE.json",
+    "candidate_commit": "4c8a6aaea6b5e0ecac7e6059179a8b0d5e57ac3f",
+    "build_uuid": "14208a93-3d47-40bd-87fd-35069f338b6d",
+    "failed_native_build": "14208a93-3d47-40bd-87fd-35069f338b6d",
+    "deployed_candidate_image": "sha256:059d675cda4a8f89d0fda2d842940e1df2f2a479de8a83a18cc71c03217075c2",
+    "failure_receipt": "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json"
   },
   "last_completed": {
     "id": "AGR-306-C14-RELEASE",
@@ -62,9 +67,9 @@
     "broader_audit": "deferred; not claimed complete"
   },
   "next_task": {
-    "id": "AGR-306-C15-CLOUD",
-    "status": "pending",
-    "action": "Upload frozen source candidate, accept one exact Cloudflare runtime image, then pin and ordinary frontend release; Azure remains unchanged."
+    "id": "AGR-306-C15-CANDIDATE-VERIFY",
+    "status": "ready",
+    "action": "Commit C15 exact candidate constants/evidence only; verify existing image once, no rollout or publication; preserve approved-runtime pin."
   },
   "no_relaunch": {
     "recorded_local_jobs": [],
