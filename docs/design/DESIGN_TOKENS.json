@@ -14,7 +14,7 @@
     "--color-dusk-indigo": "#4F659C",
     "--color-coral-alert": "#E06A4E",
     "--font-plus-jakarta-sans": "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
-    "--text-caption": "11px",
+    "--text-caption": "12px",
     "--text-body-sm": "13px",
     "--text-body": "17px",
     "--text-body-lg": "17px",
@@ -35,11 +35,11 @@
     "--container": "428px",
     "--section-padding": "24px",
     "--grid-gap": "12px",
-    "--radius": "22px",
-    "--radius-hero": "24px",
+    "--radius": "14px",
+    "--radius-hero": "20px",
     "--radius-input": "12px",
     "--radius-pill": "999px",
-    "--shadow-ambient": "0 8px 24px rgba(0,30,20,.04)"
+    "--shadow-ambient": "none"
   },
   "aliases": {
     "--bg": "--color-canvas-warm-cream",

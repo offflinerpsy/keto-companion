@@ -31,3 +31,7 @@ A USDA or label result is a candidate until reviewed. Confirming a personal food
 ## Acceptance
 
 Focused tests cover selection and delayed replies, quantities, typed confirmations, diary draft handling, steppers, route state and help lifecycle. Root verified the first core increment in the browser at actual 440 and 390 CSS px, including immediate 200 g input and empty-field steppers. New search, own-dish and shop surfaces require their own integrated screenshots and checks after implementation. See [the active feature specification](../../specs/001-iphone-keto-overhaul/spec.md) and [AGR-306](https://linear.app/agregator/issue/AGR-306/keto-polnocennye-scenarii-pitaniya-i-pokupki-na-iphone) for scope and acceptance status.
+
+## C15 detail pass — 2026-11-09
+
+The owner requested refined spacing, typography, controls and icons after using C14. The current source uses 14 px cards, 12 px controls, medium-weight secondary labels, and a local 30-symbol SVG mask set in `cloudflare-saas/public/ui-icons.css`. Build concatenation preserves the existing single CSS asset. Mobile date/time fields stack, quantity fields align at their lower edge, own-dish results and ingredients have explicit gaps, and disclosures retain visible open/closed chevrons. The full review and acceptance boundaries are recorded in [C15 UI result](../evidence/AGR_306_C15_UI_RESULT_RU.md) and [C15 source acceptance](../evidence/AGR_306_C15_UI_ACCEPTANCE.json).

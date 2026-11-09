@@ -1,0 +1,107 @@
+{
+  "schema": "keto-c15-live-http-v1",
+  "source_commit": "ad5f4b63479e226ca080ae22f3102d4d34c9e3fb",
+  "scope": "Existing public status/assets and read-only unauthenticated guards; no login attempt, family identity, diary write or paid model call. Not a live signed compute transaction.",
+  "checks": [
+    {
+      "name": "served_/",
+      "passed": true,
+      "status": 200,
+      "sha256": "56d2dec8fd7b75931d5cb9baf3cfa7e3fac668660cafaff7440d3e5d134f2e20"
+    },
+    {
+      "name": "served_/app.bundle.js",
+      "passed": true,
+      "status": 200,
+      "sha256": "1642fc37a46e856c9a74081904c5f8a161681ddc76408907063773bc599cbeab"
+    },
+    {
+      "name": "served_/style.css",
+      "passed": true,
+      "status": 200,
+      "sha256": "2557ea68bc1dde1f1332232b88b4c53825c13b2103701691c0db2f1f7e534c1a"
+    },
+    {
+      "name": "served_/help",
+      "passed": true,
+      "status": 200,
+      "sha256": "b94508cc3cefe90a08213584bf31acf943e17b1b65c103f89b0be8a371f64574"
+    },
+    {
+      "name": "served_/privacy",
+      "passed": true,
+      "status": 200,
+      "sha256": "74ca6f6dd2db4bad44495754eead5ae1e92c9553b5104daa904203f8a7b99f96"
+    },
+    {
+      "name": "served_/delete",
+      "passed": true,
+      "status": 200,
+      "sha256": "82b6cde59cb0fdf7ed78391ab84e47a010948f520d89966057ed7a9080d07179"
+    },
+    {
+      "name": "CSP_and_no_store",
+      "passed": true
+    },
+    {
+      "name": "health_firebase_and_private_storage",
+      "passed": true
+    },
+    {
+      "name": "compute_status_honest",
+      "passed": true
+    },
+    {
+      "name": "Google_public_config",
+      "passed": true
+    },
+    {
+      "name": "unauthenticated_/api/session",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/admin/summary",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/sources",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/export",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "Azure_exact_code_and_private_contract",
+      "passed": true,
+      "status": 200,
+      "cache_control": "no-store"
+    }
+  ],
+  "transport": "curl with inherited proxy settings and TLS verification; temporary synthetic cookie jar",
+  "health": {
+    "version": "0.7.1-tranquil-dev-pilot",
+    "build": "mobile-chat",
+    "capabilities": {
+      "firebase_google": true,
+      "direct_google": false,
+      "storage": true,
+      "compute": true
+    }
+  },
+  "azure": {
+    "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
+    "runtime_code_sha256": "166e2a288d7f1ea6d068279163a069ef2374d6d274c7462b743b7e699c3cfe7c",
+    "edge_signature": "Ed25519",
+    "authentication_required": true,
+    "medical_monitoring": false
+  },
+  "synthetic_cookie_cleanup_verified": true,
+  "checked_at": "2026-11-09T23:37:40.341605+00:00",
+  "passed": true,
+  "total": 15
+}

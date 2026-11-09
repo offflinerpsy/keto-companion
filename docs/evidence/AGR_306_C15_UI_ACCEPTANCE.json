@@ -1,0 +1,145 @@
+{
+  "task": "AGR-306-C15-UI",
+  "status": "accepted_and_released",
+  "updated_at": "2026-11-09T23:38:04.556934+00:00",
+  "base_commit": "892e06363f7d04dcf795f6f56d8d9fdb245dc7ce",
+  "source_baseline": "4a555cb91706137e3bd58972a5dc6870a4210f733129a252548ed98110bcf614",
+  "branch": "codex/keto-ui-polish-c15",
+  "one_writer": "root",
+  "independent_reviewers": [
+    "resume_audit",
+    "ui_review",
+    "qa_review"
+  ],
+  "scope": "existing UI typography spacing local icons and form layouts; no domain or auth changes",
+  "checks": {
+    "node_passed": 253,
+    "browser_shell_passed": 20,
+    "browser_intake_passed": 11,
+    "affected_browser_rerun_passed": 2,
+    "visual_widths": [
+      360,
+      390,
+      430,
+      768,
+      1440
+    ],
+    "first_matrix_screens": 32,
+    "targeted_screens": 10,
+    "final_screens": 2,
+    "page_errors": 0,
+    "document_horizontal_overflow": 0,
+    "confirmed_saved_dark_large": true,
+    "contracts_passed": true,
+    "specification_passed": true,
+    "repository_hygiene_passed": true,
+    "owned_fixture_and_browser_processes_closed": true
+  },
+  "measurements": {
+    "date_width_before_px": 152,
+    "date_width_after_px": 316,
+    "recipe_filter_gap_px": 20,
+    "weekday_checkbox_px": [
+      20,
+      20
+    ],
+    "weekday_tile_min_px": [
+      70.5,
+      68
+    ],
+    "own_nutrition_inset_px": 14,
+    "recipe_footer_gap_px": 12
+  },
+  "source_hashes": {
+    "cloudflare-saas/build.cjs": "e7701283e8595b53fc007ae91227f1191916df2a1564cdc93b61b9a199919f07",
+    "cloudflare-saas/public/app.css": "dc369bbe33f2563de21e4600e6315eaf94533623b912e3a58db5bb4251a45d93",
+    "cloudflare-saas/public/app.js": "ff03ad98a508826a2356d52c80ca1b6e704b81cdcc8783eff49027bdd3009a0c",
+    "cloudflare-saas/public/chat-actions.js": "60def7643be527f0ab6608b63c9acd4a56719f85e60e3c91c5d80409179c599e",
+    "cloudflare-saas/public/delete.html": "82b6cde59cb0fdf7ed78391ab84e47a010948f520d89966057ed7a9080d07179",
+    "cloudflare-saas/public/developer-extension.js": "eb6ce7ff242feaab646ae14e420ff067e00ef7e9b633af3faf34bb20dc165a70",
+    "cloudflare-saas/public/developer-ui.js": "e3af808c5045cef29241a0f7b373eac9194613c2de6abccaf1152bf33fb0952b",
+    "cloudflare-saas/public/favicon-16.png": "c396d06bd1b0a32fe7af02ca0cc3b5f4f8e38b19c68835ba07a19c90757c8a20",
+    "cloudflare-saas/public/favicon-32.png": "df16aa9545ac69ed41f2d12429d16a3000624f581ba7427471eec159580c87e6",
+    "cloudflare-saas/public/favicon-48.png": "d34058aa4b58c08f7090b47dc258098113bea6519884e71daa065155a82dc91b",
+    "cloudflare-saas/public/favicon.ico": "1c5f76c3fa6cb63d3d1e5dce896a80bb10ce9c1e97eb580ef27c8bdd133b30ff",
+    "cloudflare-saas/public/favicon.svg": "fbaba988fe7991c1d6223b9bb1fd980fb0bde988333c6bb17567e8e1c494e88b",
+    "cloudflare-saas/public/firebase-flow.js": "cea550ebe555486872ed0c62ecb9be03b83328c0904bbd96ed6ae2ba34427597",
+    "cloudflare-saas/public/firebase-login.js": "dc02f7d713ce8bf8facaf9ff60b67183ba71a52fa7f95617948ecabb1ecf0a98",
+    "cloudflare-saas/public/help.html": "b94508cc3cefe90a08213584bf31acf943e17b1b65c103f89b0be8a371f64574",
+    "cloudflare-saas/public/icon-180.png": "afa409ee9dee4cd98e45e57ba21523225b5edfea59fd92d2f6d8ee04d5ca2941",
+    "cloudflare-saas/public/icon-192.png": "2a62a73a82fda6fc858d95c092a2ff0eeba6b8084f2ebc3aa097a5dcb95e44fa",
+    "cloudflare-saas/public/icon-512.png": "8eb290b1f70b4e666b71a50d4cba6a0c0dac5e5a390392b5ccabc8d2696b02cd",
+    "cloudflare-saas/public/icon.svg": "fbaba988fe7991c1d6223b9bb1fd980fb0bde988333c6bb17567e8e1c494e88b",
+    "cloudflare-saas/public/index.html": "56d2dec8fd7b75931d5cb9baf3cfa7e3fac668660cafaff7440d3e5d134f2e20",
+    "cloudflare-saas/public/intake-ui.js": "f3218a139908aedbbb1691cda7e232c846df89dac5d6c91142c5be450f1c0706",
+    "cloudflare-saas/public/kitchen-ui.js": "844bfefb0439fbe1b3ec189cf539e06937b83d7dd85fb11025523cbd4b11f607",
+    "cloudflare-saas/public/manifest.webmanifest": "a9339060e10a984e6b3ac5bb618febc584c25c516a8da606a7e765500ae39b15",
+    "cloudflare-saas/public/media.js": "37739bbbf2e90afe099778cb76f4441b0fda74a50beb92dc87f26a87ca98a175",
+    "cloudflare-saas/public/mobile-ui.js": "ee3f5fab97b8123dba2aacd875d4bab2d5199a1bee9517f20f3b4897aa5b4159",
+    "cloudflare-saas/public/own-dish.js": "4d672b17689bc9fec65879a5c2d84c15805f55152db5a49d1e720955fc065e18",
+    "cloudflare-saas/public/privacy.html": "74ca6f6dd2db4bad44495754eead5ae1e92c9553b5104daa904203f8a7b99f96",
+    "cloudflare-saas/public/quagga-1.13.0.min.js": "21391dcc0804d5089c639e27649ba9feb042f0cdeb3760e2ecc32fe21ff38a64",
+    "cloudflare-saas/public/recipe-library.js": "4e6cc8e8fe4585fec227e8fdc299b7b1ad3f4a137500f993e5c284d754661a81",
+    "cloudflare-saas/public/recipe-page-calls.js": "3082061d3b995198563e065f56dfcd18f15f745d8f4551cfa0c1b6c5c9c550cc",
+    "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
+    "cloudflare-saas/public/setup-controls.js": "66256ccb3f5a638190856caff9a51a7aafcd97eb2f60bc05e3c2aecc4d3f7860",
+    "cloudflare-saas/public/setup-ui.js": "aab98ae6af42ff01c5c6f9eef8a9af597a852b72eaf41152d266ba6ca9c254aa",
+    "cloudflare-saas/public/shell-ui.js": "423a6bbf4991343befb653d4782e6d51668016e5507358eb0b9f8f8fa206fe32",
+    "cloudflare-saas/public/shop-scanner.js": "69eadc9a028e8548c931910ca97d75ff5501c2945039809f94b288053fdab705",
+    "cloudflare-saas/public/shop-ui.js": "336c67cf9418b0582c54e32e5cccd4d98e11a96d4799baf44893f5b27f2cdd28",
+    "cloudflare-saas/public/today-plan.js": "3ee68b0468266a4d150669ffcb484f58b62be37b09ef65f048e487514b142aea",
+    "cloudflare-saas/public/tranquil-dawn.webp": "49f025cafa6d6de3ab0a8b2d5ba510ce91a2ba2a45792b03af958c7edffc1bf4",
+    "cloudflare-saas/public/ui-icons.css": "60db220cde8216ced468d15eb2924b4ca834969e7a729996b1e34f4614e98dbd",
+    "cloudflare-saas/tests/own-dish.test.mjs": "d5b8a13455692185d0d4267cf628d830561648009e22c237b2315387cddb7045"
+  },
+  "screens": [
+    {
+      "path": "docs/evidence/c15/products-r1.png",
+      "sha256": "9d7f8f019889c4b9a526c97264a45bf3e1aa9e31716312f641975aa8c1f88fa7"
+    },
+    {
+      "path": "docs/evidence/c15/profile-r1.png",
+      "sha256": "136fda2570e16a7a1905d803e9f57e3999b61a6250972afd5441039c467088e2"
+    },
+    {
+      "path": "docs/evidence/c15/intake-r1.png",
+      "sha256": "070cd3f2a5ee57599449e041ec0db7797cdefd516191c70e9a970c6323851853"
+    },
+    {
+      "path": "docs/evidence/c15/confirmation-r1.png",
+      "sha256": "00890ab1dbd1b2451fa43022faf93097bda3f1ecfbdbfb2a07fc192b5a034f2e"
+    },
+    {
+      "path": "docs/evidence/c15/weekdays-r2.png",
+      "sha256": "a2045837d6b792b4a7531ee42af429f333bb79bc93226fa08a1eff2f943cf1f7"
+    },
+    {
+      "path": "docs/evidence/c15/dark-large-r2.png",
+      "sha256": "0ea7663af395f22b09ff9cce6e6548015aaa8964a701aad50ee43b9c59a42c45"
+    },
+    {
+      "path": "docs/evidence/c15/own-dish-final.png",
+      "sha256": "4ebf68aba09676aa2569f9a19be4b17a608470dda5cdacfc804a2308b0a3aa92"
+    },
+    {
+      "path": "docs/evidence/c15/recipe-footer-final.png",
+      "sha256": "731eb2ccc28b4891687b97bb921b6252e706738eee378db1e74049da94dce6a3"
+    }
+  ],
+  "limits": [
+    "Synthetic Chromium and real local HTTP/SQLite only; no physical iPhone acceptance",
+    "No family diary or profile written",
+    "Camera/dictation/physical keyboard acceptance remains owner device work"
+  ],
+  "initial_failure_preserved": {
+    "log": "/workspace/scratch/7b30ca21ef3f/c15-node-r1.log",
+    "passed": 251,
+    "failed": 2,
+    "reason": "app.css exceeded unchanged 60000-byte developer-patch bound",
+    "correction": "Local SVG definitions moved to protected ui-icons.css; same single style.css build output",
+    "focused_rerun_passed": 33
+  },
+  "recovery": "C14 was already released; new scoped UI task, no repetition of historical Azure release",
+  "deployed_frontend_commit": "ad5f4b63479e226ca080ae22f3102d4d34c9e3fb",
+  "release_receipt": "docs/evidence/AGR_306_C15_RELEASE_RECEIPT.json"
+}
