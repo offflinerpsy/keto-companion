@@ -2,14 +2,14 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T21:36:54.352735+00:00",
+  "updated_at": "2026-11-09T21:48:05.239531+00:00",
   "active_task": {
     "id": "AGR-306",
-    "stage": "C14_acceptance_only_recovery",
+    "stage": "C14_corrected_candidate_prepared",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/iphone-keto-overhaul",
     "base_commit": "d9e54d9d7e4bff24c364a3bcf472cc22f94280c5",
-    "next_action": "Commit observed candidate configuration; run existing acceptance-only verifier without image rebuild/rollout",
+    "next_action": "Commit the corrected protected static test and generated assets; start one exact-commit native image build; observe its recorded UUID and restore the ordinary trigger after terminal outcome.",
     "owner_iPhone_test": "Deferred until next ready candidate after owner-requested audit; no foreground window requested",
     "previous_login": "accepted; preserve existing identity/runtime",
     "phase1_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/phase1-acceptance.json",
@@ -20,15 +20,15 @@
     "native_build": "3d27fc52-b960-4443-a40f-f150f5da9fb9",
     "source_commit": "1f7040501fbae54662ad89c776020a7d880f3994",
     "runtime_image": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
-    "source_baseline": "97541c77d758419484d908aa3e6dc5fab86bb8368970b832d82eceb13a352015",
-    "runtime_acceptance": "Native image rollout complete; acceptance failed; approved pin unchanged. Existing candidate verifier recovery pending.",
+    "source_baseline": "eb13ec9de519b4a82d368cd71f67749616df18dcdf1a9ad65387c7b04e8309eb",
+    "runtime_acceptance": "Both failed candidates stopped; root cause reproduced and fixed; accepted app image and runner bindings restored; new baseline requires new real image acceptance.",
     "implementation_paused": false,
     "audit_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/owner-pause-audit/AUDIT_RESULT.md",
     "audit_linear_comment": "03b56ead-fa9a-44af-a3d8-0b7495ce4d2b",
     "physical_iPhone_acceptance": "PARTIAL: actual connected iPhone Chrome nav/library/datalist/help/steppers accepted; keyboard/camera/voice and scroll observation remain.",
     "C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_BUILD_EVIDENCE.json",
     "C8_independent_control": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
-    "technical_release_acceptance": "NOT RELEASED: current candidate passes local source/browser gates; existing Azure administration connection unavailable. No new C14 native build or live mutation.",
+    "technical_release_acceptance": "NOT RELEASED: corrected source awaits native acceptance; Azure archive transferred and verified but not deployed; main Worker unchanged.",
     "owner_continuation": "Owner approved 2026-11-09 product review and explicitly authorized implementation, testing and existing private-family release without intermediate questions.",
     "research_root": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional",
     "resume_linear_comment": "46694022-f549-4dce-a8ee-e6d045d04a6c",
@@ -42,7 +42,7 @@
     "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md",
     "C10_receipt": "docs/evidence/AGR_306_C10_SHELL_ACCEPTANCE.json",
     "C11_receipt": "docs/evidence/AGR_306_C11_INTAKE_ACCEPTANCE.json",
-    "current_delivery_release_status": "C10/C11/C12/C13 implemented; C14 local acceptance complete, remote acceptance/deployment blocked by existing connection",
+    "current_delivery_release_status": "C10/C11/C12/C13 implemented; C14 isolated snapshot test correction passed locally; new native image acceptance pending.",
     "C12_receipt": "docs/evidence/AGR_306_C12_CHAT_ACCEPTANCE.json",
     "C13_receipt": "docs/evidence/AGR_306_C13_SOURCES_ACCEPTANCE.json",
     "C13_source_commit": "02328d4283b7268a13c7f1bfd39bef68637c5982",
@@ -50,8 +50,8 @@
     "release_access": {
       "mac_direct": "system_info unavailable: MCP SSE429",
       "originating_browser": "restored; existing Azure Cloud Shell reconnected; exact function app Running readback",
-      "cloudflare_connector": "read verified; original trigger commands retained",
-      "live_mutation_this_delivery": "Native exact image and developer Worker updated; main app/Azure not deployed; ordinary trigger restored"
+      "cloudflare_connector": "Accepted exact app and bindings restored after failed runtime acceptance; ordinary trigger restored",
+      "live_mutation_this_delivery": "Failed candidate rolled back to accepted runtime; main app and Azure remain unchanged"
     },
     "previous_technical_release_acceptance": "Native newimage and ordinary no-rebuild builds bothSUCCESS; exactapp8/runner/probeabsence/staging/ordinarycontrols verified.",
     "historical_native_build": "7ce93b5a-49f0-45ea-a0b8-a23c7b9abc75",
@@ -61,7 +61,10 @@
     "accepted_runtime_baseline": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7",
     "native_source_commit": "22768691dc720396e2e6c099aa5b657f80c0fcf3",
     "native_failure_receipt": "docs/evidence/AGR_306_C14_NATIVE_FAILURE.json",
-    "runtime_image_candidate": "sha256:79b76cf29fd9edd2f2b32254cb81c9cf2bf200f8fa10bf5574a220e257e77885"
+    "runtime_image_candidate": "sha256:79b76cf29fd9edd2f2b32254cb81c9cf2bf200f8fa10bf5574a220e257e77885",
+    "existing_candidate_verify_build": "7c1d5c0b-a1af-4e1a-bcce-5b5e443b2af8",
+    "existing_candidate_verify_commit": "18fe17b9f573b5ba2a4049b50645c52d347a349f",
+    "runtime_correction_receipt": "docs/evidence/AGR_306_C14_RUNTIME_CORRECTION.json"
   },
   "last_completed": {
     "id": "AGR-305-LOGIN",
@@ -79,7 +82,7 @@
   "next_task": {
     "id": "AGR-306-C14-RELEASE",
     "status": "in_progress",
-    "action": "Commit observed candidate configuration; run existing acceptance-only verifier without image rebuild/rollout"
+    "action": "Commit the corrected protected static test and generated assets; start one exact-commit native image build; observe its recorded UUID and restore the ordinary trigger after terminal outcome."
   },
   "no_relaunch": {
     "recorded_local_jobs": [],
