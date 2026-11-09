@@ -1,0 +1,79 @@
+{
+  "issue": "AGR-306",
+  "build_uuid": "59252eb7-2ebf-4c9b-9f80-dc0285d3ada7",
+  "source_commit": "bafe6442fb5446e5bfaf6631b2a3cd97d5963141",
+  "python_passed": 551,
+  "python_subtests": 6,
+  "node_passed": 200,
+  "gate": {
+    "checks": [
+      {
+        "name": "python_env",
+        "exit": 0
+      },
+      {
+        "name": "python_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "node_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "container_sdk",
+        "exit": 0
+      },
+      {
+        "name": "container_worker_build",
+        "exit": 0
+      },
+      {
+        "name": "runtime_fonts",
+        "exit": 0
+      },
+      {
+        "name": "all_python",
+        "exit": 0
+      },
+      {
+        "name": "all_node",
+        "exit": 0
+      },
+      {
+        "name": "legacy_ui",
+        "exit": 0
+      },
+      {
+        "name": "legacy_oauth_ui",
+        "exit": 0
+      },
+      {
+        "name": "contracts",
+        "exit": 0
+      },
+      {
+        "name": "specification",
+        "exit": 0
+      },
+      {
+        "name": "web_build",
+        "exit": 0
+      },
+      {
+        "name": "legacy_build",
+        "exit": 0
+      },
+      {
+        "name": "hygiene",
+        "exit": 0
+      },
+      {
+        "name": "generated_assets_match",
+        "exit": 0
+      }
+    ],
+    "seconds": 180.73,
+    "scope": "trusted reviewed source; no real data or paid model calls",
+    "github_actions_required": false
+  }
+}
