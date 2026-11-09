@@ -319,3 +319,41 @@ test('SPEC-AUDIT: verified no-model chat result refunds reserved quota',async()=
   assert.equal(e.DB.db.prepare('SELECT COALESCE(SUM(requests),0) n FROM global_usage').get().n,0);
  }finally{restore()}
 });
+test('label extraction reserves quota, replays candidate, rejects mismatch and does not store image',async()=>{
+ const e=env(),owner=(await login(e)).cookie,a=await member(e,owner,'label@example.test','label');let restore=useBridge(e);
+ try{assert.equal((await tool(e,a,'keto_consent',{processing:true,storage:true,health:true,confirmed:true})).status,200)}finally{restore()}
+ const original=globalThis.fetch;let calls=0;
+ globalThis.fetch=async(_url,init)=>{calls++;assert.equal(e.DB.db.prepare('SELECT SUM(requests) n FROM usage').get().n,1);const data=JSON.parse(new TextDecoder().decode(init.body));assert.equal(data.operation,'label_extract');return new Response(JSON.stringify({response:{review_candidate:{name:'candidate'},model_called:true},state:data.state}))};
+ try{const args={request_id:'label_extract_0001',image_data_url:'data:image/png;base64,'+syntheticPng.replaceAll('-','+').replaceAll('_','/')+'=='};assert.equal((await tool(e,a,'keto_label_extract',args)).status,200);assert.equal((await tool(e,a,'keto_label_extract',args)).status,200);assert.equal(calls,1);assert.equal((await tool(e,a,'keto_label_extract',{...args,image_data_url:'data:image/png;base64,QUJD'})).status,409);assert(!JSON.stringify(e.DB.db.prepare('SELECT response_json FROM jobs').all()).includes(syntheticPng));assert(!JSON.stringify(e.DB.db.prepare('SELECT payload FROM private_state').all()).includes(syntheticPng));}finally{globalThis.fetch=original}
+});
+test('label pending, caps, consent/session changes and uncertain failure never redispatch',async()=>{
+ const e=env(),owner=(await login(e)).cookie,a=await member(e,owner,'label-races@example.test','label-races');let restore=useBridge(e);try{assert.equal((await tool(e,a,'keto_consent',{processing:true,storage:true,health:true,confirmed:true})).status,200)}finally{restore()}
+ const original=globalThis.fetch;let calls=0,mode='normal',release,entered;let arrived=new Promise(r=>entered=r);globalThis.fetch=async(_url,init)=>{calls++;const data=JSON.parse(new TextDecoder().decode(init.body));if(mode==='pending'){entered();await new Promise(r=>release=r)}if(mode==='consent')e.DB.db.prepare('UPDATE consents SET processing=0,consent_revision=consent_revision+1').run();if(mode==='session')e.DB.db.prepare('UPDATE sessions SET expires_at=0').run();if(mode==='timeout')throw Error('uncertain timeout');return new Response(JSON.stringify({response:{review_candidate:{name:'label'},model_called:true},state:data.state}))};
+ const image='data:image/png;base64,QUJD';const args=id=>({request_id:id,image_data_url:image});try{
+ assert.equal((await tool(e,a,'keto_label_extract',{...args('bad_label_001'),image_data_url:'not image'})).status,400);assert.equal(calls,0);
+ mode='pending';const first=tool(e,a,'keto_label_extract',args('pending_label_01'));await arrived;assert.equal((await tool(e,a,'keto_label_extract',args('pending_label_01'))).status,409);assert.equal(calls,1);release();assert.equal((await first).status,200);
+ e.DB.db.prepare('UPDATE global_usage SET requests=500').run();assert.equal((await tool(e,a,'keto_label_extract',args('global_label_001'))).status,409);assert.equal(calls,1);e.DB.db.prepare('UPDATE global_usage SET requests=1').run();e.DB.db.prepare('UPDATE usage SET requests=30').run();assert.equal((await tool(e,a,'keto_label_extract',args('member_label_001'))).status,409);assert.equal(calls,1);e.DB.db.prepare('UPDATE usage SET requests=1').run();
+ mode='consent';assert.equal((await tool(e,a,'keto_label_extract',args('consent_label_01'))).status,409);assert.equal(e.DB.db.prepare("SELECT response_json FROM jobs WHERE request_id='consent_label_01'").get().response_json,null);e.DB.db.prepare('UPDATE consents SET processing=1').run();
+ mode='session';assert.equal((await tool(e,a,'keto_label_extract',args('session_label_01'))).status,409);assert.equal(e.DB.db.prepare("SELECT response_json FROM jobs WHERE request_id='session_label_01'").get().response_json,null);e.DB.db.prepare('UPDATE sessions SET expires_at=?').run(Math.floor(Date.now()/1000)+3600);
+ mode='timeout';assert.equal((await tool(e,a,'keto_label_extract',args('timeout_label_01'))).status,503);const count=calls;assert.equal((await tool(e,a,'keto_label_extract',args('timeout_label_01'))).status,409);assert.equal(calls,count);assert(!JSON.stringify(e.DB.db.prepare('SELECT payload FROM private_state').all()).includes(image));assert(!JSON.stringify(e.DB.db.prepare('SELECT response_json FROM jobs').all()).includes(image));
+ }finally{globalThis.fetch=original}
+});
+test('invalid image rejected before Azure refunds proven no-model reservation',async()=>{
+ const e=env(),owner=(await login(e)).cookie,a=await member(e,owner,'label-invalid@example.test','label-invalid'),restore=useBridge(e);try{assert.equal((await tool(e,a,'keto_consent',{processing:true,storage:true,health:true,confirmed:true})).status,200);const r=await tool(e,a,'keto_label_extract',{request_id:'label_invalid_001',image_data_url:'data:image/png;base64,QUJD'});assert.equal(r.status,422);assert.equal((await r.json()).model_called,false);assert.equal((await tool(e,a,'keto_label_extract',{request_id:'label_invalid_001',image_data_url:'data:image/png;base64,QUJD'})).status,422);assert.equal(e.DB.db.prepare('SELECT SUM(requests) n FROM usage').get().n,0);assert.equal(e.DB.db.prepare('SELECT SUM(requests) n FROM global_usage').get().n,0)}finally{restore()}
+});
+
+test('intake bridge errors return fixed actionable text and release the private-state lock',async()=>{
+ const e=env(),owner=(await login(e)).cookie,a=await member(e,owner,'intake-errors@example.test','intake-errors');let restore=useBridge(e);
+ try{assert.equal((await tool(e,a,'keto_consent',{processing:true,storage:true,health:true,confirmed:true})).status,200)}finally{restore()}
+ const id=e.DB.db.prepare("SELECT id FROM users WHERE email='intake-errors@example.test'").get().id,before=e.DB.db.prepare('SELECT payload FROM private_state WHERE user_id=?').get(id).payload,original=globalThis.fetch;
+ try{for(const code of ['INTAKE_TIME_AMBIGUOUS','INTAKE_TIME_NONEXISTENT','INTAKE_STALE','INTAKE_ENTRY_NOT_FOUND','INTAKE_SOURCE_NOT_FOUND','INTAKE_SOURCE_MISMATCH','INTAKE_AMOUNT_BASIS','INTAKE_TIME_MISMATCH','INTAKE_TIMEZONE_REQUIRED']){
+   globalThis.fetch=async()=>new Response(JSON.stringify({error:'BRIDGE_REJECTED',validation_code:code,message:'PRIVATE_UPSTREAM_EXCEPTION'}),{status:422});
+   const response=await tool(e,a,'keto_kitchen',{action:'intake',values:{},expected_revision:1});assert.equal(response.status,422);const result=await response.json();assert.equal(result.error,code);assert.equal(typeof result.message,'string');assert.ok(result.message.length>20);assert.ok(!JSON.stringify(result).includes('PRIVATE_UPSTREAM_EXCEPTION'));
+   const stored=e.DB.db.prepare('SELECT payload,lock_id FROM private_state WHERE user_id=?').get(id);assert.equal(stored.payload,before);assert.equal(stored.lock_id,null);
+  }
+  globalThis.fetch=async()=>new Response(JSON.stringify({error:'BRIDGE_REJECTED',validation_code:'PRIVATE_CODE',message:'PRIVATE_UPSTREAM_EXCEPTION'}),{status:422});
+  const unknown=await tool(e,a,'keto_kitchen',{action:'intake',values:{},expected_revision:1});assert.equal(unknown.status,422);assert.deepEqual(await unknown.json(),{error:'VALIDATION_FAILED'});
+  globalThis.fetch=async()=>new Response(JSON.stringify({error:'BRIDGE_REJECTED',validation_code:'INTAKE_TIME_AMBIGUOUS'}),{status:422});
+  const outside=await tool(e,a,'keto_kitchen',{action:'status'});assert.equal(outside.status,422);assert.deepEqual(await outside.json(),{error:'VALIDATION_FAILED'});
+ }finally{globalThis.fetch=original}
+});

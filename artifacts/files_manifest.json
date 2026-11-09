@@ -4,48 +4,56 @@
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "14c17578952ac7adfd03cf900ca324546fdfd7ea50e5aa35014f9e6f4475e81f",
-      "bytes": 998100,
+      "sha256": "f9b9768ffbb08bd86bcfa5e09f9fde6ba7895dc13c8f84016980bd77687bcd67",
+      "bytes": 1405676,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "de958bb3db167d59d738831137c9d464363f03a0af8a336807edc9db1aa8b31a",
-      "bytes": 128476,
+      "sha256": "d8da69b8b2d19d054aa88c84d483f0083cfc61f723a48e1744e4dced719e7232",
+      "bytes": 153806,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/assets/index.html",
-      "sha256": "a7791cd3b1d17a1800685053c598fcbb824b46d2bfbcee676783e4cdbe72ca13",
-      "bytes": 42493,
+      "sha256": "074d1f96d57582322ddd5ca8986f11dae074db89bace2f0e901de2bd55c15a7b",
+      "bytes": 51137,
       "mime": "text/plain",
       "module_name": "assets/index.html",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "cd7887182cd920c4268accd4a390f807d36567e77d75a4768aeb09a73120acf6",
-      "bytes": 548235,
+      "sha256": "f5a812c95bb728c72b0dfa3e7c61a6835094e456b3f70560835b207ee6b789d8",
+      "bytes": 726321,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"
     },
     {
+      "path": "cloudflare-saas/dist/assets/quagga-1.13.0.min.js",
+      "sha256": "21391dcc0804d5089c639e27649ba9feb042f0cdeb3760e2ecc32fe21ff38a64",
+      "bytes": 162971,
+      "mime": "text/plain",
+      "module_name": "assets/quagga-1.13.0.min.js",
+      "module_type": "text"
+    },
+    {
       "path": "cloudflare-saas/dist/assets/style.css",
-      "sha256": "9c5a5abaadebfc8a59e45d8fe3acde3750acbb3b71e10a95cabedee16cee6a64",
-      "bytes": 33738,
+      "sha256": "4c3aca596d5578bf7316bd4fb0d915d45e255e4cde1ddaef0ffd09ba75af0992",
+      "bytes": 44743,
       "mime": "text/plain",
       "module_name": "assets/style.css",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/help.html",
-      "sha256": "541d76c4dc0efdf12871d050f01d23569f978c300c80338eb1b920f89d41cca4",
-      "bytes": 3544,
+      "sha256": "b94508cc3cefe90a08213584bf31acf943e17b1b65c103f89b0be8a371f64574",
+      "bytes": 3528,
       "mime": "text/plain",
       "module_name": "assets/help.html",
       "module_type": "text"
@@ -198,6 +206,14 @@
       "path": "cloudflare-saas/migrations/0007_developer.sql",
       "sha256": "b14472ebb08a288c52670e300f1261c5bab9d129d4e4fd73bbf9df8ea5d616c6",
       "bytes": 1290,
+      "mime": "application/sql",
+      "module_name": null,
+      "module_type": null
+    },
+    {
+      "path": "cloudflare-saas/migrations/0008_shop_lookup.sql",
+      "sha256": "38af85819867a6cfa68da1251059a92cbb31f91a343e4969a73f7f8c4168df39",
+      "bytes": 447,
       "mime": "application/sql",
       "module_name": null,
       "module_type": null

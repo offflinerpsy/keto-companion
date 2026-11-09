@@ -4,14 +4,15 @@ import argparse,gzip,hashlib,io,json,subprocess,tarfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 EDITABLE=('cloudflare-saas/public/app.css','cloudflare-saas/public/help.html','cloudflare-saas/public/developer-extension.js')
-ROOT_FILES={'requirements.txt','requirements-dev.txt','pytest.ini','pyproject.toml','setup.cfg','conftest.py'}
+ROOT_FILES={'function_app.py','requirements.txt','requirements-dev.txt','pytest.ini','pyproject.toml','setup.cfg','conftest.py'}
 PREFIXES=('service/','library/','tests/','scripts/','cloudflare-saas/','ui-sdk/','developer-runtime/')
 EXCLUDED={'node_modules','.git','.private','.venv','__pycache__','.pytest_cache','dist','generated','build','.cache'}
 GENERATED={'developer-runtime/release.json','cloudflare-saas/src/embedded-assets.mjs','cloudflare-saas/public/app.bundle.js','cloudflare-saas/public/style.css','cloudflare-saas/public/knowledge-data.js','service/static/app.bundle.js'}
 SUFFIXES={'.py','.mjs','.cjs','.js','.json','.css','.html','.sql','.toml','.txt','.yaml','.yml','.md','.svg','.png','.webp','.ico','.webmanifest','.csv','.ts'}
+PUBLIC_REFERENCE_FILES={'library/skills/keto-menu/data/usda-reference/usda-sr-legacy-normalized.json.gz'}
 def permitted(name):
     p=Path(name)
-    return not p.is_absolute() and not any(x in EXCLUDED or x.startswith('.') or x in ('qa','data-private','health') for x in p.parts) and name not in GENERATED and (name in ROOT_FILES or name.startswith(PREFIXES)) and p.suffix in SUFFIXES and not any(word in p.name.lower() for word in ('credential','token-state','local.settings','firebase-admin','service-account'))
+    return not p.is_absolute() and not any(x in EXCLUDED or x.startswith('.') or x in ('qa','data-private','health') for x in p.parts) and name not in GENERATED and (name in ROOT_FILES or name.startswith(PREFIXES)) and (p.suffix in SUFFIXES or name in PUBLIC_REFERENCE_FILES) and not any(word in p.name.lower() for word in ('credential','token-state','local.settings','firebase-admin','service-account'))
 def prepare(output,generated):
     candidates=subprocess.run(['git','ls-files','--cached','--others','--exclude-standard','-z'],cwd=ROOT,capture_output=True,check=True).stdout.decode().split('\0')
     names=set()

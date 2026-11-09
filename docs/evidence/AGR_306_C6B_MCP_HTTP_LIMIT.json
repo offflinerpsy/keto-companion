@@ -1,0 +1,10 @@
+{
+  "issue": "AGR-306",
+  "scope": "Stopped unsupported direct MCP public HTTP surface; native Cloudflare Builds remains the original supported release execution environment",
+  "purpose": "read-only error classification on exact already-deleted probe; no POST/auth/job",
+  "http": 403,
+  "content_type": "text/plain;charset=UTF-8",
+  "server": null,
+  "cf_ray": null,
+  "body": "Forbidden: requests to keto-developer-check-agr306-6503b8c162.offflinerpsy.workers.dev are not allowed"
+}

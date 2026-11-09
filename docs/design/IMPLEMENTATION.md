@@ -1,48 +1,33 @@
-# Tranquil Dawn in KETO
+# KETO mobile interface — AGR-306
 
-Task: **CF-DEV-MEDIA-08**, bounded UI continuation. The supplied [style reference](DESIGN.md) is authoritative for this change. Existing behavior and the [design handoff](../en/AI_DESIGN_HANDOFF.md) remain authoritative for forms, consent, safety and media/developer actions.
+## Approved continuation — 2026-11-09
 
-The source now applies warm cream, spruce interaction colors, white cards, botanical pastels and soft ambient elevation across the existing application. It does not introduce a framework, router, remote font, health score or new personal-data store. This is a source implementation with focused synthetic checks, not a claim of pixel fidelity, deployed behavior or clinical validation.
+The owner approved the independent product review and resumed implementation through the existing private-family release. [The delivery contract](PRODUCT_DELIVERY_2026_11_09.md) now controls navigation and task flow: Chat / Diary / Recipes / Products; Today remains a nested meal plan; one consumed-food editor; contextual chat actions; compact system-style forms. Prior C9 technical receipts remain historical evidence, not acceptance of the newly requested product.
 
-## Reference and adaptations
+The current owner brief replaces the earlier Tranquil Dawn direction with a practical Russian interface for iPhone. The existing vanilla application, router, saved theme values and private state stay in place. Source changes are under review; release and physical iPhone acceptance are separate stages.
 
-| Reference | Source implementation | Reason or boundary |
-| --- | --- | --- |
-| Cream `#FAF9F6`, spruce `#0E3B36`, charcoal `#1A2421`, mint `#F0F7F5`, slate `#6C7A76`, four accent colors | Exact source-named CSS tokens in `app.css`, mirrored in [DESIGN_TOKENS.json](DESIGN_TOKENS.json); existing `--bg`, `--paper`, `--ink`, `--muted`, `--accent`, `--soft` aliases | Existing components retain their vocabulary. Slate remains the source token. Small secondary text uses `#5E6F68`: source slate on cream has approximately 4.26:1 contrast; the adaptation exceeds 4.5:1. |
-| Plus Jakarta Sans and permitted substitutes | Locally available font stack: Plus Jakarta Sans, Inter, SF Pro Display, Urbanist, system sans | No font request, download or redistribution; actual face depends on the device. |
-| Type table body 14px, quick start 15px | Source scale tokens retain quick-start 15px body and 17px body-lg; rendered application body and inputs use 17px, help 14–15px with 1.5 line height | Explicit accessibility choice. Table heading sizes 17/20/24/28px are retained. |
-| 4px unit; cards 22px, hero 24px, input 12px; pill buttons | Named spacing/radius tokens, shared card and form styles, ambient `0 8px 24px rgba(0,30,20,.04)` | No decorative diagonal arrows. Warnings and proposal borders retain their semantic emphasis. |
-| Reference page 428px versus quick start 390px | 428px content token for mobile where practical, 20px gutters (16px at narrow widths), existing 900px page / 850px chat desktop workspace | Desktop keeps usable width; mobile controls can use available space. |
-| Four narrow metric columns | Four status cards at desktop width, 2×2 on narrow screens and with large text | Real saved statuses and counts, no unsupported biometric figures or nutrient claims. |
-| 42px hero CTA | Minimum 48px button, selector and slider-handle targets; labelled check/radio controls have 48px rows | Touch accessibility takes precedence over the illustrative 42px height. |
-| Coastal photograph and English wellness slogan | Decorative same-origin `/tranquil-dawn.webp` on login and Menu; Russian meal-planning copy on a 96% cream surface | Parent supplies and packages the photograph, license and provenance. No hero in fixed chat chrome; no remote/authenticated image URL. |
-| Notification badge | No badge added | No unread-count source exists. |
-| Daily plan ring with example “3/3” | Native labelled progress bar and explicit four-step list, derived from the current accepted state | No hardcoded completion or health score. |
-| Light theme | Default and saved `light` use Tranquil Dawn; saved `dark` remains an explicit dark adaptation with contrasting text/buttons | Dark colors are an application adaptation, not part of the supplied light reference. Saved `ivory-plum` enum is retained and displayed as “Tranquil Dawn”. |
+## Current design rules
 
-## Applied surfaces
+| Element | Current implementation |
+| --- | --- |
+| Typography | `-apple-system, BlinkMacSystemFont, system-ui, sans-serif`; 17 px body, one heading scale, explicit large-text setting. No downloaded Apple font files. |
+| Light surfaces | Neutral `#F2F2F7` canvas, white cards, `#1C1C1E` text, `#50545B` secondary text. |
+| Interaction | Blue `#005FCC`, pale blue selection surface `#EAF2FF`, visible selected navigation and keyboard focus. Color supports a label or selected state. |
+| Dark surfaces | Explicit saved dark theme; neutral dark backgrounds, light text and blue controls with contrasting button text. |
+| Controls | At least 48 px touch controls in the current adaptation; compact radio glyphs aligned with the first line of the label. Numeric steppers have visible starting values and work when a field is empty. |
+| Food search | Human names and preparation state, bounded named results, visible continuation, source review before import. Internal product IDs remain machine keys. |
+| Confirmations | Russian action and subject, named ingredients, known mass or “масса не указана”, visible cancellation and saved receipt. No raw payload fields. |
+| Help | Explicit close, browser-back lifecycle and focus on the close control when opened; preserve the current draft. |
+| Imagery | No decorative photo hero in Menu or login. The legacy packaged photograph is not required in the current interface. |
 
-- Login and invitation controls keep Google/invite/deletion status messages and existing authentication actions.
-- Header and four bottom tabs use compact icon controls with accessible labels. The existing navigation and route keys remain in place.
-- Chat retains its scroll container, confirmations, photo preview, dictation Stop/Cancel and recovery messages. Photo and link actions share the composer toolbar. Short-height layouts reduce static explanatory chrome, preserving error/status content and the existing attachment actions.
-- Guided onboarding, numeric controls, screening and targets share the new surfaces; original input ownership and required/validation fields remain intact.
-- Recipe Studio, recipe cards, pantry, diary, menu, shopping, memory, settings, source/import dialogs and the developer technical form/diff/preview receive the shared tokens and geometry.
-- Developer confirmation text, technical-only attestation, Stop control, isolated preview and media epoch guards are preserved. No medical rule, calculation, data import or backend policy changed.
+The historical variable names remain for compatibility. [DESIGN_TOKENS.json](DESIGN_TOKENS.json) mirrors their current base values in `cloudflare-saas/public/app.css`; the names do not imply green interaction colors or a downloaded font.
 
-## Overview state contract
+## Data and interaction boundaries
 
-`tranquilSummary(next)` and `renderTranquilSummary(next)` live in the existing `app.js`; no additional module or request is needed. The summary renders only inside Menu. Before reading targets, pantry, diary or plans, it requires `processing_consent`, `profile.consent.storage` and `profile.consent.health_data` to be explicitly true.
+Menu summaries require explicit processing, storage and health-data consent before reading private state. An unquantified food record or incomplete nutrient field remains unknown. Household quantities and a person's consumed portions use separate calculations. Measurements are distinct from food intake.
 
-The cards show the saved screening status, saved target status, number of saved pantry positions and number of diary records. Missing arrays display “Нет данных”; an actual empty array displays zero records, never zero intake. Unquantified diary records remain records without invented nutrients. There is no daily nutrient overview because that would require an explicit accepted date/plan selection contract.
+A USDA or label result is a candidate until reviewed. Confirming a personal food does not approve a cooking method or exact meal plan. The own-dish calculation shows stated quantities, known contributions and missing fields; observational compositions remain separate from checked planning eligibility.
 
-Progress has four labelled conditions: accepted permissions; screening allows planning with an explicitly empty hold list; saved targets with explicit `targets_stale=false` and no holds; a saved `user_accepted` menu with days and the current integer profile revision, valid screening and target status. Draft, stale, blocked, missing and revision-mismatched menus do not complete the last step. This tracks preparation of a personal menu, not medical assessment or the amount of food eaten.
+## Acceptance
 
-Rendering follows `setState`/`renderState`. `clearScreen` clears and hides the overview. Existing owner-change, consent-revocation and response-epoch guards remain responsible for invalidation. The new renderer reads neither browser storage nor private endpoints and never writes health data.
-
-## Verification and parent handoff
-
-Focused tests cover exact source tokens, explicit dark compatibility and contrast, baseline DOM IDs/form contracts, route controls, same-origin hero scope, real/unknown summary data, draft/stale menu rejection, consent-before-read, account cleanup and late-response rejection. Existing setup, kitchen, allergy, media, chat-image and developer UI regressions are included in the bounded run. See [the result receipt](../../qa/TRANQUIL_DAWN_RESULT.json) for exact commands and hashes.
-
-No browser, cloud operation, installation, Git write or subagent was used. Browser geometry is unverified: the CSS retains dedicated chat flex scrolling and short-height rules, but screenshots must establish the requested 440×540 large-text / 956×440 minimum useful chat area and overflow behavior. Parent owns generated builds, photo packaging, isolated visual/device QA, complete suites and release. The source writer does not edit `RECOVERY_STATE.json` or claim a public release.
-
-Next action: parent integrates these UI sources with the supplied photograph in its existing release build and verifies that exact build using the authorized isolated visual/release checks.
+Focused tests cover selection and delayed replies, quantities, typed confirmations, diary draft handling, steppers, route state and help lifecycle. Root verified the first core increment in the browser at actual 440 and 390 CSS px, including immediate 200 g input and empty-field steppers. New search, own-dish and shop surfaces require their own integrated screenshots and checks after implementation. See [the active feature specification](../../specs/001-iphone-keto-overhaul/spec.md) and [AGR-306](https://linear.app/agregator/issue/AGR-306/keto-polnocennye-scenarii-pitaniya-i-pokupki-na-iphone) for scope and acceptance status.

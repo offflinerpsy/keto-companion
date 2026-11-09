@@ -1,0 +1,39 @@
+{
+  "issue": "AGR-306",
+  "scope": "Independent exact application/runner/settings/deployment readback; executing digest of each instance not independently measured",
+  "observed_at": "2026-11-09T13:24:58.565Z",
+  "application": {
+    "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "name": "keto-companion-developer-runner",
+    "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:95efda5830c8ed9bc2f32a5f13a9a06fe3fb2be5f239404f755e521553badf52",
+    "max_instances": 1,
+    "scheduling_policy": "default",
+    "env_count": 0,
+    "key_count": 0,
+    "version": 6
+  },
+  "runner": {
+    "values": {
+      "DEVELOPER_BASELINE": "66dd980b4f3dc9d90c37fe100d5ddf24f8c272b7cace6d6565a1b6e92854e759",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:95efda5830c8ed9bc2f32a5f13a9a06fe3fb2be5f239404f755e521553badf52"
+    },
+    "binding_types": [
+      "plain_text",
+      "plain_text",
+      "durable_object_namespace"
+    ]
+  },
+  "deployments": [
+    {
+      "id": "795ef7ba-f43a-4796-b348-f14a85935466",
+      "created_on": "2026-11-09T13:22:26.127594Z",
+      "versions": [
+        {
+          "version_id": "2a156d6a-c742-4793-84d0-cd31d0e7985c",
+          "percentage": 100
+        }
+      ],
+      "source": "api"
+    }
+  ]
+}

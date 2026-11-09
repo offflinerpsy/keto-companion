@@ -1,0 +1,80 @@
+{
+  "issue": "AGR-306",
+  "build_uuid": "c296da43-d1c2-48cd-a563-9340087ecd87",
+  "source_commit": "2eed11d44e5b86a28f31d998b793789c6ce34e2d",
+  "build_status": "stopped/success",
+  "full_gate_checks": 16,
+  "python": {
+    "pass": 554,
+    "subtests": 6
+  },
+  "node": {
+    "pass": 231
+  },
+  "http_guard_tests": 8,
+  "acceptance": {
+    "task": "CF-DEV-MEDIA-08",
+    "baseline": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7",
+    "image_digest": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "network_policy": "Container class enableInternet=false; no egress exceptions",
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "private_credentials_transported_to_agent": false,
+    "publication_broker": false,
+    "runtime_user_flow_tested": false,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true
+  },
+  "rollout": {
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "rollout_id": "b84f20e1-609f-4d7c-9508-0d388dbddc93",
+    "previous_digest": "sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008",
+    "new_digest": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1"
+  },
+  "independent_control": {
+    "app_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "version": 8,
+    "max_instances": 1,
+    "scheduling": "default",
+    "environment_variables": 0,
+    "authorized_keys": 0,
+    "runner_baseline": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7",
+    "runner_image_digest": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+    "staging_deployment": "5b7cea28-2664-4835-aa01-384f12e6ede3",
+    "staging_version": "c10d11ee-9178-412b-95d4-b2c8bb08c1a2",
+    "percentage": 100,
+    "full_script_inventory": 32,
+    "check_probe_current_count": 0
+  },
+  "limitations": [
+    "Physical iPhone acceptance open.",
+    "Native new-image outer script exposes summary only; detailed guarded HTTP/job receipt remains in its build filesystem. Do not replay this job. Ordinary acceptance emits durable filtered identity evidence.",
+    "Original C6b job remains UNKNOWN and retired."
+  ]
+}

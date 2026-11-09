@@ -1,0 +1,139 @@
+{
+  "schema": "keto-c14-runtime-correction-v1",
+  "recorded_at": "2026-11-09T21:48:04.885Z",
+  "status": "local_correction_passed_cloud_candidate_pending",
+  "source_parent": "18fe17b9f573b5ba2a4049b50645c52d347a349f",
+  "failed_acceptance_build": "7c1d5c0b-a1af-4e1a-bcce-5b5e443b2af8",
+  "failed_acceptance": {
+    "run_id": "8570a4a4-98d6-4bcf-a1ed-788955bc4fc1",
+    "probe_name": "keto-developer-check-7a39310690",
+    "job_id": "825f9462-fe66-48eb-bd1c-85e5f52896d8",
+    "upload": "delivered_unverified",
+    "readiness": "known_handler_shape",
+    "post": "delivered_unverified",
+    "post_count": 1,
+    "cleanup": "delivered_unverified",
+    "events": [
+      {
+        "method": "PUT",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "POST",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "GET",
+        "status": 404,
+        "type": "known_handler_shape"
+      },
+      {
+        "method": "POST",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "DELETE",
+        "status": 200,
+        "type": "json"
+      }
+    ],
+    "post_result": {
+      "status": "failed",
+      "baseline": "97541c77d758419484d908aa3e6dc5fab86bb8368970b832d82eceb13a352015",
+      "patch_hash": "dc1f87ea820e71d645fae38a6446cb30505d01bddd999029ccd8c2e7ef66f461",
+      "image_digest": "sha256:79b76cf29fd9edd2f2b32254cb81c9cf2bf200f8fa10bf5574a220e257e77885",
+      "exit_code": 1,
+      "stages": [
+        {
+          "name": "syntax",
+          "exit_code": 0,
+          "passed_count": null
+        },
+        {
+          "name": "build",
+          "exit_code": 0,
+          "passed_count": null
+        },
+        {
+          "name": "product",
+          "exit_code": 1,
+          "passed_count": 13
+        }
+      ]
+    },
+    "outcome": "verifier_failed"
+  },
+  "root_cause": "The protected static test dereferenced developerSnapshot.sources in the isolated runtime, whose trusted runner deliberately creates developerSnapshot=null with KETO_DEVELOPER_SNAPSHOT_SKIP=1.",
+  "correction": {
+    "file": "cloudflare-saas/tests/static.test.mjs",
+    "scope": "Require null only with the explicit isolated flag; ordinary builds still require the complete allowlisted snapshot; existing byte limits and asset checks unchanged.",
+    "ordinary_product": {
+      "exit_code": 0,
+      "passed": 14
+    },
+    "isolated_product": {
+      "exit_code": 0,
+      "passed": 14
+    },
+    "isolated_python": {
+      "exit_code": 0,
+      "passed": 17
+    },
+    "negative_control": {
+      "exit_code": 1,
+      "expected": true,
+      "assertion": "ordinary build requires the source snapshot"
+    }
+  },
+  "new_source": {
+    "baseline": "eb13ec9de519b4a82d368cd71f67749616df18dcdf1a9ad65387c7b04e8309eb",
+    "files": 229,
+    "archive_sha256": "4ae07bdf5eef426a7dbb86f823270dc2bd46f657d52e0e281c684e89c63ed37e"
+  },
+  "rollback": {
+    "restored_app": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "version": 10,
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+      "max_instances": 1,
+      "scheduling_policy": "default"
+    },
+    "runner": {
+      "bindings": [
+        {
+          "name": "DEVELOPER_BASELINE",
+          "text": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7",
+          "type": "plain_text"
+        },
+        {
+          "name": "DEVELOPER_IMAGE_DIGEST",
+          "text": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+          "type": "plain_text"
+        },
+        {
+          "class_name": "KetoTester",
+          "name": "KETO_TESTER",
+          "namespace_id": "b0a394e990794e51ba4f38a9339bb308",
+          "type": "durable_object_namespace"
+        }
+      ],
+      "tags": [
+        "keto",
+        "developer-isolated",
+        "baseline:8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7"
+      ]
+    },
+    "active_instances": 0,
+    "probes": []
+  },
+  "approved_pin_changed": false,
+  "azure_or_main_worker_published": false
+}

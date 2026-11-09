@@ -1,0 +1,80 @@
+{
+  "schema": "keto-source-acceptance-v1",
+  "task": "AGR-306",
+  "accepted_at": "2026-11-09T11:27:40.622Z",
+  "branch": "codex/iphone-keto-overhaul",
+  "base_commit": "d9e54d9d7e4bff24c364a3bcf472cc22f94280c5",
+  "status": "accepted_source_and_synthetic_mobile_only",
+  "snapshot_baseline": "27437fded5bfdeeb63154fc5e127d85660f1a898e44aa130c3fc315b1625be28",
+  "independent_review": {
+    "product": "Sol accepted core, catalog, own dishes, shop, FR009 and five measurement UI corrections",
+    "domain": "Sol accepted source/provenance/unknown/eligibility/privacy and normalized parser-zero/GKI correction"
+  },
+  "checks": {
+    "python": {
+      "passed": 550,
+      "skipped": 1,
+      "subtests": 6,
+      "skip_reason": "Linux-only memfd descriptor branch on Mac"
+    },
+    "node": {
+      "passed": 196,
+      "failed": 0
+    },
+    "after_presentation_changes": {
+      "node": 11,
+      "build": "passed"
+    },
+    "legacy_ui": "passed",
+    "oauth_ui": "passed",
+    "contracts": "passed",
+    "specification": "passed",
+    "repository": "passed",
+    "web_build": "passed",
+    "legacy_build": "passed",
+    "promotion": {
+      "passed": 2,
+      "failed": 1,
+      "reason": "Expected old approved runtime pin differs from new source; new native image acceptance required, no pin fabricated"
+    }
+  },
+  "mobile_browser": {
+    "actual_css_viewports": [
+      [
+        440,
+        956
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "measurement": "cancel/add/correct/delete; 90.08mg/dL+BHB1=>GKI5; BHB0=>no numeric ratio; later invalid draft preserved after actual successful receipt; editing cancel restores unrelated new draft",
+    "portion": "50g avocado=>80kcal,1g protein,7.35g fat,4.27g total carbs,3.35g fiber,0.92g available carbs; unknown GI. Manual GI15 synthetic arithmetic fixture=>GL0.14; not a factual avocado GI; switching food clears assertion",
+    "shop_next": "real domain food confirm→separate pantry cancel then confirm→current stock preview→explicit ineligible outcome; dirty100g avocado draft retained; unknown stock remains null",
+    "layout": "no horizontal overflow; outer appScroll0",
+    "external_fixtures": "photo/barcode earlier synthetic fixed candidates, not OCR or live OFF"
+  },
+  "cleanup": {
+    "owned_tab": "1973326084",
+    "closed": true,
+    "viewport_reset": true,
+    "cua_kernel_reset": true,
+    "owned_server_pid": 79637,
+    "server_stopped": true,
+    "port_closed": true
+  },
+  "pending": [
+    "native Cloudflare full CI/new image acceptance/approved pin",
+    "existing Azure deployment and real label schema/OCR",
+    "D1 additive0008 and existing Worker release",
+    "real OFF/cache provenance check",
+    "physical iPhone17ProMax camera/keyboard/flows; owner connects at final readiness"
+  ],
+  "not_claimed": [
+    "cloud release",
+    "real OCR",
+    "physical device acceptance",
+    "clinical certification"
+  ]
+}

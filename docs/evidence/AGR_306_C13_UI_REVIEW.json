@@ -1,0 +1,104 @@
+{
+  "task": "AGR-306-C13 confirmed own-recipe and product intake entrypoints",
+  "status": "completed_isolated_candidate",
+  "created_at": "2026-11-09T20:54:48.184779+00:00",
+  "authoritative_head": "861a88bf533f65f1e7dec07999680712ee3f5371",
+  "authoritative_modified_by_agent": false,
+  "candidate": "/workspace/scratch/bbdbdb895c38/keto-c13-entrypoints-candidate",
+  "patch": "/workspace/scratch/bbdbdb895c38/keto-c13-entrypoints.patch",
+  "patch_sha256": "5ed56205db8070c96abf83f69f20f6c6464cde6c4c5f0298dc51fc7a48bb3b18",
+  "files": {
+    "cloudflare-saas/public/own-dish.js": {
+      "baseline_sha256": "39cbc36032f7fdeae95cae8c1ae2453ea4e3ce76452922945e9bc260703d8ddb",
+      "candidate_sha256": "840c24e7fc8dfdf6ea4344ab31e2332eaab135e0e44b28e969a58db1c26dd465"
+    },
+    "cloudflare-saas/public/shop-ui.js": {
+      "baseline_sha256": "0627aaea37aca9a5f47abb3d52dc32404628d627666666e1ffca33550452b742",
+      "candidate_sha256": "c5cce50194956b03d8d4073884e24216c01e4a87d45e7289a0552b8a4ed57a17"
+    },
+    "cloudflare-saas/tests/own-dish.test.mjs": {
+      "baseline_sha256": "a1d6a56acbd9abbbd66de75580523dca46416894fb31c685147abcae0fd00056",
+      "candidate_sha256": "ae401905f0f37634c3c88bdeaeb11f37bbd847f84151c4e03e104ccd60127669"
+    },
+    "cloudflare-saas/tests/shop-ui.test.mjs": {
+      "baseline_sha256": "f5bc9ba0d2b1e1bcee17dbedef42f20e74278399bad29e1a14e3a04792dd01af",
+      "candidate_sha256": "6c921f02bc93bc31b3d8429476904279e1546841c550fe654700c25e85a88e81"
+    }
+  },
+  "contract": {
+    "own_recipe": {
+      "recipe_id": "current selected getState().kitchen.own_recipes row",
+      "name_ru": "confirmed name_ru",
+      "amount": {
+        "value": 1,
+        "unit": "portion"
+      }
+    },
+    "saved_product": {
+      "food_id": "matching receipt-confirmed saved.id",
+      "name_ru": "saved.name",
+      "amount": {
+        "value": 100,
+        "unit": "g"
+      }
+    },
+    "callback": "openIntake",
+    "date_time": "Not passed; common editor owns eating date/time review",
+    "writes_on_entrypoint_click": false
+  },
+  "ui": {
+    "removed": "legacy own-date/fraction/basis/own_dish_diary path",
+    "progression": "method chooser → chosen method → explicit label review → confirmed product continuation",
+    "collapsed_details": [
+      "shop-allergen-review",
+      "shop-portion-options",
+      "shop-next-options"
+    ],
+    "explicit_label_confirmation_preserved": true,
+    "photo_barcode_manual_source_checks_preserved": true
+  },
+  "checks": [
+    {
+      "command": "node --test cloudflare-saas/tests/own-dish.test.mjs cloudflare-saas/tests/shop-ui.test.mjs cloudflare-saas/tests/shop-scanner.test.mjs cloudflare-saas/tests/shop-lookup.test.mjs",
+      "cwd": "/workspace/scratch/bbdbdb895c38/keto-c13-entrypoints-testbed",
+      "runtime": "Node v24.22.1",
+      "passed": 42,
+      "failed": 0,
+      "log": "/workspace/scratch/bbdbdb895c38/keto-c13-entrypoints-tests-final.txt"
+    },
+    {
+      "command": "git apply --check /workspace/scratch/bbdbdb895c38/keto-c13-entrypoints.patch",
+      "cwd": "/workspace/scratch/bbdbdb895c38/keto-companion",
+      "returncode": 0
+    },
+    {
+      "check": "All four authoritative source hashes still match captured baseline",
+      "passed": true
+    }
+  ],
+  "earlier_attempts": [
+    {
+      "result": "31 passed; 9 fixture-loading failures",
+      "reason": "Initial isolated testbed lacked existing OFF SQL and Quagga bundle/license fixtures; copied unchanged fixtures and reran same suite."
+    },
+    {
+      "result": "40/40 before compactness request",
+      "log": "/workspace/scratch/bbdbdb895c38/keto-c13-entrypoints-tests.txt"
+    },
+    {
+      "result": "42/42 after compactness, before requested wording cleanup",
+      "log": "/workspace/scratch/bbdbdb895c38/keto-c13-entrypoints-tests-r2.txt"
+    }
+  ],
+  "not_run": [
+    "browser tests (root delegated)",
+    "deployment",
+    "full repository suite"
+  ],
+  "independent_review": "Read-only source review identified current state membership, receipt generation and reset invariants; implemented them. Root reviewed candidate functionality before final wording cleanup.",
+  "remaining_root_work": [
+    "Integrate four-file patch",
+    "Run prepared real HTTP/browser own/shop/calculator continuation tests",
+    "Build/generated assets via normal release process"
+  ]
+}

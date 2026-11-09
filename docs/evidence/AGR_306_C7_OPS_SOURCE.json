@@ -1,0 +1,39 @@
+{
+  "issue": "AGR-306",
+  "stage": "C7 OPS-only acceptance recovery source",
+  "created_at": "2026-11-09T14:23:47.736744+00:00",
+  "files": {
+    "ops/runtime-acceptance-http.mjs": "976a19b670e8a1dddfb1a6e9c4234a38e731055fb354d9d8879930dee7df080c",
+    "ops/runtime-acceptance-http.test.mjs": "ddbac24dfd41ade22ec5095dd7ed9d71ccff896599ca2a684206f739bff72575",
+    "ops/run_guarded_runtime_acceptance.mjs": "794121f33c32b70a8a2656836d299812d6aa3886ddeccc9922764e1691c875d7",
+    "ops/verify_existing_candidate.mjs": "63132f9d87dc74fb24e56609a2b837a7b2d4d696a2608817c5eadf67b3f5cdff",
+    "ops/candidate-runtime.json": "ca1003a0339f9f0ba6be205e96fbefb9d56e3ee5081e75ff69c6df7e54b6ddb1",
+    "ops/promote_existing_runtime.mjs": "140fb29e081020b886c989a6110762270d1501a4f84cd57f443e5c2429668226",
+    "ops/promotion.test.mjs": "f052049846ca8af4193a85022d3a334a5fa0c13898b661190c8563e79f0f6cee"
+  },
+  "protected_source_baseline": "0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8",
+  "source_archive_unchanged": true,
+  "approved_pin_unchanged": "accepted C5 image95ef/baseline66dd",
+  "candidate": "actual configured C6b image7cbe/baseline0a; not approved until real verification",
+  "changes": [
+    "trusted original verifier preserved; guardednativeHTTP readiness and exactonePOST, manualredirects,10ssettle,no retries",
+    "durable public jobidentity/phase beforedispatch; safe response summary and fixedterminalfailurecode",
+    "flagged hardpinned exactexisting-candidate verification; no imagebuild/rollout/approvedpin write",
+    "ordinarypromotion uses sameguard and retains previousrelease/baseline/image/binding/application/cleanup gates"
+  ],
+  "checks": {
+    "HTTP_operator_Node_passed": 8,
+    "promotion_targeted_Node_passed": 3,
+    "promotion_pin_match": "notrun expectedmismatch untilactualcandidateaccepted",
+    "syntax": "passed",
+    "diff_check": "passed"
+  },
+  "review": "nutrition_review Sol accepted finaldelta closing redirect307/308 and rawterminalerror P2s",
+  "limits": [
+    "Markerless404knownhandler shape is readiness only, not identityproof; authority is captured exactupload/knownjob and authenticated POST bound to baseline/patch/image result",
+    "Protected verifier internal validation error may be masked by simultaneous DELETEfailure; safe facts retained and acceptance fails",
+    "Original C6b jobUUIDwasnotlogged/resultUNKNOWN retained,neverreplayed; exactoriginalprobeDELETE200audited",
+    "DirectMCPpublicHTTPisforbidden; stoppedthatroute. Existing nativeCloudflareBuilds source workflow only; no proxies,credentials exported,network or permissionchanges"
+  ],
+  "next": "One exactnativeCI existingcandidate verification, then actualreceipt/livecontrol acceptance/pin/ordinaryrelease/liveUI/iPhone"
+}

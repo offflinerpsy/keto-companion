@@ -1,0 +1,150 @@
+{
+  "schema": "keto-c14-live-http-v1",
+  "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
+  "scope": "Existing public status/assets and invalid-login/unauthenticated guards; no family identity, diary writes or paid model calls. Not a live signed compute transaction.",
+  "checks": [
+    {
+      "name": "served_/",
+      "passed": true,
+      "status": 200,
+      "sha256": "074d1f96d57582322ddd5ca8986f11dae074db89bace2f0e901de2bd55c15a7b"
+    },
+    {
+      "name": "served_/app.bundle.js",
+      "passed": true,
+      "status": 200,
+      "sha256": "f5a812c95bb728c72b0dfa3e7c61a6835094e456b3f70560835b207ee6b789d8"
+    },
+    {
+      "name": "served_/style.css",
+      "passed": true,
+      "status": 200,
+      "sha256": "4c3aca596d5578bf7316bd4fb0d915d45e255e4cde1ddaef0ffd09ba75af0992"
+    },
+    {
+      "name": "served_/help",
+      "passed": true,
+      "status": 200,
+      "sha256": "b94508cc3cefe90a08213584bf31acf943e17b1b65c103f89b0be8a371f64574"
+    },
+    {
+      "name": "served_/privacy",
+      "passed": true,
+      "status": 200,
+      "sha256": "74ca6f6dd2db4bad44495754eead5ae1e92c9553b5104daa904203f8a7b99f96"
+    },
+    {
+      "name": "served_/delete",
+      "passed": true,
+      "status": 200,
+      "sha256": "82b6cde59cb0fdf7ed78391ab84e47a010948f520d89966057ed7a9080d07179"
+    },
+    {
+      "name": "CSP_and_no_store",
+      "passed": true
+    },
+    {
+      "name": "health_firebase_and_private_storage",
+      "passed": true
+    },
+    {
+      "name": "compute_status_honest",
+      "passed": true
+    },
+    {
+      "name": "Google_public_config",
+      "passed": true
+    },
+    {
+      "name": "unauthenticated_/api/session",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/admin/summary",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/sources",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/export",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/tools/keto_chat",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/tools/keto_menu",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated_/api/personal/delete",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "direct_Google_mode_disabled",
+      "passed": true
+    },
+    {
+      "name": "foreign_origin_refused",
+      "passed": true
+    },
+    {
+      "name": "firebase_challenge_issued",
+      "passed": true
+    },
+    {
+      "name": "challenge_cookie_secure",
+      "passed": true
+    },
+    {
+      "name": "invalid_firebase_token_refused",
+      "passed": true
+    },
+    {
+      "name": "challenge_replay_refused",
+      "passed": true
+    },
+    {
+      "name": "failed_login_created_no_session",
+      "passed": true
+    },
+    {
+      "name": "Azure_exact_code_and_private_contract",
+      "passed": true,
+      "status": 200,
+      "cache_control": "no-store"
+    }
+  ],
+  "transport": "curl with inherited proxy settings and TLS verification; temporary synthetic cookie jar",
+  "health": {
+    "version": "0.7.1-tranquil-dev-pilot",
+    "build": "mobile-chat",
+    "capabilities": {
+      "firebase_google": true,
+      "direct_google": false,
+      "storage": true,
+      "compute": true
+    }
+  },
+  "azure": {
+    "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
+    "runtime_code_sha256": "166e2a288d7f1ea6d068279163a069ef2374d6d274c7462b743b7e699c3cfe7c",
+    "edge_signature": "Ed25519",
+    "authentication_required": true,
+    "medical_monitoring": false
+  },
+  "synthetic_cookie_cleanup_verified": true,
+  "checked_at": "2026-11-09T22:25:02.557443+00:00",
+  "passed": true,
+  "total": 25
+}

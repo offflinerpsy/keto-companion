@@ -4,8 +4,32 @@ const b64=b=>{let s='';for(const x of new Uint8Array(b))s+=String.fromCharCode(x
 const nonce=()=>b64(crypto.getRandomValues(new Uint8Array(32)));
 const hex=b=>Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('');
 const hash=async x=>hex(await crypto.subtle.digest('SHA-256',typeof x==='string'?te.encode(x):x));
-export const OPS={keto_kitchen:'kitchen',keto_guidance:'guidance',keto_topics:'topics',keto_reminders:'reminders',keto_transcribe:'transcribe',keto_open:'open',keto_recipes:'recipes',keto_consent:'consent',keto_propose_change:'propose',keto_apply_proposal:'apply',keto_menu:'menu',keto_chat:'chat',keto_export:'export',keto_import_menu:'import_menu'};
+export const OPS={keto_label_extract:'label_extract',keto_kitchen:'kitchen',keto_guidance:'guidance',keto_topics:'topics',keto_reminders:'reminders',keto_transcribe:'transcribe',keto_open:'open',keto_recipes:'recipes',keto_consent:'consent',keto_propose_change:'propose',keto_apply_proposal:'apply',keto_menu:'menu',keto_chat:'chat',keto_export:'export',keto_import_menu:'import_menu'};
 export const bridgeConfigured=env=>Boolean(env.KETO_EDGE_BRIDGE_URL&&((typeof env.KETO_EDGE_SIGNING_JWK==='string'&&env.KETO_EDGE_SIGNING_JWK.length>50)||(typeof env.KETO_EDGE_BRIDGE_SECRET==='string'&&env.KETO_EDGE_BRIDGE_SECRET.length>=32)));
+const INTAKE_VALIDATION_MESSAGES=Object.freeze({
+ INTAKE_TIME_AMBIGUOUS:'Выбранное время встречается дважды при переводе часов. В «Уточнении времени» выберите первое или второе время.',
+ INTAKE_TIME_NONEXISTENT:'Такого местного времени нет из-за перевода часов. Выберите другое время еды.',
+ INTAKE_STALE:'Дневник, профиль или расчёт изменились. Обновите записи и подготовьте новое предложение.',
+ INTAKE_ENTRY_NOT_FOUND:'Запись больше не найдена в вашем дневнике. Обновите список и выберите запись заново.',
+ INTAKE_SOURCE_NOT_FOUND:'Блюдо или продукт больше не найдены. Выберите доступную еду заново.',
+ INTAKE_SOURCE_MISMATCH:'Этот вариант блюда устарел или относится к другой теме. Откройте его в исходной теме либо подберите новый.',
+ INTAKE_AMOUNT_BASIS:'Проверьте количество и единицу: для блюда — порции или доля всего блюда, для продукта — граммы. Готовая масса блюда не вычисляется из сырого веса.',
+ INTAKE_TIME_MISMATCH:'Дата, время или часовой пояс еды не совпадают. Проверьте их и уточнение перевода часов.',
+ INTAKE_TIMEZONE_REQUIRED:'Для времени еды нужен подтверждённый часовой пояс. Укажите его в профиле.'
+});
+function intakeValidationScope(subject,operation,state,args){
+ if(operation==='kitchen')return ['intake','intake_preview','diary_history'].includes(args?.action);
+ const owner=state?.core,proposal=state?.pending?.[args?.proposal_id];
+ return operation==='apply'&&owner?.owner_account_id===subject&&owner?.subject_id===subject&&['kitchen.intake','kitchen.diary','kitchen.own_dish_diary','diary.add','diary.update','diary.repeat','diary.delete'].includes(proposal?.type);
+}
+async function intakeValidationCode(response){
+ const reader=response.body?.getReader();if(!reader)return null;let size=0,parts=[];
+ try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>4096){await reader.cancel();return null}parts.push(value)}
+  const bytes=new Uint8Array(size);let offset=0;for(const part of parts){bytes.set(part,offset);offset+=part.length}
+  const body=JSON.parse(new TextDecoder().decode(bytes)),code=body?.validation_code;
+  return body?.error==='BRIDGE_REJECTED'&&typeof code==='string'&&Object.hasOwn(INTAKE_VALIDATION_MESSAGES,code)?code:null;
+ }catch{return null}
+}
 export async function bridgeCall(env,subject,operation,state,args){
  if(!bridgeConfigured(env))throw Error('BRIDGE_NOT_CONFIGURED');
  let url;try{url=new URL(env.KETO_EDGE_BRIDGE_URL)}catch{throw Error('BRIDGE_NOT_CONFIGURED')};
@@ -22,7 +46,11 @@ export async function bridgeCall(env,subject,operation,state,args){
   const key=await crypto.subtle.importKey('raw',te.encode(env.KETO_EDGE_BRIDGE_SECRET),{name:'HMAC',hash:'SHA-256'},false,['sign']);signature=hex(await crypto.subtle.sign('HMAC',key,te.encode(message)));
  }
  const r=await fetch(url.href,{method:'POST',headers:{'content-type':'application/json','x-keto-timestamp':stamp,'x-keto-nonce':n,'x-keto-signature':signature},body,signal:AbortSignal.timeout(55000)});
- if(!r.ok)throw Error(r.status===422?'BRIDGE_REJECTED':'BRIDGE_UNAVAILABLE');
+ if(!r.ok){
+  const error=Error(r.status===422?'BRIDGE_REJECTED':'BRIDGE_UNAVAILABLE');
+  if(r.status===422&&intakeValidationScope(subject,operation,state,args)){const code=await intakeValidationCode(r);if(code)error.intakeValidationCode=code}
+  throw error;
+ }
  const reader=r.body?.getReader();let nbytes=0,parts=[];if(!reader)throw Error('BRIDGE_UNAVAILABLE');while(true){let {done,value}=await reader.read();if(done)break;nbytes+=value.length;if(nbytes>2000000){await reader.cancel();throw Error('BRIDGE_UNAVAILABLE')}parts.push(value)}const bytes=new Uint8Array(nbytes);let pos=0;for(const p of parts){bytes.set(p,pos);pos+=p.length}
  let out;try{out=JSON.parse(new TextDecoder().decode(bytes))}catch{throw Error('BRIDGE_UNAVAILABLE')};if(!out||typeof out.response!=='object'||!('state' in out))throw Error('BRIDGE_UNAVAILABLE');return out;
 }
@@ -38,6 +66,10 @@ export async function handleTool(req,env,h){
  const name=new URL(req.url).pathname.slice('/api/tools/'.length),operation=OPS[name];if(!operation)h.fail(404,'NOT_FOUND');
  const {u,raw}=await h.auth(req,env,{write:true});const args=await h.bodyJson(req,1500000);
  if(Object.hasOwn(args,'subject')||Object.hasOwn(args,'owner_id')||Object.hasOwn(args,'source_context'))h.fail(400,'INVALID_BODY');
+ if(operation==='label_extract'){
+  const keys=Object.keys(args);const raw=args.image_data_url;
+  if(keys.some(k=>!['request_id','image_data_url','note','thread_id'].includes(k))||typeof args.request_id!=='string'||!/^[A-Za-z0-9_-]{8,100}$/.test(args.request_id)||typeof raw!=='string'||!/^data:image\/(?:png|jpeg|webp|gif);base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(raw)||raw.length>1333380||raw.endsWith(',')||('note' in args&&(typeof args.note!=='string'||args.note.length>500))||('thread_id' in args&&(typeof args.thread_id!=='string'||args.thread_id.length>80)))h.fail(400,'INVALID_BODY');
+ }
  if(operation==='consent'&&(!['processing','storage','health','confirmed'].every(k=>typeof args[k]==='boolean')||args.confirmed!==true))h.fail(400,'INVALID_BODY');
  if(operation==='chat'&&urgent(args.message)){
   let warning='';try{
@@ -61,15 +93,15 @@ export async function handleTool(req,env,h){
   if(src.mime==='image/jpeg'&&src.object_key){if(callArgs.image_data_url)h.fail(400,'INVALID_BODY');const obj=await env.UPLOADS.get(src.object_key);if(!obj)h.fail(404,'SOURCE_NOT_AVAILABLE');const bytes=await h.readBounded(new Response(obj.body),1000000);let encoded=b64(bytes).replaceAll('-','+').replaceAll('_','/');encoded+='='.repeat((4-encoded.length%4)%4);callArgs.image_data_url='data:image/jpeg;base64,'+encoded}
  }
  const transient=operation==='transcribe'||(operation==='export'&&args.format==='pdf');
- const requestId=(['chat','transcribe'].includes(operation)||(operation==='kitchen'&&args.action==='generate'))?args.request_id:(req.headers.get('x-request-id')||crypto.randomUUID());if(typeof requestId!=='string'||!/^[A-Za-z0-9_-]{8,100}$/.test(requestId))h.fail(400,'INVALID_REQUEST_ID');
+ const requestId=(['chat','transcribe','label_extract'].includes(operation)||(operation==='kitchen'&&args.action==='generate'))?args.request_id:(req.headers.get('x-request-id')||crypto.randomUUID());if(typeof requestId!=='string'||!/^[A-Za-z0-9_-]{8,100}$/.test(requestId))h.fail(400,'INVALID_REQUEST_ID');
  const requestHash=await hash(JSON.stringify({name,args})),sessionHash=await h.sha(raw),date=new Date().toISOString().slice(0,10),t=now(),lock=crypto.randomUUID();
  let existing=await h.dbfirst(env,'SELECT request_hash,status,response_json,consent_revision FROM jobs WHERE user_id=? AND request_id=?',u.id,requestId);
- if(existing){if(existing.request_hash!==requestHash)h.fail(409,'REQUEST_ID_MISMATCH');if(existing.status==='completed'){if(transient)h.fail(409,'ALREADY_PROCESSED');let c=await h.dbfirst(env,'SELECT consent_revision FROM consents WHERE user_id=?',u.id);if((c?.consent_revision||0)!==existing.consent_revision)h.fail(409,'CONSENT_CHANGED');return h.json(JSON.parse(existing.response_json))}h.fail(409,existing.status==='pending'?'REQUEST_PENDING':'REQUEST_FAILED')}
+ if(existing){if(existing.request_hash!==requestHash)h.fail(409,'REQUEST_ID_MISMATCH');if(existing.status==='completed'){if(transient)h.fail(409,'ALREADY_PROCESSED');let c=await h.dbfirst(env,'SELECT consent_revision FROM consents WHERE user_id=?',u.id);if((c?.consent_revision||0)!==existing.consent_revision)h.fail(409,'CONSENT_CHANGED');const replayed=JSON.parse(existing.response_json);return h.json(replayed,operation==='label_extract'&&replayed.error_code?422:200)}h.fail(409,existing.status==='pending'?'REQUEST_PENDING':'REQUEST_FAILED')}
  if(operation==='consent'&&(!args.storage||!args.health||!args.processing))await consentChange(env,u,args);
  await h.dbrun(env,"INSERT INTO private_state(user_id,revision,payload,updated_at) VALUES(?,0,'{}',?) ON CONFLICT(user_id) DO NOTHING",u.id,t);
  // Reserve all potentially paid chat requests; refund only after a verified no-model result.
  // A user phrase such as 'рассчитай ужин' may invoke recipe design before local guidance.
- const paid=['chat','transcribe'].includes(operation)||(operation==='kitchen'&&args.action==='generate')?1:0;
+ const paid=['chat','transcribe','label_extract'].includes(operation)||(operation==='kitchen'&&args.action==='generate')?1:0;
  const db=env.DB,stmts=[
   db.prepare("UPDATE jobs SET status='failed',finished_at=? WHERE user_id=? AND status='pending' AND EXISTS(SELECT 1 FROM private_state WHERE user_id=? AND lock_until<=?)").bind(t,u.id,u.id,t),
   db.prepare("INSERT INTO jobs(user_id,request_id,request_hash,status,revision,created_at,consent_revision) SELECT ?,?,?,'pending',s.revision,?,COALESCE(c.consent_revision,0) FROM private_state s JOIN users u ON u.id=s.user_id JOIN sessions z ON z.user_id=u.id AND z.token_hash=? AND z.expires_at>? LEFT JOIN consents c ON c.user_id=u.id WHERE s.user_id=? AND u.status='active' AND (s.lock_id IS NULL OR s.lock_until<=?) AND (?=0 OR (c.storage=1 AND c.health=1 AND c.processing=1 AND COALESCE((SELECT requests FROM usage WHERE user_id=? AND day=?),0)<30 AND COALESCE((SELECT requests FROM global_usage WHERE day=?),0)<500)) AND (? IN ('open','recipes','consent','export','guidance') OR (c.storage=1 AND c.health=1)) ON CONFLICT(user_id,request_id) DO NOTHING").bind(u.id,requestId,requestHash,t,sessionHash,t,u.id,t,paid,u.id,date,date,operation),
@@ -83,7 +115,7 @@ export async function handleTool(req,env,h){
   let recipeSource=null;if(operation==='apply'&&args.approved===true){const proposal=doc?.pending?.[args.proposal_id];if(proposal?.type==='catalog.recipe.add'){try{recipeSource=JSON.parse(proposal.payload.source_ref).source_id}catch{}}}
   const out=await bridgeCall(env,u.id,operation,operation==='transcribe'?null:doc,callArgs);
   if(transient)out.state=doc;
-  if(out.response?.error_code&&!transient)throw Error('BRIDGE_UNAVAILABLE');
+  if(out.response?.error_code&&!transient&&!(operation==='label_extract'&&out.response.model_called===false))throw Error('BRIDGE_UNAVAILABLE');
   let payload=JSON.stringify(out.state||{}),answer=JSON.stringify(transient?{already_processed:true}:out.response);if(te.encode(payload).length>1500000||te.encode(answer).length>1500000)throw Error('PAYLOAD_TOO_LARGE');
   const newRevision=saved.revision+1;
   let completion=[db.prepare("UPDATE private_state SET payload=?,revision=revision+1,updated_at=? WHERE user_id=? AND lock_id=? AND revision=? AND EXISTS(SELECT 1 FROM users WHERE id=? AND status='active') AND EXISTS(SELECT 1 FROM sessions WHERE user_id=? AND token_hash=? AND expires_at>?) AND COALESCE((SELECT consent_revision FROM consents WHERE user_id=?),0)=?").bind(payload,now(),u.id,lock,saved.revision,u.id,u.id,sessionHash,now(),u.id,job.consent_revision)];
@@ -97,6 +129,6 @@ export async function handleTool(req,env,h){
   return h.json(out.response,out.response.error_code?422:200);
  }catch(e){
   await db.batch([db.prepare("UPDATE jobs SET status='failed',finished_at=? WHERE user_id=? AND request_id=? AND status='pending'").bind(now(),u.id,requestId),db.prepare('UPDATE private_state SET lock_id=NULL,lock_until=NULL WHERE user_id=? AND lock_id=?').bind(u.id,lock)]);
-  if(e instanceof h.Fail)throw e;if(e.message==='BRIDGE_REJECTED')h.fail(422,'VALIDATION_FAILED');h.fail(503,e.message==='BRIDGE_NOT_CONFIGURED'?'BRIDGE_NOT_CONFIGURED':'COMPUTE_UNAVAILABLE');
+  if(e instanceof h.Fail)throw e;if(Object.hasOwn(INTAKE_VALIDATION_MESSAGES,e.intakeValidationCode))return h.json({error:e.intakeValidationCode,message:INTAKE_VALIDATION_MESSAGES[e.intakeValidationCode]},422);if(e.message==='BRIDGE_REJECTED')h.fail(422,'VALIDATION_FAILED');h.fail(503,e.message==='BRIDGE_NOT_CONFIGURED'?'BRIDGE_NOT_CONFIGURED':'COMPUTE_UNAVAILABLE');
  }
 }

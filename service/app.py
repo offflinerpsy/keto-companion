@@ -13,6 +13,43 @@ from .brain import AzureBrain, BrainUnavailable
 from .domain import Service,VERSION,UI_ALLOWED,UI_DEFAULT,InputError,PermissionError,literal_guard,k
 
 HERE=Path(__file__).parent
+# Fixed source-only inventory. No settings, private state, filesystem walk or
+# environment override may stand in for the deployed bytes at app startup.
+RUNTIME_CODE_FILES=(
+    'function_app.py',
+    'library/skills/keto-companion/scripts/keto_core.py',
+    'service/__init__.py',
+    'service/app.py',
+    'service/brain.py',
+    'service/chat_actions.py',
+    'service/confirmation.py',
+    'service/developer.py',
+    'service/domain.py',
+    'service/edge_bridge.py',
+    'service/entra.py',
+    'service/food_source.py',
+    'service/intake.py',
+    'service/kitchen.py',
+    'service/label.py',
+    'service/mobile.py',
+    'service/mobile_exports.py',
+    'service/oauth_bridge.py',
+    'service/planning.py',
+    'service/portion_search.py',
+    'service/recipe_brain.py',
+    'service/speech.py',
+    'service/store.py',
+)
+
+def runtime_code_sha256(root=None):
+    """Versioned digest of exact installed Python bytes; missing files fail startup."""
+    root=HERE.resolve().parent if root is None else Path(root)
+    digest=hashlib.sha256(b'keto-runtime-code-v1\n')
+    for relative in RUNTIME_CODE_FILES:
+        file_digest=hashlib.sha256((root/relative).read_bytes()).hexdigest()
+        digest.update(relative.encode('utf-8')+b'\0'+file_digest.encode('ascii')+b'\n')
+    return digest.hexdigest()
+
 RESOURCE='ui://keto-companion/workspace-v020'
 S={'type':'string'};I={'type':'integer'};B={'type':'boolean'};O={'type':'object'}
 def schema(props=None,required=None):return {'type':'object','properties':props or {},'required':required or [],'additionalProperties':False}
@@ -25,7 +62,7 @@ def tool(name,title,description,props=None,required=None,read=False,app_only=Fal
 TOOLS=[
  tool('keto_open','KETO Companion','Открыть личную страницу, настройки, состояние и понятную справку.',read=True,render=True),
  tool('keto_chat','Обсудить питание','Разобрать сообщение через Azure Terra. Создаёт только предложения, не применяет изменения. Может сохранять историю при согласии.',{'message':{'type':'string','minLength':1,'maxLength':6000},'request_id':{'type':'string','minLength':8,'maxLength':100},'image_data_url':{'type':'string','maxLength':1500000},'thread_id':{'type':'string','maxLength':80}},['message','request_id']),
- tool('keto_recipes','Подобрать рецепты','Проверяемые рецепты из каталога с граммовками и рассчитанным составом.',{'query':S,'limit':{'type':'integer','minimum':1,'maximum':72},'include_food_ids':{'type':'array','maxItems':12,'items':S},'exclude_food_ids':{'type':'array','maxItems':40,'items':S},'max_minutes':{'type':'integer','minimum':1,'maximum':180}},read=True),
+ tool('keto_recipes','Подобрать рецепты','Проверяемые рецепты из каталога с граммовками и рассчитанным составом.',{'query':S,'limit':{'type':'integer','minimum':1,'maximum':72},'include_food_ids':{'type':'array','maxItems':12,'items':S},'exclude_food_ids':{'type':'array','maxItems':40,'items':S},'max_minutes':{'type':'integer','minimum':1,'maximum':180},'offset':{'type':'integer','minimum':0,'maximum':100000},'category':{'type':'string','enum':['breakfast','main','side','component']}},read=True),
  tool('keto_propose_change','Подготовить изменение','Подготовить изменение профиля, дневника, настроек или меню. Показать для явного подтверждения в приложении.',{'event_type':S,'payload':O,'expected_revision':I},['event_type','payload','expected_revision']),
  tool('keto_apply_proposal','Подтвердить изменение','Применить выбранное пользователем предложение. Только кнопкой приложения, не решением языковой модели.',{'proposal_id':S,'expected_revision':I,'approved':B},['proposal_id','expected_revision','approved'],app_only=True),
  tool('keto_consent','Разрешения','Согласие самого пользователя на обработку Azure и хранение. Только через явные элементы согласия.',{'processing':B,'storage':B,'health':B,'confirmed':B},['processing','storage','health','confirmed'],app_only=True),
@@ -50,9 +87,58 @@ TOOLS.extend([
  tool('keto_reminders','Личные напоминания','Напоминания и экспорт в Календарь; сайт не отправляет push в фоне.',{'action':{'type':'string','enum':['list','create','update','delete','complete','ics']},'reminder_id':S,'values':O,'confirmed':B,'expected_revision':I},['action']),
  tool('keto_transcribe','Распознать запись','До 60 секунд, аудио до 1 МБ. Текст только черновик, не отправляется автоматически.',{'audio_base64':{'type':'string','maxLength':1400000},'mime':{'type':'string','enum':['audio/mp4','audio/webm','audio/wav','audio/x-wav']},'request_id':{'type':'string','minLength':8,'maxLength':100}},['audio_base64','mime','request_id'])
 ])
-MOBILE_HTTP_TOOLS={'keto_guidance','keto_topics','keto_reminders','keto_transcribe'}
-TOOLS.append(tool('keto_kitchen','Что приготовим','Единая кладовая, рецепты и память. Генерация может вызвать Azure Sol high; сохранения только через отдельное подтверждение.',{'action':{'type':'string','enum':['status','foods','parse','generate','select','memory','pantry','remember','forget','save','favorite','rate','diary','accept_day']},'spec':O,'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'thread_id':{'type':'string','maxLength':80},'query':{'type':'string','maxLength':1000},'recipe_id':{'type':'string','maxLength':80},'values':O,'expected_revision':I},['action']))
+TOOLS.append(tool('keto_label_extract','Прочитать этикетку','Только неподтверждённый черновик; без сохранения.',{'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'image_data_url':{'type':'string','maxLength':1500000},'note':{'type':'string','maxLength':500},'thread_id':{'type':'string','maxLength':80}},['request_id','image_data_url']))
+MOBILE_HTTP_TOOLS={'keto_guidance','keto_topics','keto_reminders','keto_transcribe','keto_label_extract'}
+TOOLS.append(tool('keto_kitchen','Что приготовим','Единая кладовая, рецепты и память. Генерация может вызвать Azure Sol high; сохранения только через отдельное подтверждение.',{'action':{'type':'string','enum':['status','foods','source_search','source_detail','source_import','chat_action','intake_preview','intake','diary_history','food_portion','own_dish_calculate','own_dish_detail','own_dish_save','own_dish_diary','parse','generate','select','memory','pantry','remember','forget','save','favorite','rate','diary','accept_day']},'spec':O,'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'thread_id':{'type':'string','maxLength':80},'query':{'type':'string','maxLength':1000},'recipe_id':{'type':'string','maxLength':80},'values':O,'expected_revision':I},['action']))
 TOOL_MAP={x['name']:x for x in TOOLS}
+
+# Only these fixed domain failures may cross the private compute boundary.
+# All other exception messages, source text and identifiers remain opaque.
+INTAKE_VALIDATION_CODES={
+ 'Двусмысленное время: нужно уточнить переход часов':'INTAKE_TIME_AMBIGUOUS',
+ 'Несуществующее время перехода на летнее время':'INTAKE_TIME_NONEXISTENT',
+ 'Устаревший экран дневника':'INTAKE_STALE',
+ 'Укажите актуальную ревизию дневника':'INTAKE_STALE',
+ 'Дневник изменился; обновите историю':'INTAKE_STALE',
+ 'Расчёт или запись изменились. Проверьте количество заново.':'INTAKE_STALE',
+ 'Расчёт изменился. Проверьте новое предложение перед сохранением.':'INTAKE_STALE',
+ 'Профиль изменился. Подготовьте предложение заново.':'INTAKE_STALE',
+ 'Предложение истекло; отмените и подготовьте заново':'INTAKE_STALE',
+ 'Запись не найдена в вашем дневнике':'INTAKE_ENTRY_NOT_FOUND',
+ 'Запись дневника не найдена':'INTAKE_ENTRY_NOT_FOUND',
+ 'Блюдо не найдено':'INTAKE_SOURCE_NOT_FOUND',
+ 'Продукт не найден':'INTAKE_SOURCE_NOT_FOUND',
+ 'Черновик не принадлежит выбранной теме или устарел':'INTAKE_SOURCE_MISMATCH',
+ 'Подбор изменился. Выберите рецепт заново.':'INTAKE_SOURCE_MISMATCH',
+ 'Источник записи не совпадает с сообщением':'INTAKE_SOURCE_MISMATCH',
+ 'Рецепт сообщения больше недоступен':'INTAKE_SOURCE_MISMATCH',
+ 'Рецепт не совпадает с сообщением':'INTAKE_SOURCE_MISMATCH',
+ 'Сообщение отсутствует в выбранной теме':'INTAKE_SOURCE_MISMATCH',
+ 'Действие отсутствует в выбранном сообщении':'INTAKE_SOURCE_MISMATCH',
+ 'Количество порций противоречит основе':'INTAKE_AMOUNT_BASIS',
+ 'Масса противоречит количеству':'INTAKE_AMOUNT_BASIS',
+ 'Для блюда нужна порция или доля всего блюда; готовая масса неизвестна':'INTAKE_AMOUNT_BASIS',
+ 'Для продукта нужна масса в граммах':'INTAKE_AMOUNT_BASIS',
+ 'Дата, время и часовой пояс еды не совпадают':'INTAKE_TIME_MISMATCH',
+ 'Уточнение перехода часов не совпадает со временем':'INTAKE_TIME_MISMATCH',
+ 'Подтвердите часовой пояс в профиле':'INTAKE_TIMEZONE_REQUIRED',
+ 'Укажите часовой пояс IANA':'INTAKE_TIMEZONE_REQUIRED',
+ 'Для времени нужен часовой пояс':'INTAKE_TIMEZONE_REQUIRED',
+}
+
+def intake_validation_code(message,body):
+    code=INTAKE_VALIDATION_CODES.get(message)
+    if code is None:return None
+    try:
+        request=json.loads(body);args=request.get('arguments',{});state=request.get('state') or {}
+        if not isinstance(args,dict) or not isinstance(state,dict):return None
+        if request.get('operation')=='kitchen' and args.get('action') in ('intake','intake_preview','diary_history'):return code
+        if request.get('operation')=='apply':
+            owner=state.get('core',{})
+            proposal=state.get('pending',{}).get(args.get('proposal_id'),{})
+            if owner.get('owner_account_id')==request.get('subject')==owner.get('subject_id') and proposal.get('type') in ('kitchen.intake','kitchen.diary','kitchen.own_dish_diary','diary.add','diary.update','diary.repeat','diary.delete'):return code
+    except (ValueError,TypeError,AttributeError):pass
+    return None
 
 def image_clean(value):
     if value is None:return None
@@ -73,6 +159,7 @@ def b64(raw):return base64.urlsafe_b64encode(raw).decode().rstrip('=')
 def unb64(v):return base64.urlsafe_b64decode(v+'='*(-len(v)%4))
 
 def create_app(service=None,auth_records=None,signing_key=None,public_url=None,testing=False,entra_verifier=None,oauth_key=None,edge_secret=None,edge_replay_store=None):
+    runtime_digest=runtime_code_sha256()
     svc=service or Service(from_env(),AzureBrain())
     records=auth_records if auth_records is not None else json.loads(os.getenv('KETO_AUTH_RECORDS','[]'))
     secret=signing_key or os.getenv('KETO_SESSION_SECRET','')
@@ -263,7 +350,8 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
             except BridgeError as exc:
                 # Authentication and validation failures contain no input or credentials.
                 status=401 if str(exc) in ('invalid request','expired','invalid signature','replay') else 422
-                return JSONResponse({'error':'BRIDGE_REJECTED'},status_code=status)
+                code=intake_validation_code(str(exc),b''.join(pieces)) if status==422 else None
+                return JSONResponse({'error':'BRIDGE_REJECTED',**({'validation_code':code} if code else {})},status_code=status)
     @app.get('/api/auth-config')
     def auth_config():
         return {'mode':'entra' if entra_mode else 'local_test','clientId':os.getenv('KETO_ENTRA_CLIENT_ID'),'tenantId':os.getenv('KETO_ENTRA_TENANT_ID'),'scope':'api://'+os.getenv('KETO_ENTRA_CLIENT_ID','')+'/user_impersonation','redirectUri':public_url+'/'}
@@ -272,7 +360,7 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
     def protected_metadata():
         return {'resource':public_url+'/mcp','authorization_servers':([public_url] if bridge else ['https://login.microsoftonline.com/'+os.getenv('KETO_ENTRA_TENANT_ID','')+'/v2.0']),'scopes_supported':([SCOPE] if bridge else ['api://'+os.getenv('KETO_ENTRA_CLIENT_ID','')+'/user_impersonation']),'bearer_methods_supported':['header']}
     @app.get('/status')
-    def status():return {'service':'KETO Companion','version':VERSION,'transport':'HTTP + MCP','authentication_required':True,'medical_monitoring':False,'source_commit':os.getenv('KETO_SOURCE_COMMIT',''),'edge_signature':'Ed25519' if edge_public_value else ('HMAC' if edge_secret_value else 'disabled')}
+    def status():return JSONResponse({'service':'KETO Companion','version':VERSION,'transport':'HTTP + MCP','authentication_required':True,'medical_monitoring':False,'source_commit':os.getenv('KETO_SOURCE_COMMIT',''),'runtime_code_sha256':runtime_digest,'edge_signature':'Ed25519' if edge_public_value else ('HMAC' if edge_secret_value else 'disabled')},headers={'Cache-Control':'no-store'})
     @app.get('/')
     def home():return HTMLResponse((HERE/'static/index.html').read_text())
     @app.post('/api/login')
@@ -306,7 +394,7 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
         if name=='keto_delete_profile':return svc.delete_profile(sub,args['expected_revision'],args['confirmation'],kind)
         if name=='keto_open':return dict(svc.opened(sub,kind),_ui_confirmation=confirmations.issue(sub))
         if name=='keto_chat':return svc.chat(sub,args['message'],args['request_id'],kind,None if literal_guard(args['message'])=='urgent' else image_clean(args.get('image_data_url')),thread_id=args.get('thread_id'))
-        if name=='keto_recipes':return svc.catalog(sub,args.get('query',''),args.get('limit',12),kind,args.get('include_food_ids'),args.get('exclude_food_ids'),args.get('max_minutes'))
+        if name=='keto_recipes':return svc.catalog(sub,args.get('query',''),args.get('limit',12),kind,args.get('include_food_ids'),args.get('exclude_food_ids'),args.get('max_minutes'),args.get('offset',0),args.get('category'))
         if name=='keto_propose_change':return svc.propose(sub,args['event_type'],args['payload'],args['expected_revision'],kind)
         if name=='keto_apply_proposal':return svc.apply(sub,args['proposal_id'],args['expected_revision'],args['approved'],kind)
         if name=='keto_consent':return svc.consent(sub,args['processing'],args['storage'],args['health'],args['confirmed'],kind)

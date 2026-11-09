@@ -1,0 +1,199 @@
+{
+  "task": "AGR-306-C14",
+  "status": "local_source_acceptance_passed_release_blocked",
+  "observed_at": "2026-11-09T21:10:27.943027+00:00",
+  "candidate_commit": "1f7040501fbae54662ad89c776020a7d880f3994",
+  "protected_baseline": "97541c77d758419484d908aa3e6dc5fab86bb8368970b832d82eceb13a352015",
+  "full_source_gate": {
+    "command": "python3 scripts/cloudflare_ci.py",
+    "execution": "local managed Linux environment; not a Cloudflare build",
+    "node": "24.22.1",
+    "python": "3.12.14",
+    "checks": [
+      {
+        "name": "python_env",
+        "exit": 0
+      },
+      {
+        "name": "python_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "node_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "container_sdk",
+        "exit": 0
+      },
+      {
+        "name": "container_worker_build",
+        "exit": 0
+      },
+      {
+        "name": "runtime_fonts",
+        "exit": 0
+      },
+      {
+        "name": "all_python",
+        "exit": 0
+      },
+      {
+        "name": "all_node",
+        "exit": 0
+      },
+      {
+        "name": "legacy_ui",
+        "exit": 0
+      },
+      {
+        "name": "legacy_oauth_ui",
+        "exit": 0
+      },
+      {
+        "name": "contracts",
+        "exit": 0
+      },
+      {
+        "name": "specification",
+        "exit": 0
+      },
+      {
+        "name": "web_build",
+        "exit": 0
+      },
+      {
+        "name": "legacy_build",
+        "exit": 0
+      },
+      {
+        "name": "hygiene",
+        "exit": 0
+      },
+      {
+        "name": "generated_assets_match",
+        "exit": 0
+      }
+    ],
+    "seconds": 88.91,
+    "scope": "trusted reviewed source; no real data or paid model calls",
+    "github_actions_required": false,
+    "python_passed": 627,
+    "python_subtests_passed": 6,
+    "node_passed": 253,
+    "log_sha256": "b3cb5be9f52110122b7ea004d90855fc52bfd135298feb8a14257f5ba19b0721"
+  },
+  "browser": {
+    "real_http_service_sqlite": {
+      "passed": 11,
+      "failed": 0,
+      "source_checkpoint": "02328d4283b7268a13c7f1bfd39bef68637c5982",
+      "cases": "C11 intake/history, C12 actions/concurrency, C13 all source continuations",
+      "synthetic_membership_only": true
+    },
+    "mobile_shell": {
+      "passed": 20,
+      "failed": 0,
+      "source_checkpoint": "4a3f2d82e448a61cb0724dc6f59daa82142132ce",
+      "viewports": [
+        "440x956",
+        "390x844",
+        "375x812",
+        "956x440"
+      ],
+      "text": "Normal, Large, 200% and keyboard-like viewport reduction",
+      "theme": "light and dark",
+      "scope": "Chromium synthetic APIs; physical keyboard/camera/voice not claimed"
+    },
+    "subsequent_source_change": "Only help text and generated artifacts; final exact source CI passed"
+  },
+  "release_guards": {
+    "http_acceptance_wrapper_passed": 8,
+    "promotion_safety_passed": 3,
+    "pin_equality": "not run as passed; current protected baseline differs from old accepted runtime and requires actual new-image acceptance"
+  },
+  "exact_package": {
+    "receipt": "docs/evidence/AGR_306_C14_SOURCE_PACKAGE.json",
+    "zip_sha256": "58d23318fc88d80c768671da99f53eb6135b6a651c419cd0d59e4a6c9a562ec3",
+    "runtime_code_sha256": "166e2a288d7f1ea6d068279163a069ef2374d6d274c7462b743b7e699c3cfe7c",
+    "members": 71,
+    "prepared_not_deployed": true
+  },
+  "release_blocker": {
+    "reason": "Existing authenticated Azure administration path unavailable",
+    "mac_direct": "MCP SSE probe returned 429; repeated read-only identity check confirmed unavailable",
+    "browser": "Browser access requires the originating browser context; repeated documentation call confirmed unavailable",
+    "azure_mutation_performed": false,
+    "cloudflare_mutation_performed": false,
+    "new_services_accounts_or_tokens_created": false,
+    "permission": "Owner release authorization persists; this is a connection blocker, not an approval request"
+  },
+  "last_live_readback": {
+    "staging_commit": "715a2931edf7831abde8d7b5eed6536115caa677",
+    "runtime_application": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "runtime_version": 8,
+    "runtime_image": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+    "max_instances": 1,
+    "environment_variables_count": 0,
+    "authorized_keys_count": 0,
+    "ordinary_build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+    "ordinary_deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+    "temporary_rollout_flags": false,
+    "C14_cloud_build_started": false
+  },
+  "earlier_evidence": [
+    {
+      "check": "first shell browser run",
+      "passed": 19,
+      "failed": 1,
+      "cause": "fixed November 9 fixture was searched on November 10 after profile midnight",
+      "resolution": "test explicitly selects stored date; product logic unchanged; final20 passed"
+    },
+    {
+      "check": "expanded duplicate standalone help copy",
+      "passed": 3,
+      "failed": 1,
+      "cause": "existing modular Worker code/metadata size bound",
+      "resolution": "kept standalone help concise; existing assertion unchanged;4static and final253Node passed"
+    },
+    {
+      "check": "source candidate a74f54b",
+      "gate_stages_passed": 16,
+      "seconds": 93.72
+    },
+    {
+      "check": "source candidate 4a3f2d8",
+      "gate_stages_passed": 16,
+      "seconds": 93.42
+    }
+  ],
+  "screenshots": {
+    "docs/evidence/c14/chat.png": {
+      "sha256": "71750144c1edf8ccb07c8554808526ada0087fa0840cbb282386ba37db563340",
+      "viewport": "440x956",
+      "synthetic_data": true
+    },
+    "docs/evidence/c14/diary.png": {
+      "sha256": "3b6560b133d4e10673440d74bab7f9ee99a33a115cbce6da9ed42e770ec70d03",
+      "viewport": "440x956",
+      "synthetic_data": true
+    },
+    "docs/evidence/c14/grocery.png": {
+      "sha256": "49260b1c04f274066331382c3316d773c93ffd599cfb1ed471911048fd2aa612",
+      "viewport": "440x956",
+      "synthetic_data": true
+    },
+    "docs/evidence/c14/intake.png": {
+      "sha256": "6420f9029cb83cc78bdcba64eea8030d18b76064a8217433dab2d7555c95456f",
+      "viewport": "440x956",
+      "synthetic_data": true
+    }
+  },
+  "not_claimed": [
+    "new live signed Cloudflare to Azure to D1 intake transaction",
+    "actual wife/iPhone end-to-end acceptance for this candidate",
+    "clinical or universal accessibility compliance",
+    "final private-family deployment or merge"
+  ],
+  "next_single_task": "Restore existing Azure administration connection, then resume C14 exact native runtime acceptance → real accepted pin → exact Azure deployment/adoption digest → ordinary full promotion and live readback; use docs/design/EXISTING_RELEASE_C14.md"
+}

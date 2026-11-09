@@ -1,0 +1,93 @@
+{
+  "schema": "keto-isolated-intake-candidate-v1",
+  "stage": "AGR-306 C11 intake backend",
+  "status": "completed",
+  "completed_at": "2026-11-09T20:19:29.153347+00:00",
+  "authoritative_repository_modified_by_this_agent": false,
+  "base_commit": "8a52625a74fb2ca260300f1e23212af51041bdba",
+  "baseline_file_sha256": {
+    "library/skills/keto-companion/scripts/keto_core.py": "7ef8233d681401c718aff04a23343717dee07f6e5f462bc8d12dd921db4d477f",
+    "service/domain.py": "d65eddcf8d26e67b963e225cef42858a5d2e950e11e0be896ce4abfd632e06a1",
+    "service/kitchen.py": "1d8f8340083a129210ae08773004020736ce7e6742f4911cd9e05dd69c53ed3a",
+    "service/app.py": "082a85e340832638af141652aa7eb243dc447b107ca8bc17163e37665e9a684f"
+  },
+  "candidate_files": [
+    {
+      "path": "library/skills/keto-companion/scripts/keto_core.py",
+      "sha256": "de71dbe8bb42dc57d04f1fd00b1c212121f67b812c6a50f7502b0916d45725a9"
+    },
+    {
+      "path": "service/app.py",
+      "sha256": "923d590d0c90aee50928d3f8dd8f52305ab3545e4672687006663fd74c95955a"
+    },
+    {
+      "path": "service/domain.py",
+      "sha256": "a8bbfe4190303c47ad729f2bd2defd4bc5a701d9e9ee53d71fcb34f0ab7138a1"
+    },
+    {
+      "path": "service/intake.py",
+      "sha256": "0820d749adf5fba96693c1c0c841f61cad8666fc82f3432aa484b98f671f27bb"
+    },
+    {
+      "path": "service/kitchen.py",
+      "sha256": "12fdc526c75fd5635fa3b603aa0eabeaada62fc88f28c35fc94b301143e8b6d9"
+    },
+    {
+      "path": "tests/test_intake.py",
+      "sha256": "a9a8c6a2fe57e476c41126237ef78da7a64757764e5840f2badc1ad2fa021699"
+    }
+  ],
+  "patch": "/workspace/scratch/bbdbdb895c38/keto-intake.patch",
+  "patch_sha256": "d31dc58e73f1620b45da73ba16346345f62eae6360ac1c5d68e9365c207cf961",
+  "patch_check": "git apply --check passed against authoritative tree",
+  "testbed": "/workspace/scratch/bbdbdb895c38/keto-intake-testbed",
+  "runtime": "Existing pinned project .venv Python 3.12.14; no packages installed",
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/test_intake.py tests/test_service.py tests/test_kitchen.py tests/test_own_dish.py tests/test_measurement_tools.py tests/test_kitchen_parent.py tests/test_spec_audit_regressions.py library/skills/keto-companion/tests/test_core.py",
+      "result": "368 passed",
+      "duration_seconds": 15.21,
+      "new_intake_cases": 18
+    },
+    {
+      "command": "python -m pytest -q tests/test_kitchen_release.py tests/test_kitchen_appliances.py",
+      "result": "21 passed",
+      "duration_seconds": 2.45
+    }
+  ],
+  "prior_attempts": [
+    {
+      "result": "349 passed; 1 failed PDF_FONT_UNAVAILABLE",
+      "cause": "Tracked-file-only isolated testbed omitted existing local runtime-fonts; copied only that runtime directory and PDF test passed."
+    },
+    {
+      "result": "13 passed; 1 failed incorrect expected transport HTTP status",
+      "cause": "New test expected 400 but existing transport uses 422 for missing UI confirmation; assertion corrected to preserve transport contract."
+    }
+  ],
+  "independent_review": {
+    "agent": "snapshot_review",
+    "mode": "read-only",
+    "findings_fixed": [
+      "Inherited DST fold and needless timezone-default injection on note edits",
+      "Source-only diary correction dropping existing quantity",
+      "Legacy date-only note edits requiring absent profile timezone"
+    ],
+    "snapshot_forgery_path_found": false
+  },
+  "contracts": "Root runs scripts/export_contracts.py after integrating all UI/API edits, then --check and verify_specification.py; generated contracts not edited here.",
+  "scope_limits": [
+    "No provider/network/database migration or schema-version bump",
+    "No deployed/live/physical-device validation claimed",
+    "Existing common state-size limit remains; history reaches all retained records",
+    "Legacy free-text diary date extraction is unchanged; common UI/API requires explicit selected eating date"
+  ],
+  "next_task": "Root integrates exact patch, tests shared UI with synthetic Service HTTP, runs full required gates and generated-contract checks before release.",
+  "total_distinct_test_cases_passed": 389,
+  "root_integration_correction": {
+    "path": "service/kitchen.py::kitchen_card",
+    "change": "Remove unquantified-only known_subtotal None -> 0 compatibility fallback. Preserve None; root requested clearer approved unknown semantics.",
+    "required_test_update": "tests/test_spec_audit_regressions.py::test_unquantified_meal_never_becomes_zero_carbohydrate expects known_subtotal_g==0 at baseline; replace only that expectation with is None and add unquantified-only case to new tests as desired.",
+    "candidate_patch_changed": false
+  }
+}

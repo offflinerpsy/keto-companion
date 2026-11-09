@@ -1,0 +1,116 @@
+{
+  "schema": "agr306-c6b-build-evidence-v1",
+  "scope": "Sanitized terminal build metadata and bounded logs; no independent live control read",
+  "account_id": "0609100baf768271ea2811c9a9ee2b16",
+  "build_uuid": "8bee9b90-41c8-4ddb-8b16-0190cd6a976e",
+  "commit": "ac9bb9c60bae19b86b4ac656ea9204bbe05767a9",
+  "status": "stopped",
+  "outcome": "fail",
+  "created_utc": "2026-11-09T13:40:53.833Z",
+  "stopped_utc": "2026-11-09T13:47:28.871Z",
+  "logs": {
+    "cursor_followed": true,
+    "pages": 2,
+    "line_count": 501,
+    "scope": "filtered only; raw logs not retained"
+  },
+  "gates": {
+    "full_gate_passed": true,
+    "checks": [
+      {
+        "name": "python_env",
+        "exit": 0
+      },
+      {
+        "name": "python_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "node_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "container_sdk",
+        "exit": 0
+      },
+      {
+        "name": "container_worker_build",
+        "exit": 0
+      },
+      {
+        "name": "runtime_fonts",
+        "exit": 0
+      },
+      {
+        "name": "all_python",
+        "exit": 0
+      },
+      {
+        "name": "all_node",
+        "exit": 0
+      },
+      {
+        "name": "legacy_ui",
+        "exit": 0
+      },
+      {
+        "name": "legacy_oauth_ui",
+        "exit": 0
+      },
+      {
+        "name": "contracts",
+        "exit": 0
+      },
+      {
+        "name": "specification",
+        "exit": 0
+      },
+      {
+        "name": "web_build",
+        "exit": 0
+      },
+      {
+        "name": "legacy_build",
+        "exit": 0
+      },
+      {
+        "name": "hygiene",
+        "exit": 0
+      },
+      {
+        "name": "generated_assets_match",
+        "exit": 0
+      }
+    ],
+    "python_passed": 553,
+    "python_subtests_passed": 6,
+    "node_tests": 206,
+    "node_passed": 206,
+    "node_failed": 0,
+    "gate_seconds": 146.41
+  },
+  "native_release": {
+    "rollout_submitted_reported": true,
+    "rollout_id": "e8614ca5-b20a-4417-928d-1233884688e0",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "previous_digest": "sha256:95efda5830c8ed9bc2f32a5f13a9a06fe3fb2be5f239404f755e521553badf52",
+    "new_digest": "sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008",
+    "baseline": "not observed in terminal receipt",
+    "runner_worker_deploy_stage_reached": true,
+    "cloud_container_acceptance": "failed exit=1; detailed safe cause not emitted",
+    "temporary_probe_deleted": "unknown; no cleanup receipt",
+    "native_acceptance_receipt": null
+  },
+  "worker_deploy": {
+    "staging_worker_deploy_started": false,
+    "receipt": null
+  },
+  "failure": "RuntimeError: cloud_container_acceptance failed, exit=1; no credentials exported",
+  "limits": [
+    "C6b full gate passed, but overall build failed in native cloud-container acceptance after a reported rollout; do not mark release successful.",
+    "Rollout and runner Worker effects require exact-target read-only reconciliation before any retry or correction.",
+    "No proof of actual executing image, probe cleanup, runtime synthetic acceptance or staging Worker deployment.",
+    "Prior C6 failure evidence remains unchanged.",
+    "No build retry, cancellation, cloud mutation, browser or provider call by evidence reader."
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "issue": "AGR-306",
+  "stage": "C11 common intake and full diary history",
+  "status": "completed_local_acceptance",
+  "observed_at": "2026-11-09T20:35:22.125901+00:00",
+  "base_commit": "8a52625a74fb2ca260300f1e23212af51041bdba",
+  "checks": {
+    "isolated_backend": {
+      "passed": 389,
+      "receipt": "AGR_306_C11_BACKEND_REVIEW.json"
+    },
+    "isolated_signed_bridge": {
+      "passed": 96,
+      "receipt": "AGR_306_C11_BRIDGE_REVIEW.json"
+    },
+    "root_integrated_python": {
+      "passed": 53,
+      "command": "pytest tests/test_intake.py tests/test_edge_bridge.py tests/test_spec_audit_regressions.py"
+    },
+    "root_final_intake_after_delete_preview": {
+      "passed": 20
+    },
+    "node_cloudflare": {
+      "passed": 246,
+      "failed": 0,
+      "note": "Includes five isolated C12 action-module tests, not yet wired or included in this checkpoint. All 241 C11 Cloudflare tests passed."
+    },
+    "browser_real_service": {
+      "passed": 4,
+      "failed": 0,
+      "identity": "fixed synthetic membership; real HTTP Service, SQLite, calculations, CAS and one-use confirmation",
+      "cases": [
+        "recipe amount/time/review/apply/reload",
+        "cancel/edit/repeat identity and no early write",
+        "75-entry history, stale pagination and fresh revision editing",
+        "legacy missing snapshot, custom meal label and exact seconds preserved"
+      ]
+    },
+    "browser_shell_regression": {
+      "passed": 20,
+      "failed": 0,
+      "synthetic_API": true
+    },
+    "bundle": "existing web build passed"
+  },
+  "fixes_from_independent_review": [
+    "omit unchanged edit fields; preserve historical source/time/legacy meal",
+    "bind editor to loaded history revision and expose initial read retry",
+    "allowlisted safe intake validation messages through signed compute boundary",
+    "authoritative allergen snapshots and factual-intake warnings",
+    "concrete owned-row deletion review including historical entries",
+    "separate fixed editable source payload from bounded executable Worker size"
+  ],
+  "source_sha256": {
+    "cloudflare-saas/public/app.css": "e0dcee864e5d778c69f15f037932efa2572f1c3b8db69705db08a09e421609ef",
+    "cloudflare-saas/public/app.js": "09b9ac839b40bc8b57bccb65dc645ebd7c30409492c3a0b4a5a6beabd839c01c",
+    "cloudflare-saas/public/index.html": "a52f994831209c6c5ba6de569dc4e6af6089cff340c022fba9d2016d8382f917",
+    "cloudflare-saas/public/intake-ui.js": "c77ef8438c19c5ab3e7dd8283aec957713b7e7d48b3b1edb9646f3240342dbe9",
+    "cloudflare-saas/public/shell-ui.js": "6650dc0bfcb1dcfb2c9ae67c3cd39563a86bd11ef510b390f5e36199ecbeb898",
+    "cloudflare-saas/src/compute.mjs": "50dbeb05fce25d51b1141d3c974fd9774976ce912da8f7d074f8c296041ea97d",
+    "cloudflare-saas/tests/static.test.mjs": "b7dfe1671280e90a83cd40e085b0280494eac08caa4018dcd544b9feeb6d931f",
+    "cloudflare-saas/tests/tranquil-design.test.mjs": "86c6ab5616412c753f3cb2c4a930e305be62968f8613078b6e402c40819bcd06",
+    "cloudflare-saas/tests/ed25519-bridge.test.mjs": "10d30dbc167d83cbacf3262062e7e4ee02f2c9e4d2e81634546a99b263adcb94",
+    "cloudflare-saas/tests/worker.test.mjs": "9085af47cf048d77513f17c6775f0e0a97fe08af9778b11423af54bd54ea6ed1",
+    "library/skills/keto-companion/scripts/keto_core.py": "3ed80085a8f094707dc946c953ae6b8ce601c609df3b4667294558dff1db63b6",
+    "service/app.py": "95d672862a7db91b8a384200a1d4418ad0bf8c05b9d7d6cccec22ba00a1b3f5b",
+    "service/domain.py": "de2371e658aea53b33ad1fc230ce96f412170495e85913468364299516beaa97",
+    "service/intake.py": "0e46079a13bc13031899ac8bc0cdadce0dcfb803a7c88a55787ca415a43d536b",
+    "service/kitchen.py": "e9f4482b9108fd3e829d3912b4b611f402c0fa2b97ac14223f0bcc48edb6bae9",
+    "tests/browser/intake.config.mjs": "f17d31a6b5cad86e8232e2d7a2ef34143b72d496ba79b577487e01c18f82231c",
+    "tests/browser/intake.spec.mjs": "18f772e5cf9f94649d4a3be554196e3d8abf583358144baebf9adf97bcb9e4f4",
+    "tests/browser/intake_server.py": "5d385da2139e0457875814401993b6fcea3e60aef076a2360b8bd6ce962c8f01",
+    "tests/browser/shell.spec.mjs": "a7ff341f9e954a5c4166a501b0ae4e15bc3f932233077b76a1a3011eb4677090",
+    "tests/test_edge_bridge.py": "500bea3135130f9113a32c970c78936154411c324b5b48ba72c6b92a266e6fe8",
+    "tests/test_intake.py": "82052279dc8492c4b29e032e572d8a72ccaf9f00608653f1332339a554f213ed",
+    "tests/test_spec_audit_regressions.py": "597703cfb9049be17b81e0440a39ca56eb40ded5d377045f016861fa00102553"
+  },
+  "screenshots": {
+    "c11-intake-review.png": "2fb20c2147be5525253c43541caac34356fa77713aa02f9e0e1eedcedd12bf23",
+    "c11-day-saved.png": "bdb1d5d9422243439c898d2b0e3eb843d8408d9cd0a1645d3ea537d6b0e86ad4"
+  },
+  "earlier_attempts": [
+    {
+      "result": "initial browser 2 failures, 1 pass",
+      "cause": "generic ingredients preview renderer assumed intake entry was recipe",
+      "resolution": "typed entry preview bypasses generic ingredients renderer; subsequent 4 paths pass"
+    },
+    {
+      "result": "initial full Node three failures",
+      "resolution": "new module added to VM harness; Worker byte budget now separates existing bounded editable sources; source/image pin equality intentionally deferred until real accepted image at C14"
+    }
+  ],
+  "release_status": "source checkpoint only; generated artifacts regenerated and committed at C14; no new deployment yet",
+  "physical_iPhone_spouse_acceptance": "not claimed; prior partial evidence preserved",
+  "next_stage": "C12 durable contextual chat actions and same intake editor"
+}

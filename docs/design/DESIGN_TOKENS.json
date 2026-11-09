@@ -1,22 +1,22 @@
 {
   "schema": "keto-tranquil-dawn-tokens-v1",
-  "source": "docs/design/DESIGN.md",
+  "source": "docs/design/IMPLEMENTATION.md",
   "theme": "light",
   "tokens": {
-    "--color-canvas-warm-cream": "#FAF9F6",
+    "--color-canvas-warm-cream": "#F2F2F7",
     "--color-card-surface-white": "#FFFFFF",
-    "--color-mint-glaze-surface": "#F0F7F5",
-    "--color-spruce-teal": "#0E3B36",
-    "--color-deep-charcoal": "#1A2421",
-    "--color-slate-neutral": "#6C7A76",
+    "--color-mint-glaze-surface": "#EAF2FF",
+    "--color-spruce-teal": "#005FCC",
+    "--color-deep-charcoal": "#1C1C1E",
+    "--color-slate-neutral": "#50545B",
     "--color-verdant-mint": "#43A08A",
     "--color-muted-peach": "#F09E81",
     "--color-dusk-indigo": "#4F659C",
     "--color-coral-alert": "#E06A4E",
-    "--font-plus-jakarta-sans": "\"Plus Jakarta Sans\", Inter, \"SF Pro Display\", Urbanist, -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif",
+    "--font-plus-jakarta-sans": "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
     "--text-caption": "11px",
     "--text-body-sm": "13px",
-    "--text-body": "15px",
+    "--text-body": "17px",
     "--text-body-lg": "17px",
     "--text-subheading": "17px",
     "--text-heading": "20px",
@@ -57,9 +57,11 @@
     "mobile_content_max_px": 428,
     "desktop_page_max_px": 900,
     "dark": "explicit saved preference only",
-    "secondary_text_color": "#5E6F68",
-    "source_slate_preserved_for": "source token and non-text detail",
-    "quickstart_body_px": 15,
-    "reference_type_table_body_px": 14
-  }
+    "secondary_text_color": "#50545B",
+    "source_slate_preserved_for": "legacy property name; neutral secondary text",
+    "quickstart_body_px": 17,
+    "reference_type_table_body_px": 17
+  },
+  "current_issue": "AGR-306",
+  "compatibility": "Source-named CSS custom properties retained; values now follow the mobile system adaptation."
 }

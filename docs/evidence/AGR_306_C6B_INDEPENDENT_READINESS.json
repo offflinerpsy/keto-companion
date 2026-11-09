@@ -1,0 +1,39 @@
+{
+  "issue": "AGR-306",
+  "scope": "independent fixed synthetic existing-image acceptance; original unknown execution retained, never replayed",
+  "probe": "keto-developer-check-agr306-6503b8c162",
+  "job_id": "8bafa6de-fe14-4e12-af6c-d70e5bcb2fa1",
+  "baseline": "0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8",
+  "image_digest": "sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008",
+  "started_at": "2026-11-09T14:02:07.919Z",
+  "post_attempts": 0,
+  "uploaded": true,
+  "cleanup": {
+    "delete_succeeded": true,
+    "independently_absent": true
+  },
+  "accepted": false,
+  "runner_worker_sha256": "ed7fdc52c3e02b2947128a633134b3face929fdade30c34c371c905b99b268c3",
+  "preflight": {
+    "application_version": 7,
+    "max_instances": 1,
+    "scheduling_policy": "default",
+    "existing_instances": 11,
+    "active_instances": 0,
+    "no_database_or_R2_binding": true,
+    "no_models_or_family_data": true
+  },
+  "patch_hash": "cf4ec701038b3fdfbce661c168751486804f0115fca023b58bea1dc5f9dee3fa",
+  "probe_module_sha256": "30e346128a3c5cc229e7796e34d6205b864c6f68783f7121ec668830bf55c3da",
+  "readiness": {
+    "http": 403,
+    "content_type": "text/plain;charset=UTF-8",
+    "bytes": 102,
+    "checked_at": "2026-11-09T14:02:23.953Z"
+  },
+  "failure": {
+    "name": "Error",
+    "message": "READINESS_NOT_JSON_OR_NOT_OK_NO_POST"
+  },
+  "finished_at": "2026-11-09T14:02:25.200Z"
+}

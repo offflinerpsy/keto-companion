@@ -73,6 +73,13 @@ class EdgeBridge:
    if op=='sanitize_image':
     if set(args)!={'image_data_url'} or doc is not None:raise ValueError()
     return {'response':{'image_data_url':self.image_clean(args['image_data_url'])},'state':None}
+   if op=='label_extract':
+    if isinstance(self.brain,AzureBrain) and os.getenv('KETO_AZURE_AUTH')=='cli':raise BridgeError('model unavailable')
+    Draft202012Validator(self.tool_map['keto_label_extract']['inputSchema']).validate(args)
+    from .label import extract
+    try:image=self.image_clean(args['image_data_url'])
+    except ValueError:return {'response':{'error_code':'INVALID_IMAGE','message':'Не удалось прочитать фото. Выберите другое.','model_called':False},'state':copy.deepcopy(doc)}
+    return {'response':extract(self.brain,image,args.get('note')),'state':copy.deepcopy(doc)}
    if op=='transcribe':
     if doc is not None:raise ValueError()
     Draft202012Validator(self.tool_map['keto_transcribe']['inputSchema']).validate(args)

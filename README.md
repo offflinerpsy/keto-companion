@@ -2,7 +2,9 @@
 
 ## Current 0.7.1 pilot
 
-The supplied Tranquil Dawn design is live. Owner-only bounded development produces a tested private preview/diff, not self-publication. Chat accepts image paste, drop and explicitly loaded public image links. Full regression and exact isolated candidate acceptance run in **Cloudflare**, without GitHub Actions. [RU quick guide](docs/ru/START_071.md) · [EN quick guide](docs/en/START_071.md) · [exact release evidence](docs/evidence/CF_DEV_MEDIA_08_RELEASE_RECEIPT.json).
+C10–C13 implement a compact system-font interface with four everyday tabs and one confirmed food-entry flow. The deployed revision and C14 acceptance are tracked in [current status](docs/CURRENT_STATUS.json); implemented source does not itself establish a completed release. [RU quick guide](docs/ru/START_071.md) · [EN quick guide](docs/en/START_071.md) · [approved product plan](docs/design/PRODUCT_DELIVERY_2026_11_09.md).
+
+Owner-only bounded development produces a tested private preview/diff, not self-publication. Chat accepts image paste, drop and explicitly loaded public image links. Full regression and exact isolated candidate acceptance run in **Cloudflare**, without GitHub Actions.
 
 
 **Private family pilot · mobile-first web app · explicit consent · deterministic nutrition calculations.**
@@ -25,7 +27,9 @@ The supplied Tranquil Dawn design is live. Owner-only bounded development produc
 
 ## What the product contains
 
-A Google-sign-in, invitation-only web workspace with four primary tabs: **Chat, Menu, Diary, More**. Guided onboarding and explicit target approval precede personalized menu generation. Chat and Recipe Studio share confirmed preferences, pantry, topics, calculated recipes and diary actions. Dictation creates an editable draft; images do not establish exact food weights. Accepted menus export to PDF; reminders export to Calendar via ICS, not automatic background push.
+A Google-sign-in, invitation-only web workspace with four primary tabs: **Chat / Diary / Recipes / Products**. **Profile and settings** opens from the header; **My menu** is under Recipes. Guided onboarding and explicit target approval precede personalized menu generation. Chat offers contextual actions beside the relevant messages.
+
+Recipes, own dishes and products share **Log what you ate → quantity and basis → eating date/time → calculated review → Add to diary**. The confirmed entry opens in Diary with the selected day’s totals; entries can be edited or repeated. Saving a recipe or planning a meal does not record food eaten or subtract stock. Dictation creates an editable draft; images do not establish exact food weights. Accepted menus export to PDF; reminders export to Calendar via ICS, not automatic background push.
 
 The recipe engine uses **85 USDA food records**, **72 reference recipes**, and **18 controlled cooking-method families**. Generated combinations are calculated drafts, not a claim of kitchen testing. Local manufacturer label references remain partial. Food composition, energy, portions and shopping are calculated by code rather than invented by the language model.
 

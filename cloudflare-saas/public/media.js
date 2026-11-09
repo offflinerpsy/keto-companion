@@ -23,12 +23,12 @@ export async function prepareImage(file,{bitmap=globalThis.createImageBitmap,doc
 
 // One attachment controller for picker, paste, drop and explicit public-image URL.
 // Dependencies are injectable for focused DOM tests; no global document handlers.
-export function setupChatImages({root,$,prepare=prepareImage,link,epoch,setImage,notify}){
+export function setupChatImages({root,$,prepare=prepareImage,link,epoch,setImage,notify,openDialog,closeDialog}){
  let generation=0;
  const current=(g,e)=>g===generation&&e===epoch();
- function closeLink(){const d=$('image-link-details');if(typeof d.close==='function'){if(d.open)d.close()}else d.open=false}
- function openLink(){const d=$('image-link-details');if(typeof d.showModal==='function'){if(!d.open)d.showModal()}else d.open=true;$('image-link-url').focus()}
- function reset(){generation++;closeLink();$('image-link-load').disabled=false;setImage(null);$('message').required=true;$('photo-preview').hidden=true;$('photo-preview-image').removeAttribute('src');$('photo').value='';$('photo-status').textContent='';$('image-link-url').value='';$('image-drop-zone').classList.remove('dragging')}
+ function closeLink(history=true){const d=$('image-link-details');if(history&&d.open&&closeDialog){closeDialog();return}if(typeof d.close==='function'){if(d.open)d.close()}else d.open=false}
+ function openLink(){if(openDialog){openDialog('image','image-link-url');return}const d=$('image-link-details');if(typeof d.showModal==='function'){if(!d.open)d.showModal()}else d.open=true;$('image-link-url').focus()}
+ function reset(){generation++;closeLink(false);$('image-link-load').disabled=false;setImage(null);$('message').required=true;$('photo-preview').hidden=true;$('photo-preview-image').removeAttribute('src');$('photo').value='';$('photo-status').textContent='';$('image-link-url').value='';$('image-drop-zone').classList.remove('dragging')}
  function display(value){setImage(value);$('message').required=false;$('photo-preview-image').src=value;$('photo-preview').hidden=false;$('photo-status').textContent='Фото подготовлено. Отправится только с вашим сообщением.'}
  async function attach(file){const g=++generation,e=epoch();try{const value=await prepare(file);if(current(g,e))display(value)}catch(error){if(current(g,e))notify(error.message)}}
  function first(files){const images=[...files].filter(f=>f.type?.startsWith('image/'));if(images.length){if(images.length>1)notify('За одно сообщение можно отправить одно фото. Выбрано первое.');void attach(images[0]);return true}if(files.length)notify('Нужен файл изображения. Страницу можно добавить текстом или скриншотом.');return false}
@@ -40,7 +40,7 @@ export function setupChatImages({root,$,prepare=prepareImage,link,epoch,setImage
  root.addEventListener('dragover',e=>{if(relevant(e)){e.preventDefault();e.dataTransfer.dropEffect='copy';zone.classList.add('dragging')}});
  root.addEventListener('dragleave',e=>{if(!root.contains(e.relatedTarget))zone.classList.remove('dragging')});
  root.addEventListener('drop',e=>{if(!relevant(e))return;e.preventDefault();zone.classList.remove('dragging');if(!first(e.dataTransfer.files||[]))offerUrl(e.dataTransfer.getData('text/uri-list'))});
- $('image-link-open').onclick=openLink;$('image-link-close').onclick=()=>{generation++;closeLink();$('image-link-load').disabled=false};$('image-link-details').addEventListener('cancel',()=>{generation++;$('image-link-load').disabled=false});
+ $('image-link-open').onclick=openLink;$('image-link-close').onclick=()=>{generation++;closeLink();$('image-link-load').disabled=false};$('image-link-details').addEventListener('cancel',e=>{generation++;$('image-link-load').disabled=false;if(closeDialog){e.preventDefault();closeDialog()}});
  $('image-link-load').onclick=async()=>{const g=++generation,e=epoch(),url=$('image-link-url').value;$('image-link-load').disabled=true;try{const value=await link(url);if(current(g,e)){display(value);closeLink()}}catch(error){if(current(g,e))notify(error.message)}finally{if(current(g,e))$('image-link-load').disabled=false}};
  return {reset,attach,offerUrl,invalidate(){generation++}};
 }

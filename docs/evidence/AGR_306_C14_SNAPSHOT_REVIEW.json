@@ -1,0 +1,27 @@
+{
+  "task": "AGR-306 C14 protected runtime snapshot digest-input completeness",
+  "depends_on_patch": "keto-c14-runtime-digest.patch",
+  "modified_files": [
+    "scripts/prepare_developer_snapshot.py",
+    "tests/test_developer.py"
+  ],
+  "candidate_directory": "/workspace/scratch/bbdbdb895c38/keto-c14-digest-candidate",
+  "authoritative_repository_modified": false,
+  "remote_mutations": false,
+  "patch_path": "/workspace/scratch/bbdbdb895c38/keto-c14-snapshot-inputs.patch",
+  "patch_sha256": "f130d787b3331d73f6d2000b93d4002bbc3cf0a6616dfbb00eec3f811bf4ec92",
+  "production_change": "Add only function_app.py to fixed source-only ROOT_FILES allowlist; all exclusion and credential/path guards unchanged.",
+  "regression": "Existing deterministic source-snapshot test now requires every RUNTIME_CODE_FILES path to pass permitted, exist in manifest and tar, and recover identical startup digest from exact archived bytes.",
+  "tests": {
+    "command": "python -m pytest -q tests/test_developer.py tests/test_runtime_code_digest.py",
+    "passed": 21,
+    "seconds": 0.77,
+    "exit_code": 0
+  },
+  "red_test": {
+    "original_allowlist_exit_code": 1,
+    "failed_test": "test_snapshot_allowlist_and_deterministic_archive",
+    "log": "/workspace/scratch/bbdbdb895c38/keto-c14-snapshot-red-test.txt"
+  },
+  "checked_at": "2026-11-09T20:56:50.318837+00:00"
+}

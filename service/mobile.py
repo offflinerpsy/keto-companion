@@ -9,6 +9,7 @@ def mobile_init(d):
     if 'topics' not in d:d['topics']={'main':{'id':'main','title':'Основной разговор','messages':copy.deepcopy(d.get('chat',[]))[-60:],'choices':[]}}
     if d.get('active_thread') not in d['topics']:d['active_thread']='main'
     d.setdefault('reminders',[])
+    for t in d['topics'].values():t.setdefault('epoch',0)
 def compact_topics(d):
     if 'topics' not in d:return
     import json
@@ -65,7 +66,8 @@ class MobileService:
             if thread_id=='main':raise ValueError('Основную тему можно очистить, но нельзя удалить')
             topic(d,thread_id);del d['topics'][thread_id]
             if d['active_thread']==thread_id:d['active_thread']='main'
-        elif action=='clear':topic(d,thread_id)['messages']=[];topic(d,thread_id)['choices']=[]
+        elif action=='clear':
+            t=topic(d,thread_id);t['messages']=[];t['choices']=[];t['epoch']=t.get('epoch',0)+1
         else:raise ValueError('Неизвестное действие темы')
         if action in ('delete','clear'):
             d['requests']={rid:r for rid,r in d.get('requests',{}).items() if r.get('thread_id','main')!=thread_id}

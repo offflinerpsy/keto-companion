@@ -1,0 +1,10 @@
+{
+  "account": "0609100baf768271ea2811c9a9ee2b16",
+  "worker": "keto-companion-developer-runner",
+  "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+  "baseline": "eb13ec9de519b4a82d368cd71f67749616df18dcdf1a9ad65387c7b04e8309eb",
+  "image_digest": "sha256:2a9b8e3b417d52a1c6216f682b5c2872a25f45034238a11f03f4fc5fa1e2085f",
+  "worker_sha256": "ed7fdc52c3e02b2947128a633134b3face929fdade30c34c371c905b99b268c3",
+  "instance_type": "standard-1",
+  "max_instances": 1
+}

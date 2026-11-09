@@ -19,6 +19,10 @@
     {
       "path": "cloudflare-saas/migrations/0007_developer.sql",
       "sha256": "b14472ebb08a288c52670e300f1261c5bab9d129d4e4fd73bbf9df8ea5d616c6"
+    },
+    {
+      "path": "cloudflare-saas/migrations/0008_shop_lookup.sql",
+      "sha256": "38af85819867a6cfa68da1251059a92cbb31f91a343e4969a73f7f8c4168df39"
     }
   ],
   "notice": "Actual SQLite-compatible D1 migration result; no user data or database connection.",
@@ -780,6 +784,73 @@
         }
       ],
       "table": "sessions"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "provider",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "until_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "shop_provider_backoff"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "id",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "requested_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "shop_provider_requests"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "barcode",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "payload",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "expires_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [],
+      "table": "shop_public_cache"
     },
     {
       "columns": [

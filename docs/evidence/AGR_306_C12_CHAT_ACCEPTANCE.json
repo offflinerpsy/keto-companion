@@ -1,0 +1,72 @@
+{
+  "issue": "AGR-306",
+  "stage": "C12 durable contextual chat actions",
+  "status": "completed_local_acceptance",
+  "observed_at": "2026-11-09T20:47:53.486977+00:00",
+  "base_commit": "ce9fa715bec77e63298bd68faf59d0696876adc5",
+  "checks": {
+    "candidate": "37 final focused cases; earlier 256 affected cases retained separately in backend review",
+    "root_python": {
+      "passed": 80,
+      "failed": 0,
+      "command": "pytest tests/test_chat_actions.py tests/test_intake.py tests/test_edge_bridge.py"
+    },
+    "node_cloudflare": {
+      "passed": 248,
+      "failed": 0
+    },
+    "browser_real_service": {
+      "passed": 8,
+      "failed": 0,
+      "cases": [
+        "persisted hunger choices and unsent draft, no model/write",
+        "exact generated recipe, half portion, shared confirmation and focus return",
+        "late action cannot replace newer route",
+        "refresh after another device changes revision",
+        "four C11 intake/history regressions"
+      ]
+    },
+    "bundle": "existing web build passed"
+  },
+  "behavior": [
+    "0..3 closed actions are owned by persisted assistant message, thread and exact recipe generation",
+    "normal and kitchen fast reply share lifecycle and replay identity",
+    "read-only resolver never applies, generates or calls a model",
+    "origin and generation are revalidated in intake prepare and apply",
+    "cleared/deleted topic cannot be resurrected; newer topic selection survives old completion",
+    "partial matches retain bounded explanations; empty recipe result has local navigation recovery",
+    "chat answer no longer duplicates in a global toast",
+    "late navigation/dialog responses discarded; modal restores originating action focus",
+    "generated card uses common intake with captured thread; fractional planned amount and unknown energy preserved"
+  ],
+  "paid_admission_fix": "Always remove extra.model_called before OR so free recipe fallback cannot erase a paid intent call. Regression passed.",
+  "source_sha256": {
+    "cloudflare-saas/public/chat-actions.js": "60def7643be527f0ab6608b63c9acd4a56719f85e60e3c91c5d80409179c599e",
+    "cloudflare-saas/public/app.css": "f1670f6ab4610ee4b97a616f5eaea740f45d8fa28e5e8fa330ee649dbc1fb410",
+    "cloudflare-saas/public/app.js": "eb2fffe6bc5631c30201f1856d0a9b7cb2ea84965a4732434ca36dd354e19c91",
+    "cloudflare-saas/public/intake-ui.js": "37b43a9acdedc3002fdf0f6df43f8134ea8cc9af73ae162e6715fcac37742b44",
+    "cloudflare-saas/public/kitchen-ui.js": "9d2d9b23da062a7f93edc94c5b97ecf6dd8cbcb8b085864738dd8849765f2c5d",
+    "cloudflare-saas/public/shell-ui.js": "423a6bbf4991343befb653d4782e6d51668016e5507358eb0b9f8f8fa206fe32",
+    "cloudflare-saas/tests/chat-actions.test.mjs": "90a8c2e14d15ae64458cb1aa3a6a97264a393bcea477477f1cd2d8e01b2de7a4",
+    "cloudflare-saas/tests/kitchen.test.mjs": "da06ec39f9fc0fc49f92166443d5ab74de9d3ef04ebd6b9dda09dfa5b672e2e9",
+    "cloudflare-saas/tests/static.test.mjs": "293bd1dfbfd09d4eb41525b4dc0dd9355960fd62afc794a6e7fc82d9bf46767d",
+    "cloudflare-saas/tests/tranquil-design.test.mjs": "c5fb6bab41f1f68ad53b88ba5b2150d726d0aad2c8cfa1ea6486e97cb2556555",
+    "service/app.py": "7e66d7411b18550917c2694814ed56081b92b7e0a4e11ffdd511b227127b30e7",
+    "service/chat_actions.py": "8c0daa26f07f05fe59f4938f901f9f6b8405ec7232d87072b377db76d2dc64e8",
+    "service/domain.py": "e3607060ab76042f03a94281bae8ee2894c61fadbf8e05c44ea7644e1cffdc1d",
+    "service/intake.py": "ed64c209b67140b16cf723bde6275b838e1cc76f1f6f43c7858545b448278dea",
+    "service/kitchen.py": "d99891affb4d5670cd67b7641be0549b6c9c85b086be462b913297a0e8626562",
+    "service/mobile.py": "3b158d14b40528296859341aa380150fe5c5e261b2c0f504859ebb3ba1822451",
+    "tests/browser/chat-actions.spec.mjs": "3edd4574ea6023c02e809b867820b50ebff49e048166b3f03890e2b65c5628f8",
+    "tests/browser/intake.config.mjs": "a5826f1e5fafa7ace953fe38e1f99ae05ec3f97c194be98695354a3813c54e28",
+    "tests/browser/intake_server.py": "19d70ab29df1290f7c230292bcf417862dabb90b32ed75772b18fc76c66e7c1a",
+    "tests/test_chat_actions.py": "73c2d5bc49145dbf532e6552dbbd7576629466da87bc30cc9cc5336bab532112"
+  },
+  "screenshots": {
+    "c12-context-actions.png": "71750144c1edf8ccb07c8554808526ada0087fa0840cbb282386ba37db563340"
+  },
+  "review": "GPT-6 Astra ultra independent lifecycle and client review; all material findings integrated",
+  "release_status": "source checkpoint only; generated artifacts and real accepted runtime pin follow at C14",
+  "physical_iPhone_spouse_acceptance": "not claimed",
+  "next_stage": "C13 own dishes, confirmed products and portion calculator use common intake"
+}

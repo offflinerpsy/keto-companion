@@ -24,7 +24,8 @@ def test_unquantified_meal_never_becomes_zero_carbohydrate(svc):
     for card in result['recipes']:
         budget=card['budget']
         assert budget['remaining_g'] is None and budget['meal_assumption_g'] is None
-        assert budget['confirmed_logged_g'] is None and budget['known_subtotal_g']==0
+        # A note-only day has no quantified subtotal, even an alleged zero.
+        assert budget['confirmed_logged_g'] is None and budget['known_subtotal_g'] is None
         assert budget['diary_complete_for_budget'] is False
         assert 'остаток углеводов не определён' in card['fit_note']
 

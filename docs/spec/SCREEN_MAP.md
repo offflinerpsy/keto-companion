@@ -13,7 +13,7 @@ Exact static selectors are in [UI_CONTRACTS](UI_CONTRACTS.md).
 ## Route and shell model
 
 Hash routes are client navigation; Worker does not serve a separate private HTML page per route.
-Canonical routes: chat, today, diary, more, recipes, settings, sources, reminders,
+Canonical routes: chat, today, diary, more, recipes, products, settings, sources, reminders,
 admin, targets, knowledge, memory and setup-consent/about/restrictions/targets.
 `setup` resolves to the saved stage; `onboarding` resolves to setup-restrictions.
 The static onboarding page is moved into a setup slot and loses its `data-page` at initialization.
@@ -30,10 +30,10 @@ First-run routing prioritizes unfinished setup unless the requested route is rec
 
 | Surface | Sections/actions | States |
 | --- | --- | --- |
-| Header | Brand, Back, connection, Help, Refresh | Back hidden on primary tabs; narrow/short status hidden |
+| Header | Brand, Back, connection, More, Help, Refresh | Back hidden on primary tabs; narrow/short status hidden |
 | Login | Google sign-in, invitation claim, switch account | Missing setup, cancelled/blocked popup, uninvited email, pending member |
 | Deletion recovery | Receipt field, continue action, status | Missing code, pending cleanup, complete; no health content |
-| Workspace | Four tabs; content; safety holds; toast; proposals | Hidden until own session/state; screen reset on session/consent boundary |
+| Workspace | Five tabs: Today, Recipes, Products, Diary, Chat; content; safety holds; toast; proposals | Hidden until own session/state; screen reset on session/consent boundary |
 | More | Secondary destinations and public document links | Admin entry shown only for admin; API remains authoritative |
 
 Persistent proposal host `#proposals` is a single moving node.
@@ -117,6 +117,22 @@ Links open official sources with noopener/noreferrer.
 Empty/error of a new source should not be filled with fabricated summaries.
 This is a static curated explanation view, not full-text retrieval over newly fetched pages.
 
+## Products — #products
+
+C9 candidate (2026-11-09), pending visual/device and release acceptance. Primary Products tab
+and the Today package shortcut open the same existing product workspace. It hosts reviewed
+basic/personal food search, pantry, own-dish entry and the staged package flow. Local search
+uses known names/states; USDA stays a supplementary, explicitly identified reference.
+
+Package entry offers a self-hosted Quagga2 barcode scanner, label photo/upload, explicit
+name/brand search of Open Food Facts, and manual entry. Search defaults to country-tagged
+Russia/Belarus results; a wider search is explicit. Selecting a result re-reads the exact GTIN.
+Capture/search, pending, review, proposal and saved-next-step states remain separate.
+Unknown mass, nutrient basis, allergens and GI stay visible; no candidate is automatically saved.
+The camera stops on exit, hide, reset, cancellation and accepted code. Late results and per-session
+food caches are invalidated; local input remains usable while protected network calls serialize.
+Physical camera behavior is a separate iPhone acceptance check.
+
 ## Recipes / Recipe Studio — #recipes
 
 Entry: Chat shortcut, More, reference exit from setup, target infeasibility path.
@@ -164,9 +180,9 @@ Empty facts: explain the bounded canonical memory instead of claiming total reca
 Topic deletion does not remove the shared facts shown here.
 Unknown historical date must remain unknown.
 
-## Menu — #today
+## Today — #today
 
-Entry: primary Menu; successful chat menu can navigate here.
+Entry: primary Today; successful chat menu can navigate here. Current local-calendar-day meals appear first; other selected-plan dates are available in a secondary disclosure. An empty current day offers recipe selection. Multi-day planning and exports stay available.
 Sections: gate/explanation, recipe/target links, start date/day count,
 draft or saved plan, preparation links, shopping, PDF and other exports/import.
 Draft has Choose this menu; saved plan has accepted/stale state.

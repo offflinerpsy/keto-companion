@@ -1,0 +1,23 @@
+{
+  "issue": "AGR-306",
+  "stage": "C6b generated legacy artifact reconciliation",
+  "created_at": "2026-11-09T13:40:14.408348+00:00",
+  "failed_build": "360e307b-3df8-47b9-8611-7334e1e25bfd",
+  "failed_commit": "4a74431165f054bf9d738b3188eb42d59a3153de",
+  "failed_gate": "generated_assets_match; service/static/app.bundle.js",
+  "failed_build_effect": "build command failed before any deploy/native-image/probe/Worker stage; no release effect to replay",
+  "cause": "service/static/app.js directly imports changed cloudflare-saas/public/kitchen-ui.js. Supported legacy build had not been regenerated locally; it reproduces the saved CI artifact difference. No dependency/source implementation change.",
+  "change": "node scripts/build_legacy_ui.cjs regenerated its committed bundle",
+  "old_sha256": "6f42e9fe4f8b1effc2872a602a33c3642cfd6a50f3bfe91a32159eddcc067d58",
+  "new_sha256": "a52d48d1b22dad75b11348d6ce597bde91ca4fa079b3e019a768a690961aac72",
+  "source_baseline": "0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8",
+  "source_archive_sha256": "c33d25d9cb722069d7ccb23e3a05ff87b34bfed0d49a59b74bb396f6e7b6d8be",
+  "baseline_unchanged_reason": "Generated legacy bundle excluded by supported snapshot manifest; source implementation and tests unchanged",
+  "checks": {
+    "legacy_build": "passed",
+    "legacy_UI_no_browser": "passed",
+    "legacy_OAuth_UI": "passed",
+    "prior_exact_C6_CI": "553Python+6subtests,206Node,15gates passed; last generated match failed, not reinterpreted as pass"
+  },
+  "Azure": "Existing C1 compute/backend remains; no backend source change. Native deploy guard still verifies actual accepted C1 static hash as backend adoption guard, not new legacy frontend adoption."
+}

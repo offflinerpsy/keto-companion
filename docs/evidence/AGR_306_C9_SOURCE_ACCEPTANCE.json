@@ -1,0 +1,77 @@
+{
+  "issue": "AGR-306",
+  "stage": "C9 source and mobile browser acceptance",
+  "observed_at": "2026-11-09T18:06:17.738929+00:00",
+  "source_root": "/Users/alexyarosh/Projects/keto-companion-azure",
+  "cloud_effects": "none in C9; prior C8 remains deployed",
+  "checks": {
+    "node_all": {
+      "pass": 231,
+      "fail": 0,
+      "log": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional/C9_FINAL_NODE.log"
+    },
+    "contracts_check": "PASS 7 files/no drift",
+    "specification": "PASS 25 docs/879 links",
+    "repository": "PASS 515 files/27 artifacts",
+    "ui_no_browser": "PASS",
+    "oauth_ui_no_browser": "PASS",
+    "normal_and_legacy_build": "PASS",
+    "git_diff_check": "PASS",
+    "independent_review": "Final_mobile_source_review accepted final cut; method-switch P2 resolved; Terra focused17/17 PASS",
+    "native_guard_wiring": {
+      "python_pass": 7,
+      "node_http_pass": 8,
+      "stage": "cloud_container_acceptance uses guarded wrapper, timeout390 unchanged"
+    }
+  },
+  "browser": {
+    "profile": "PERSONAL — Offliner",
+    "extension_instance": "a1f97a64-70a2-4acc-8199-b9946bf8fe67",
+    "surface": "native Chrome scoped existing local-only synthetic preview",
+    "css_viewports": [
+      [
+        440,
+        956
+      ],
+      [
+        390,
+        843
+      ]
+    ],
+    "journey": "name search -> exact synthetic package -> explicit nutrition/state/review -> proposal -> confirm save -> own dish",
+    "actual_domain": "Service with MemoryStore; outbound network and models disabled",
+    "observations": [
+      "5 SVG tab icons visible, current tab marked page, no horizontal overflow",
+      "Products contains stock/product capture; cooking controls remain under Recipes",
+      "Saved product passes into own dish exactly once with correct ready state and blank grams",
+      "Existing own dish selection retained; no auto-save or real health data"
+    ],
+    "screenshots": [
+      "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional/mobile/FINAL_BUILDER_440.jpg",
+      "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional/mobile/FINAL_PRODUCTS_390.jpg",
+      "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional/mobile/FINAL_PRODUCTS_440.jpg",
+      "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional/mobile/FINAL_RECIPES_390.jpg",
+      "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional/mobile/FINAL_TODAY_390.jpg"
+    ],
+    "cleanup": "owned preview tab1973326186 closed and absence verified; viewport reset; disposable CUA reset acknowledged"
+  },
+  "source_files": {
+    "cloudflare-saas/public/index.html": "2dc8d309a839996a7f3502e5489ed4a9a2b4d8fa7ad48ca39aa64fc7a1573316",
+    "cloudflare-saas/public/app.css": "effca984b999b8d040acd282c9ef05b5ec8a064bb393678f43ddb6ff936f8df4",
+    "cloudflare-saas/public/app.js": "0d5ec32aa4369454c569a27b822f7ec64acb7422e22aac1204c43e07a2d89521",
+    "cloudflare-saas/public/shop-ui.js": "c75005d729f6635688e728ae4d2f7090ceb096c61b172153ccfc69b480456154",
+    "cloudflare-saas/public/kitchen-ui.js": "7d689e71eaeaa4785cba03fe4ace8c0efe12cb74f94ae380bdb807ceb96a7bf1",
+    "cloudflare-saas/public/own-dish.js": "3fcaeb56f3a281f57c9073e0cdf41202f94416375fa1e516206a718dcd884e96",
+    "cloudflare-saas/public/shop-scanner.js": "69eadc9a028e8548c931910ca97d75ff5501c2945039809f94b288053fdab705",
+    "cloudflare-saas/src/shop-lookup.mjs": "718734d94e24ad5db79cb5f90dc664759ba8d73d901ab7aab3415062ac2c196f",
+    "scripts/deploy_developer_native.py": "2f92cd3047cc09dc60db29b080b264a13cc4afcee5bfc174dcbfa4fcbe5c23ef",
+    "tests/test_developer_deploy_contract.py": "5a700242faee7c07007cad7bc5791a929f355152754884a82b12dd9876292d38"
+  },
+  "limits": [
+    "Full native C9 CI/new immutable runtime acceptance not yet performed",
+    "Actual hardware camera/Safari/voice/keyboard and physical iPhone acceptance pending",
+    "Synthetic fixture is not evidence of real OFF coverage or Azure extraction accuracy",
+    "No invented GI or ketosis; unknown remains unknown"
+  ],
+  "candidate_runtime_baseline": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7"
+}

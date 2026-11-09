@@ -1,0 +1,44 @@
+{
+  "issue": "AGR-306",
+  "created_at": "2026-11-09T13:29:47.278589+00:00",
+  "stage": "C6 source automatic read ordering and Russian OFF presentation",
+  "baseline": "0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8",
+  "source_archive_sha256": "c33d25d9cb722069d7ccb23e3a05ff87b34bfed0d49a59b74bb396f6e7b6d8be",
+  "files": {
+    "cloudflare-saas/public/app.js": "d784b95f04261bf1430afe77054963a1338b3111e5b4f6a8c2cf81a0e5f81de7",
+    "cloudflare-saas/public/kitchen-ui.js": "42e14c2d88389d4215ae318af3136a65a36e2d622f22bc817c35c809f5920dbe",
+    "cloudflare-saas/public/shop-ui.js": "e4ac2cc19a438555fc7f5782bd6f45a1d9455a90474714cca13b6a2b522ba7a2",
+    "cloudflare-saas/tests/kitchen.test.mjs": "82d860bc268827b614fded9210a619aabc05cdead160c65022a33ef175d7db10",
+    "cloudflare-saas/tests/shop-ui.test.mjs": "742e494aabc6c9e0f1277408bef081e9db0ac4bae4e33af23e000e006e0e94ef",
+    "cloudflare-saas/tests/static.test.mjs": "e381d8b99fcc110ff6cb5d448c6748020567cc72a99ccf37cfec94af36fa2283",
+    "cloudflare-saas/tests/tranquil-design.test.mjs": "fa2552996f6f7d238642a5d77f175a7bfe621c5c531f12fdac3467ae8b6619c2"
+  },
+  "observed_defect": "Actual three concurrent recipe-page automatic reads produced kitchen status200,foods409,recipes409; server single-user lock intentionally preserved. Pending debounce/in-flight reads also drained before new entry.",
+  "changes": [
+    "sequential bounded automatic page loading with route/account guards, inert and busy state",
+    "invalidate queued page lookups and await outstanding controller reads while preserving typed draft",
+    "Russian known OFF preview captions only; raw candidate and OCR caption parsing unchanged"
+  ],
+  "checks": {
+    "controller_app_Node": {
+      "passed": 43,
+      "performed_by": "shop_impl; unchanged accepted checks reused"
+    },
+    "shop_Node": {
+      "passed": 12,
+      "performed_by": "root after exact live fixture translation"
+    },
+    "syntax": "passed by source worker",
+    "diff_check": "passed"
+  },
+  "independent_reviews": {
+    "nutrition_review": "accepted final startup and debounce/inflight fixes",
+    "product_review": "accepted scoped OFF presentation translation"
+  },
+  "runtime_preimage": {
+    "acceptance_build": "924bc7d8-25c9-4c9c-82e5-2fdd0d4f1272",
+    "image_digest": "sha256:95efda5830c8ed9bc2f32a5f13a9a06fe3fb2be5f239404f755e521553badf52",
+    "independent_control": "AGR_306_C5_LIVE_CONTROL.json"
+  },
+  "status": "source accepted; requires real C6 immutable image/full CI/live frontend acceptance; physical iPhone still pending"
+}

@@ -1,0 +1,162 @@
+{
+  "task": "AGR-306-C12-server-candidate",
+  "stage": "completed",
+  "created_at": "2026-11-09T20:41:03.223925+00:00",
+  "authoritative_repo": "/workspace/scratch/bbdbdb895c38/keto-companion",
+  "candidate": "/workspace/scratch/bbdbdb895c38/keto-c12-candidate",
+  "test_copy": "/workspace/scratch/bbdbdb895c38/keto-c12-check",
+  "authoritative_head_at_handoff": "ce9fa715bec77e63298bd68faf59d0696876adc5",
+  "patch": {
+    "path": "/workspace/scratch/bbdbdb895c38/keto-c12.patch",
+    "sha256": "c02b865983777abbd3bdcd936a8dd1b396b68e607f265cbef00e76947deda44b",
+    "files": 7,
+    "insertions": 568,
+    "deletions": 51,
+    "apply_check": "passed against current authoritative tree; read-only git apply --check"
+  },
+  "source_files": [
+    {
+      "path": "service/app.py",
+      "base_sha256": "95d672862a7db91b8a384200a1d4418ad0bf8c05b9d7d6cccec22ba00a1b3f5b",
+      "candidate_sha256": "deffd63a0b1ecad92bd3e87f1ba5bb531dc6dd51fe54671600c1d780a2af0d77"
+    },
+    {
+      "path": "service/chat_actions.py",
+      "base_sha256": null,
+      "candidate_sha256": "8c0daa26f07f05fe59f4938f901f9f6b8405ec7232d87072b377db76d2dc64e8"
+    },
+    {
+      "path": "service/domain.py",
+      "base_sha256": "de2371e658aea53b33ad1fc230ce96f412170495e85913468364299516beaa97",
+      "candidate_sha256": "e3607060ab76042f03a94281bae8ee2894c61fadbf8e05c44ea7644e1cffdc1d"
+    },
+    {
+      "path": "service/intake.py",
+      "base_sha256": "0e46079a13bc13031899ac8bc0cdadce0dcfb803a7c88a55787ca415a43d536b",
+      "candidate_sha256": "ed64c209b67140b16cf723bde6275b838e1cc76f1f6f43c7858545b448278dea"
+    },
+    {
+      "path": "service/kitchen.py",
+      "base_sha256": "e9f4482b9108fd3e829d3912b4b611f402c0fa2b97ac14223f0bcc48edb6bae9",
+      "candidate_sha256": "cce691a2fdda64d6adf19e81d30ec321116fdc72db494829dc196941f37ae66e"
+    },
+    {
+      "path": "service/mobile.py",
+      "base_sha256": "c94b255937407c66596c5368b97ab3c9e618b66593b87f4a66eb5b398bb94615",
+      "candidate_sha256": "3b158d14b40528296859341aa380150fe5c5e261b2c0f504859ebb3ba1822451"
+    },
+    {
+      "path": "tests/test_chat_actions.py",
+      "base_sha256": null,
+      "candidate_sha256": "73c2d5bc49145dbf532e6552dbbd7576629466da87bc30cc9cc5336bab532112"
+    }
+  ],
+  "test_dependency_hashes": {
+    "library/skills/keto-companion/scripts/keto_core.py": "3ed80085a8f094707dc946c953ae6b8ce601c609df3b4667294558dff1db63b6",
+    "tests/test_intake.py": "82052279dc8492c4b29e032e572d8a72ccaf9f00608653f1332339a554f213ed"
+  },
+  "verification": {
+    "status": "passed",
+    "passed": 37,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 6.11,
+    "new_focused_tests": 37,
+    "cwd": "/workspace/scratch/bbdbdb895c38/keto-c12-check",
+    "interpreter": "/workspace/scratch/bbdbdb895c38/keto-companion/.venv/bin/python",
+    "command": "python -m pytest -q tests/test_chat_actions.py --disable-warnings --maxfail=4",
+    "scope": "Final candidate including both review fixes; earlier complete affected selection256/0 is retained separately."
+  },
+  "verification_history": [
+    {
+      "status": "blocked",
+      "finding": "Isolated test copy initially omitted required service/static mount directory; copied existing static fixture files, no source change."
+    },
+    {
+      "status": "failed",
+      "passed": 175,
+      "failed": 2,
+      "finding": "Isolated PDF tests could not locate runtime-fonts; copied existing test fonts to correct runtime-fonts path."
+    },
+    {
+      "status": "failed",
+      "passed": 25,
+      "failed": 1,
+      "finding": "New same-RK replay test accidentally generated a different serving spec; corrected test to regenerate the exact original spec."
+    },
+    {
+      "status": "passed",
+      "passed": 253,
+      "failed": 0,
+      "finding": "Expanded C12 and affected suites before latest C11 rebase."
+    },
+    {
+      "status": "passed",
+      "passed": 255,
+      "failed": 0,
+      "finding": "Rebased candidate preserves latest C11 allergy/delete previews and fixed bridge validation map."
+    },
+    {
+      "status": "failed",
+      "passed": 31,
+      "failed": 1,
+      "finding": "Additional normal model-routed kitchen test exposed existing model_called short-circuit/extra override defect; fixed unconditional pop before OR."
+    },
+    {
+      "status": "passed",
+      "passed": 256,
+      "failed": 0,
+      "finding": "Final complete affected selection including paid-call regression."
+    },
+    {
+      "status": "passed",
+      "passed": 37,
+      "failed": 0,
+      "finding": "Final review fixes: exact/partial catalogue explanation survives reload and resolver, bounded metadata excludes calculation, empty recipe questions restore safe navigation in normal and fast paths."
+    }
+  ],
+  "contracts_preserved": [
+    "Consent and ownership",
+    "Explicit proposal apply and expected_revision CAS",
+    "Medical screening and deterministic arithmetic",
+    "60 messages per topic, 200000-byte topic history budget, 1400000-byte document limit",
+    "Pending safety proposals survive topic history clear/delete under existing stale/CAS behavior",
+    "Legacy ordinary intake without optional origin/generation remains valid"
+  ],
+  "implemented": [
+    "Stable assistant/user message IDs and 0..3 compact typed refs shared across both chat append paths",
+    "Read-only owned keto_kitchen chat_action resolver",
+    "Availability projection and compact restored card refs",
+    "Hunger choices without model or generation",
+    "Generation identity on generated cards; optional intake generation binding",
+    "Message origin protected through intake preview/prepare/apply",
+    "Topic epoch and pending request continuity; preserve newer active topic selection",
+    "Cross-dispatch plain-text replay compatibility including old fast hashes",
+    "Correct paid model_called metadata when intent model runs and kitchen uses free templates",
+    "Bounded catalogue fit_note/match provenance persists on actions and returns on resolved recipe without stored calculation",
+    "Explicit empty recipes plus questions restores navigate-to-recipes action without generation"
+  ],
+  "limits": [
+    "No UI/browser run by this agent; root owns client integration and visual verification.",
+    "No full repository suite, deployment, remote mutation or generated-artifact writes.",
+    "Menu route actions open the current menu; full unaccepted historic plan payloads are not persisted in messages.",
+    "Draft unavailability is based on invalidation/eviction/replacement; no new TTL policy."
+  ],
+  "next_task": {
+    "id": "C12-client-integration-verification",
+    "owner": "root",
+    "action": "Apply reviewed patch, integrate the agreed message-action client contract and run browser plus complete release gates."
+  },
+  "updated_at": "2026-11-09T20:44:07.017208+00:00",
+  "previous_complete_affected_selection": {
+    "status": "passed",
+    "passed": 256,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 24.57,
+    "new_focused_tests": 32,
+    "cwd": "/workspace/scratch/bbdbdb895c38/keto-c12-check",
+    "interpreter": "/workspace/scratch/bbdbdb895c38/keto-companion/.venv/bin/python",
+    "command": "python -m pytest -q tests/test_chat_actions.py tests/test_service.py tests/test_kitchen.py tests/test_kitchen_parent.py tests/test_kitchen_release.py tests/test_kitchen_appliances.py tests/test_mobile.py tests/test_mobile_parent_review.py tests/test_intake.py tests/test_edge_bridge.py tests/test_own_dish.py --disable-warnings --maxfail=5"
+  }
+}

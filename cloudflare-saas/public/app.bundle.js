@@ -1,3 +1,1291 @@
+// cloudflare-saas/public/chat-actions.js
+var TYPES = /* @__PURE__ */ new Set(["navigate", "choose_meal_mode", "open_recipe", "open_intake", "review_proposal"]);
+var VIEWS = /* @__PURE__ */ new Set(["chat", "diary", "recipes", "products", "today", "setup", "targets", "knowledge", "memory", "reminders", "more"]);
+var MODES = /* @__PURE__ */ new Set(["pantry_only", "pantry_plus", "inspiration"]);
+var STATUS = { unavailable: "\u042D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E.", expired: "\u0421\u0440\u043E\u043A \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F \u0438\u0441\u0442\u0451\u043A.", completed: "\u0423\u0436\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E.", stale: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u0437\u0430\u043D\u043E\u0432\u043E." };
+function setupChatActions({ el: el2, call: call2, getState, epoch, getContext = () => null, refresh: refresh2, run: run2, notify: notify2, navigate, chooseMode, openRecipe: openRecipe2, openIntake, showProposal: showProposal2 }) {
+  let serial = 0, resolving = false;
+  function render(message) {
+    const wrapper = el2("article", "chat-message " + (message.role === "user" ? "user" : "assistant"));
+    if (message.id) wrapper.dataset.messageId = message.id;
+    wrapper.append(el2("div", "bubble " + (message.role === "user" ? "user" : "assistant"), message.text || ""));
+    if (message.role !== "assistant" || !message.id || !message.thread_id) return wrapper;
+    const actions = Array.isArray(message.actions) ? message.actions.filter((a2) => a2 && TYPES.has(a2.type) && typeof a2.id === "string" && typeof a2.label === "string").slice(0, 3) : [];
+    if (!actions.length) return wrapper;
+    const group = el2("div", "message-actions");
+    group.setAttribute("aria-label", "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u043F\u043E\u0441\u043B\u0435 \u043E\u0442\u0432\u0435\u0442\u0430");
+    const status = el2("p", "message-action-status");
+    status.setAttribute("role", "status");
+    for (const action of actions) {
+      const button = el2("button", "secondary", action.label);
+      button.type = "button";
+      button.dataset.actionId = action.id;
+      if (action.type === "open_recipe" && typeof action.fit_note === "string") button.append(el2("span", "message-action-note", action.fit_note));
+      button.disabled = action.status !== "available";
+      if (button.disabled) button.setAttribute("aria-description", action.reason || STATUS[action.status] || STATUS.unavailable);
+      button.onclick = () => run2(async () => {
+        if (resolving) return;
+        const before = getState(), thread = before?.active_thread || "main";
+        if (thread !== message.thread_id) {
+          notify2("\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0442\u0435\u043C\u0443 \u044D\u0442\u043E\u0433\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F.");
+          return;
+        }
+        const version2 = before.revision, stamp = epoch(), token = serial, context = getContext();
+        resolving = true;
+        for (const control of group.children) control.disabled = true;
+        status.textContent = "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u043C\u2026";
+        try {
+          const result = await call2("keto_kitchen", {
+            action: "chat_action",
+            thread_id: message.thread_id,
+            values: { message_id: message.id, action_id: action.id },
+            expected_revision: version2
+          });
+          if (token !== serial || stamp !== epoch() || context !== getContext() || (getState()?.active_thread || "main") !== thread) return;
+          if (getState().revision !== version2) {
+            status.textContent = "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041D\u0430\u0436\u043C\u0438\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.";
+            return;
+          }
+          if (result.message_id !== message.id || result.response_thread_id !== message.thread_id || result.action?.id !== action.id) {
+            status.textContent = "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.";
+            return;
+          }
+          const command = result.command;
+          if (!command) {
+            status.textContent = result.action?.reason || STATUS[result.action?.status] || STATUS.unavailable;
+            button.dataset.unavailable = "true";
+            return;
+          }
+          button.disabled = false;
+          button.focus?.({ preventScroll: true });
+          if (command.type !== action.type) throw Error("\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.");
+          if (command.type === "navigate" && VIEWS.has(command.view)) navigate(command.view);
+          else if (command.type === "choose_meal_mode" && MODES.has(command.mode)) chooseMode(command.mode);
+          else if (command.type === "open_recipe" && command.recipe?.recipe_id) openRecipe2(command.recipe, command.source);
+          else if (command.type === "open_intake" && command.source?.recipe_id) openIntake({ ...command.source, amount: command.suggested_amount });
+          else if (command.type === "review_proposal" && getState().pending?.some((p) => p.id === command.proposal_id)) showProposal2(command.proposal_id);
+          else throw Error("\u042D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E.");
+          status.textContent = "";
+        } catch (error) {
+          if (token === serial && stamp === epoch() && context === getContext()) {
+            status.textContent = error.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043E\u0442\u043A\u0440\u044B\u0442\u044C. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.";
+            if (refresh2) {
+              const retry = el2("button", "text-btn", "\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440");
+              retry.type = "button";
+              retry.onclick = () => run2(async () => {
+                retry.disabled = true;
+                try {
+                  await refresh2();
+                  if (token === serial && stamp === epoch()) status.textContent = "\u0420\u0430\u0437\u0433\u043E\u0432\u043E\u0440 \u043E\u0431\u043D\u043E\u0432\u043B\u0451\u043D. \u041D\u0430\u0436\u043C\u0438\u0442\u0435 \u043D\u0443\u0436\u043D\u043E\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.";
+                } finally {
+                  retry.disabled = false;
+                }
+              });
+              status.append(retry);
+            }
+          }
+        } finally {
+          if (token === serial && stamp === epoch()) {
+            resolving = false;
+            for (const control of group.children) {
+              const original = actions.find((a2) => a2.id === control.dataset.actionId);
+              control.disabled = original?.status !== "available" || control.dataset.unavailable === "true";
+            }
+          }
+        }
+      });
+      group.append(button);
+    }
+    const unavailable = actions.filter((a2) => a2.status !== "available");
+    if (unavailable.length === actions.length) status.textContent = unavailable[0].reason || STATUS[unavailable[0].status] || STATUS.unavailable;
+    wrapper.append(group, status);
+    return wrapper;
+  }
+  return { render, reset() {
+    serial++;
+    resolving = false;
+  } };
+}
+
+// cloudflare-saas/public/recipe-page-calls.js
+function createRecipePageCalls({ call: call2, epoch }) {
+  let tail = Promise.resolve();
+  const pending = /* @__PURE__ */ new Set();
+  function invoke(...args) {
+    const stamp = epoch();
+    const result = tail.catch(() => {
+    }).then(() => {
+      if (stamp !== epoch()) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
+      if (args[2]?.signal?.aborted) throw Object.assign(Error("\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E."), { name: "AbortError" });
+      return call2(...args);
+    });
+    tail = result;
+    pending.add(result);
+    result.then(() => pending.delete(result), () => pending.delete(result));
+    return result;
+  }
+  async function settle(current) {
+    while (pending.size) {
+      await Promise.allSettled([...pending]);
+      if (!current()) return false;
+    }
+    return current();
+  }
+  return { invoke, settle };
+}
+
+// cloudflare-saas/public/today-plan.js
+function localCalendarDate(date = /* @__PURE__ */ new Date()) {
+  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+}
+function renderTodayPlan({ plan, draft, root, empty, el: el2, formatDate: formatDate2, openRecipe: openRecipe2, acceptPlan, now = /* @__PURE__ */ new Date() }) {
+  const today = localCalendarDate(now), days = plan.days || [], todayDays = days.filter((d2) => d2.date === today), otherDays = days.filter((d2) => d2.date !== today);
+  empty.hidden = !draft && plan.status !== "stale_requires_recheck" && todayDays.some((d2) => d2.meals.length > 0);
+  root.replaceChildren(el2("h2", "", draft ? "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043C\u0435\u043D\u044E" : "\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E"));
+  if (plan.status === "stale_requires_recheck") root.append(el2("div", "notice danger", "\u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F: \u044D\u0442\u043E \u043C\u0435\u043D\u044E \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043F\u0435\u0440\u0435\u0441\u0447\u0451\u0442\u0430. \u041D\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u0430\u043A \u0430\u043A\u0442\u0443\u0430\u043B\u044C\u043D\u043E\u0435."));
+  function dayCard(day) {
+    const box = el2("article", "menu-day");
+    box.append(el2("h3", "", formatDate2(day.date)));
+    for (const meal of day.meals) {
+      const part = el2("div", "meal");
+      part.append(el2("h3", "", meal.name_ru));
+      const b2 = el2("button", "text-btn", "\u0413\u0440\u0430\u043C\u043C\u043E\u0432\u043A\u0438 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435");
+      b2.addEventListener("click", () => openRecipe2(meal));
+      part.append(b2);
+      box.append(part);
+    }
+    return box;
+  }
+  for (const day of todayDays) root.append(dayCard(day));
+  if (otherDays.length) {
+    const details = el2("details", "panel");
+    details.append(el2("summary", "", "\u0414\u0440\u0443\u0433\u0438\u0435 \u0434\u043D\u0438 \u043F\u043B\u0430\u043D\u0430"), ...otherDays.map(dayCard));
+    root.append(details);
+  }
+  if (draft) {
+    const b2 = el2("button", "primary", "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E");
+    b2.addEventListener("click", acceptPlan);
+    root.append(b2);
+  }
+}
+
+// cloudflare-saas/public/media.js
+var RecorderController = class {
+  constructor({ mediaDevices, Recorder, onState, onAudio, clock = () => Date.now(), interval = (fn, ms) => globalThis.setInterval(fn, ms), clear = (id) => globalThis.clearInterval(id) }) {
+    Object.assign(this, { mediaDevices, Recorder, onState, onAudio, clock, interval, clear });
+    this.generation = 0;
+    this.mode = "idle";
+  }
+  emit(mode, message = "") {
+    this.mode = mode;
+    this.onState({ mode, message, seconds: Math.min(60, Math.floor((this.clock() - (this.started ?? this.clock())) / 1e3)) });
+  }
+  release() {
+    if (this.timer) this.clear(this.timer);
+    this.timer = null;
+    for (const track of this.stream?.getTracks() || []) {
+      track.onended = null;
+      track.stop();
+    }
+    this.stream = null;
+  }
+  async start() {
+    if (this.mode !== "idle") return;
+    const generation = ++this.generation;
+    this.emit("permission", "\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438.");
+    try {
+      if (!this.mediaDevices?.getUserMedia || !this.Recorder) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0434\u0438\u043A\u0442\u043E\u0432\u043A\u0443 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u044B \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442.");
+      const mime = ["audio/mp4", "audio/webm"].find((x) => this.Recorder.isTypeSupported(x));
+      if (!mime) throw Error("\u042D\u0442\u043E\u0442 \u0431\u0440\u0430\u0443\u0437\u0435\u0440 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u044C MP4/WebM. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u0443.");
+      const stream = await this.mediaDevices.getUserMedia({ audio: true });
+      if (generation !== this.generation) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      this.stream = stream;
+      for (const track of stream.getTracks()) track.onended = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C.");
+      const recorder = new this.Recorder(stream, { mimeType: mime, audioBitsPerSecond: 64e3 });
+      this.recorder = recorder;
+      this.parts = [];
+      this.bytes = 0;
+      this.started = this.clock();
+      recorder.ondataavailable = (e) => {
+        if (generation !== this.generation) return;
+        if (e.data?.size) {
+          this.parts.push(e.data);
+          this.bytes += e.data.size;
+          if (this.bytes > 1e6) this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u043A\u043E\u0440\u043E\u0447\u0435.");
+        }
+      };
+      recorder.onerror = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
+      recorder.onstop = async () => {
+        this.release();
+        if (generation !== this.generation) return;
+        try {
+          const blob = new Blob(this.parts, { type: mime });
+          this.parts = [];
+          if (!blob.size) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0443\u0441\u0442\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
+          if (blob.size > 1e6) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411.");
+          this.abort = new AbortController();
+          this.emit("recognizing", "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u044E\u2026 \u041C\u043E\u0436\u043D\u043E \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.");
+          const text = await this.onAudio(blob, mime, this.abort.signal);
+          if (generation !== this.generation) return;
+          this.emit("idle", "\u0422\u0435\u043A\u0441\u0442 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C\xBB.");
+        } catch (e) {
+          if (generation === this.generation) this.emit("idle", e.name === "AbortError" ? "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u0432\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E." : e.message);
+        } finally {
+          this.parts = [];
+        }
+      };
+      recorder.start(250);
+      this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
+      this.timer = this.interval(() => {
+        this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
+        if (this.clock() - this.started >= 6e4) this.stop();
+      }, 250);
+    } catch (e) {
+      this.release();
+      if (generation === this.generation) this.emit("idle", e.name === "NotAllowedError" ? "\u041D\u0435\u0442 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u043D\u0430 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0435\u0433\u043E \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0441\u0430\u0439\u0442\u0430 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0442\u0435\u043A\u0441\u0442." : e.message);
+    }
+  }
+  stop() {
+    if (this.mode === "recording" && this.recorder?.state === "recording") {
+      this.recorder.stop();
+      this.release();
+    }
+  }
+  cancel(message = "\u0417\u0430\u043F\u0438\u0441\u044C \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430.") {
+    this.generation++;
+    this.abort?.abort();
+    if (this.recorder?.state === "recording") this.recorder.stop();
+    this.release();
+    this.parts = [];
+    this.emit("idle", message);
+  }
+};
+async function blobBase64(blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let text = "";
+  for (const b2 of bytes) text += String.fromCharCode(b2);
+  return btoa(text);
+}
+async function prepareImage(file, { bitmap = globalThis.createImageBitmap, document: document2 = globalThis.document, URL: URL2 = globalThis.URL, Image = globalThis.Image } = {}) {
+  if (!file || !file.type?.startsWith("image/") || file.size > 12e6) throw Error("\u041D\u0443\u0436\u043D\u043E \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0434\u043E 12 \u041C\u0411.");
+  let source, url;
+  try {
+    if (bitmap) source = await bitmap(file);
+    else {
+      url = URL2.createObjectURL(file);
+      source = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+    const width = source.width || source.naturalWidth, height = source.height || source.naturalHeight;
+    if (!width || !height || width * height > 24e6) throw Error("\u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0435.");
+    const canvas = document2.createElement("canvas");
+    let scale = Math.min(1, 1024 / Math.max(width, height));
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
+    const result = canvas.toDataURL("image/jpeg", 0.78);
+    if (result.length > 13e5) throw Error("\u041F\u043E\u0441\u043B\u0435 \u0441\u0436\u0430\u0442\u0438\u044F \u0444\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043C\u0435\u043D\u044C\u0448\u0438\u0439 \u0441\u043D\u0438\u043C\u043E\u043A.");
+    return result;
+  } catch (e) {
+    throw Error(e.message?.includes("\u041C\u0411") ? e.message : "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u0444\u043E\u0442\u043E. \u0414\u043B\u044F HEIC \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u044D\u043A\u0441\u043F\u043E\u0440\u0442 \u0432 JPEG/PNG \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
+  } finally {
+    source?.close?.();
+    if (url) URL2.revokeObjectURL(url);
+  }
+}
+function setupChatImages({ root, $: $3, prepare = prepareImage, link, epoch, setImage, notify: notify2, openDialog, closeDialog }) {
+  let generation = 0;
+  const current = (g, e) => g === generation && e === epoch();
+  function closeLink(history2 = true) {
+    const d2 = $3("image-link-details");
+    if (history2 && d2.open && closeDialog) {
+      closeDialog();
+      return;
+    }
+    if (typeof d2.close === "function") {
+      if (d2.open) d2.close();
+    } else d2.open = false;
+  }
+  function openLink() {
+    if (openDialog) {
+      openDialog("image", "image-link-url");
+      return;
+    }
+    const d2 = $3("image-link-details");
+    if (typeof d2.showModal === "function") {
+      if (!d2.open) d2.showModal();
+    } else d2.open = true;
+    $3("image-link-url").focus();
+  }
+  function reset() {
+    generation++;
+    closeLink(false);
+    $3("image-link-load").disabled = false;
+    setImage(null);
+    $3("message").required = true;
+    $3("photo-preview").hidden = true;
+    $3("photo-preview-image").removeAttribute("src");
+    $3("photo").value = "";
+    $3("photo-status").textContent = "";
+    $3("image-link-url").value = "";
+    $3("image-drop-zone").classList.remove("dragging");
+  }
+  function display(value) {
+    setImage(value);
+    $3("message").required = false;
+    $3("photo-preview-image").src = value;
+    $3("photo-preview").hidden = false;
+    $3("photo-status").textContent = "\u0424\u043E\u0442\u043E \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E. \u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0441 \u0432\u0430\u0448\u0438\u043C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435\u043C.";
+  }
+  async function attach(file) {
+    const g = ++generation, e = epoch();
+    try {
+      const value = await prepare(file);
+      if (current(g, e)) display(value);
+    } catch (error) {
+      if (current(g, e)) notify2(error.message);
+    }
+  }
+  function first(files) {
+    const images = [...files].filter((f) => f.type?.startsWith("image/"));
+    if (images.length) {
+      if (images.length > 1) notify2("\u0417\u0430 \u043E\u0434\u043D\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u043E\u0434\u043D\u043E \u0444\u043E\u0442\u043E. \u0412\u044B\u0431\u0440\u0430\u043D\u043E \u043F\u0435\u0440\u0432\u043E\u0435.");
+      void attach(images[0]);
+      return true;
+    }
+    if (files.length) notify2("\u041D\u0443\u0436\u0435\u043D \u0444\u0430\u0439\u043B \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F. \u0421\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u043C\u043E\u0436\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0442\u0435\u043A\u0441\u0442\u043E\u043C \u0438\u043B\u0438 \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442\u043E\u043C.");
+    return false;
+  }
+  function offerUrl(value) {
+    const url = String(value || "").split("\n").find((x) => x.trim() && !x.startsWith("#"));
+    if (!url) return;
+    try {
+      if (new URL(url).protocol !== "https:") throw Error();
+      $3("image-link-url").value = url;
+      openLink();
+      notify2("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u0441\u044B\u043B\u043A\u0443 \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0444\u043E\u0442\u043E \u043F\u043E \u0441\u0441\u044B\u043B\u043A\u0435\xBB.");
+    } catch {
+      notify2("\u041D\u0443\u0436\u043D\u0430 \u043F\u0440\u044F\u043C\u0430\u044F \u043F\u0443\u0431\u043B\u0438\u0447\u043D\u0430\u044F HTTPS-\u0441\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435.");
+    }
+  }
+  $3("photo").onchange = (e) => first(e.target.files || []);
+  $3("photo-remove").onclick = reset;
+  root.addEventListener("paste", (e) => {
+    const files = [...e.clipboardData?.items || []].filter((x) => x.kind === "file" && x.type.startsWith("image/")).map((x) => x.getAsFile()).filter(Boolean);
+    if (!files.length) {
+      const text2 = (e.clipboardData?.getData("text/plain") || "").trim();
+      if (/^https:\/\/[^\s]+$/i.test(text2) && (/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(text2) || /^https:\/\/(?:images\.unsplash\.com|images\.pexels\.com|upload\.wikimedia\.org)\//i.test(text2))) offerUrl(text2);
+      return;
+    }
+    const text = e.clipboardData?.getData("text/plain");
+    if (!text) e.preventDefault();
+    first(files);
+  });
+  const zone = $3("image-drop-zone");
+  zone.onclick = () => $3("photo").click();
+  zone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      $3("photo").click();
+    }
+  });
+  const relevant = (e) => [...e.dataTransfer?.types || []].some((t) => ["Files", "text/uri-list"].includes(t));
+  root.addEventListener("dragover", (e) => {
+    if (relevant(e)) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      zone.classList.add("dragging");
+    }
+  });
+  root.addEventListener("dragleave", (e) => {
+    if (!root.contains(e.relatedTarget)) zone.classList.remove("dragging");
+  });
+  root.addEventListener("drop", (e) => {
+    if (!relevant(e)) return;
+    e.preventDefault();
+    zone.classList.remove("dragging");
+    if (!first(e.dataTransfer.files || [])) offerUrl(e.dataTransfer.getData("text/uri-list"));
+  });
+  $3("image-link-open").onclick = openLink;
+  $3("image-link-close").onclick = () => {
+    generation++;
+    closeLink();
+    $3("image-link-load").disabled = false;
+  };
+  $3("image-link-details").addEventListener("cancel", (e) => {
+    generation++;
+    $3("image-link-load").disabled = false;
+    if (closeDialog) {
+      e.preventDefault();
+      closeDialog();
+    }
+  });
+  $3("image-link-load").onclick = async () => {
+    const g = ++generation, e = epoch(), url = $3("image-link-url").value;
+    $3("image-link-load").disabled = true;
+    try {
+      const value = await link(url);
+      if (current(g, e)) {
+        display(value);
+        closeLink();
+      }
+    } catch (error) {
+      if (current(g, e)) notify2(error.message);
+    } finally {
+      if (current(g, e)) $3("image-link-load").disabled = false;
+    }
+  };
+  return { reset, attach, offerUrl, invalidate() {
+    generation++;
+  } };
+}
+
+// cloudflare-saas/public/shop-scanner.js
+var libraryPromise;
+function loadScanner() {
+  if (globalThis.Quagga) return Promise.resolve(globalThis.Quagga);
+  if (!libraryPromise) libraryPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "/quagga-1.13.0.min.js";
+    script.onload = () => globalThis.Quagga ? resolve(globalThis.Quagga) : reject(Error("scanner unavailable"));
+    script.onerror = () => reject(Error("scanner unavailable"));
+    document.head.append(script);
+  }).catch((e) => {
+    libraryPromise = null;
+    throw e;
+  });
+  return libraryPromise;
+}
+function validScanCode(s2) {
+  if (typeof s2 !== "string" || !/^\d+$/.test(s2) || ![8, 12, 13].includes(s2.length)) return false;
+  let sum = 0;
+  for (let i = s2.length - 2, j2 = 0; i >= 0; i--, j2++) sum += Number(s2[i]) * (j2 % 2 ? 1 : 3);
+  return (10 - sum % 10) % 10 === Number(s2.at(-1));
+}
+function createScanner({ video, load = loadScanner, getMedia = (constraints) => navigator.mediaDevices.getUserMedia(constraints), replaceVideo = (old) => {
+  const fresh = old.cloneNode(false);
+  old.replaceWith(fresh);
+  return fresh;
+}, capture = (preview) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = preview.videoWidth;
+  canvas.height = preview.videoHeight;
+  if (!canvas.width || !canvas.height) return null;
+  canvas.getContext("2d").drawImage(preview, 0, 0);
+  return canvas.toDataURL("image/jpeg", 0.85);
+}, schedule = (fn, ms) => setTimeout(fn, ms), cancelTimer = (id) => clearTimeout(id), onState = () => {
+}, onCode = () => {
+} }) {
+  let token = 0, stream = null, active = false, timer = null, flight = Promise.resolve();
+  function stop() {
+    token++;
+    active = false;
+    if (timer !== null) cancelTimer(timer);
+    timer = null;
+    const s2 = stream;
+    stream = null;
+    if (s2) for (const track of s2.getTracks()) track.stop();
+    video.srcObject = null;
+    video.hidden = true;
+  }
+  async function start2() {
+    stop();
+    const id = token;
+    active = true;
+    onState("opening");
+    try {
+      video = replaceVideo(video);
+      const preview = video;
+      preview.hidden = false;
+      const lib = await load();
+      if (id !== token) return;
+      const acquired = await getMedia({ audio: false, video: { facingMode: "environment" } });
+      if (id !== token) {
+        for (const t of acquired.getTracks()) t.stop();
+        return;
+      }
+      stream = acquired;
+      for (const track of acquired.getTracks()) track.addEventListener?.("ended", () => {
+        if (id === token) {
+          stop();
+          onState("error");
+        }
+      }, { once: true });
+      preview.srcObject = acquired;
+      await preview.play();
+      if (id !== token) return;
+      onState("scanning");
+      async function scan() {
+        try {
+          await flight.catch(() => {
+          });
+          if (id !== token || !active) return;
+          const src = capture(preview);
+          if (src) {
+            const work = Promise.resolve().then(() => lib.decodeSingle({ src, numOfWorkers: 0, locate: true, decoder: { readers: ["ean_reader", "ean_8_reader", "upc_reader"] } }));
+            flight = work;
+            const result = await work;
+            if (id !== token || !active) return;
+            const code = result?.codeResult?.code;
+            if (validScanCode(code)) {
+              stop();
+              onCode(code);
+              return;
+            }
+          }
+          if (id === token && active) timer = schedule(() => {
+            timer = null;
+            scan();
+          }, 500);
+        } catch (e) {
+          if (id === token) {
+            stop();
+            onState("error");
+          }
+        }
+      }
+      scan();
+    } catch (e) {
+      if (id !== token) return;
+      stop();
+      onState(e?.name === "NotAllowedError" || e?.name === "SecurityError" ? "denied" : "error");
+    }
+  }
+  return { start: start2, stop };
+}
+
+// cloudflare-saas/public/shop-ui.js
+function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2, run: run2, epoch, allergens, prepare = prepareImage, scannerFactory = createScanner, onPantryPreview = () => {
+}, onPantryReset = () => {
+}, onOwnFood = () => {
+}, setView: setView2 = () => {
+}, openIntake }) {
+  const root = $3("shop-root");
+  let image2 = null, generation = 0, pending = null, saved = null, source = null, abort = null, ready = true, preparing = false, ownHint = null, pantryPending = null, pantryBusy = false;
+  root.innerHTML = `<details class="panel"><summary>\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</summary><p>\u041D\u0430\u0439\u0434\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0438\u043B\u0438 \u0441\u043D\u0438\u043C\u0438\u0442\u0435 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443. \u041F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439.</p><div id="shop-search-stage" hidden><form id="shop-search-form"><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0431\u0440\u0435\u043D\u0434<input id="shop-query" minlength="2" maxlength="80" required></label><label class="check"><input id="shop-wide" type="checkbox"> \u0418\u0441\u043A\u0430\u0442\u044C \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C</label><button type="submit">\u041D\u0430\u0439\u0442\u0438 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443</button></form><p class="muted">\u041F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E \u0438\u0449\u0435\u043C \u0437\u0430\u043F\u0438\u0441\u0438 \u0434\u043B\u044F \u0420\u043E\u0441\u0441\u0438\u0438 \u0438 \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438. \u0423\u043A\u0430\u0437\u0430\u043D\u043D\u0430\u044F \u0441\u0442\u0440\u0430\u043D\u0430 \u043D\u0435 \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u0440\u0443\u0435\u0442 \u043D\u0430\u043B\u0438\u0447\u0438\u0435 \u0432 \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0435.</p><div id="shop-search-results" aria-live="polite"></div></div><div id="shop-methods" class="shop-methods"><button id="shop-name-method" type="button">\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044E</button><button id="shop-scan" type="button">\u0421\u043A\u0430\u043D\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434</button><button id="shop-barcode-method" type="button">\u0412\u0432\u0435\u0441\u0442\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434</button><button id="shop-photo-method" type="button">\u0424\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438</button><button id="shop-manual" type="button">\u0412\u0432\u0435\u0441\u0442\u0438 \u0432\u0440\u0443\u0447\u043D\u0443\u044E</button></div><button id="shop-other-method" class="secondary" type="button" hidden>\u0414\u0440\u0443\u0433\u043E\u0439 \u0441\u043F\u043E\u0441\u043E\u0431</button><div id="shop-scanner" hidden><video id="shop-video" muted playsinline></video><button id="shop-stop-scan" type="button">\u0417\u0430\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u043C\u0435\u0440\u0443</button></div><div id="shop-photo-stage" hidden><div class="shop-photo-actions"><label class="secondary photo-button shop-file-label">\u0421\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443<input id="shop-camera" type="file" accept="image/*" capture="environment"></label><label class="secondary photo-button shop-file-label">\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0444\u043E\u0442\u043E<input id="shop-photo" type="file" accept="image/*"></label></div><img id="shop-preview" alt="\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438" hidden style="max-width:100%;max-height:240px"><button id="shop-read" type="button" disabled>\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443</button><button id="shop-cancel" type="button" hidden>\u041E\u0442\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0436\u0438\u0434\u0430\u043D\u0438\u0435</button></div><div id="shop-barcode-stage" hidden><label>\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434<input id="shop-barcode" inputmode="numeric" maxlength="14"></label><button id="shop-find" type="button">\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443</button></div><p id="shop-status" role="status"></p><div id="shop-candidate"></div><form id="shop-form" hidden><h3>\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442</h3><p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u043A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u043E \u043D\u0430 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443. \u0414\u043B\u044F 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438 \u043D\u0443\u0436\u043D\u0430 \u044F\u0432\u043D\u043E \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u043C\u0430\u0441\u0441\u0430 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u0435 \u043E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u043F\u0443\u0441\u0442\u044B\u043C.</p><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435<select name="state" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435</option><option value="ready_to_eat">\u0413\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E</option><option value="raw">\u0421\u044B\u0440\u043E\u0439</option><option value="dry">\u0421\u0443\u0445\u043E\u0439</option><option value="cooked">\u0413\u043E\u0442\u043E\u0432\u044B\u0439</option><option value="canned">\u041A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439</option><option value="ready_to_cook">\u0414\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F</option></select></label><label>\u041E\u0441\u043D\u043E\u0432\u0430 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439<select name="unit_basis" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443</option><option value="per100g">\u041D\u0430 100 \u0433</option><option value="per100ml">\u041D\u0430 100 \u043C\u043B</option><option value="perserving">\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E</option></select></label><label>\u041C\u0430\u0441\u0441\u0430 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438, \u0433 (\u0435\u0441\u043B\u0438 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430)<input name="basis_mass" inputmode="decimal"></label><label>\u042D\u043D\u0435\u0440\u0433\u0438\u044F, \u043A\u043A\u0430\u043B<input name="energy_kcal" inputmode="decimal"></label><label>\u0411\u0435\u043B\u043A\u0438, \u0433<input name="protein_g" inputmode="decimal"></label><label>\u0416\u0438\u0440\u044B, \u0433<input name="fat_g" inputmode="decimal"></label><label>\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433<input name="carb" inputmode="decimal"></label><label>\u041A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B<select name="basis"><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438</option><option value="unknown">\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E</option><option value="total_includes_fiber">\u0412\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443</option><option value="available_excludes_fiber">\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438</option></select></label><label>\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433<input name="fiber_g" inputmode="decimal"></label><details id="shop-allergen-review"><summary>\u0410\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443</summary><fieldset id="shop-allergens"><legend>\u041E\u0442\u043C\u0435\u0442\u044C\u0442\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438</legend></fieldset></details><label class="check"><input name="confirm" type="checkbox"> \u042F \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u043B(\u0430) \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043E\u0441\u043D\u043E\u0432\u0443, \u043C\u0430\u0441\u0441\u0443, \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</label><details id="shop-portion-options"><summary>\u041F\u043E\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u0443\u044E \u043F\u043E\u0440\u0446\u0438\u044E</summary><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0434\u043B\u044F \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0439 \u0435\u0434\u0438\u043D\u0438\u0446\u0435 (\u0433, \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0439)<input name="portion" inputmode="decimal"></label><button id="shop-portion" type="button">\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C</button><p id="shop-portion-result" role="status"></p></details><p>\u0413\u043B\u0438\u043A\u0435\u043C\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0438\u043D\u0434\u0435\u043A\u0441: \u043D\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445.</p><button id="shop-submit" type="submit">\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C</button></form><div id="shop-next" hidden><p id="shop-saved-name"></p><button id="shop-record" class="primary" type="button">\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435</button><details id="shop-next-options"><summary>\u0417\u0430\u043F\u0430\u0441\u044B \u0438 \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</summary><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0432 \u0437\u0430\u043F\u0430\u0441\u0430\u0445, \u0433<input id="shop-grams" inputmode="decimal"></label><button id="shop-pantry" type="button">\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0437\u0430\u043F\u0430\u0441\u044B</button><button id="shop-own" type="button">\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</button><button id="shop-suggest" type="button" hidden>\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button></details></div></details>`;
+  const form = $3("shop-form"), status = $3("shop-status"), preview = $3("shop-preview"), next = $3("shop-next");
+  const scanner = scannerFactory({ video: $3("shop-video"), onState(state2) {
+    status.textContent = { opening: "\u041E\u0436\u0438\u0434\u0430\u0435\u043C \u0434\u043E\u0441\u0442\u0443\u043F \u043A \u043A\u0430\u043C\u0435\u0440\u0435. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u043C\u0435\u0440\u0443 \u0438\u043B\u0438 \u0432\u0432\u0435\u0441\u0442\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.", scanning: "\u041D\u0430\u0432\u0435\u0434\u0438\u0442\u0435 \u043A\u0430\u043C\u0435\u0440\u0443 \u043D\u0430 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434.", denied: "\u041D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u0430 \u043A \u043A\u0430\u043C\u0435\u0440\u0435. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0434\u043E\u0441\u0442\u0443\u043F \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.", error: "\u041A\u0430\u043C\u0435\u0440\u0430 \u0438\u043B\u0438 \u0441\u043A\u0430\u043D\u0435\u0440 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B. \u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438\u043B\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438." }[state2];
+    if (state2 === "denied" || state2 === "error") $3("shop-scanner").hidden = true;
+  }, onCode(code) {
+    $3("shop-scanner").hidden = true;
+    $3("shop-barcode").value = code;
+    $3("shop-find").onclick();
+  } });
+  function stopScanner() {
+    scanner.stop();
+    $3("shop-scanner").hidden = true;
+  }
+  let searchToken = 0;
+  $3("shop-query").addEventListener("input", () => {
+    searchToken++;
+    $3("shop-search-results").replaceChildren();
+  });
+  $3("shop-wide").addEventListener("change", () => {
+    searchToken++;
+    $3("shop-search-results").replaceChildren();
+  });
+  $3("shop-search-form").onsubmit = (e) => {
+    e.preventDefault();
+    run2(async () => {
+      const token = ++searchToken, stamp = epoch(), query = $3("shop-query").value.trim(), wide = $3("shop-wide").checked, box = $3("shop-search-results");
+      box.replaceChildren(el2("p", "muted", "\u0418\u0449\u0435\u043C \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438\u2026"));
+      try {
+        const d2 = await api("/api/shop/search", "POST", { query, wide });
+        if (token !== searchToken || stamp !== epoch()) return;
+        box.replaceChildren();
+        if (!d2.hits.length) box.append(el2("p", "muted", "\u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041C\u043E\u0436\u043D\u043E \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u043F\u043E\u0438\u0441\u043A \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C, \u0441\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443 \u0438\u043B\u0438 \u0432\u0432\u0435\u0441\u0442\u0438 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E."));
+        for (const hit of d2.hits) {
+          const b2 = el2("button", "secondary", [hit.name, hit.brand, ...hit.countries.map((c2) => ({ "en:russia": "\u0420\u043E\u0441\u0441\u0438\u044F", "en:belarus": "\u0411\u0435\u043B\u0430\u0440\u0443\u0441\u044C" })[c2]).filter(Boolean)].filter(Boolean).join(" \xB7 "));
+          b2.type = "button";
+          b2.onclick = () => {
+            searchToken++;
+            $3("shop-barcode").value = hit.code;
+            $3("shop-find").onclick();
+          };
+          box.append(b2);
+        }
+        box.append(el2("p", "muted", "Open Food Facts \xB7 ODbL. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u0438 \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439."));
+      } catch (err) {
+        if (token === searchToken && stamp === epoch()) box.replaceChildren(el2("p", "muted", "\u041F\u043E\u0438\u0441\u043A \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D: " + err.message));
+      }
+    });
+  };
+  function leave() {
+    stopScanner();
+    searchToken++;
+    generation++;
+    const waiting = !$3("shop-cancel").hidden;
+    abort?.abort();
+    abort = null;
+    if (waiting) {
+      $3("shop-cancel").hidden = true;
+      $3("shop-read").disabled = !image2;
+      status.textContent = "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E. \u0417\u0430\u043F\u0440\u043E\u0441 \u043C\u043E\u0433 \u0431\u044B\u0442\u044C \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u0430\u043D; \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442\u0441\u044F. \u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435.";
+    }
+  }
+  function stage(name2) {
+    $3("shop-methods").hidden = Boolean(name2);
+    $3("shop-other-method").hidden = !name2;
+    $3("shop-search-stage").hidden = name2 !== "name";
+    $3("shop-barcode-stage").hidden = name2 !== "barcode" && name2 !== "scan";
+    $3("shop-photo-stage").hidden = name2 !== "photo";
+    form.hidden = !["manual", "review"].includes(name2);
+    $3("shop-candidate").hidden = name2 !== "review";
+    next.hidden = name2 !== "saved";
+  }
+  function method(name2) {
+    leave();
+    stage(name2);
+  }
+  $3("shop-other-method").onclick = () => {
+    method("");
+    status.textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043F\u043E\u0441\u043E\u0431. \u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435.";
+  };
+  stage("");
+  $3("shop-name-method").onclick = () => method("name");
+  $3("shop-barcode-method").onclick = () => method("barcode");
+  $3("shop-scan").onclick = () => {
+    method("scan");
+    $3("shop-scanner").hidden = false;
+    scanner.start();
+  };
+  $3("shop-stop-scan").onclick = () => {
+    stopScanner();
+    status.textContent = "\u041A\u0430\u043C\u0435\u0440\u0430 \u0437\u0430\u043A\u0440\u044B\u0442\u0430.";
+  };
+  $3("shop-photo-method").onclick = () => method("photo");
+  const panel = root.querySelector("details");
+  panel.addEventListener("toggle", () => {
+    if (!panel.open) stopScanner();
+  });
+  if (typeof document !== "undefined") document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopScanner();
+  });
+  for (const [id, label] of allergens) {
+    const l2 = el2("label", "check", label), i = el2("input");
+    i.type = "checkbox";
+    i.value = id;
+    l2.prepend(i);
+    $3("shop-allergens").append(l2);
+  }
+  const unresolvedLabels = { name: "\u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435", brand: "\u0431\u0440\u0435\u043D\u0434", barcode: "\u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434", basis: "\u043E\u0441\u043D\u043E\u0432\u0430 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439", serving_mass: "\u043C\u0430\u0441\u0441\u0430 \u043F\u043E\u0440\u0446\u0438\u0438", serving_unit: "\u0435\u0434\u0438\u043D\u0438\u0446\u0430 \u043F\u043E\u0440\u0446\u0438\u0438", nutrients: "\u043F\u0438\u0449\u0435\u0432\u044B\u0435 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F", carbohydrate_basis: "\u043E\u0441\u043D\u043E\u0432\u0430 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", carbohydrate_caption: "\u043F\u043E\u0434\u043F\u0438\u0441\u044C \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", ingredients_text: "\u0441\u043E\u0441\u0442\u0430\u0432", allergen_statement_text: "\u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u043E\u0431 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u0430\u0445", readability: "\u0447\u0438\u0442\u0430\u0435\u043C\u043E\u0441\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438", reshoot_hint: "\u043A\u0430\u0447\u0435\u0441\u0442\u0432\u043E \u0444\u043E\u0442\u043E" };
+  const unresolvedLabel = (key) => Object.hasOwn(unresolvedLabels, key) ? "\u0422\u0440\u0435\u0431\u0443\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438: " + unresolvedLabels[key] + "." : "\u0414\u0440\u0443\u0433\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438.";
+  const current = (g, e) => g === generation && e === epoch();
+  function setReady(value) {
+    ready = value;
+    $3("shop-submit").disabled = !value || preparing;
+  }
+  function clearCandidate() {
+    for (const id of ["shop-next-options", "shop-allergen-review", "shop-portion-options"]) $3(id).open = false;
+    pantryPending = null;
+    $3("shop-suggest").hidden = true;
+    onPantryReset();
+    ownHint?.remove();
+    ownHint = null;
+    source = null;
+    saved = null;
+    next.hidden = true;
+    $3("shop-saved-name").textContent = "";
+    $3("shop-grams").value = "";
+    $3("shop-candidate").replaceChildren();
+    $3("shop-portion-result").textContent = "";
+    for (const key of ["name", "state", "unit_basis", "basis_mass", "energy_kcal", "protein_g", "fat_g", "carb", "basis", "fiber_g", "portion"]) form.elements[key].value = "";
+    form.elements.confirm.checked = false;
+    for (const x of $3("shop-allergens").querySelectorAll("input")) x.checked = false;
+    setReady(false);
+  }
+  form.addEventListener("input", () => {
+    generation++;
+    if (saved) {
+      pantryPending = null;
+      $3("shop-suggest").hidden = true;
+      onPantryReset();
+      saved = null;
+      next.hidden = true;
+      $3("shop-saved-name").textContent = "";
+      ownHint?.remove();
+      ownHint = null;
+    }
+  });
+  $3("shop-manual").onclick = () => {
+    method("manual");
+    if (saved) clearCandidate();
+    setReady(true);
+    status.textContent = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0438\u0445 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435.";
+  };
+  async function select(file) {
+    stopScanner();
+    const g = ++generation, e = epoch();
+    abort?.abort();
+    image2 = null;
+    clearCandidate();
+    preview.hidden = true;
+    $3("shop-read").disabled = true;
+    if (!file) return;
+    const data = await prepare(file);
+    if (!current(g, e)) return;
+    image2 = data;
+    preview.src = data;
+    preview.hidden = false;
+    $3("shop-read").disabled = false;
+    status.textContent = "\u0424\u043E\u0442\u043E \u0433\u043E\u0442\u043E\u0432\u043E. \u0414\u043B\u044F \u0447\u0442\u0435\u043D\u0438\u044F \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \u043A\u043D\u043E\u043F\u043A\u0443.";
+  }
+  for (const id of ["shop-camera", "shop-photo"]) $3(id).onchange = () => run2(() => select($3(id).files?.[0]));
+  function nutrientLine(x) {
+    const off = source?.provider === "Open Food Facts", name2 = { Energy: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", Protein: "\u0411\u0435\u043B\u043A\u0438", Fat: "\u0416\u0438\u0440\u044B", Carbohydrates: "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B", Fiber: "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430" }[x.name] || x.name, unit = { kcal: "\u043A\u043A\u0430\u043B", g: "\u0433", ml: "\u043C\u043B" }[x.unit] || x.unit, column = off && x.column === "100 g/ml (provider; verify label)" ? "\u043D\u0430 100 \u0433 \u0438\u043B\u0438 100 \u043C\u043B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435" : x.column;
+    return `${name2}: ${x.value ?? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445"} ${unit ?? ""} (${column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`;
+  }
+  function show(c2) {
+    clearCandidate();
+    if (c2) stage("review");
+    else form.hidden = true;
+    source = c2?.provenance || null;
+    const host = $3("shop-candidate");
+    if (!c2) {
+      status.textContent = "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.";
+      return;
+    }
+    form.elements.confirm.checked = false;
+    for (const x of $3("shop-allergens").querySelectorAll("input")) x.checked = false;
+    if (c2.name) form.elements.name.value = c2.name;
+    $3("shop-barcode").value = typeof c2.barcode === "string" && /^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(c2.barcode) ? c2.barcode : "";
+    host.append(el2("h3", "", "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0434\u043B\u044F \u0441\u0432\u0435\u0440\u043A\u0438 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439"));
+    for (const line of [c2.name, c2.brand, c2.barcode ? "\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434: " + c2.barcode : null, "\u041E\u0441\u043D\u043E\u0432\u0430: " + ({ per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E", unknown: "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" }[c2.basis] || "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430"), ...c2.nutrients.map(nutrientLine), c2.ingredients_text, c2.allergen_statement_text, ...c2.unresolved_fields.map(unresolvedLabel), c2.reshoot_hint]) if (line) host.append(el2("p", "", line));
+    const original = el2("details");
+    original.append(el2("summary", "", "\u0418\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u043F\u043E\u0434\u043F\u0438\u0441\u0438 \u0438 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F"));
+    for (const x of c2.nutrients) original.append(el2("p", "", `${x.name}: ${x.value ?? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445"} ${x.unit ?? ""} (${x.column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`));
+    host.append(original);
+    const columns = [...new Set(c2.nutrients.map((x) => x.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"))];
+    function applyColumn(column) {
+      setReady(true);
+      const f = form.elements;
+      for (const key of ["energy_kcal", "protein_g", "fat_g", "carb", "fiber_g"]) f[key].value = "";
+      f.unit_basis.value = columns.length === 1 && ["per100g", "per100ml", "perserving"].includes(c2.basis) ? c2.basis : "";
+      f.basis_mass.value = columns.length === 1 && c2.serving_mass != null && c2.serving_unit === "g" && c2.basis === "perserving" ? String(c2.serving_mass) : "";
+      f.basis.value = "";
+      const keys = { energy_kcal: [], protein_g: [], fat_g: [], carb: [], fiber_g: [] };
+      for (const r of c2.nutrients.filter((x) => (x.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430") === column)) {
+        const n = (r.name || "").toLowerCase().trim(), u2 = (r.unit || "").toLowerCase().trim();
+        let key = null;
+        if (/^(energy|energy kcal|энергия|энергетическая ценность)$/.test(n) && ["kcal", "\u043A\u043A\u0430\u043B"].includes(u2)) key = "energy_kcal";
+        else if (/^(protein|proteins|белки|белок)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "protein_g";
+        else if (/^(fat|fats|жиры|жир)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "fat_g";
+        else if (["g", "\u0433"].includes(u2) && (/^(carbohydrate|carbohydrates|углеводы)$/.test(n) || /^(total carbohydrates? \(includes fib(?:er|re)\))$/.test(n) && c2.carbohydrate_basis === "total_includes_fiber" && typeof c2.carbohydrate_caption === "string" && c2.carbohydrate_caption.toLowerCase().trim() === n)) key = "carb";
+        else if (/^(fiber|fibre|клетчатка|пищевые волокна)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "fiber_g";
+        if (key && typeof r.value === "number" && Number.isFinite(r.value) && r.value >= 0) keys[key].push(r.value);
+      }
+      for (const [key, values2] of Object.entries(keys)) if (values2.length === 1) f[key].value = String(values2[0]);
+      if (columns.length === 1 && keys.carb.length === 1 && c2.carbohydrate_basis === "total_includes_fiber" && typeof c2.carbohydrate_caption === "string") {
+        const caption = c2.carbohydrate_caption.toLowerCase().trim();
+        const matching = c2.nutrients.filter((r) => (r.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430") === column && (r.name || "").toLowerCase().trim() === caption && /^(total carbohydrates? \(includes fib(?:er|re)\))$/.test(caption) && ["g", "\u0433"].includes((r.unit || "").toLowerCase().trim()) && typeof r.value === "number" && Number.isFinite(r.value) && r.value >= 0 && r.value === keys.carb[0]);
+        if (matching.length === 1) f.basis.value = "total_includes_fiber";
+      }
+      status.textContent = "\u0427\u0438\u0441\u043B\u0430 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u044B \u0432 \u0438\u0441\u0445\u043E\u0434\u043D\u043E\u0439 \u043E\u0441\u043D\u043E\u0432\u0435. \u0421\u0432\u0435\u0440\u044C\u0442\u0435 \u043A\u0430\u0436\u0434\u044B\u0439 \u043F\u0443\u043D\u043A\u0442, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443 \u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435.";
+    }
+    if (columns.length === 1) applyColumn(columns[0]);
+    else if (columns.length > 1) {
+      host.append(el2("p", "", "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0434\u043D\u0443 \u043A\u043E\u043B\u043E\u043D\u043A\u0443 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u0434\u043B\u044F \u0444\u043E\u0440\u043C\u044B:"));
+      for (const column of columns) {
+        const b2 = el2("button", "secondary", "\u0418\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C: " + column);
+        b2.type = "button";
+        b2.onclick = () => applyColumn(column);
+        host.append(b2);
+      }
+    }
+    if (source) {
+      const p = el2("p", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: Open Food Facts, ODbL \xB7 "), a2 = el2("a", "", "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430");
+      a2.href = "https://world.openfoodfacts.org/product/" + c2.barcode;
+      a2.target = "_blank";
+      a2.rel = "noopener noreferrer";
+      p.append(a2);
+      host.append(p);
+    }
+    if (columns.length !== 1) status.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A; \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043D\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B.";
+  }
+  $3("shop-read").onclick = () => run2(async () => {
+    if (!image2) return;
+    const g = ++generation, e = epoch();
+    abort = new AbortController();
+    $3("shop-read").disabled = true;
+    $3("shop-cancel").hidden = false;
+    status.textContent = "\u0427\u0438\u0442\u0430\u044E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443\u2026";
+    try {
+      const d2 = await call2("keto_label_extract", { request_id: crypto.randomUUID().replaceAll("-", ""), image_data_url: image2 }, { signal: abort.signal });
+      if (current(g, e)) show(d2.review_candidate);
+    } finally {
+      if (current(g, e)) {
+        $3("shop-read").disabled = false;
+        $3("shop-cancel").hidden = true;
+      }
+    }
+  });
+  $3("shop-cancel").onclick = () => {
+    generation++;
+    abort?.abort();
+    abort = null;
+    $3("shop-cancel").hidden = true;
+    $3("shop-read").disabled = !image2;
+    status.textContent = "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E. \u0417\u0430\u043F\u0440\u043E\u0441 \u043C\u043E\u0433 \u0431\u044B\u0442\u044C \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u0430\u043D; \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442\u0441\u044F. \u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435.";
+  };
+  $3("shop-barcode").oninput = () => {
+    stopScanner();
+    generation++;
+    abort?.abort();
+    clearCandidate();
+  };
+  $3("shop-find").onclick = () => run2(async () => {
+    stopScanner();
+    const barcode = $3("shop-barcode").value.trim(), g = ++generation, e = epoch();
+    clearCandidate();
+    status.textContent = "\u0418\u0449\u0443\u2026";
+    try {
+      const d2 = await api("/api/shop/barcode", "POST", { barcode });
+      if (current(g, e)) show(d2.review_candidate);
+    } catch (err) {
+      if (current(g, e)) status.textContent = "\u041F\u043E\u0438\u0441\u043A \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.";
+      throw err;
+    }
+  });
+  function number2(v2, max) {
+    if (!v2.trim()) return null;
+    const x = v2.trim().replace(",", ".");
+    if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(x) || !Number.isFinite(Number(x)) || Number(x) > max) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0447\u0438\u0441\u043B\u043E.");
+    return Number(x);
+  }
+  $3("shop-portion").onclick = () => run2(async () => {
+    const f = form.elements, unit = f.unit_basis.value;
+    if (!["per100g", "per100ml", "perserving"].includes(unit)) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439.");
+    const amount = number2(f.portion.value, 1e4);
+    if (amount === null || amount <= 0) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E.");
+    const factor = amount / (unit === "perserving" ? 1 : 100), parts = [];
+    for (const [key, label] of [["energy_kcal", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0431\u0435\u043B\u043A\u0438, \u0433"], ["fat_g", "\u0436\u0438\u0440\u044B, \u0433"], ["carb", "\u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433"], ["fiber_g", "\u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433"]]) {
+      const v2 = number2(f[key].value, 1e4);
+      parts.push(label + ": " + (v2 === null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(v2 * factor)));
+    }
+    $3("shop-portion-result").textContent = parts.join(" \xB7 ") + "; \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u043A\u0430\u043A \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435.";
+  });
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    run2(async () => {
+      if (!ready) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043A\u043E\u043B\u043E\u043D\u043A\u0443 \u0438\u043B\u0438 \u0432\u0432\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.");
+      if (preparing || pending) throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0438\u043B\u0438 \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430.");
+      const f = form.elements;
+      if (!f.confirm.checked || !f.name.value.trim() || !f.state.value) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B.");
+      const unit = f.unit_basis.value;
+      if (!["per100g", "per100ml", "perserving"].includes(unit)) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439.");
+      const mass = unit === "per100g" ? 100 : number2(f.basis_mass.value, 1e4);
+      if (mass === null || mass <= 0) throw Error("\u0414\u043B\u044F 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445.");
+      const scale = (v2) => v2 === null ? null : v2 * 100 / mass;
+      const declared_label = { basis: unit, mass_g: mass, energy_kcal: number2(f.energy_kcal.value, 1e4), protein_g: number2(f.protein_g.value, 1e4), fat_g: number2(f.fat_g.value, 1e4), carbohydrate_g: number2(f.carb.value, 1e4), fiber_g: number2(f.fiber_g.value, 1e4), carbohydrate_basis: f.basis.value };
+      const id = "U" + crypto.randomUUID().replaceAll("-", ""), carb = scale(number2(f.carb.value, 1e4));
+      let basis = f.basis.value;
+      if (carb !== null && !["total_includes_fiber", "available_excludes_fiber", "unknown"].includes(basis)) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435, \u043A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0438\u043B\u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \xAB\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\xBB.");
+      if (carb === null && !basis) basis = "unknown";
+      declared_label.carbohydrate_basis = basis;
+      const values2 = { energy_kcal: scale(number2(f.energy_kcal.value, 1e4)), protein_g: scale(number2(f.protein_g.value, 1e4)), fat_g: scale(number2(f.fat_g.value, 1e4)), carbohydrate_total_g: basis === "total_includes_fiber" ? carb : null, fiber_g: scale(number2(f.fiber_g.value, 1e4)) };
+      const provider = source?.provider === "Open Food Facts" ? "open_food_facts" : "personal_label";
+      const provenance = { type: "shop_label", provider, barcode: provider === "open_food_facts" ? $3("shop-barcode").value.trim() : null, license: provider === "open_food_facts" ? "ODbL" : null };
+      const payload = { food_id: id, name_ru: f.name.value.trim(), state: f.state.value, allergens: [...$3("shop-allergens").querySelectorAll("input:checked")].map((x) => x.value), label_confirmed: true, source_ref: provider === "open_food_facts" ? source.url : "\u041B\u0438\u0447\u043D\u0430\u044F \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430", carb_basis: "total_includes_fiber", nutrient_status: Object.values(values2).some((x) => x === null) ? "partial" : "complete", provenance, recipe_eligible: false, declared_label, ...values2 };
+      if (carb !== null && basis !== "total_includes_fiber") payload.declared_carbohydrate = { value: carb, basis };
+      const submitted = { id, state: payload.state, name: payload.name_ru, generation };
+      preparing = true;
+      setReady(ready);
+      let d2;
+      try {
+        d2 = await call2("keto_propose_change", { event_type: "catalog.food.add", payload, expected_revision: getState().revision });
+      } finally {
+        preparing = false;
+        setReady(ready);
+      }
+      pending = { proposal: d2.proposal.id, ...submitted };
+      accept2(d2);
+      ;
+    });
+  };
+  $3("shop-pantry").onclick = () => run2(async () => {
+    if (!saved || pantryBusy || pantryPending) return;
+    const grams = number2($3("shop-grams").value, 3e4);
+    if (grams !== null && grams <= 0) throw Error("\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0434\u043E\u043B\u0436\u043D\u043E \u0431\u044B\u0442\u044C \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0443\u043B\u044F.");
+    const current2 = getState().kitchen?.pantry || [];
+    if (current2.some((x) => x.food_id === saved.id)) throw Error("\u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u0443\u0436\u0435 \u0432 \u0437\u0430\u043F\u0430\u0441\u0430\u0445; \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0432 \u0440\u0430\u0437\u0434\u0435\u043B\u0435 \u043A\u0443\u0445\u043D\u0438.");
+    const selected = { id: saved.id, name: saved.name, generation };
+    const items = [...current2.map(({ food_id, state: state2, grams: grams2 }) => ({ food_id, state: state2, grams: grams2 })), { food_id: selected.id, state: saved.state, grams }];
+    pantryBusy = true;
+    $3("shop-pantry").disabled = true;
+    let d2;
+    try {
+      d2 = await call2("keto_kitchen", { action: "pantry", values: { items }, expected_revision: getState().revision });
+    } finally {
+      pantryBusy = false;
+      $3("shop-pantry").disabled = false;
+    }
+    if (selected.generation !== generation || saved?.id !== selected.id) return;
+    pantryPending = { proposal: d2.proposal.id, ...selected };
+    accept2(d2);
+    ;
+  });
+  $3("shop-record").onclick = () => run2(() => {
+    if (saved) openIntake({ food_id: saved.id, name_ru: saved.name, amount: { value: 100, unit: "g" } });
+  });
+  $3("shop-suggest").onclick = () => {
+    if (saved && !$3("shop-suggest").hidden) onPantryPreview(saved.name);
+  };
+  $3("shop-own").onclick = () => {
+    if (!saved) return;
+    setView2("recipes");
+    const d2 = $3("own-dish-root").querySelector("details");
+    if (!d2) return;
+    ownHint?.remove();
+    onOwnFood(saved);
+    ownHint = el2("p", "notice", "\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0434\u043B\u044F \xAB" + saved.name + "\xBB.");
+    d2.prepend(ownHint);
+    d2.open = true;
+    d2.scrollIntoView({ block: "start" });
+  };
+  return { afterApplied(d2) {
+    if (pantryPending && d2?.receipt?.id === pantryPending.proposal && d2.receipt.type === "kitchen.pantry") {
+      const p = pantryPending;
+      pantryPending = null;
+      if (p.generation === generation && saved?.id === p.id && d2.state?.kitchen?.pantry?.some((i) => i.food_id === p.id)) {
+        $3("shop-suggest").hidden = false;
+        status.textContent = "\u0417\u0430\u043F\u0430\u0441\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B. \u041C\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u0431\u043B\u044E\u0434.";
+      }
+    } else if (pantryPending && d2?.state?.pending && !d2.state.pending.some((p) => p.id === pantryPending.proposal)) {
+      pantryPending = null;
+    }
+    if (pending && d2?.receipt?.id === pending.proposal && d2.receipt.type === "catalog.food.add") {
+      const p = pending;
+      pending = null;
+      if (p.generation === generation) {
+        saved = p;
+        $3("shop-next-options").open = false;
+        stage("saved");
+        $3("shop-candidate").replaceChildren();
+        next.hidden = false;
+        $3("shop-saved-name").textContent = "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + p.name;
+        $3("shop-pantry").textContent = "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0437\u0430\u043F\u0430\u0441\u044B";
+        status.textContent = "\u041B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D.";
+        next.scrollIntoView?.({ block: "nearest" });
+      }
+    } else if (pending && d2?.state?.pending && !d2.state.pending.some((p) => p.id === pending.proposal)) {
+      pending = null;
+    }
+  }, stopScanner, leave, reset() {
+    stage("");
+    for (const id of ["shop-next-options", "shop-allergen-review", "shop-portion-options"]) $3(id).open = false;
+    stopScanner();
+    searchToken++;
+    $3("shop-search-results").replaceChildren();
+    generation++;
+    pantryPending = null;
+    pantryBusy = false;
+    $3("shop-suggest").hidden = true;
+    onPantryReset();
+    ownHint?.remove();
+    ownHint = null;
+    abort?.abort();
+    image2 = null;
+    pending = null;
+    saved = null;
+    source = null;
+    preparing = false;
+    setReady(true);
+    preview.removeAttribute("src");
+    preview.hidden = true;
+    form.hidden = true;
+    $3("shop-photo-stage").hidden = true;
+    $3("shop-cancel").hidden = true;
+    $3("shop-read").disabled = true;
+    $3("shop-candidate").replaceChildren();
+    status.textContent = "";
+    $3("shop-portion-result").textContent = "";
+    next.hidden = true;
+    form.reset();
+    $3("shop-camera").value = "";
+    $3("shop-photo").value = "";
+    $3("shop-barcode").value = "";
+    $3("shop-query").value = "";
+    $3("shop-wide").checked = false;
+    $3("shop-search-stage").hidden = true;
+    $3("shop-barcode-stage").hidden = true;
+  } };
+}
+
+// cloudflare-saas/public/recipe-library.js
+function createRecipeLibrary({ call: call2, readFilters, render, clear = () => {
+}, status, more, epoch }) {
+  let token = 0, offset2 = 0, scope2 = null, retry = null;
+  const fingerprint = (x) => JSON.stringify(x);
+  function invalidate() {
+    token++;
+    retry = null;
+    more(false);
+  }
+  async function load(append = false) {
+    const filters = readFilters(), key = fingerprint(filters);
+    if (append && scope2 !== key) append = false;
+    const start2 = append ? offset2 : 0, serial = ++token, screen = epoch();
+    if (!append) {
+      clear();
+      scope2 = null;
+      offset2 = 0;
+    }
+    retry = { append, key };
+    status("\u0417\u0430\u0433\u0440\u0443\u0437\u043A\u0430\u2026");
+    more(false);
+    try {
+      const d2 = await call2({ ...filters, limit: 24, offset: start2 });
+      if (serial !== token || screen !== epoch() || fingerprint(readFilters()) !== key) return;
+      render(d2, append);
+      scope2 = key;
+      offset2 = start2 + d2.recipes.length;
+      retry = null;
+      status(`\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u043E ${offset2} \u0438\u0437 ${d2.total}. ${d2.note}`);
+      more(d2.has_more, false);
+    } catch (e) {
+      if (serial === token && screen === epoch() && fingerprint(readFilters()) === key) {
+        retry = { append, key };
+        status("\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442\u044B. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
+        more(true, true);
+      }
+      throw e;
+    }
+  }
+  function next() {
+    const key = fingerprint(readFilters());
+    return load(retry && retry.key === key ? retry.append : true);
+  }
+  return { load, next, invalidate };
+}
+
+// cloudflare-saas/public/own-dish.js
+function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, numberRu: numberRu2, openIntake }) {
+  const root = $3("own-dish-root");
+  root.innerHTML = `<details class="panel"><summary>\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</summary><form id="own-form"><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F<select name="category"><option value="main">\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E</option><option value="breakfast">\u0417\u0430\u0432\u0442\u0440\u0430\u043A</option><option value="side">\u0413\u0430\u0440\u043D\u0438\u0440</option><option value="component">\u041A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442</option></select></label><label>\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u043E \u0432\u0441\u0451\u043C \u0431\u043B\u044E\u0434\u0435<input name="servings" type="text" inputmode="decimal" value="1" required><span id="own-servings-error" role="alert"></span></label><label>\u0410\u043A\u0442\u0438\u0432\u043D\u043E\u0435 \u0432\u0440\u0435\u043C\u044F, \u043C\u0438\u043D\u0443\u0442<input name="minutes" type="number" min="1" max="360" value="15" required></label><label>\u041D\u0430\u0439\u0442\u0438 \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442<input name="search" type="search" autocomplete="off"></label><div id="own-results"></div><div id="own-rows"></div><label>\u0428\u0430\u0433\u0438<textarea name="steps" maxlength="5000" required></textarea></label><p id="own-form-error" role="alert"></p><button type="submit">\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button><button id="own-save" type="button" hidden>\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button></form><div id="own-preview" aria-live="polite"></div><div id="own-intake" hidden><label>\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E<select id="own-saved"></select></label><button id="own-detail" type="button">\u0421\u043E\u0441\u0442\u0430\u0432 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435</button><div id="own-detail-result" aria-live="polite"></div><button id="own-record" class="primary" type="button">\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435</button></div></details>`;
+  const form = $3("own-form");
+  let rows = [], id = null, stamp = "", saved = null, searchEpoch = 0, results = [], resultPage = 0;
+  function decimal(value, label, min, max, near) {
+    const raw = String(value ?? "").trim();
+    let error = "";
+    if (!/^(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(raw)) error = "\u0423\u043A\u0430\u0436\u0438\u0442\u0435 " + label + " \u0447\u0438\u0441\u043B\u043E\u043C, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 1,5.";
+    const n = Number(raw.replace(",", "."));
+    if (!error && (!Number.isFinite(n) || n < min || n > max)) error = "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 " + label + ": \u0434\u043E\u043F\u0443\u0441\u0442\u0438\u043C\u043E \u043E\u0442 " + min + " \u0434\u043E " + max + ".";
+    if (near) near.textContent = error;
+    if (error) throw Error(error);
+    return n;
+  }
+  function reset() {
+    rows = [];
+    id = null;
+    stamp = "";
+    saved = null;
+    searchEpoch++;
+    form.reset();
+    $3("own-results").replaceChildren();
+    $3("own-rows").replaceChildren();
+    $3("own-preview").replaceChildren();
+    $3("own-detail-result").replaceChildren();
+    $3("own-form-error").textContent = "";
+    $3("own-saved").replaceChildren();
+    $3("own-saved").value = "";
+    $3("own-save").hidden = true;
+    $3("own-intake").hidden = true;
+  }
+  function payload() {
+    return { recipe_id: id || (id = "R" + crypto.randomUUID().replaceAll("-", "")), name_ru: form.elements.namedItem("name").value, category: form.elements.namedItem("category").value, base_servings: decimal(form.elements.namedItem("servings").value, "\u0447\u0438\u0441\u043B\u043E \u043F\u043E\u0440\u0446\u0438\u0439", 0.1, 30, $3("own-servings-error")), active_minutes: decimal(form.elements.namedItem("minutes").value, "\u0432\u0440\u0435\u043C\u044F", 1, 360), ingredients: rows.map((x) => ({ food_id: x.food_id, state: x.state, grams_edible: decimal(x.grams, "\u0433\u0440\u0430\u043C\u043C\u044B \u0434\u043B\u044F \xAB" + x.name_ru + "\xBB", 1e-3, 5e3, x.error) })), steps_ru: form.elements.namedItem("steps").value };
+  }
+  function changed() {
+    stamp = "";
+    $3("own-save").hidden = true;
+    if ($3("own-preview").children.length) $3("own-preview").replaceChildren(el2("p", "muted", "\u0421\u043E\u0441\u0442\u0430\u0432 \u0438\u0437\u043C\u0435\u043D\u0451\u043D \u2014 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0439\u0442\u0435."));
+  }
+  function draw() {
+    const box = $3("own-rows");
+    box.replaceChildren();
+    for (const row of rows) {
+      const line = el2("div", "inline-form");
+      line.append(el2("span", "", row.name_ru + " \xB7 " + foodState2(row.state)));
+      const gram = el2("input");
+      gram.type = "text";
+      gram.inputMode = "decimal";
+      gram.required = true;
+      gram.value = row.grams;
+      gram.setAttribute("aria-label", "\u0413\u0440\u0430\u043C\u043C\u044B \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u043E\u0439 \u0447\u0430\u0441\u0442\u0438: " + row.name_ru);
+      gram.oninput = () => {
+        row.grams = gram.value;
+        changed();
+      };
+      const del = el2("button", "secondary", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C");
+      del.type = "button";
+      del.onclick = () => {
+        rows = rows.filter((x) => x !== row);
+        draw();
+        changed();
+      };
+      const error = el2("span", "");
+      error.setAttribute("role", "alert");
+      row.error = error;
+      line.append(gram, del, error);
+      box.append(line);
+    }
+  }
+  function preview(box, p) {
+    const batch = p.whole_batch;
+    box.append(el2("h4", "", batch.name_ru + " \xB7 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E"), el2("p", "muted", "\u0420\u0430\u0441\u0447\u0451\u0442 \u0434\u043B\u044F \u0444\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438 \u043F\u0438\u0442\u0430\u043D\u0438\u044F; \u044D\u0442\u043E \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E."));
+    if (p.servings != null) box.append(el2("p", "", `\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u043E \u0432\u0441\u0451\u043C \u0431\u043B\u044E\u0434\u0435: ${numberRu2(p.servings)}`));
+    for (const i of batch.ingredients) box.append(el2("p", "", i.name_ru + " \u2014 " + numberRu2(i.grams_edible) + " \u0433 \xB7 " + foodState2(i.state)));
+    if (p.steps_ru) box.append(el2("p", "", "\u041F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435: " + p.steps_ru));
+    for (const [title, c2] of [["\u0412\u0441\u0451 \u0431\u043B\u044E\u0434\u043E", batch], ["\u041E\u0434\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044F", p.per_portion]]) {
+      const fields = [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043E\u043A", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"], ["net_carbohydrate_g", "\u0420\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0435 \u0447\u0438\u0441\u0442\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"]];
+      box.append(el2("p", "", title + ": " + fields.map(([k, n, u2]) => {
+        const value = c2.nutrition[k], known = c2.coverage[k]?.known_subtotal;
+        return n + " " + (value == null ? "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E" + (known == null ? "" : ` (\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u0447\u0430\u0441\u0442\u044C ${numberRu2(known, k === "energy_kcal" ? 0 : 1)} ${u2})`) : `${numberRu2(value, k === "energy_kcal" ? 0 : 1)} ${u2}`);
+      }).join(" \xB7 ")));
+    }
+    if (p.issues?.some((x) => x.startsWith("allergen:"))) box.append(el2("p", "notice", "\u0412 \u0441\u043E\u0441\u0442\u0430\u0432\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u0438\u0437 \u0432\u0430\u0448\u0435\u0433\u043E \u043F\u0440\u043E\u0444\u0438\u043B\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0434 \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u0435\u043C."));
+  }
+  function drawResults() {
+    const box = $3("own-results");
+    box.replaceChildren(el2("p", "muted", `\u041D\u0430\u0439\u0434\u0435\u043D\u043E: ${results.length}`));
+    for (const f of results.slice(resultPage * 8, resultPage * 8 + 8)) {
+      const b2 = el2("button", "secondary", f.name_ru + " \xB7 " + foodState2(f.state));
+      b2.type = "button";
+      b2.onclick = () => {
+        if (!rows.some((r) => r.food_id === f.food_id)) rows.push({ ...f, grams: "" });
+        draw();
+        changed();
+        box.replaceChildren();
+        form.elements.namedItem("search").value = "";
+        searchEpoch++;
+      };
+      box.append(b2);
+    }
+    for (const [label, delta, show] of [["\u041D\u0430\u0437\u0430\u0434", -1, resultPage > 0], ["\u0415\u0449\u0451", 1, (resultPage + 1) * 8 < results.length]]) if (show) {
+      const b2 = el2("button", "secondary", label);
+      b2.type = "button";
+      b2.onclick = () => {
+        resultPage += delta;
+        drawResults();
+      };
+      box.append(b2);
+    }
+  }
+  form.addEventListener("input", changed);
+  form.elements.namedItem("search").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") e.preventDefault();
+  });
+  form.elements.namedItem("search").addEventListener("input", () => {
+    const query = form.elements.namedItem("search").value.trim(), token = ++searchEpoch, screen = epoch();
+    if (!query) {
+      $3("own-results").replaceChildren();
+      return;
+    }
+    run2(async () => {
+      const d2 = await call2("keto_kitchen", { action: "foods", query });
+      if (token !== searchEpoch || screen !== epoch()) return;
+      results = d2.foods;
+      resultPage = 0;
+      drawResults();
+    });
+  });
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    run2(async () => {
+      let data;
+      try {
+        data = payload();
+        $3("own-form-error").textContent = "";
+      } catch (e2) {
+        $3("own-form-error").textContent = e2.message;
+        return;
+      }
+      const key = JSON.stringify(data), screen = epoch();
+      const d2 = await call2("keto_kitchen", { action: "own_dish_calculate", values: data });
+      if (screen !== epoch()) return;
+      try {
+        if (key !== JSON.stringify(payload())) return;
+      } catch {
+        return;
+      }
+      stamp = key;
+      $3("own-preview").replaceChildren();
+      preview($3("own-preview"), d2.preview);
+      $3("own-save").hidden = false;
+    });
+  };
+  $3("own-save").onclick = () => run2(async () => {
+    const data = payload();
+    if (JSON.stringify(data) !== stamp) throw Error("\u041F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0439\u0442\u0435 \u0438\u0437\u043C\u0435\u043D\u0451\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E.");
+    const d2 = await call2("keto_kitchen", { action: "own_dish_save", values: data, expected_revision: getState().revision });
+    accept2(d2);
+  });
+  $3("own-detail").onclick = () => run2(async () => {
+    const rid = $3("own-saved").value, screen = epoch();
+    const d2 = await call2("keto_kitchen", { action: "own_dish_detail", values: { recipe_id: rid } });
+    if (screen !== epoch() || rid !== $3("own-saved").value) return;
+    $3("own-detail-result").replaceChildren();
+    preview($3("own-detail-result"), d2.preview);
+  });
+  $3("own-saved").addEventListener("change", () => $3("own-detail-result").replaceChildren());
+  $3("own-record").onclick = () => run2(() => {
+    const selected = (getState()?.kitchen?.own_recipes || []).find((recipe) => recipe.recipe_id === $3("own-saved").value);
+    if (!selected) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E.");
+    openIntake({ recipe_id: selected.recipe_id, name_ru: selected.name_ru, amount: { value: 1, unit: "portion" } });
+  });
+  function update(state2) {
+    const list = state2?.kitchen?.own_recipes || [];
+    const selected = $3("own-saved").value || saved;
+    $3("own-saved").replaceChildren(...list.map((r) => {
+      const o2 = el2("option", "", r.name_ru);
+      o2.value = r.recipe_id;
+      return o2;
+    }));
+    $3("own-saved").value = list.some((r) => r.recipe_id === selected) ? selected : list[0]?.recipe_id || "";
+    if ($3("own-saved").value !== selected) $3("own-detail-result").replaceChildren();
+    $3("own-intake").hidden = !list.length;
+  }
+  function savedReceipt(data) {
+    saved = data.recipe_id;
+    $3("own-saved").value = saved;
+    if ((() => {
+      try {
+        return JSON.stringify(data) === JSON.stringify(payload());
+      } catch {
+        return false;
+      }
+    })()) {
+      form.reset();
+      rows = [];
+      id = null;
+      stamp = "";
+      draw();
+      $3("own-preview").replaceChildren();
+      $3("own-save").hidden = true;
+    } else {
+      id = null;
+      stamp = "";
+      $3("own-save").hidden = true;
+    }
+    $3("own-intake").hidden = false;
+  }
+  function addConfirmedFood(food) {
+    if (!rows.some((r) => r.food_id === food.id)) {
+      rows.push({ food_id: food.id, name_ru: food.name, state: food.state, grams: "" });
+      draw();
+      changed();
+    }
+  }
+  return { reset, preview, savedReceipt, update, addConfirmedFood };
+}
+
 // cloudflare-saas/public/developer-ui.js
 var labels = { draft: "\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E \xB7 \u043E\u0436\u0438\u0434\u0430\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F", generating: "\u0413\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F \u043F\u0430\u0442\u0447\u0430", generated: "\u041F\u0430\u0442\u0447 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D \xB7 \u0435\u0449\u0451 \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D", testing: "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u0442\u0441\u044F \u0432 \u0438\u0437\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u043C \u0440\u0430\u043D\u043D\u0435\u0440\u0435", tested: "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \xB7 \u043D\u0435 \u043E\u043F\u0443\u0431\u043B\u0438\u043A\u043E\u0432\u0430\u043D\u043E", failed: "\u041E\u0448\u0438\u0431\u043A\u0430 \xB7 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u043F\u043E\u0432\u0442\u043E\u0440\u0430 \u043D\u0435\u0442", cancelled: "\u041E\u0442\u043C\u0435\u043D\u0435\u043D\u043E", expired: "\u0421\u0440\u043E\u043A \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F \u0438\u0441\u0442\u0451\u043A" };
 function setupDeveloper({ $: $3, el: el2, api, preview, epoch, notify: notify2, setView: setView2, isOwner, hasAttachment }) {
@@ -188,10 +1476,26 @@ function mountDeveloperExtension(root) {
 }
 
 // cloudflare-saas/public/kitchen-ui.js
-var kitchenModes = [["pantry_only", "\u0422\u043E\u043B\u044C\u043A\u043E \u043C\u043E\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", "\u0411\u0435\u0437 \u0441\u043A\u0440\u044B\u0442\u044B\u0445 \u043C\u0430\u0441\u043B\u0430, \u0441\u043E\u043B\u0438 \u0438 \u043F\u043E\u043A\u0443\u043F\u043E\u043A"], ["pantry_plus", "\u041C\u043E\u0436\u043D\u043E \u0434\u043E\u043A\u0443\u043F\u0438\u0442\u044C", "\u0414\u043E \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E \u0447\u0438\u0441\u043B\u0430 \u043D\u0435\u0434\u043E\u0441\u0442\u0430\u044E\u0449\u0438\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432"], ["inspiration", "\u041D\u0443\u0436\u043D\u044B \u0438\u0434\u0435\u0438", "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043D\u0435 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u0430"]];
-var kitchenActionLabels = { pantry: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E", remember: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", forget: "\u0417\u0430\u0431\u044B\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", save: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", favorite: "\u0412 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", rate: "\u041E\u0446\u0435\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", diary: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0434\u043E\u043B\u044E \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", accept_day: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C" };
-function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, notify: notify2, setView: setView2, epoch }) {
-  let pantry = [], foods = [], result = null, busy2 = false, localEpoch = 0, dirty = false;
+var kitchenModes = [["pantry_only", "\u0418\u0437 \u043C\u043E\u0438\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "\u0411\u0435\u0437 \u0441\u043A\u0440\u044B\u0442\u044B\u0445 \u043C\u0430\u0441\u043B\u0430, \u0441\u043E\u043B\u0438 \u0438 \u043F\u043E\u043A\u0443\u043F\u043E\u043A"], ["pantry_plus", "\u041C\u043E\u0436\u043D\u043E \u0434\u043E\u043A\u0443\u043F\u0438\u0442\u044C", "\u0414\u043E \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E \u0447\u0438\u0441\u043B\u0430 \u043D\u0435\u0434\u043E\u0441\u0442\u0430\u044E\u0449\u0438\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432"], ["inspiration", "\u0412\u0441\u0435 \u0440\u0435\u0446\u0435\u043F\u0442\u044B", "\u0417\u0430\u043F\u0430\u0441\u044B \u043D\u0435 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B"]];
+var kitchenActionLabels = { own_dish_save: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E", own_dish_diary: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", source_import: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442", pantry: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0437\u0430\u043F\u0430\u0441\u044B", remember: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", forget: "\u0417\u0430\u0431\u044B\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", save: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", favorite: "\u0412 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", rate: "\u041E\u0446\u0435\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", diary: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0434\u043E\u043B\u044E \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", accept_day: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C" };
+function sourceImportPreview(el2, food, original, allergens, foodState2) {
+  const labels2 = food.allergens.map((id) => allergens.find((row) => row[0] === id)?.[1] || "\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D (" + String(id) + ")");
+  return [el2("p", "", food.name_ru + " \xB7 " + foodState2(food.state)), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: " + original + " \xB7 USDA; \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B: " + (labels2.length ? labels2.join(", ") : "\u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E: \u043D\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u044B")), el2("p", "muted", "\u041F\u043E\u0441\u043B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F \u043D\u0430\u0439\u0434\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435, \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0432 \u0437\u0430\u043F\u0430\u0441\u044B \u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u043C\u0430\u0441\u0441\u0443. \u0415\u0433\u043E \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0434\u043B\u044F \u0440\u0430\u0441\u0447\u0451\u0442\u0430 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430. \u0414\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0445 \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432 \u0438 \u043C\u0435\u043D\u044E \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438 \u0435\u0449\u0451 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E.")];
+}
+function filterEverydayFoods(foods, query) {
+  const q2 = query.trim().toLocaleLowerCase("ru").replace(/ё/g, "\u0435").replace(/\s+/g, " ");
+  if (!q2) return foods;
+  const aliases = { "\u0441\u0432\u0435\u0436\u0438\u0439 \u043E\u0433\u0443\u0440\u0435\u0446": ["\u043E\u0433\u0443\u0440\u0435\u0446 \u0441 \u043A\u043E\u0436\u0443\u0440\u043E\u0439", "raw"], "\u0431\u0435\u043B\u043E\u043A\u043E\u0447\u0430\u043D\u043D\u0430\u044F \u043A\u0430\u043F\u0443\u0441\u0442\u0430": ["\u043A\u0430\u043F\u0443\u0441\u0442\u0430 \u0431\u0435\u043B\u043E\u043A\u043E\u0447\u0430\u043D\u043D\u0430\u044F", "raw"] };
+  const alias = aliases[q2];
+  return foods.filter((f) => {
+    const name2 = String(f.name_ru || "").toLocaleLowerCase("ru").replace(/ё/g, "\u0435");
+    if (alias) return name2 === alias[0] && f.state === alias[1];
+    if (q2 === "\u0441\u044B\u0440") return /(^|[^а-яё])сыр(?:$|[^а-яё]|н)/u.test(name2) || /моцарелл|фета|чеддер/u.test(name2);
+    return name2.includes(q2);
+  });
+}
+function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, notify: notify2, setView: setView2, epoch, openIntake }) {
+  let pantry = [], foods = [], allFoods = [], result = null, busy2 = false, parsing = false, parseNumber = 0, localEpoch = 0, dirty = false, specDirty = false;
   const host = $3("kitchen-studio");
   if (!host) return { render() {
   }, load: async () => {
@@ -210,10 +1514,14 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     if (!Number.isFinite(n) || n < min || n > max) throw Error(`\u0414\u043E\u043F\u0443\u0441\u0442\u0438\u043C\u043E \u043E\u0442 ${min} \u0434\u043E ${max}`);
     return n;
   };
-  const number = (n) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(n);
+  const number2 = (n) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(n);
   const states = { raw: "\u0441\u044B\u0440\u043E\u0439", ready_to_eat: "\u0433\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E", cooked_roasted: "\u0437\u0430\u043F\u0435\u0447\u0451\u043D\u043D\u044B\u0439", cooked: "\u0433\u043E\u0442\u043E\u0432\u044B\u0439", cooked_dry_heat: "\u0433\u043E\u0442\u043E\u0432\u044B\u0439, \u0441\u0443\u0445\u043E\u0439 \u0436\u0430\u0440", cooked_boiled: "\u0432\u0430\u0440\u0451\u043D\u044B\u0439", frozen: "\u0437\u0430\u043C\u043E\u0440\u043E\u0436\u0435\u043D\u043D\u044B\u0439", dry: "\u0441\u0443\u0445\u043E\u0439", canned: "\u043A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439", canned_drained: "\u0431\u0435\u0437 \u0436\u0438\u0434\u043A\u043E\u0441\u0442\u0438", ready_to_cook: "\u0434\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F" };
+  const stock = el2("div", "kitchen-composer");
   const form = el2("form", "kitchen-composer");
   form.dataset.testid = "kitchen-composer";
+  form.oninput = form.onchange = () => {
+    specDirty = true;
+  };
   const modes = el2("fieldset", "kitchen-modes");
   modes.append(el2("legend", "", "\u041A\u0430\u043A \u0433\u043E\u0442\u043E\u0432\u0438\u043C?"));
   for (const [id, title, note] of kitchenModes) {
@@ -226,57 +1534,200 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     label.append(input, el2("strong", "", title), el2("span", "muted", note));
     modes.append(label);
   }
-  form.append(modes);
   const picker = el2("div", "kitchen-picker"), product = el2("input"), datalist = el2("datalist");
   product.id = "kitchen-product";
   product.setAttribute("list", "kitchen-food-list");
-  product.placeholder = "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430";
+  product.placeholder = "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430";
   product.autocomplete = "off";
   product.dataset.testid = "kitchen-food-input";
   datalist.id = "kitchen-food-list";
-  const productLabel = el2("label", "", "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0438\u0437 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430");
+  const productLabel = el2("label", "", "\u041D\u0430\u0439\u0442\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442");
   productLabel.htmlFor = product.id;
+  const trustedList = el2("div", "kitchen-food-results");
+  trustedList.setAttribute("aria-label", "\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430 \u0438 \u043B\u0438\u0447\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B");
+  const sourceResults = el2("div", "kitchen-food-results"), review = el2("div", "panel");
+  sourceResults.setAttribute("aria-label", "\u0417\u0430\u043F\u0438\u0441\u0438 USDA \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438");
+  review.hidden = true;
+  let sourceCursor = null, sourceQuery = "", sourceToken = 0;
   const chips = el2("div", "kitchen-chips");
   chips.dataset.testid = "pantry-chips";
   const status = el2("p", "muted");
   status.setAttribute("role", "status");
   status.dataset.testid = "kitchen-status";
+  status.textContent = "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\u2026";
+  let searchNumber = 0, selectedFood = null, trustedStart = 0, browsing = false;
+  function invalidateSource() {
+    sourceToken++;
+    sourceCursor = null;
+    sourceQuery = "";
+    sourceResults.replaceChildren();
+    review.hidden = true;
+  }
+  function renderTrusted() {
+    trustedList.replaceChildren();
+    if (!browsing && !product.value.trim()) {
+      trustedList.hidden = true;
+      return;
+    }
+    trustedList.hidden = false;
+    const page = foods.slice(trustedStart, trustedStart + 8);
+    trustedList.append(el2("p", "muted", `\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B: ${foods.length ? trustedStart + 1 : 0}\u2013${trustedStart + page.length} \u0438\u0437 ${foods.length}`));
+    for (const f of page) {
+      const row = button("", async () => {
+        searchNumber++;
+        clearTimeout(product.timer);
+        invalidateSource();
+        selectedFood = f;
+        product.value = f.name_ru + " \xB7 " + (states[f.state] || f.state);
+        trustedList.hidden = true;
+        add.disabled = false;
+        status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + f.name_ru;
+      });
+      row.className = "secondary kitchen-food-row";
+      row.append(el2("strong", "", f.name_ru), el2("span", "muted", states[f.state] || f.state));
+      trustedList.append(row);
+    }
+    if (trustedStart > 0) trustedList.append(button("\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+      trustedStart = Math.max(0, trustedStart - 8);
+      renderTrusted();
+    }));
+    if (trustedStart + 8 < foods.length) trustedList.append(button("\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+      trustedStart += 8;
+      renderTrusted();
+    }));
+  }
   function foodOptions() {
     datalist.replaceChildren(...foods.map((f) => {
       const o2 = el2("option");
-      o2.value = f.food_id + " \xB7 " + f.name_ru + " \xB7 " + (states[f.state] || f.state);
+      o2.value = f.name_ru + " \xB7 " + (states[f.state] || f.state);
       return o2;
     }));
+    trustedStart = 0;
+    renderTrusted();
   }
-  let searchNumber = 0;
   product.oninput = () => {
-    const token = ++searchNumber;
+    invalidateSource();
+    searchNumber++;
     clearTimeout(product.timer);
-    product.timer = setTimeout(() => run2(async () => {
-      const e = epoch(), d2 = await call2("keto_kitchen", { action: "foods", query: product.value.slice(0, 200) });
-      if (token !== searchNumber || e !== epoch()) return;
-      foods = d2.foods;
-      foodOptions();
-    }), 250);
+    selectedFood = allFoods.find((f) => product.value === f.name_ru + " \xB7 " + (states[f.state] || f.state)) || null;
+    add.disabled = !selectedFood;
+    if (selectedFood) {
+      trustedList.hidden = true;
+      status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + selectedFood.name_ru;
+      return;
+    }
+    browsing = false;
+    foods = filterEverydayFoods(allFoods, product.value);
+    foodOptions();
+    status.textContent = foods.length ? product.value.trim() ? `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.` : "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u043F\u043E\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B." : "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438, \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u0438\u043B\u0438 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA.";
   };
   function addFood(food) {
     if (pantry.some((i) => i.food_id === food.food_id)) return;
-    pantry.push({ food_id: food.food_id, state: food.state, grams: null, name_ru: food.name_ru });
+    pantry.push({ food_id: food.food_id, state: food.state, grams: food.grams ?? null, name_ru: food.name_ru });
     dirty = true;
     renderChips();
   }
-  const add = button("\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C", async () => {
-    const code = product.value.split(" \xB7 ")[0];
-    const food = foods.find((f) => f.food_id === code);
+  const add = button("\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0437\u0430\u043F\u0430\u0441\u044B", async () => {
+    const food = selectedFood || foods.find((f) => product.value === f.name_ru + " \xB7 " + (states[f.state] || f.state));
     if (!food) {
-      status.textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C. \u0414\u043B\u044F \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0433\u043E \u0441\u043F\u0438\u0441\u043A\u0430 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \xAB\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\xBB. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u043C\u0443 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0443 \u043D\u0443\u0436\u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430.";
+      status.textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438\u0437 \u0441\u043F\u0438\u0441\u043A\u0430. \u0414\u043B\u044F \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0433\u043E \u0441\u043F\u0438\u0441\u043A\u0430 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \xAB\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\xBB. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u043C\u0443 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0443 \u043D\u0443\u0436\u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430.";
       return;
     }
     addFood(food);
     product.value = "";
+    selectedFood = null;
+    add.disabled = true;
+    browsing = false;
+    renderTrusted();
   });
-  picker.append(productLabel, product, datalist, add);
-  form.append(picker);
+  add.disabled = true;
+  picker.onkeydown = (e) => {
+    if (e.key === "Enter" && e.target.tagName !== "BUTTON") e.preventDefault();
+  };
+  const browse = button("\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+    browsing = true;
+    foods = filterEverydayFoods(allFoods, product.value);
+    trustedStart = 0;
+    renderTrusted();
+  });
+  picker.append(productLabel, product, datalist, browse, trustedList, add);
+  const sourceSearch = button("\u0418\u0441\u043A\u0430\u0442\u044C \u0432 USDA", async () => {
+    invalidateSource();
+    sourceQuery = product.value.trim();
+    await loadSource(false);
+  });
+  async function loadSource(more) {
+    const e = epoch(), token = ++sourceToken, q2 = sourceQuery, cursor = more ? sourceCursor : null;
+    const d2 = await call2("keto_kitchen", { action: "source_search", query: q2, values: { cursor, limit: 20 } });
+    if (e !== epoch() || token !== sourceToken || q2 !== sourceQuery || q2 !== product.value.trim()) return;
+    if (!more) sourceResults.replaceChildren();
+    sourceResults.querySelector("[data-source-more]")?.remove();
+    sourceResults.append(el2("p", "muted", `USDA: \u043D\u0430\u0439\u0434\u0435\u043D\u043E ${d2.total}. \u0417\u0430\u043F\u0438\u0441\u0438 \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438.`));
+    for (const candidate of d2.candidates) {
+      if (candidate.already_imported) {
+        sourceResults.append(el2("p", "muted", (candidate.name_ru_unofficial || candidate.name_en) + " \xB7 \u0443\u0436\u0435 \u0432 \u043B\u0438\u0447\u043D\u044B\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430\u0445"));
+        continue;
+      }
+      sourceResults.append(button((candidate.name_ru_unofficial || candidate.name_en) + " \xB7 USDA \xB7 " + (candidate.category_ru || ""), async () => {
+        const ee2 = epoch(), tt = ++sourceToken;
+        const detail = await call2("keto_kitchen", { action: "source_detail", values: { candidate_id: candidate.candidate_id } });
+        if (ee2 !== epoch() || tt !== sourceToken) return;
+        showSource(detail.candidate);
+      }));
+    }
+    sourceCursor = d2.next_cursor;
+    if (sourceCursor) {
+      const b2 = button("\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451", () => loadSource(true));
+      b2.dataset.sourceMore = "true";
+      sourceResults.append(b2);
+    }
+  }
+  function showSource(c2) {
+    review.hidden = false;
+    review.replaceChildren(el2("h3", "", "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0437\u0430\u043F\u0438\u0441\u0438 USDA"), el2("p", "", c2.name_en), el2("p", "muted", c2.name_ru_unofficial ? "\u041D\u0435\u043E\u0444\u0438\u0446\u0438\u0430\u043B\u044C\u043D\u044B\u0439 \u043F\u0435\u0440\u0435\u0432\u043E\u0434: " + c2.name_ru_unofficial : "\u041F\u0435\u0440\u0435\u0432\u043E\u0434 \u043D\u0435 \u043F\u0440\u0435\u0434\u043E\u0441\u0442\u0430\u0432\u043B\u0435\u043D"), el2("p", "muted", "USDA FoodData Central \xB7 SR Legacy \xB7 CC0. \u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u0432 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0435 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u044B. \u0413\u043B\u0438\u043A\u0435\u043C\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0438\u043D\u0434\u0435\u043A\u0441 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u0435\u043D. \u041F\u043E\u0441\u043B\u0435 \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u044F \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u043C\u043E\u0436\u043D\u043E \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u0432 \u0437\u0430\u043F\u0430\u0441\u044B \u0438 \u0443\u043A\u0430\u0437\u0430\u0442\u044C \u043C\u0430\u0441\u0441\u0443. \u0415\u0433\u043E \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0434\u043B\u044F \u0440\u0430\u0441\u0447\u0451\u0442\u0430 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430. \u0414\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0445 \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432 \u0438 \u043C\u0435\u043D\u044E \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438 \u0435\u0449\u0451 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E."));
+    const a2 = el2("a", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A USDA");
+    a2.href = c2.source_url;
+    a2.target = "_blank";
+    a2.rel = "noopener noreferrer";
+    review.append(a2);
+    for (const [key, label] of [["energy_kcal", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0431\u0435\u043B\u043E\u043A, \u0433"], ["fat_g", "\u0436\u0438\u0440\u044B, \u0433"], ["carbohydrate_total_g", "\u043E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433"], ["fiber_g", "\u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433"]]) review.append(el2("p", "", label + " \u043D\u0430 100 \u0433: " + number2(c2[key])));
+    const nameLabel = el2("label", "", "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043B\u0438\u0447\u043D\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430"), name2 = el2("input");
+    name2.value = c2.name_ru_unofficial || c2.name_en;
+    name2.maxLength = 200;
+    nameLabel.append(name2);
+    const stateLabel = el2("label", "", "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430"), state2 = el2("select");
+    for (const [v2, t] of [["", "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435"], ...Object.entries(states).filter(([v3]) => v3 !== "frozen")]) {
+      const o2 = el2("option", "", t);
+      o2.value = v2;
+      state2.append(o2);
+    }
+    stateLabel.append(state2);
+    const allergy = el2("fieldset");
+    allergy.append(el2("legend", "", "\u041E\u0442\u043C\u0435\u0442\u044C\u0442\u0435 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438"));
+    const checks = [];
+    for (const [v2, t] of [["egg", "\u042F\u0439\u0446\u0430"], ["milk", "\u041C\u043E\u043B\u043E\u043A\u043E"], ["fish", "\u0420\u044B\u0431\u0430"], ["crustacean_shellfish", "\u0420\u0430\u043A\u043E\u043E\u0431\u0440\u0430\u0437\u043D\u044B\u0435"], ["mollusc", "\u041C\u043E\u043B\u043B\u044E\u0441\u043A\u0438"], ["tree_nut", "\u041E\u0440\u0435\u0445\u0438"], ["peanut", "\u0410\u0440\u0430\u0445\u0438\u0441"], ["soy", "\u0421\u043E\u044F"], ["wheat", "\u041F\u0448\u0435\u043D\u0438\u0446\u0430"], ["gluten", "\u0413\u043B\u044E\u0442\u0435\u043D"], ["sesame", "\u041A\u0443\u043D\u0436\u0443\u0442"], ["celery", "\u0421\u0435\u043B\u044C\u0434\u0435\u0440\u0435\u0439"], ["coconut", "\u041A\u043E\u043A\u043E\u0441"], ["mustard", "\u0413\u043E\u0440\u0447\u0438\u0446\u0430"], ["lupin", "\u041B\u044E\u043F\u0438\u043D"], ["sulfite", "\u0421\u0443\u043B\u044C\u0444\u0438\u0442\u044B"]]) {
+      const label = el2("label", "check", t), check = el2("input");
+      check.type = "checkbox";
+      check.value = v2;
+      label.prepend(check);
+      allergy.append(label);
+      checks.push(check);
+    }
+    const confirmLabel = el2("label", "check", "\u042F \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u043B(\u0430) \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0441\u043F\u0438\u0441\u043E\u043A \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u043E\u0432, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u043D\u044B\u0445"), confirmed = el2("input");
+    confirmed.type = "checkbox";
+    confirmLabel.prepend(confirmed);
+    review.append(nameLabel, stateLabel, allergy, confirmLabel, button("\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043B\u0438\u0447\u043D\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", async () => {
+      if (!confirmed.checked || !state2.value || !name2.value.trim()) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B.");
+      await act("source_import", null, { candidate_id: c2.candidate_id, release_hash: c2.release_hash, name_ru: name2.value.trim(), state: state2.value, allergens: checks.filter((x) => x.checked).map((x) => x.value), source_review_confirmed: true });
+    }));
+    review.setAttribute("tabindex", "-1");
+    review.focus?.({ preventScroll: true });
+    review.scrollIntoView?.({ block: "nearest" });
+  }
+  const sourceDetails = el2("details");
+  sourceDetails.append(el2("summary", "", "\u0414\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA"), sourceSearch, sourceResults, review);
+  picker.append(sourceDetails);
+  stock.append(picker);
   const free = el2("textarea");
   free.id = "kitchen-free";
   free.placeholder = "\u0415\u0441\u0442\u044C \u044F\u0439\u0446\u0430, \u043A\u0430\u0431\u0430\u0447\u043E\u043A \u0438 \u0448\u0430\u043C\u043F\u0438\u043D\u044C\u043E\u043D\u044B";
@@ -287,40 +1738,64 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   freeLabel.htmlFor = free.id;
   const questions = el2("div", "kitchen-questions");
   questions.dataset.testid = "product-questions";
-  form.append(freeLabel, free, button("\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
-    const e = epoch(), d2 = await call2("keto_kitchen", { action: "parse", query: free.value });
-    if (e !== epoch()) return;
-    questions.replaceChildren();
-    for (const i of d2.pantry) {
-      let f = foods.find((f2) => f2.food_id === i.food_id) || i;
-      addFood({ ...f, ...i });
-      const item = pantry.find((x) => x.food_id === i.food_id);
-      item.grams = i.grams;
+  const parseButton = button("\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+    if (parsing) return;
+    const query = free.value.trim();
+    if (!query) {
+      status.textContent = "\u041D\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0434\u043B\u044F \u0440\u0430\u0437\u0431\u043E\u0440\u0430.";
+      return;
     }
-    renderChips();
-    for (const q2 of d2.questions) {
-      const row = el2("div", "notice");
-      row.append(el2("p", "", q2.text));
-      for (const f of q2.choices) row.append(button(f.name_ru + " \xB7 " + (states[f.state] || f.state), async () => {
-        addFood(f);
-        row.remove();
-      }));
-      row.append(button("\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u044D\u0442\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", async () => row.remove()));
-      questions.append(row);
+    const e = epoch(), token = ++parseNumber;
+    parsing = true;
+    parseButton.disabled = true;
+    status.textContent = "\u0420\u0430\u0437\u0431\u0438\u0440\u0430\u044E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\u2026";
+    try {
+      const d2 = await call2("keto_kitchen", { action: "parse", query: /^(?:есть|у меня есть|продукты|из продуктов)(?:\s|:|$)/iu.test(query) ? query : "\u0415\u0441\u0442\u044C " + query });
+      if (e !== epoch() || token !== parseNumber || free.value.trim() !== query) {
+        status.textContent = "\u0422\u0435\u043A\u0441\u0442 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u0420\u0430\u0437\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0431\u043D\u043E\u0432\u043B\u0451\u043D\u043D\u044B\u0439 \u0441\u043F\u0438\u0441\u043E\u043A.";
+        return;
+      }
+      questions.replaceChildren();
+      for (const i of d2.pantry) {
+        const existing = pantry.find((x) => x.food_id === i.food_id);
+        if (!existing) addFood({ ...i, name_ru: d2.food_names?.[i.food_id] || i.name_ru });
+      }
+      renderChips();
+      for (const q2 of d2.questions) {
+        const row = el2("div", "notice");
+        row.append(el2("p", "", q2.text));
+        for (const f of q2.choices) row.append(button(f.name_ru + " \xB7 " + (states[f.state] || f.state), async () => {
+          addFood(f);
+          row.remove();
+        }));
+        row.append(button("\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u044D\u0442\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", async () => row.remove()));
+        questions.append(row);
+      }
+      status.textContent = `\u041D\u0430\u0439\u0434\u0435\u043D\u043E: ${d2.pantry.length}; \u0443\u0442\u043E\u0447\u043D\u0435\u043D\u0438\u0439: ${d2.questions.length}. \u0420\u0430\u043D\u0435\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u044B\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u0430 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B.`;
+    } catch (err) {
+      status.textContent = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0440\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B: " + err.message;
+    } finally {
+      if (token === parseNumber) {
+        parsing = false;
+        parseButton.disabled = false;
+      }
     }
-  }), questions, chips);
+  });
+  const freeDetails = el2("details");
+  freeDetails.append(el2("summary", "", "\u041F\u0435\u0440\u0435\u0447\u0438\u0441\u043B\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441\u0432\u043E\u0438\u043C\u0438 \u0441\u043B\u043E\u0432\u0430\u043C\u0438"), freeLabel, free, parseButton);
+  stock.append(freeDetails, questions, chips);
   function renderChips() {
     chips.replaceChildren();
     for (const item of pantry) {
       const chip = el2("div", "kitchen-chip");
       chip.dataset.foodId = item.food_id;
-      chip.append(el2("strong", "", item.name_ru || item.food_id), el2("span", "muted", (states[item.state] || item.state) + " \xB7 " + item.food_id));
+      chip.append(el2("strong", "", item.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442"), el2("span", "muted", states[item.state] || "\u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043E"));
       const label = el2("label", "", "\u0417\u0430\u043F\u0430\u0441, \u0433 (\u043D\u0435\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E)"), input = el2("input");
       input.type = "text";
       input.inputMode = "decimal";
       input.value = item.grams ?? "";
-      input.setAttribute("aria-label", (item.name_ru || item.food_id) + ": \u0433\u0440\u0430\u043C\u043C\u044B");
-      input.onchange = () => {
+      input.setAttribute("aria-label", (item.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442") + ": \u0433\u0440\u0430\u043C\u043C\u044B");
+      input.oninput = () => {
         item.grams = input.value === "" ? null : input.value;
         dirty = true;
       };
@@ -332,10 +1807,11 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       }));
       chips.append(chip);
     }
-    if (!pantry.length) chips.append(el2("p", "muted", "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043F\u0443\u0441\u0442\u0430. \u0412 \u0440\u0435\u0436\u0438\u043C\u0435 \u0438\u0434\u0435\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u043D\u0435 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B."));
+    if (!pantry.length) chips.append(el2("p", "muted", "\u0417\u0430\u043F\u0430\u0441\u044B \u043F\u043E\u043A\u0430 \u043F\u0443\u0441\u0442\u044B. \u0412 \u0440\u0435\u0436\u0438\u043C\u0435 \u0438\u0434\u0435\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u043D\u0435 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B."));
   }
   const stockNote = el2("p", "muted", "\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0432 \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u043C \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0438. \u0428\u0442\u0443\u043A\u0438 \u043D\u0435 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u044B\u0432\u0430\u044E\u0442\u0441\u044F \u0432 \u0433\u0440\u0430\u043C\u043C\u044B. \u041F\u0440\u043E\u0441\u043C\u043E\u0442\u0440 \u0440\u0435\u0446\u0435\u043F\u0442\u0430 \u043D\u0435 \u0441\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u0442 \u0437\u0430\u043F\u0430\u0441.");
-  form.append(stockNote, button("\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E", () => act("pantry", null, { items: cleanPantry() })), button("\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0443\u044E", async () => {
+  stock.append(stockNote, button("\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F", () => act("pantry", null, { items: cleanPantry() })), button("\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0437\u0430\u043F\u0430\u0441\u044B", async () => {
+    if (dirty && !globalThis.confirm("\u0417\u0430\u043C\u0435\u043D\u0438\u0442\u044C \u043D\u0435\u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0439 \u0441\u043F\u0438\u0441\u043E\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u043C\u0438 \u0437\u0430\u043F\u0430\u0441\u0430\u043C\u0438?")) return;
     dirty = false;
     pantry = (getState()?.kitchen?.pantry || []).map((i) => ({ ...i }));
     renderChips();
@@ -355,7 +1831,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       const step = id === "time" ? 5 : 1, wrap2 = el2("div", "number-control");
       for (const [symbol, delta] of [["\u2212", -1], ["+", 1]]) {
         const b2 = button(symbol, async () => {
-          input.value = String(Math.max(min, Math.min(max, decimal(input.value, min, max) + delta * step)));
+          input.value = String(Math.max(min, Math.min(max, (input.value.trim() === "" ? Number(value) : decimal(input.value, min, max)) + delta * step)));
           input.dispatchEvent(new Event("change", { bubbles: true }));
         });
         b2.setAttribute("aria-label", (delta < 0 ? "\u0423\u043C\u0435\u043D\u044C\u0448\u0438\u0442\u044C " : "\u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0442\u044C ") + label);
@@ -393,55 +1869,58 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     if (equipment.value === "multicooker" && Number(time.value) < 25) time.value = "25";
   };
   equipment.onchange();
-  const cuisine = field("cuisine", "\u0421\u0442\u0438\u043B\u044C \u043A\u0443\u0445\u043D\u0438", "text", "\u0414\u043E\u043C\u0430\u0448\u043D\u044F\u044F \u043A\u0443\u0445\u043D\u044F \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438");
-  cuisine.maxLength = 100;
   const avoid = el2("input");
   avoid.id = "kitchen-avoid";
   avoid.placeholder = "\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0441\u044B\u0440";
   avoid.maxLength = 200;
-  const avoidLabel = el2("label", "", "\u0412\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u0431\u0435\u0437 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430 (\u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043D\u0438\u0436\u0435)");
+  const avoidLabel = el2("label", "", "\u0412\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u0431\u0435\u0437 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430 (\u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435)");
   avoidLabel.htmlFor = avoid.id;
   const avoidList = el2("datalist");
   avoidList.id = "kitchen-avoid-list";
-  let avoidFoods = [];
+  let avoidFoods = [], selectedAvoid = null, avoidSearchNumber = 0;
   avoid.setAttribute("list", avoidList.id);
   avoid.oninput = () => {
     clearTimeout(avoid.timer);
-    const value = avoid.value;
+    const value = avoid.value, token = ++avoidSearchNumber;
+    selectedAvoid = avoidFoods.find((f) => value === f.name_ru + " \xB7 " + (states[f.state] || f.state)) || null;
+    if (selectedAvoid) return;
     avoid.timer = setTimeout(() => run2(async () => {
       const e = epoch(), d2 = await call2("keto_kitchen", { action: "foods", query: value.slice(0, 200) });
-      if (e !== epoch() || value !== avoid.value) return;
+      if (e !== epoch() || token !== avoidSearchNumber || value !== avoid.value) return;
       avoidFoods = d2.foods;
       avoidList.replaceChildren(...avoidFoods.map((f) => {
         const o2 = el2("option");
-        o2.value = f.food_id + " \xB7 " + f.name_ru;
+        o2.value = f.name_ru + " \xB7 " + (states[f.state] || f.state);
         return o2;
       }));
     }), 250);
   };
   controls.append(avoidList);
   controls.append(avoidLabel, avoid);
-  form.append(controls);
+  form.append(modes, controls);
   const generate = el2("button", "primary", "\u041F\u0440\u0435\u0434\u043B\u043E\u0436\u0438\u0442\u044C \u0431\u043B\u044E\u0434\u0430");
   generate.type = "submit";
   generate.dataset.testid = "kitchen-generate";
-  form.append(generate, status);
+  const generateStatus = el2("p", "muted");
+  generateStatus.setAttribute("role", "status");
+  form.append(generate, generateStatus);
+  stock.append(status);
   const results = el2("div");
   results.dataset.testid = "kitchen-results";
-  host.replaceChildren(form, results);
+  const savedPreview = el2("section", "panel");
+  savedPreview.hidden = true;
+  savedPreview.dataset.testid = "confirmed-pantry-preview";
+  let savedToken = 0;
+  const recipeHost = $3("recipe-kitchen-slot");
+  if (recipeHost) {
+    host.replaceChildren(stock);
+    recipeHost.replaceChildren(savedPreview, form, results);
+  } else host.replaceChildren(stock, savedPreview, form, results);
   const cleanPantry = () => pantry.map(({ food_id, state: state2, grams }) => ({ food_id, state: state2, grams: grams === null || grams === "" ? null : decimal(grams, 0.1, 3e4) }));
   async function act(action, rid, values2 = {}) {
     const state2 = getState();
     const d2 = await call2("keto_kitchen", { action, thread_id: state2.active_thread || "main", expected_revision: state2.revision, ...rid ? { recipe_id: rid } : {}, values: values2 });
     accept2(d2);
-    if (d2.proposal) {
-      $3("proposals").dataset.testid = "kitchen-confirmation";
-      const surface = document.body.dataset.view === "chat" ? $3("chat-confirmations") || $3("chat-extras") : document.body.dataset.view === "memory" ? memory : host;
-      surface.append($3("proposals"));
-      $3("proposals").setAttribute("tabindex", "-1");
-      $3("proposals").focus();
-      $3("proposals").scrollIntoView({ block: "nearest" });
-    }
     return d2;
   }
   form.onsubmit = (e) => {
@@ -450,22 +1929,23 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     run2(async () => {
       busy2 = true;
       generate.disabled = true;
-      if (questions.children.length) {
+      if (parsing || questions.children.length) {
         busy2 = false;
         generate.disabled = false;
-        throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438\u043B\u0438 \u044F\u0432\u043D\u043E \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435 \u0431\u0435\u0437 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0445.");
+        throw Error(parsing ? "\u0414\u043E\u0436\u0434\u0438\u0442\u0435\u0441\u044C \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0438\u044F \u0440\u0430\u0437\u0431\u043E\u0440\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432." : "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438\u043B\u0438 \u044F\u0432\u043D\u043E \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435 \u0431\u0435\u0437 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0445.");
       }
       const e2 = epoch(), token = ++localEpoch;
-      status.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u044E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438 \u0441\u043F\u043E\u0441\u043E\u0431\u044B \u0433\u043E\u0442\u043E\u0432\u043A\u0438\u2026";
+      generateStatus.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u044E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438 \u0441\u043F\u043E\u0441\u043E\u0431\u044B \u0433\u043E\u0442\u043E\u0432\u043A\u0438\u2026";
       try {
-        const fid = avoid.value.split(" \xB7 ")[0];
-        if (avoid.value && !avoidFoods.some((f) => f.food_id === fid)) throw Error("\u0414\u043B\u044F \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0433\u043E \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430.");
-        const spec = { mode: new FormData(form).get("mode"), meal: meal.value, servings: decimal(servings.value, 1, 6), time_budget: decimal(time.value, 5, 120), equipment: equipment.value, cuisine: cuisine.value, max_missing_items: decimal(missing.value, 0, 5), pantry: cleanPantry(), avoid: fid ? [fid] : [] };
+        const selected = selectedAvoid || avoidFoods.find((f) => avoid.value === f.name_ru + " \xB7 " + (states[f.state] || f.state));
+        if (avoid.value && !selected) throw Error("\u0414\u043B\u044F \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.");
+        const fid = selected?.food_id;
+        const spec = { mode: new FormData(form).get("mode"), meal: meal.value, servings: decimal(servings.value, 1, 6), time_budget: decimal(time.value, 5, 120), equipment: equipment.value, max_missing_items: decimal(missing.value, 0, 5), pantry: cleanPantry(), avoid: fid ? [fid] : [] };
         const d2 = await call2("keto_kitchen", { action: "generate", spec, thread_id: getState().active_thread || "main", expected_revision: getState().revision, request_id: crypto.randomUUID().replaceAll("-", "") });
         if (e2 !== epoch() || token !== localEpoch) return;
         accept2(d2);
         show(d2);
-        status.textContent = d2.message || "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D\u043D\u044B\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B.";
+        generateStatus.textContent = d2.message || "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D\u043D\u044B\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B.";
       } finally {
         if (e2 === epoch()) {
           busy2 = false;
@@ -476,23 +1956,24 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   };
   function listItems(items) {
     const list = el2("ul", "ingredient-list");
-    for (const i of items) list.append(el2("li", "", i.name_ru + " \xB7 " + number(i.grams_edible) + " \u0433 \xB7 " + (states[i.state] || i.state)));
+    for (const i of items) list.append(el2("li", "", i.name_ru + " \xB7 " + (i.stock_quantity_unknown ? "\u043D\u0443\u0436\u043D\u043E " + number2(i.required_grams) + " \u0433; \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043F\u0430\u0441" : number2(i.grams_edible) + " \u0433") + " \xB7 " + (states[i.state] || i.state)));
     return list;
   }
-  function card(r) {
+  function card(r, { source: originSource } = {}) {
+    const thread = originSource?.thread_id || getState()?.active_thread || "main";
     const c2 = el2("article", "panel kitchen-candidate");
     c2.dataset.testid = "kitchen-candidate";
     c2.dataset.recipeId = r.recipe_id;
-    c2.append(el2("span", "tag", r.draft_label || "\u0421\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442"), el2("h3", "", r.name_ru), el2("p", "muted", r.ingredients.map((i) => i.name_ru).slice(0, 3).join(" \xB7 ")), el2("p", "muted", r.active_minutes + " \u043C\u0438\u043D \xB7 " + number(r.servings || 1) + " \u043F\u043E\u0440\u0446\u0438\u0439 \u0432\u0441\u0435\u0433\u043E"));
+    c2.append(el2("span", "tag", r.draft_label || "\u0421\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442"), el2("h3", "", r.name_ru), el2("p", "muted", r.ingredients.map((i) => i.name_ru).slice(0, 3).join(" \xB7 ")), el2("p", "muted", r.active_minutes + " \u043C\u0438\u043D \xB7 " + number2(r.servings || 1) + " \u043F\u043E\u0440\u0446\u0438\u0439 \u0432\u0441\u0435\u0433\u043E"));
     if (r.equipment_note) c2.append(el2("p", "notice", r.equipment_note));
     const fit = el2("details"), fitSummary = el2("summary", "", "\u041F\u043E\u0447\u0435\u043C\u0443 \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0442");
     fit.append(fitSummary, el2("p", "", r.fit_note || "\u0421\u043E\u0441\u0442\u0430\u0432 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D \u043F\u043E \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0443."));
     c2.append(fit);
     if (r.meal_role === "side_or_light") c2.append(el2("p", "notice", "\u041D\u0435\u0431\u043E\u043B\u044C\u0448\u043E\u0435 \u0431\u043B\u044E\u0434\u043E / \u0433\u0430\u0440\u043D\u0438\u0440 \u2014 \u043D\u0435 \u0432\u0435\u0441\u044C \u043F\u0440\u0438\u0451\u043C \u043F\u0438\u0449\u0438."));
     const n = r.nutrition;
-    c2.append(el2("p", "nutrition", "\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E: " + number(n.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + number(n.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u043E\u0431\u0449\u0438\u0435 " + number(n.carbohydrate_total_g) + " \u0433 \xB7 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 " + number(n.fiber_g) + " \u0433"));
+    c2.append(el2("p", "nutrition", "\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E: " + number2(n.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + number2(n.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u043E\u0431\u0449\u0438\u0435 " + number2(n.carbohydrate_total_g) + " \u0433 \xB7 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 " + number2(n.fiber_g) + " \u0433"));
     const batch = r.whole_batch;
-    if (batch) c2.append(el2("p", "nutrition", "\u0412\u0441\u0451 \u0431\u043B\u044E\u0434\u043E: " + number(batch.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + number(batch.nutrition.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + number(batch.nutrition.carbohydrate_total_g) + " \u0433"));
+    if (batch) c2.append(el2("p", "nutrition", "\u0412\u0441\u0451 \u0431\u043B\u044E\u0434\u043E: " + number2(batch.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + number2(batch.nutrition.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + number2(batch.nutrition.carbohydrate_total_g) + " \u0433"));
     c2.append(el2("h4", "", "\u041D\u0430 \u043E\u0434\u043D\u0443 \u043F\u043E\u0440\u0446\u0438\u044E"), listItems(r.ingredients));
     if (batch) {
       const b2 = el2("details");
@@ -503,7 +1984,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     steps.append(el2("summary", "", "\u041F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435"));
     for (const step of String(r.steps_ru).split("\n")) steps.append(el2("p", "", step));
     c2.append(steps);
-    c2.append(el2("h4", "", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u2014 \u0442\u043E\u043B\u044C\u043A\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0430\u044E\u0449\u0435\u0435"), r.missing?.length ? listItems(r.missing) : el2("p", "muted", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u043D\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043F\u043E \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u043C\u0443 \u0437\u0430\u043F\u0430\u0441\u0443. \u041D\u0435\u0443\u043A\u0430\u0437\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C."));
+    c2.append(el2("h4", "", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u0438 \u0437\u0430\u043F\u0430\u0441 \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438"), r.missing?.length ? listItems(r.missing) : el2("p", "muted", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u043D\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043F\u043E \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u043C\u0443 \u0437\u0430\u043F\u0430\u0441\u0443. \u041D\u0435\u0443\u043A\u0430\u0437\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C."));
     const source = el2("details");
     source.append(el2("summary", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0438 \u0438 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F"));
     source.append(el2("p", "muted", r.quantity_note || "\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043D\u0435 \u0440\u0430\u0432\u043D\u044B \u043D\u0443\u043B\u044E."));
@@ -516,12 +1997,12 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     }
     c2.append(source);
     const actions = el2("div", "kitchen-actions");
+    actions.append(button("\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435", () => openIntake({ recipe_id: r.recipe_id, name_ru: r.name_ru, amount: { value: 1, unit: "portion" }, thread_id: thread, origin: originSource?.origin, generation_id: originSource?.generation_id || r.generation_id }), "primary"));
     actions.append(button("\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0434\u043B\u044F \u0447\u0430\u0442\u0430", async () => {
       accept2(await call2("keto_kitchen", { action: "select", recipe_id: r.recipe_id, thread_id: getState().active_thread || "main", expected_revision: getState().revision }));
       notify2("\u0412\u044B\u0431\u0440\u0430\u043D\u043E. \u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u0447\u0430\u0442\u0430 \u043E\u0442\u043D\u043E\u0441\u044F\u0442\u0441\u044F \u043A \u044D\u0442\u043E\u043C\u0443 \u0440\u0435\u0446\u0435\u043F\u0442\u0443.");
     }));
     for (const a2 of ["save", "favorite"]) actions.append(button(kitchenActionLabels[a2], () => act(a2, r.recipe_id)));
-    actions.append(button("\u0412 \u0434\u043D\u0435\u0432\u043D\u0438\u043A: \xBD \u043F\u043E\u0440\u0446\u0438\u0438", () => act("diary", r.recipe_id, { fraction: 0.5, basis: "portion" })), button("\u0412 \u0434\u043D\u0435\u0432\u043D\u0438\u043A: \xBD \u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430", () => act("diary", r.recipe_id, { fraction: 0.5, basis: "batch" })));
     const rating = el2("select");
     rating.setAttribute("aria-label", "\u041E\u0446\u0435\u043D\u043A\u0430 \u0440\u0435\u0446\u0435\u043F\u0442\u0430");
     for (let n2 = 1; n2 <= 5; n2++) {
@@ -534,15 +2015,16 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     c2.append(actions);
     return c2;
   }
-  function show(data) {
-    result = data;
-    results.replaceChildren();
-    if (data.fallback_reason) results.append(el2("p", "notice", "Azure-\u0434\u0438\u0437\u0430\u0439\u043D \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0438\u043B\u0438 \u043E\u0442\u043A\u043B\u043E\u043D\u0451\u043D. \u042D\u0442\u043E \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u0438\u0437 \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C\u044B\u0445 \u0448\u0430\u0431\u043B\u043E\u043D\u043E\u0432."));
-    for (const q2 of data.questions || []) results.append(el2("p", "notice", q2));
+  function show(data, target = results) {
+    if (target === results) result = data;
+    target.replaceChildren();
+    if (data.fallback_reason) target.append(el2("p", "notice", "\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u044B \u0440\u0435\u0446\u0435\u043F\u0442\u044B \u043F\u043E \u0433\u043E\u0442\u043E\u0432\u044B\u043C \u0448\u0430\u0431\u043B\u043E\u043D\u0430\u043C. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0434 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435\u043C."));
+    for (const q2 of data.questions || []) target.append(el2("p", "notice", q2));
+    if (!(data.recipes || []).length) target.append(el2("p", "notice", "\u041F\u043E\u0434\u0445\u043E\u0434\u044F\u0449\u0438\u0445 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0445 \u0431\u043B\u044E\u0434 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0432 \u0441\u0432\u043E\u0451\u043C \u0431\u043B\u044E\u0434\u0435."));
     const grid = el2("div", "recipe-grid kitchen-grid");
     grid.append(...(data.recipes || []).map(card));
-    results.append(grid);
-    if (data.day) results.append(dayCard(data));
+    target.append(grid);
+    if (data.day) target.append(dayCard(data));
   }
   function dayCard(data) {
     const box = el2("div", "panel");
@@ -568,7 +2050,6 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       const row = el2("article", "panel");
       row.append(el2("h3", "", "\u041D\u0435 \u043B\u044E\u0431\u043B\u044E: " + fact.name_ru), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438. \u0414\u0430\u0442\u0430 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0444\u0430\u043A\u0442\u0430 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0430."), button("\u0417\u0430\u0431\u044B\u0442\u044C", async () => {
         accept2(await call2("keto_propose_change", { event_type: "settings.update", payload: { disliked_food_ids: getState().profile.settings.disliked_food_ids.filter((id) => id !== fact.food_id) }, expected_revision: getState().revision }));
-        memory.append($3("proposals"));
       }));
       memory.append(row);
     }
@@ -576,44 +2057,110 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       const row = el2("article", "panel");
       row.append(el2("h3", "", "\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435: " + favorite.name_ru), button("\u0423\u0431\u0440\u0430\u0442\u044C \u0438\u0437 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E", async () => {
         accept2(await call2("keto_propose_change", { event_type: "settings.update", payload: { favorites: getState().profile.settings.favorites.filter((id) => id !== favorite.recipe_id) }, expected_revision: getState().revision }));
-        memory.append($3("proposals"));
       }));
       memory.append(row);
     }
-    if (info.pantry_origin) memory.append(el2("p", "muted", "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0430 \u0432\u0430\u043C\u0438: " + info.pantry_origin.at));
+    if (info.pantry_origin) memory.append(el2("p", "muted", "\u041C\u043E\u0438 \u0437\u0430\u043F\u0430\u0441\u044B \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u044B \u0432\u0430\u043C\u0438: " + info.pantry_origin.at));
     const pref = el2("input");
     pref.placeholder = "\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0440\u044B\u0431\u0443";
     pref.setAttribute("aria-label", "\u041A\u0430\u043A\u043E\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u043D\u0435 \u043B\u044E\u0431\u0438\u0442\u0435");
     memory.append(pref, button("\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C: \u043D\u0435 \u043B\u044E\u0431\u043B\u044E", async () => {
       const d2 = await call2("keto_chat", { message: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438, \u043D\u0435 \u043B\u044E\u0431\u043B\u044E " + pref.value, request_id: crypto.randomUUID().replaceAll("-", ""), thread_id: state2.active_thread || "main" });
       accept2(d2);
-      if (d2.proposal) {
-        memory.append($3("proposals"));
-        $3("proposals").scrollIntoView({ block: "nearest" });
-      }
     }));
-    for (const [title, value, view2] of [["\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", state2.profile.allergies.join(", ") || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B", "setup"], ["\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u0438\u0442\u0430\u043D\u0438\u044F", state2.profile.targets ? "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B" : "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D\u044B", "targets"], ["\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", state2.profile.settings.favorites.length + " \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", "recipes"], ["\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F", info.pantry.length + " \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "recipes"]]) {
+    for (const [title, value, view2] of [["\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", state2.profile.allergies.map((id) => ({ milk: "\u043C\u043E\u043B\u043E\u043A\u043E", egg: "\u044F\u0439\u0446\u0430", fish: "\u0440\u044B\u0431\u0430", wheat: "\u043F\u0448\u0435\u043D\u0438\u0446\u0430", gluten: "\u0433\u043B\u044E\u0442\u0435\u043D", soy: "\u0441\u043E\u044F", peanut: "\u0430\u0440\u0430\u0445\u0438\u0441", tree_nut: "\u043E\u0440\u0435\u0445\u0438", sesame: "\u043A\u0443\u043D\u0436\u0443\u0442" })[id] || "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u2014 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435").join(", ") || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B", "setup"], ["\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u0438\u0442\u0430\u043D\u0438\u044F", state2.profile.targets ? "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B" : "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D\u044B", "targets"], ["\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", state2.profile.settings.favorites.length + " \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", "recipes"], ["\u041C\u043E\u0438 \u0437\u0430\u043F\u0430\u0441\u044B", info.pantry.length + " \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "recipes"]]) {
       const row = el2("article", "panel");
       row.append(el2("h3", "", title), el2("p", "", value), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0439 \u043F\u0440\u043E\u0444\u0438\u043B\u044C; \u0434\u0430\u0442\u0430 \u043F\u0440\u0435\u0436\u043D\u0438\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u043C\u043E\u0436\u0435\u0442 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u043E\u0432\u0430\u0442\u044C."), button("\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C / \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C", async () => setView2(view2)));
       memory.append(row);
     }
   }
-  return { render() {
+  function invalidatePageLookups() {
+    searchNumber++;
+    avoidSearchNumber++;
+    sourceToken++;
+    parseNumber++;
+    clearTimeout(product.timer);
+    clearTimeout(avoid.timer);
+    parsing = false;
+    parseButton.disabled = false;
+  }
+  function cancelSavedPreview() {
+    savedToken++;
+    savedPreview.hidden = true;
+    savedPreview.replaceChildren();
+  }
+  function previewSavedPantry(name2) {
+    const state2 = getState(), stock2 = state2?.kitchen?.pantry;
+    if (!Array.isArray(stock2)) throw Error("\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0437\u0430\u043F\u0430\u0441\u044B \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B.");
+    const stamp = state2.revision, token = ++savedToken;
+    savedPreview.hidden = false;
+    savedPreview.replaceChildren();
+    savedPreview.append(el2("h2", "", "\u041F\u043E\u0434\u0431\u043E\u0440 \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u043C \u0437\u0430\u043F\u0430\u0441\u0430\u043C"), el2("p", "", `\u0414\u043E\u0431\u0430\u0432\u043B\u0435\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \xAB${name2}\xBB. \u041B\u0438\u0447\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u043F\u043E\u043A\u0430 \u043D\u0435 \u0434\u043E\u043F\u0443\u0449\u0435\u043D\u044B \u043A \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u043C \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438; \u0438\u0445 \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0432 \u0441\u0432\u043E\u0451\u043C \u0431\u043B\u044E\u0434\u0435.`), el2("p", "muted", dirty ? "\u0412\u0430\u0448 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043A\u0443\u0445\u043D\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435. \u041F\u043E\u0434\u0431\u043E\u0440 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0437\u0430\u043F\u0430\u0441\u044B \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E." : "\u041F\u043E\u0434\u0431\u043E\u0440 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u0437\u0430\u043F\u0430\u0441\u044B \u0438 \u0442\u0435\u043A\u0443\u0449\u0438\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u043D\u0438\u0436\u0435."));
+    const list = el2("ul");
+    for (const i of stock2) list.append(el2("li", "", (i.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442") + " \xB7 " + (i.grams == null ? "\u043C\u0430\u0441\u0441\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430" : number2(i.grams) + " \u0433")));
+    savedPreview.append(list);
+    const output = el2("div");
+    const start2 = button("\u041D\u0430\u0447\u0430\u0442\u044C \u043F\u043E\u0434\u0431\u043E\u0440 \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u043C \u0437\u0430\u043F\u0430\u0441\u0430\u043C", async () => {
+      if (busy2) return;
+      const now = getState();
+      if (now?.revision !== stamp) {
+        previewSavedPantry(name2);
+        throw Error("\u0417\u0430\u043F\u0430\u0441\u044B \u0438\u043B\u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0431\u043D\u043E\u0432\u043B\u0451\u043D\u043D\u044B\u0439 \u0441\u043F\u0438\u0441\u043E\u043A \u0438 \u043D\u0430\u0447\u043D\u0438\u0442\u0435 \u043F\u043E\u0434\u0431\u043E\u0440 \u0435\u0449\u0451 \u0440\u0430\u0437.");
+      }
+      const chosen = selectedAvoid || avoidFoods.find((f) => avoid.value === f.name_ru + " \xB7 " + (states[f.state] || f.state));
+      if (avoid.value && !chosen) throw Error("\u0414\u043B\u044F \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.");
+      const spec = { mode: "pantry_only", meal: meal.value, servings: decimal(servings.value, 1, 6), time_budget: decimal(time.value, 5, 120), equipment: equipment.value, max_missing_items: decimal(missing.value, 0, 5), pantry: now.kitchen.pantry.map(({ food_id, state: state3, grams }) => ({ food_id, state: state3, grams })), avoid: chosen ? [chosen.food_id] : [] };
+      const e = epoch();
+      busy2 = true;
+      start2.disabled = true;
+      generate.disabled = true;
+      output.replaceChildren(el2("p", "muted", "\u041F\u043E\u0434\u0431\u0438\u0440\u0430\u044E \u0431\u043B\u044E\u0434\u0430\u2026"));
+      try {
+        const d2 = await call2("keto_kitchen", { action: "generate", spec, thread_id: now.active_thread || "main", expected_revision: now.revision, request_id: crypto.randomUUID().replaceAll("-", "") });
+        if (e !== epoch() || token !== savedToken) return;
+        accept2(d2);
+        show(d2, output);
+      } finally {
+        if (e === epoch()) {
+          busy2 = false;
+          generate.disabled = false;
+          if (token === savedToken) start2.disabled = false;
+        }
+      }
+    });
+    savedPreview.append(start2, output);
+    savedPreview.scrollIntoView?.({ block: "nearest" });
+  }
+  return { chooseMode(mode) {
+    if (!kitchenModes.some(([id]) => id === mode)) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043F\u043E\u0441\u043E\u0431 \u043F\u043E\u0434\u0431\u043E\u0440\u0430.");
+    form.elements.namedItem("mode").value = mode;
+    specDirty = true;
+    generateStatus.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0443\u0441\u043B\u043E\u0432\u0438\u044F \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041F\u0440\u0435\u0434\u043B\u043E\u0436\u0438\u0442\u044C \u0431\u043B\u044E\u0434\u0430\xBB.";
+  }, previewSavedPantry, cancelSavedPreview, invalidatePageLookups, render() {
     const state2 = getState();
     if (!dirty) {
       pantry = (state2?.kitchen?.pantry || []).map((i) => ({ ...i }));
       renderChips();
     }
     renderMemory();
-  }, async load() {
-    const e = epoch();
+  }, async load(isCurrent = () => true) {
+    const e = epoch(), searchAtStart = searchNumber, draft = () => JSON.stringify([meal.value, servings.value, time.value, missing.value, equipment.value, avoid.value, free.value, product.value, ...Array.from(modes.children, (x) => Boolean(x.children[0]?.checked))]), draftAtStart = draft();
     try {
-      const [d2, f] = await Promise.all([call2("keto_kitchen", { action: "status", thread_id: getState()?.active_thread || "main" }), call2("keto_kitchen", { action: "foods" })]);
-      if (e !== epoch()) return;
-      foods = f.foods;
+      let d2 = {};
+      try {
+        d2 = await call2("keto_kitchen", { action: "status", thread_id: getState()?.active_thread || "main" });
+      } catch {
+      }
+      if (e !== epoch() || !isCurrent()) return false;
+      const f = await call2("keto_kitchen", { action: "foods" });
+      if (e !== epoch() || !isCurrent()) return false;
+      allFoods = f.foods;
+      foods = filterEverydayFoods(allFoods, product.value);
       foodOptions();
-      if (d2.spec) {
-        for (const name2 of ["meal", "servings", "equipment", "cuisine"]) {
+      status.textContent = foods.length ? product.value.trim() ? `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.` : "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u043F\u043E\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B." : "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438, \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u0438\u043B\u0438 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA.";
+      const unchanged = !dirty && !specDirty && draft() === draftAtStart;
+      if (d2.spec && unchanged) {
+        for (const name2 of ["meal", "servings", "equipment"]) {
           const node = form.elements.namedItem(name2);
           if (node) node.value = d2.spec[name2];
         }
@@ -621,22 +2168,53 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         missing.value = d2.spec.max_missing_items;
         form.elements.namedItem("mode").value = d2.spec.mode;
         equipmentHint.textContent = equipmentNotes[equipment.value] || "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u0438\u0431\u043E\u0440, \u043A\u043E\u0442\u043E\u0440\u044B\u043C \u0431\u0443\u0434\u0435\u0442\u0435 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C\u0441\u044F.";
-        pantry = d2.spec.pantry.map((i) => ({ ...i, name_ru: foods.find((f2) => f2.food_id === i.food_id)?.name_ru || getState().kitchen.pantry.find((f2) => f2.food_id === i.food_id)?.name_ru || i.food_id }));
+        pantry = d2.spec.pantry.map((i) => ({ ...i, name_ru: foods.find((f2) => f2.food_id === i.food_id)?.name_ru || getState().kitchen.pantry.find((f2) => f2.food_id === i.food_id)?.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442" }));
         renderChips();
       }
-      if (d2.recipes) show(d2);
-    } catch (e2) {
-      status.textContent = e2.message;
+      if (d2.recipes && unchanged) show(d2);
+      return true;
+    } catch (err) {
+      if (e === epoch() && isCurrent()) status.textContent = err.message;
+      return false;
     }
   }, reset() {
+    cancelSavedPreview();
     pantry = [];
+    foods = [];
+    allFoods = [];
+    trustedStart = 0;
+    datalist.replaceChildren();
+    trustedList.replaceChildren();
+    trustedList.hidden = true;
+    status.textContent = "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\u2026";
     result = null;
     dirty = false;
+    specDirty = false;
     busy2 = false;
+    parsing = false;
+    parseButton.disabled = false;
+    parseNumber++;
+    searchNumber++;
+    sourceToken++;
+    sourceResults.replaceChildren();
+    review.replaceChildren();
+    review.hidden = true;
+    avoidSearchNumber++;
+    selectedFood = null;
+    add.disabled = true;
+    browsing = false;
+    selectedAvoid = null;
+    avoidFoods = [];
+    avoidList.replaceChildren();
+    avoid.value = "";
     localEpoch++;
+    servings.value = "1";
+    time.value = "20";
+    missing.value = "2";
     clearTimeout(product.timer);
     clearTimeout(avoid.timer);
     results.replaceChildren();
+    generateStatus.textContent = "";
     questions.replaceChildren();
     product.value = "";
     free.value = "";
@@ -2572,8 +4150,11 @@ function linkSlider(element, inputs, { min, max, step, labels: labels2, localWin
 }
 
 // cloudflare-saas/public/routes.js
-var ROUTES = ["chat", "today", "diary", "more", "recipes", "settings", "sources", "reminders", "admin", "developer", "targets", "knowledge", "memory", "setup-consent", "setup-about", "setup-restrictions", "setup-targets"];
-var MAIN = ["chat", "today", "diary", "more"];
+var ROUTES = ["chat", "today", "diary", "more", "recipes", "products", "settings", "sources", "reminders", "admin", "developer", "targets", "knowledge", "memory", "setup-consent", "setup-about", "setup-restrictions", "setup-targets"];
+var MAIN_ROUTES = ["chat", "diary", "recipes", "products"];
+function mainTab(route) {
+  return route === "today" ? "recipes" : MAIN_ROUTES.includes(route) ? route : "more";
+}
 function routeValue(hash, fallback = "chat") {
   const value = String(hash || "").replace(/^#/, "");
   return ROUTES.includes(value) ? value : fallback;
@@ -2581,61 +4162,123 @@ function routeValue(hash, fallback = "chat") {
 function initialRoute(state2, hash) {
   const g = state2.guidance;
   if (g && !g.ready) {
-    if (routeValue(hash, "") === "recipes") return "recipes";
+    if (["recipes", "products"].includes(routeValue(hash, ""))) return routeValue(hash, "");
     return "setup-" + g.stage;
   }
   return routeValue(hash, state2.ui?.home || "chat");
 }
 function createRouter({ location: location2, history: history2, listen, render, closeDialog = () => {
 }, fallback = () => "chat" }) {
-  let current = "", depth = 0, origin = "more";
+  let current = "", depth = 0, origin = "more", closingDialog = false, pendingDialog = null, pendingRoute = null;
   function display(route, reason) {
     depth = history2.state?.ketoDepth || 0;
     origin = history2.state?.ketoOrigin || origin;
-    if (!history2.state?.ketoDialog) closeDialog();
+    closeDialog(history2.state?.ketoDialog || null, { restore: route === current });
     if (route === current && reason === "history") return;
     current = route;
-    depth = history2.state?.ketoDepth || 0;
     render(route, { reason, origin, depth });
   }
   function go(value, { replace = false, reason = "user" } = {}) {
     const route = routeValue("#" + value, fallback());
-    if (route !== current && !MAIN.includes(route)) origin = current || "more";
+    if (closingDialog) {
+      pendingRoute = { route, replace, reason };
+      pendingDialog = null;
+      return;
+    }
     if (route === current) return;
-    const swap = replace || MAIN.includes(current) && MAIN.includes(route);
-    const nextDepth = swap ? depth : depth + 1;
+    const inDialog = Boolean(history2.state?.ketoDialog);
+    if (route === "today" && current !== "recipes" && !replace && !inDialog) {
+      depth = 0;
+      history2.replaceState({ ketoRoute: "recipes", ketoDepth: 0, ketoOrigin: "more" }, "", "#recipes");
+    }
+    if (!MAIN_ROUTES.includes(route)) origin = route === "today" ? "recipes" : current || "more";
+    const swap = replace || MAIN_ROUTES.includes(route) || inDialog;
+    const nextDepth = MAIN_ROUTES.includes(route) ? 0 : swap ? Math.max(0, depth - (inDialog ? 1 : 0)) : depth + 1;
     history2[swap ? "replaceState" : "pushState"]({ ketoRoute: route, ketoDepth: nextDepth, ketoOrigin: origin }, "", "#" + route);
     display(route, reason);
   }
   function back() {
+    if (history2.state?.ketoDialog) {
+      if (!closingDialog) {
+        closingDialog = true;
+        history2.back();
+      }
+      return;
+    }
+    if (current === "today" && depth === 0) {
+      go("recipes", { replace: true });
+      return;
+    }
     if (depth > 0) {
       history2.back();
       return;
     }
-    go(current === "recipes" ? origin : current === "setup-consent" ? "recipes" : current.startsWith("setup-") ? ["setup-consent", "setup-about", "setup-restrictions", "setup-targets"][Math.max(0, ["setup-consent", "setup-about", "setup-restrictions", "setup-targets"].indexOf(current) - 1)] : "more", { replace: true });
+    go(current === "more" ? "chat" : current === "setup-consent" ? "recipes" : current.startsWith("setup-") ? ["setup-consent", "setup-about", "setup-restrictions", "setup-targets"][Math.max(0, ["setup-consent", "setup-about", "setup-restrictions", "setup-targets"].indexOf(current) - 1)] : "more", { replace: true });
   }
-  listen("popstate", () => display(routeValue(location2.hash, fallback()), "history"));
+  listen("popstate", () => {
+    closingDialog = false;
+    display(routeValue(location2.hash, fallback()), "history");
+    if (pendingRoute) {
+      const next = pendingRoute;
+      pendingRoute = null;
+      go(next.route, next);
+    } else if (pendingDialog) {
+      const kind = pendingDialog;
+      pendingDialog = null;
+      openDialog(kind);
+      closeDialog(kind, { restore: false });
+    }
+  });
   listen("hashchange", () => {
     const valid = routeValue(location2.hash, fallback());
     if (location2.hash !== "#" + valid) history2.replaceState({ ketoRoute: valid, ketoDepth: depth }, "", "#" + valid);
     display(valid, "history");
   });
-  return { go, back, openDialog() {
-    history2.pushState({ ketoRoute: current, ketoDepth: depth + 1, ketoOrigin: origin, ketoDialog: "recipe" }, "", "#" + current);
-    depth++;
-  }, closeDialog() {
-    if (history2.state?.ketoDialog) history2.back();
-    else closeDialog();
-  }, get current() {
-    return current;
-  }, reset() {
-    current = "";
-    depth = 0;
-    origin = "more";
-    history2.replaceState(null, "", location2.pathname + location2.search);
-  }, parent() {
-    return current === "recipes" ? origin : current.startsWith("setup-") ? "setup" : "more";
-  } };
+  function openDialog(kind = "recipe") {
+    if (closingDialog) {
+      pendingDialog = kind;
+      return false;
+    }
+    const replacing = Boolean(history2.state?.ketoDialog);
+    history2[replacing ? "replaceState" : "pushState"]({ ketoRoute: current, ketoDepth: replacing ? depth : depth + 1, ketoOrigin: origin, ketoDialog: kind }, "", "#" + current);
+    if (!replacing) depth++;
+    return true;
+  }
+  return {
+    go,
+    back,
+    openDialog,
+    dismissDialog() {
+      if (history2.state?.ketoDialog) {
+        depth = Math.max(0, depth - 1);
+        history2.replaceState({ ketoRoute: current, ketoDepth: depth, ketoOrigin: origin }, "", "#" + current);
+      }
+      closeDialog(null, { restore: true });
+    },
+    closeDialog() {
+      if (closingDialog) return;
+      if (history2.state?.ketoDialog) {
+        closingDialog = true;
+        closeDialog(null, { restore: true });
+        history2.back();
+      } else closeDialog(null, { restore: true });
+    },
+    get current() {
+      return current;
+    },
+    reset() {
+      current = "";
+      depth = 0;
+      origin = "more";
+      closingDialog = false;
+      pendingDialog = null;
+      pendingRoute = null;
+      history2.replaceState(null, "", location2.pathname + location2.search);
+    },
+    parent() {
+      return current === "today" ? "recipes" : current.startsWith("setup-") ? "setup" : origin || "more";
+    }
+  };
 }
 
 // cloudflare-saas/public/setup-ui.js
@@ -2843,12 +4486,8 @@ function setupGuidance({ $: $3, el: el2, getState, call: call2, accept: accept2,
     }
     if (route.startsWith("setup")) stage(route);
   }
-  function showProposal(data, where) {
+  function showProposal2(data) {
     accept2(data);
-    $3(where).append($3("proposals"));
-    $3("proposals").setAttribute("tabindex", "-1");
-    $3("proposals").focus();
-    $3("proposals").scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
   $3("baseline-form").onsubmit = (e) => {
     e.preventDefault();
@@ -2857,7 +4496,7 @@ function setupGuidance({ $: $3, el: el2, getState, call: call2, accept: accept2,
       if (!picked("activity") || !picked("planning-goal") || !picked("planning-mode") || !$3("baseline-category").value) throw Error("\u042F\u0432\u043D\u043E \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043A\u043E\u044D\u0444\u0444\u0438\u0446\u0438\u0435\u043D\u0442, \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u044C, \u0446\u0435\u043B\u044C \u0438 \u0440\u0435\u0436\u0438\u043C.");
       const values2 = { baseline: { age_years: numeric($3("baseline-age").value, { min: 0, max: 120 }), height_cm: numeric($3("baseline-height").value, { min: 80, max: 240 }), weight_kg: numeric($3("baseline-weight").value, { min: 20, max: 400 }), equation_category: $3("baseline-category").value, activity: picked("activity"), measured_at: $3("baseline-measured").value }, choices: { goal: picked("planning-goal"), mode: picked("planning-mode") }, timezone: $3("baseline-zone").value };
       if ($3("baseline-name").value.trim()) values2.display_name = $3("baseline-name").value.trim();
-      showProposal(await call2("keto_guidance", { action: "baseline", values: values2 }), "setup-confirmations");
+      showProposal2(await call2("keto_guidance", { action: "baseline", values: values2 }), "setup-confirmations");
     });
   };
   $3("calculate-guidance").onclick = () => run2(async () => {
@@ -2904,7 +4543,7 @@ function setupGuidance({ $: $3, el: el2, getState, call: call2, accept: accept2,
   });
   $3("apply-targets").onclick = () => run2(async () => {
     if (!lastPreview?.preview_hash) throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0439\u0442\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B.");
-    showProposal(await call2("keto_guidance", { action: "propose", preview_hash: lastPreview.preview_hash }), "target-confirmations");
+    showProposal2(await call2("keto_guidance", { action: "propose", preview_hash: lastPreview.preview_hash }), "target-confirmations");
   });
   return { initial: initialRoute, render, resolve(route) {
     if (route === "onboarding") return "setup-restrictions";
@@ -2927,287 +4566,104 @@ function setupGuidance({ $: $3, el: el2, getState, call: call2, accept: accept2,
   } };
 }
 
-// cloudflare-saas/public/media.js
-var RecorderController = class {
-  constructor({ mediaDevices, Recorder, onState, onAudio, clock = () => Date.now(), interval = (fn, ms) => globalThis.setInterval(fn, ms), clear = (id) => globalThis.clearInterval(id) }) {
-    Object.assign(this, { mediaDevices, Recorder, onState, onAudio, clock, interval, clear });
-    this.generation = 0;
-    this.mode = "idle";
-  }
-  emit(mode, message = "") {
-    this.mode = mode;
-    this.onState({ mode, message, seconds: Math.min(60, Math.floor((this.clock() - (this.started ?? this.clock())) / 1e3)) });
-  }
-  release() {
-    if (this.timer) this.clear(this.timer);
-    this.timer = null;
-    for (const track of this.stream?.getTracks() || []) {
-      track.onended = null;
-      track.stop();
+// cloudflare-saas/public/shell-ui.js
+function createScrollMemory() {
+  const routes = /* @__PURE__ */ new Map(), threads = /* @__PURE__ */ new Map();
+  return {
+    saveRoute(key, top) {
+      if (key) routes.set(key, Math.max(0, Number(top) || 0));
+    },
+    route: (key) => routes.get(key) || 0,
+    saveThread(key, top) {
+      if (key) threads.set(key, Math.max(0, Number(top) || 0));
+    },
+    thread: (key) => threads.get(key),
+    clear() {
+      routes.clear();
+      threads.clear();
     }
-    this.stream = null;
-  }
-  async start() {
-    if (this.mode !== "idle") return;
-    const generation = ++this.generation;
-    this.emit("permission", "\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438.");
-    try {
-      if (!this.mediaDevices?.getUserMedia || !this.Recorder) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0434\u0438\u043A\u0442\u043E\u0432\u043A\u0443 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u044B \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442.");
-      const mime = ["audio/mp4", "audio/webm"].find((x) => this.Recorder.isTypeSupported(x));
-      if (!mime) throw Error("\u042D\u0442\u043E\u0442 \u0431\u0440\u0430\u0443\u0437\u0435\u0440 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u044C MP4/WebM. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u0443.");
-      const stream = await this.mediaDevices.getUserMedia({ audio: true });
-      if (generation !== this.generation) {
-        stream.getTracks().forEach((t) => t.stop());
-        return;
+  };
+}
+function chatScrollPosition({ previousThread, nextThread, previousKey, nextKey, top, height, clientHeight, saved, submitted = false }) {
+  const changed = previousThread !== nextThread;
+  if (changed) return { render: true, bottom: saved === void 0, top: saved || 0 };
+  const render = previousKey !== nextKey;
+  return { render, bottom: render && (submitted || height - clientHeight - top < 80), top };
+}
+function createDialogController({ $: $3, getRouter, activeElement = () => document.activeElement }) {
+  const ids = { intake: "intake-dialog", recipe: "recipe-dialog", help: "help-dialog", proposal: "proposal-dialog", attachments: "attachments-dialog", topic: "topic-dialog", image: "image-link-details", source: "source-recipe-dialog" };
+  let current = null, returnFocus = null, version2 = 0;
+  const visited = /* @__PURE__ */ new Set();
+  function sync(kind, { restore = true } = {}) {
+    const previous = current;
+    if (kind && !visited.has(kind)) kind = null;
+    if (kind !== current) version2++;
+    for (const [key, id] of Object.entries(ids)) {
+      const dialog = $3(id);
+      if (dialog?.open && key !== kind) dialog.close();
+    }
+    if (kind && ids[kind]) {
+      const dialog = $3(ids[kind]);
+      if (!dialog.open) {
+        if (!current) returnFocus = activeElement();
+        dialog.showModal();
       }
-      this.stream = stream;
-      for (const track of stream.getTracks()) track.onended = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C.");
-      const recorder = new this.Recorder(stream, { mimeType: mime, audioBitsPerSecond: 64e3 });
-      this.recorder = recorder;
-      this.parts = [];
-      this.bytes = 0;
-      this.started = this.clock();
-      recorder.ondataavailable = (e) => {
-        if (generation !== this.generation) return;
-        if (e.data?.size) {
-          this.parts.push(e.data);
-          this.bytes += e.data.size;
-          if (this.bytes > 1e6) this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u043A\u043E\u0440\u043E\u0447\u0435.");
-        }
-      };
-      recorder.onerror = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
-      recorder.onstop = async () => {
-        this.release();
-        if (generation !== this.generation) return;
-        try {
-          const blob = new Blob(this.parts, { type: mime });
-          this.parts = [];
-          if (!blob.size) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0443\u0441\u0442\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
-          if (blob.size > 1e6) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411.");
-          this.abort = new AbortController();
-          this.emit("recognizing", "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u044E\u2026 \u041C\u043E\u0436\u043D\u043E \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.");
-          const text = await this.onAudio(blob, mime, this.abort.signal);
-          if (generation !== this.generation) return;
-          this.emit("idle", "\u0422\u0435\u043A\u0441\u0442 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C\xBB.");
-        } catch (e) {
-          if (generation === this.generation) this.emit("idle", e.name === "AbortError" ? "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u0432\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E." : e.message);
-        } finally {
-          this.parts = [];
-        }
-      };
-      recorder.start(250);
-      this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
-      this.timer = this.interval(() => {
-        this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
-        if (this.clock() - this.started >= 6e4) this.stop();
-      }, 250);
-    } catch (e) {
-      this.release();
-      if (generation === this.generation) this.emit("idle", e.name === "NotAllowedError" ? "\u041D\u0435\u0442 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u043D\u0430 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0435\u0433\u043E \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0441\u0430\u0439\u0442\u0430 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0442\u0435\u043A\u0441\u0442." : e.message);
-    }
-  }
-  stop() {
-    if (this.mode === "recording" && this.recorder?.state === "recording") {
-      this.recorder.stop();
-      this.release();
-    }
-  }
-  cancel(message = "\u0417\u0430\u043F\u0438\u0441\u044C \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430.") {
-    this.generation++;
-    this.abort?.abort();
-    if (this.recorder?.state === "recording") this.recorder.stop();
-    this.release();
-    this.parts = [];
-    this.emit("idle", message);
-  }
-};
-async function blobBase64(blob) {
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let text = "";
-  for (const b2 of bytes) text += String.fromCharCode(b2);
-  return btoa(text);
-}
-async function prepareImage(file, { bitmap = globalThis.createImageBitmap, document: document2 = globalThis.document, URL: URL2 = globalThis.URL, Image = globalThis.Image } = {}) {
-  if (!file || !file.type?.startsWith("image/") || file.size > 12e6) throw Error("\u041D\u0443\u0436\u043D\u043E \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0434\u043E 12 \u041C\u0411.");
-  let source, url;
-  try {
-    if (bitmap) source = await bitmap(file);
-    else {
-      url = URL2.createObjectURL(file);
-      source = await new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = url;
-      });
-    }
-    const width = source.width || source.naturalWidth, height = source.height || source.naturalHeight;
-    if (!width || !height || width * height > 24e6) throw Error("\u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0435.");
-    const canvas = document2.createElement("canvas");
-    let scale = Math.min(1, 1024 / Math.max(width, height));
-    canvas.width = Math.max(1, Math.round(width * scale));
-    canvas.height = Math.max(1, Math.round(height * scale));
-    canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
-    const result = canvas.toDataURL("image/jpeg", 0.78);
-    if (result.length > 13e5) throw Error("\u041F\u043E\u0441\u043B\u0435 \u0441\u0436\u0430\u0442\u0438\u044F \u0444\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043C\u0435\u043D\u044C\u0448\u0438\u0439 \u0441\u043D\u0438\u043C\u043E\u043A.");
-    return result;
-  } catch (e) {
-    throw Error(e.message?.includes("\u041C\u0411") ? e.message : "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u0444\u043E\u0442\u043E. \u0414\u043B\u044F HEIC \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u044D\u043A\u0441\u043F\u043E\u0440\u0442 \u0432 JPEG/PNG \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
-  } finally {
-    source?.close?.();
-    if (url) URL2.revokeObjectURL(url);
-  }
-}
-function setupChatImages({ root, $: $3, prepare = prepareImage, link, epoch, setImage, notify: notify2 }) {
-  let generation = 0;
-  const current = (g, e) => g === generation && e === epoch();
-  function closeLink() {
-    const d2 = $3("image-link-details");
-    if (typeof d2.close === "function") {
-      if (d2.open) d2.close();
-    } else d2.open = false;
-  }
-  function openLink() {
-    const d2 = $3("image-link-details");
-    if (typeof d2.showModal === "function") {
-      if (!d2.open) d2.showModal();
-    } else d2.open = true;
-    $3("image-link-url").focus();
-  }
-  function reset() {
-    generation++;
-    closeLink();
-    $3("image-link-load").disabled = false;
-    setImage(null);
-    $3("message").required = true;
-    $3("photo-preview").hidden = true;
-    $3("photo-preview-image").removeAttribute("src");
-    $3("photo").value = "";
-    $3("photo-status").textContent = "";
-    $3("image-link-url").value = "";
-    $3("image-drop-zone").classList.remove("dragging");
-  }
-  function display(value) {
-    setImage(value);
-    $3("message").required = false;
-    $3("photo-preview-image").src = value;
-    $3("photo-preview").hidden = false;
-    $3("photo-status").textContent = "\u0424\u043E\u0442\u043E \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E. \u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0441 \u0432\u0430\u0448\u0438\u043C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435\u043C.";
-  }
-  async function attach(file) {
-    const g = ++generation, e = epoch();
-    try {
-      const value = await prepare(file);
-      if (current(g, e)) display(value);
-    } catch (error) {
-      if (current(g, e)) notify2(error.message);
-    }
-  }
-  function first(files) {
-    const images = [...files].filter((f) => f.type?.startsWith("image/"));
-    if (images.length) {
-      if (images.length > 1) notify2("\u0417\u0430 \u043E\u0434\u043D\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u043E\u0434\u043D\u043E \u0444\u043E\u0442\u043E. \u0412\u044B\u0431\u0440\u0430\u043D\u043E \u043F\u0435\u0440\u0432\u043E\u0435.");
-      void attach(images[0]);
-      return true;
-    }
-    if (files.length) notify2("\u041D\u0443\u0436\u0435\u043D \u0444\u0430\u0439\u043B \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F. \u0421\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u043C\u043E\u0436\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0442\u0435\u043A\u0441\u0442\u043E\u043C \u0438\u043B\u0438 \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442\u043E\u043C.");
-    return false;
-  }
-  function offerUrl(value) {
-    const url = String(value || "").split("\n").find((x) => x.trim() && !x.startsWith("#"));
-    if (!url) return;
-    try {
-      if (new URL(url).protocol !== "https:") throw Error();
-      $3("image-link-url").value = url;
-      openLink();
-      notify2("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u0441\u044B\u043B\u043A\u0443 \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0444\u043E\u0442\u043E \u043F\u043E \u0441\u0441\u044B\u043B\u043A\u0435\xBB.");
-    } catch {
-      notify2("\u041D\u0443\u0436\u043D\u0430 \u043F\u0440\u044F\u043C\u0430\u044F \u043F\u0443\u0431\u043B\u0438\u0447\u043D\u0430\u044F HTTPS-\u0441\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435.");
-    }
-  }
-  $3("photo").onchange = (e) => first(e.target.files || []);
-  $3("photo-remove").onclick = reset;
-  root.addEventListener("paste", (e) => {
-    const files = [...e.clipboardData?.items || []].filter((x) => x.kind === "file" && x.type.startsWith("image/")).map((x) => x.getAsFile()).filter(Boolean);
-    if (!files.length) {
-      const text2 = (e.clipboardData?.getData("text/plain") || "").trim();
-      if (/^https:\/\/[^\s]+$/i.test(text2) && (/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(text2) || /^https:\/\/(?:images\.unsplash\.com|images\.pexels\.com|upload\.wikimedia\.org)\//i.test(text2))) offerUrl(text2);
+      current = kind;
       return;
     }
-    const text = e.clipboardData?.getData("text/plain");
-    if (!text) e.preventDefault();
-    first(files);
-  });
-  const zone = $3("image-drop-zone");
-  zone.onclick = () => $3("photo").click();
-  zone.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      $3("photo").click();
+    current = null;
+    if (previous && restore) {
+      const target = returnFocus?.isConnected && !returnFocus.closest("[hidden]") ? returnFocus : !$3("pending-open")?.hidden ? $3("pending-open") : $3("content");
+      target?.focus({ preventScroll: true });
     }
-  });
-  const relevant = (e) => [...e.dataTransfer?.types || []].some((t) => ["Files", "text/uri-list"].includes(t));
-  root.addEventListener("dragover", (e) => {
-    if (relevant(e)) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "copy";
-      zone.classList.add("dragging");
-    }
-  });
-  root.addEventListener("dragleave", (e) => {
-    if (!root.contains(e.relatedTarget)) zone.classList.remove("dragging");
-  });
-  root.addEventListener("drop", (e) => {
-    if (!relevant(e)) return;
-    e.preventDefault();
-    zone.classList.remove("dragging");
-    if (!first(e.dataTransfer.files || [])) offerUrl(e.dataTransfer.getData("text/uri-list"));
-  });
-  $3("image-link-open").onclick = openLink;
-  $3("image-link-close").onclick = () => {
-    generation++;
-    closeLink();
-    $3("image-link-load").disabled = false;
-  };
-  $3("image-link-details").addEventListener("cancel", () => {
-    generation++;
-    $3("image-link-load").disabled = false;
-  });
-  $3("image-link-load").onclick = async () => {
-    const g = ++generation, e = epoch(), url = $3("image-link-url").value;
-    $3("image-link-load").disabled = true;
-    try {
-      const value = await link(url);
-      if (current(g, e)) {
-        display(value);
-        closeLink();
-      }
-    } catch (error) {
-      if (current(g, e)) notify2(error.message);
-    } finally {
-      if (current(g, e)) $3("image-link-load").disabled = false;
-    }
-  };
-  return { reset, attach, offerUrl, invalidate() {
-    generation++;
+    if (previous) returnFocus = null;
+  }
+  function open(kind, focus) {
+    if (!ids[kind]) return;
+    visited.add(kind);
+    if (!current) returnFocus = activeElement();
+    if (getRouter().openDialog(kind) === false) return;
+    sync(kind, { restore: false });
+    if (focus) $3(focus)?.focus({ preventScroll: true });
+  }
+  return { open, sync, dismiss: () => getRouter().dismissDialog(), close: () => getRouter().closeDialog(), reset() {
+    sync(null, { restore: false });
+    returnFocus = null;
+    visited.clear();
+  }, get current() {
+    return current;
+  }, get version() {
+    return version2;
   } };
 }
 
 // cloudflare-saas/public/mobile-ui.js
 var FAQ = [["\u041C\u0438\u043A\u0440\u043E\u0444\u043E\u043D", "\u041D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041C\u0438\u043A\u0440\u043E\u0444\u043E\u043D\xBB, \u0440\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C, \u0437\u0430\u0442\u0435\u043C \xAB\u0421\u0442\u043E\u043F\xBB. \u0422\u0435\u043A\u0441\u0442 \u043F\u043E\u044F\u0432\u0438\u0442\u0441\u044F \u0432 \u043F\u043E\u043B\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0438 \u043E\u0442\u043F\u0440\u0430\u0432\u044C\u0442\u0435 \u0441\u0430\u043C\u0438. \u041F\u0440\u0438 \u0437\u0430\u043A\u0440\u044B\u0442\u0438\u0438 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B \u0437\u0430\u043F\u0438\u0441\u044C \u043E\u0442\u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F."], ["PDF \u0438 Telegram", "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E, \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C PDF\xBB. \u0417\u0430\u0442\u0435\u043C \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \xAB\u041F\u043E\u0434\u0435\u043B\u0438\u0442\u044C\u0441\u044F PDF\xBB \u043E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0441\u0438\u0441\u0442\u0435\u043C\u043D\u0443\u044E \u043F\u0430\u043D\u0435\u043B\u044C \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 Telegram, \u0435\u0441\u043B\u0438 \u043E\u043D \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D. \u0415\u0441\u043B\u0438 \u043E\u0431\u043C\u0435\u043D \u0444\u0430\u0439\u043B\u0430\u043C\u0438 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D, \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435 PDF."], ["\u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u044C \u0438 \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u044F", "\u0421\u043E\u0437\u0434\u0430\u0439\u0442\u0435 \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u0435 \u0438 \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435 .ics. \u041F\u043E\u0441\u043B\u0435 \u0438\u043C\u043F\u043E\u0440\u0442\u0430 \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u044F \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442 \u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u044C \u0441 \u0435\u0433\u043E \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F\u043C\u0438. \u0418\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0432 KETO \u043D\u0435 \u043E\u0431\u043D\u043E\u0432\u043B\u044F\u044E\u0442 \u0438\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0435 \u0441\u043E\u0431\u044B\u0442\u0438\u0435 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438. \u041F\u043E\u0432\u0442\u043E\u0440\u0435\u043D\u0438\u044F \u044D\u043A\u0441\u043F\u043E\u0440\u0442\u0438\u0440\u0443\u044E\u0442\u0441\u044F \u043D\u0430 \u0434\u0432\u0430 \u0433\u043E\u0434\u0430."], ["\u0422\u0435\u043C\u044B \u0438 \u043F\u0430\u043C\u044F\u0442\u044C", "\u041A\u0430\u0436\u0434\u0430\u044F \u0442\u0435\u043C\u0430 \u0445\u0440\u0430\u043D\u0438\u0442 \u0434\u043E 60 \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0445 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439. \u041E\u0431\u0449\u0438\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u044F \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0442 \u0432\u043E \u0432\u0441\u0435\u0445 \u0442\u0435\u043C\u0430\u0445. \u0423\u0434\u0430\u043B\u0435\u043D\u0438\u0435 \u0442\u0435\u043C\u044B \u043D\u0435 \u0443\u0434\u0430\u043B\u044F\u0435\u0442 \u043F\u0440\u043E\u0444\u0438\u043B\u044C. \u0412\u0441\u0435\u0433\u043E \u0434\u043E 12 \u0442\u0435\u043C \u0438 200 \u041A\u0411 \u043E\u0431\u0449\u0435\u0439 \u0438\u0441\u0442\u043E\u0440\u0438\u0438; \u0441\u0442\u0430\u0440\u044B\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0443\u0431\u0438\u0440\u0430\u044E\u0442\u0441\u044F \u043F\u0440\u0438 \u0434\u043E\u0441\u0442\u0438\u0436\u0435\u043D\u0438\u0438 \u043F\u0440\u0435\u0434\u0435\u043B\u0430."], ["\u0424\u043E\u0442\u043E", "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0438\u043B\u0438 \u0432\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435. \u041E\u043D\u043E \u0441\u0436\u0438\u043C\u0430\u0435\u0442\u0441\u044F \u0438 \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0432\u043C\u0435\u0441\u0442\u0435 \u0441 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435\u043C. \u0414\u043B\u044F HEIC \u043C\u043E\u0436\u0435\u0442 \u043F\u043E\u043D\u0430\u0434\u043E\u0431\u0438\u0442\u044C\u0441\u044F \u044D\u043A\u0441\u043F\u043E\u0440\u0442 JPEG. \u041C\u0430\u0441\u0441\u0443 \u0438 \u043F\u043E\u043B\u043D\u044B\u0439 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u043E \u0444\u043E\u0442\u043E \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0438\u0442\u044C \u043D\u0435\u043B\u044C\u0437\u044F."], ["\u041A\u0430\u043A \u043D\u0430\u0447\u0430\u0442\u044C", "\u041D\u0430\u043F\u0438\u0448\u0438\u0442\u0435, \u0447\u0442\u043E \u0445\u043E\u0442\u0438\u0442\u0435 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C, \u0438\u043B\u0438 \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u043E \u0434\u043D\u0435. \u041B\u0438\u0447\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0441\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u043E\u044F\u0432\u043B\u044F\u044E\u0442\u0441\u044F \u0432 \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0435 \u0434\u043B\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F."]];
 var HINTS = { theme: "\u041C\u0435\u043D\u044F\u0435\u0442 \u0442\u043E\u043B\u044C\u043A\u043E \u0446\u0432\u0435\u0442\u0430 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0430. \u041F\u0438\u0442\u0430\u043D\u0438\u0435 \u0438 \u0434\u0430\u043D\u043D\u044B\u0435 \u043D\u0435 \u043C\u0435\u043D\u044F\u044E\u0442\u0441\u044F.", text_size: "\u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0432\u0430\u0435\u0442 \u0432\u0435\u0441\u044C \u0442\u0435\u043A\u0441\u0442 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F. \u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \xAB\u041A\u0440\u0443\u043F\u043D\u044B\u0439\xBB \u0434\u043B\u044F \u0447\u0442\u0435\u043D\u0438\u044F \u0431\u0435\u0437 \u043E\u0447\u043A\u043E\u0432.", density: "\u041C\u0435\u043D\u044F\u0435\u0442 \u043E\u0442\u0441\u0442\u0443\u043F\u044B \u043A\u0430\u0440\u0442\u043E\u0447\u0435\u043A, \u043D\u0435 \u0441\u043E\u043A\u0440\u0430\u0449\u0430\u0435\u0442 \u0440\u0435\u0446\u0435\u043F\u0442\u044B \u0438 \u043F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u044F.", home: "\u041D\u0430\u0447\u0430\u043B\u044C\u043D\u044B\u0439 \u0440\u0430\u0437\u0434\u0435\u043B \u043F\u043E\u0441\u043B\u0435 \u0432\u0445\u043E\u0434\u0430. \u041C\u043E\u0436\u043D\u043E \u0432\u0441\u0435\u0433\u0434\u0430 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0438\u0442\u044C\u0441\u044F \u043D\u0438\u0436\u043D\u0438\u043C\u0438 \u043A\u043D\u043E\u043F\u043A\u0430\u043C\u0438.", simple_mode: "\u0423\u0431\u0438\u0440\u0430\u0435\u0442 \u0432\u0442\u043E\u0440\u043E\u0441\u0442\u0435\u043F\u0435\u043D\u043D\u044B\u0435 \u0434\u0435\u043A\u043E\u0440\u0430\u0442\u0438\u0432\u043D\u044B\u0435 \u043F\u043E\u0434\u043F\u0438\u0441\u0438; \u0432\u0441\u0435 \u043E\u0441\u043D\u043E\u0432\u043D\u044B\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u044E\u0442\u0441\u044F.", show_nutrition: "\u041F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442 \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0439 \u0441\u043E\u0441\u0442\u0430\u0432 \u0431\u043B\u044E\u0434. \u041D\u0435 \u043D\u0430\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043A\u0430\u043B\u043E\u0440\u0438\u0438 \u0438\u043B\u0438 \u043D\u043E\u0440\u043C\u044B.", meals_per_day: "\u0427\u0438\u0441\u043B\u043E \u043F\u0440\u0438\u0451\u043C\u043E\u0432 \u043F\u0438\u0449\u0438 \u0432 \u043D\u043E\u0432\u043E\u043C \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u043E\u043C \u043C\u0435\u043D\u044E. \u0413\u043E\u0442\u043E\u0432\u043E\u0435 \u043C\u0435\u043D\u044E \u043D\u0443\u0436\u043D\u043E \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0442\u044C.", max_active_minutes: "\u0412\u0440\u0435\u043C\u044F \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0439 \u0433\u043E\u0442\u043E\u0432\u043A\u0438 \u043E\u0434\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 15 \u043C\u0438\u043D\u0443\u0442. \u041D\u0435 \u043C\u0435\u043D\u044F\u0435\u0442 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E\u0441\u0442\u0438.", "display-name": "\u0418\u043C\u044F \u0434\u043B\u044F \u043E\u0431\u0440\u0430\u0449\u0435\u043D\u0438\u044F, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 \u0410\u043D\u043D\u0430. \u041F\u043E\u043B\u0435 \u043D\u0435\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435.", timezone: "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 IANA, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 Europe/Minsk. \u041E\u043F\u0440\u0435\u0434\u0435\u043B\u044F\u0435\u0442 \u0434\u0430\u0442\u0443 \u0434\u043D\u0435\u0432\u043D\u0438\u043A\u0430, \u043D\u0435 \u0432\u0440\u0435\u043C\u044F \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430.", goal: "\u0421\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0435 \u043F\u043E\u0436\u0435\u043B\u0430\u043D\u0438\u0435. \u0412\u044B\u0431\u0440\u0430\u043D\u043D\u0430\u044F \u0446\u0435\u043B\u044C \u0440\u0430\u0441\u0447\u0451\u0442\u0430 \u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E \u043D\u0430 \u044D\u0442\u0430\u043F\u0435 \xAB\u041E \u0432\u0430\u0441\xBB, \u044D\u0442\u043E \u043F\u043E\u043B\u0435 \u043D\u0435 \u043D\u0430\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u0434\u0435\u0444\u0438\u0446\u0438\u0442.", medications: "\u041F\u0435\u0440\u0435\u0447\u0438\u0441\u043B\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044F \u0447\u0435\u0440\u0435\u0437 \u0437\u0430\u043F\u044F\u0442\u0443\u044E. \u041F\u0443\u0441\u0442\u043E\u0435 \u043F\u043E\u043B\u0435 \u0441\u0430\u043C\u043E \u043F\u043E \u0441\u0435\u0431\u0435 \u043D\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u0435\u0442 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u043B\u0435\u043A\u0430\u0440\u0441\u0442\u0432.", energy_min_kcal: "\u041D\u0438\u0436\u043D\u044F\u044F \u0433\u0440\u0430\u043D\u0438\u0446\u0430 \u0440\u0430\u043D\u0435\u0435 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u043E\u0439 \u044D\u043D\u0435\u0440\u0433\u0438\u0438 \u043D\u0430 \u0434\u0435\u043D\u044C. \u041F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u043D\u0435 \u043F\u043E\u0434\u0431\u0438\u0440\u0430\u0435\u0442 \u044D\u0442\u043E \u0447\u0438\u0441\u043B\u043E.", energy_max_kcal: "\u0412\u0435\u0440\u0445\u043D\u044F\u044F \u0433\u0440\u0430\u043D\u0438\u0446\u0430 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u043E\u0439 \u044D\u043D\u0435\u0440\u0433\u0438\u0438. \u0414\u043E\u043B\u0436\u043D\u0430 \u0431\u044B\u0442\u044C \u043D\u0435 \u043C\u0435\u043D\u044C\u0448\u0435 \u043D\u0438\u0436\u043D\u0435\u0439.", protein_min_g: "\u0421\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0439 \u043C\u0438\u043D\u0438\u043C\u0443\u043C \u0431\u0435\u043B\u043A\u0430 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445 \u0437\u0430 \u0434\u0435\u043D\u044C, \u043D\u0435 \u043C\u0430\u0441\u0441\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430.", protein_max_g: "\u0421\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0439 \u043C\u0430\u043A\u0441\u0438\u043C\u0443\u043C \u0431\u0435\u043B\u043A\u0430 \u0437\u0430 \u0434\u0435\u043D\u044C. \u041D\u0435 \u043C\u0435\u043D\u044F\u0435\u0442 \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u0438\u0435 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F.", carb_basis: "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u0438\u043B\u0438 \u0440\u0430\u0441\u0447\u0451\u0442 net carbs. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0441\u043F\u043E\u0441\u043E\u0431 \u0438\u0437 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0445 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u043E\u0432.", carb_max_g: "\u041C\u0430\u043A\u0441\u0438\u043C\u0443\u043C \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445 \u0437\u0430 \u0434\u0435\u043D\u044C \u043F\u043E \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u043C\u0443 \u0441\u043F\u043E\u0441\u043E\u0431\u0443 \u043F\u043E\u0434\u0441\u0447\u0451\u0442\u0430.", fiber_min_g: "\u0421\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0439 \u043C\u0438\u043D\u0438\u043C\u0443\u043C \u043F\u0438\u0449\u0435\u0432\u044B\u0445 \u0432\u043E\u043B\u043E\u043A\u043E\u043D \u0437\u0430 \u0434\u0435\u043D\u044C. \u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445 \u043D\u0435 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442 \u043D\u043E\u043B\u044C.", saturated_fat_max_pct: "\u0421\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u0430\u044F \u0432\u0435\u0440\u0445\u043D\u044F\u044F \u0434\u043E\u043B\u044F \u044D\u043D\u0435\u0440\u0433\u0438\u0438 \u0438\u0437 \u043D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u044B\u0445 \u0436\u0438\u0440\u043E\u0432, \u0432 \u043F\u0440\u043E\u0446\u0435\u043D\u0442\u0430\u0445.", basis_note: "\u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435, \u0441 \u043A\u0435\u043C \u0438 \u043A\u043E\u0433\u0434\u0430 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u044B \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u043A\u0430\u043A\u0438\u0435 \u0435\u0441\u0442\u044C \u0434\u043E\u043F\u0443\u0449\u0435\u043D\u0438\u044F. \u041D\u0435 \u043A\u043E\u043F\u0438\u0440\u0443\u0439\u0442\u0435 \u0434\u0435\u043C\u043E\u043D\u0441\u0442\u0440\u0430\u0446\u0438\u043E\u043D\u043D\u044B\u0435 \u043D\u043E\u0440\u043C\u044B.", "reminder-title": "\u041A\u043E\u0440\u043E\u0442\u043A\u043E\u0435 \u043B\u0438\u0447\u043D\u043E\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 \xAB\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0434\u0435\u043D\u044C\xBB. \u041D\u0435 \u0434\u043E\u0431\u0430\u0432\u043B\u044F\u0439\u0442\u0435 \u0434\u0438\u0430\u0433\u043D\u043E\u0437\u044B.", "reminder-time": "\u041C\u0435\u0441\u0442\u043D\u043E\u0435 \u0432\u0440\u0435\u043C\u044F \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u043C \u0447\u0430\u0441\u043E\u0432\u043E\u043C \u043F\u043E\u044F\u0441\u0435. \u0423\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0438\u043C\u043F\u043E\u0440\u0442\u0430 \u0432 \u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u044C.", "reminder-zone": "\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 Europe/Minsk \u0438\u043B\u0438 America/New_York. \u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0443\u0447\u0438\u0442\u044B\u0432\u0430\u0435\u0442 \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u044B \u043B\u0435\u0442\u043D\u0435\u0433\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438.", "reminder-date": "\u0414\u043B\u044F \u043E\u0434\u043D\u043E\u043A\u0440\u0430\u0442\u043D\u043E\u0433\u043E \u0441\u043E\u0431\u044B\u0442\u0438\u044F \u043E\u0447\u0438\u0441\u0442\u0438\u0442\u0435 \u0434\u043D\u0438 \u043D\u0435\u0434\u0435\u043B\u0438 \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0431\u0443\u0434\u0443\u0449\u0443\u044E \u0434\u0430\u0442\u0443.", "reminder-enabled": "\u0412\u044B\u043A\u043B\u044E\u0447\u0430\u0435\u0442 \u0431\u0443\u0434\u0443\u0449\u0443\u044E \u0437\u0430\u0434\u0430\u0447\u0443 \u0432 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0438. \u0418\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0435 \u0441\u043E\u0431\u044B\u0442\u0438\u0435 \u0443\u0434\u0430\u043B\u044F\u0439\u0442\u0435 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E \u0432 \u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440\u0435." };
-function setupMobile({ $: $3, el: el2, call: call2, accept: accept2, getState, setView: setView2, run: run2, notify: notify2, epoch, setImage, getImage, loadImageLink }) {
-  let pdf = null, recorder, chatBusy = false, renderedTopic = null;
-  const images = setupChatImages({ root: document.querySelector('[data-page="chat"]'), $: $3, link: loadImageLink, epoch, setImage, notify: notify2 });
+function setupMobile({ $: $3, el: el2, call: call2, accept: accept2, getState, setView: setView2, run: run2, notify: notify2, epoch, setImage, getImage, loadImageLink, openDialog, closeDialog }) {
+  let pdf = null, recorder, chatBusy = false, topicBusy = false, renderedTopic = null;
+  function topicControls() {
+    const s2 = getState();
+    for (const id of ["topic-picker", "topic-new", "topic-edit", "topic-rename", "topic-clear", "topic-delete"]) $3(id).disabled = chatBusy || topicBusy || id === "topic-delete" && s2?.active_thread === "main";
+    $3("send").disabled = chatBusy || topicBusy || Boolean(recorder && recorder.mode !== "idle");
+  }
+  function resizeComposer() {
+    const input = $3("message");
+    if (!input.style) return;
+    input.style.height = "auto";
+    input.style.height = Math.min(128, Math.max(48, input.scrollHeight + 2)) + "px";
+  }
+  $3("message").addEventListener("input", resizeComposer);
+  const images = setupChatImages({ root: document.querySelector('[data-page="chat"]'), $: $3, link: loadImageLink, epoch, setImage, notify: notify2, openDialog, closeDialog });
   const resetPhoto = () => images.reset();
   recorder = new RecorderController({ mediaDevices: navigator.mediaDevices, Recorder: globalThis.MediaRecorder, onState: ({ mode, message, seconds }) => {
     $3("voice-status").textContent = message;
     $3("voice-timer").textContent = Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
-    $3("mic-button").disabled = mode !== "idle" || chatBusy;
+    $3("mic-button").disabled = mode !== "idle" || chatBusy || topicBusy;
     $3("mic-button").setAttribute("aria-pressed", String(mode === "recording"));
     $3("voice-controls").hidden = mode === "idle";
     $3("voice-stop").hidden = mode !== "recording";
-    $3("send").disabled = mode !== "idle" || chatBusy;
+    $3("send").disabled = mode !== "idle" || chatBusy || topicBusy;
   }, onAudio: async (blob, mime, signal) => {
     const stamp = epoch();
     const data = await call2("keto_transcribe", { audio_base64: await blobBase64(blob), mime, request_id: crypto.randomUUID().replaceAll("-", "") }, { signal });
@@ -3215,6 +4671,7 @@ function setupMobile({ $: $3, el: el2, call: call2, accept: accept2, getState, s
     if (stamp !== epoch()) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F.");
     if (data.error_code) throw Error(data.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0440\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C.");
     $3("message").value = [$3("message").value, data.text].filter(Boolean).join("\n");
+    resizeComposer();
     $3("message").focus();
     return data.text;
   } });
@@ -3235,44 +4692,63 @@ function setupMobile({ $: $3, el: el2, call: call2, accept: accept2, getState, s
   window.addEventListener("pagehide", () => recorder.cancel());
   function changeTopic(args) {
     return run2(async () => {
+      if (chatBusy || topicBusy) {
+        notify2("\u0414\u043E\u0436\u0434\u0438\u0442\u0435\u0441\u044C \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0438\u044F \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u0441\u043C\u0435\u043D\u044B \u0442\u0435\u043C\u044B.");
+        return;
+      }
       const discards = ["create", "select", "delete", "clear"].includes(args.action);
-      if (discards && ($3("message").value.trim() || getImage()) && !confirm("\u041F\u0440\u0438 \u0441\u043C\u0435\u043D\u0435 \u0442\u0435\u043C\u044B \u0443\u0431\u0440\u0430\u0442\u044C \u0442\u0435\u043A\u0443\u0449\u0438\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A?")) return;
+      if (discards && ($3("message").value.trim() || getImage()) && !confirm("\u041F\u0440\u0438 \u0441\u043C\u0435\u043D\u0435 \u0442\u0435\u043C\u044B \u0443\u0431\u0440\u0430\u0442\u044C \u0442\u0435\u043A\u0443\u0449\u0438\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A?")) {
+        $3("topic-picker").value = getState().active_thread || "main";
+        return;
+      }
       recorder.cancel();
       if (discards) images.invalidate();
-      const result = await call2("keto_topics", { ...args, confirmed: true, expected_revision: getState().revision });
-      if (discards) {
-        resetPhoto();
-        $3("message").value = "";
+      topicBusy = true;
+      topicControls();
+      try {
+        const result = await call2("keto_topics", { ...args, confirmed: true, expected_revision: getState().revision });
+        if (discards) {
+          resetPhoto();
+          $3("message").value = "";
+          resizeComposer();
+        }
+        accept2(result);
+        setView2("chat");
+      } finally {
+        topicBusy = false;
+        topicControls();
       }
-      accept2(result);
-      setView2("chat");
     });
   }
   $3("topic-picker").onchange = (e) => changeTopic({ action: "select", thread_id: e.target.value });
   $3("topic-new").onclick = () => {
+    if (chatBusy || topicBusy) return;
     const title = prompt("\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043D\u043E\u0432\u043E\u0439 \u0442\u0435\u043C\u044B, \u0434\u043E 80 \u0437\u043D\u0430\u043A\u043E\u0432");
-    if (title?.trim()) changeTopic({ action: "create", title: title.trim() });
+    if (title?.trim()) {
+      if (closeDialog) closeDialog();
+      changeTopic({ action: "create", title: title.trim() });
+    }
   };
   $3("topic-edit").onclick = () => {
     const s2 = getState();
     $3("topic-title").value = s2.topics?.find((t) => t.id === s2.active_thread)?.title || "";
     $3("topic-delete").disabled = s2.active_thread === "main";
-    $3("topic-dialog").showModal();
+    openDialog ? openDialog("topic", "topic-title") : $3("topic-dialog").showModal();
   };
-  $3("topic-close").onclick = () => $3("topic-dialog").close();
+  $3("topic-close").onclick = () => closeDialog ? closeDialog() : $3("topic-dialog").close();
   $3("topic-rename").onclick = () => {
-    $3("topic-dialog").close();
+    closeDialog ? closeDialog() : $3("topic-dialog").close();
     changeTopic({ action: "rename", thread_id: getState().active_thread, title: $3("topic-title").value });
   };
   $3("topic-delete").onclick = () => {
     if (confirm("\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u044D\u0442\u043E\u0439 \u0442\u0435\u043C\u044B? \u041E\u0431\u0449\u0438\u0439 \u043F\u0440\u043E\u0444\u0438\u043B\u044C \u043E\u0441\u0442\u0430\u043D\u0435\u0442\u0441\u044F.")) {
-      $3("topic-dialog").close();
+      closeDialog ? closeDialog() : $3("topic-dialog").close();
       changeTopic({ action: "delete", thread_id: getState().active_thread });
     }
   };
   $3("topic-clear").onclick = () => {
     if (confirm("\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0438 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u0431\u043B\u044E\u0434 \u044D\u0442\u043E\u0439 \u0442\u0435\u043C\u044B?")) {
-      $3("topic-dialog").close();
+      closeDialog ? closeDialog() : $3("topic-dialog").close();
       changeTopic({ action: "clear", thread_id: getState().active_thread });
     }
   };
@@ -3410,6 +4886,8 @@ function setupMobile({ $: $3, el: el2, call: call2, accept: accept2, getState, s
     $3("topic-picker").value = s2.active_thread || "main";
     renderReminders();
     resetPdf();
+    topicControls();
+    resizeComposer();
     resize();
   }
   function help() {
@@ -3457,23 +4935,417 @@ function setupMobile({ $: $3, el: el2, call: call2, accept: accept2, getState, s
       if (getState() && !document.hidden) renderReminders();
     }, 6e4);
   });
-  return { render, offerImageUrl: images.offerUrl, setChatBusy(value) {
+  return { render, resizeComposer, leave() {
+    if (recorder.mode !== "idle") recorder.cancel();
+  }, changingTopic: () => topicBusy, offerImageUrl: images.offerUrl, setChatBusy(value) {
     chatBusy = value;
     const s2 = getState();
     $3("mic-button").disabled = value || !s2?.processing_consent || !s2?.profile.consent.storage || !s2?.profile.consent.health_data;
-    $3("send").disabled = value || recorder.mode !== "idle";
+    $3("send").disabled = value || topicBusy || recorder.mode !== "idle";
+    topicControls();
   }, reset() {
     renderedTopic = null;
     chatBusy = false;
+    topicBusy = false;
     recorder.cancel("");
     resetPhoto();
     resetPdf();
     $3("reminder-list").replaceChildren();
     $3("topic-picker").replaceChildren();
+    $3("topic-title").value = "";
     $3("topic-dialog").close();
     resetReminder();
     $3("reminder-zone").value = "";
   }, resetPhoto, recording: () => recorder.mode !== "idle" };
+}
+
+// cloudflare-saas/public/intake-ui.js
+var MEALS = { breakfast: "\u0417\u0430\u0432\u0442\u0440\u0430\u043A", lunch: "\u041E\u0431\u0435\u0434", dinner: "\u0423\u0436\u0438\u043D", snack: "\u041F\u0435\u0440\u0435\u043A\u0443\u0441" };
+var NUTRIENTS = [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043A\u0438", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"]];
+var number = (n, digits = 1) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(n);
+function profileClock(zone, now = /* @__PURE__ */ new Date()) {
+  if (!zone) return null;
+  try {
+    const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now).map((x) => [x.type, x.value]));
+    return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
+  } catch {
+    return null;
+  }
+}
+function dayLabel(day) {
+  try {
+    return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric" }).format(/* @__PURE__ */ new Date(day + "T12:00:00"));
+  } catch {
+    return day || "\u0414\u0430\u0442\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430";
+  }
+}
+function intakeAmount(entry) {
+  return entry?.amount || (entry?.food_id && entry?.grams != null ? { value: entry.grams, unit: "g" } : entry?.recipe_id && entry?.portions != null ? { value: entry.portions, unit: "portion" } : null);
+}
+function intakeName(entry) {
+  if (entry?.source_mode === "unquantified" && !entry?.recipe_id && !entry?.food_id) return "\u0417\u0430\u043C\u0435\u0442\u043A\u0430";
+  return entry?.name_ru || entry?.nutrition_snapshot?.name_ru || entry?.nutrition_snapshot?.source?.name_ru || (entry?.note ? "\u0417\u0430\u043C\u0435\u0442\u043A\u0430" : "\u0417\u0430\u043F\u0438\u0441\u044C \u043E \u043F\u0438\u0442\u0430\u043D\u0438\u0438");
+}
+function amountLabel(amount) {
+  return !amount ? "\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043E" : `${number(amount.value, 3)} ${amount.unit === "g" ? "\u0433" : amount.unit === "batch" ? "\u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430" : "\u043F\u043E\u0440\u0446\u0438\u0438"}`;
+}
+function entryClock(entry) {
+  if (entry?.time) return entry.time;
+  return entry?.eaten_at ? profileClock(entry.timezone, new Date(entry.eaten_at))?.time : null;
+}
+function nutritionNodes(el2, calculation) {
+  const grid = el2("dl", "intake-nutrients"), nutrition = calculation?.nutrition || {}, coverage = calculation?.coverage || {};
+  for (const [key, label, unit] of NUTRIENTS) {
+    const value = nutrition[key], known = coverage[key]?.known_subtotal;
+    grid.append(el2("dt", "", label), el2("dd", "", value == null || coverage[key]?.complete === false ? known == null || known === 0 ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445 \xB7 \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435" : `\u0443\u0447\u0442\u0435\u043D\u043E ${number(known, key === "energy_kcal" ? 0 : 1)} ${unit} \xB7 \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435` : `${number(value, key === "energy_kcal" ? 0 : 1)} ${unit}`));
+  }
+  if (calculation?.available_carbohydrate_g != null) grid.append(el2("dt", "", "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B"), el2("dd", "", number(calculation.available_carbohydrate_g) + " \u0433"));
+  return [grid];
+}
+function intakeReviewNodes(el2, preview) {
+  const entry = preview?.entry || {}, clock = entryClock(entry), nodes = [el2("h4", "", intakeName(entry)), el2("p", "", amountLabel(intakeAmount(entry))), el2("p", "", `${dayLabel(entry.date)} \xB7 ${clock || "\u0432\u0440\u0435\u043C\u044F \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043E"}`)];
+  if (entry.timezone) nodes.push(el2("p", "muted", "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441: " + entry.timezone));
+  if (MEALS[entry.meal]) nodes.push(el2("p", "", MEALS[entry.meal]));
+  if (entry.note && entry.note !== intakeName(entry)) nodes.push(el2("p", "", entry.note));
+  if (preview?.calculation || intakeAmount(entry)) nodes.push(...nutritionNodes(el2, preview?.calculation));
+  if (preview?.legacy_estimate) nodes.push(el2("p", "notice", "\u0414\u043B\u044F \u0441\u0442\u0430\u0440\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u043D \u043F\u043E \u0442\u0435\u043A\u0443\u0449\u0435\u043C\u0443 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0443. \u0418\u0441\u0442\u043E\u0440\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0440\u0430\u0441\u0447\u0451\u0442 \u043D\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u043B\u0441\u044F."));
+  if (preview?.issues?.some((x) => String(x).startsWith("allergen:"))) nodes.push(el2("p", "notice", "\u0412 \u0441\u043E\u0441\u0442\u0430\u0432\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u0438\u0437 \u0432\u0430\u0448\u0435\u0433\u043E \u043F\u0440\u043E\u0444\u0438\u043B\u044F. \u0417\u0430\u043F\u0438\u0441\u044C \u0444\u0438\u043A\u0441\u0438\u0440\u0443\u0435\u0442 \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435 \u0438 \u043D\u0435 \u0440\u0435\u043A\u043E\u043C\u0435\u043D\u0434\u0443\u0435\u0442 \u044D\u0442\u043E\u0442 \u043F\u0440\u043E\u0434\u0443\u043A\u0442."));
+  if (preview?.issues?.includes("allergens_unknown")) nodes.push(el2("p", "muted", "\u0421\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u043E\u0431 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u0430\u0445 \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438 \u043D\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0441\u044C."));
+  if (!preview?.calculation) nodes.push(el2("p", "muted", "\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0438\u043B\u0438 \u0441\u043E\u0441\u0442\u0430\u0432 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B. \u042D\u0442\u0430 \u0437\u0430\u043F\u0438\u0441\u044C \u043D\u0435 \u0434\u043E\u0431\u0430\u0432\u0438\u0442 \u0432\u044B\u0434\u0443\u043C\u0430\u043D\u043D\u044B\u0435 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043A \u0438\u0442\u043E\u0433\u0430\u043C."));
+  const references = entry.nutrition_snapshot?.source?.source_urls || entry.nutrition_snapshot?.references || entry.nutrition_snapshot?.source_refs || preview?.sources || [];
+  if (Array.isArray(references) && references.length) {
+    const details = el2("details");
+    details.append(el2("summary", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0438 \u0441\u043E\u0441\u0442\u0430\u0432\u0430"));
+    for (const ref of references) {
+      const text = typeof ref === "string" ? ref : [ref.name_ru || ref.title, ref.source_url || ref.source_ref || ref.url].filter(Boolean).join(" \xB7 ");
+      if (text) details.append(el2("p", "muted", text));
+    }
+    nodes.push(details);
+  }
+  return nodes;
+}
+function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, notify: notify2, run: run2, openDialog, closeDialog, setView: setView2, epoch, isDiaryActive, propose: propose2 }) {
+  let selection = null, submitting = false, generation = 0, historyGeneration = 0, day = "", allDates = false, rows = [], historyRevision = null, loadedKey = null, loadingKey = null, loading = false, hasMore = false, receiptEntry = null;
+  const form = $3("intake-form");
+  function stateDay() {
+    return profileClock(getState()?.profile?.timezone)?.date || "";
+  }
+  function validScope(token, stamp) {
+    return token === generation && stamp === epoch();
+  }
+  function showStatus(message) {
+    $3("intake-status").textContent = message || "";
+  }
+  function buttons() {
+    $3("intake-fields").disabled = submitting;
+    $3("intake-review").disabled = submitting;
+    $3("intake-review").textContent = submitting ? "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C \u0437\u0430\u043F\u0438\u0441\u044C\u2026" : "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C";
+  }
+  function open(source = {}) {
+    generation++;
+    selection = structuredClone(source);
+    form.reset();
+    showStatus("");
+    buttons();
+    const entry = source.entry, operation = source.operation || "add", amount = source.amount || intakeAmount(entry) || (source.food_id ? { value: 100, unit: "g" } : { value: 1, unit: "portion" });
+    const choosing = !entry && !source.recipe_id && !source.food_id;
+    $3("intake-choice").hidden = !choosing;
+    form.hidden = choosing;
+    $3("intake-title").textContent = operation === "update" ? "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C" : operation === "repeat" ? "\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C" : "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435";
+    $3("intake-name").textContent = choosing ? "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435, \u0447\u0442\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C." : source.name_ru || intakeName(entry);
+    if (!choosing) {
+      const hasAmount = operation === "add" || Boolean(intakeAmount(entry));
+      $3("intake-amount-row").hidden = !hasAmount;
+      $3("intake-amount-help").hidden = !hasAmount;
+      $3("intake-amount").required = hasAmount;
+      $3("intake-unit").replaceChildren();
+      for (const [value, label] of amount.unit === "g" ? [["g", "\u0413\u0440\u0430\u043C\u043C\u044B"]] : [["portion", "\u041F\u043E\u0440\u0446\u0438\u0438"], ["batch", "\u0414\u043E\u043B\u044F \u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430"]]) {
+        const o2 = el2("option", "", label);
+        o2.value = value;
+        $3("intake-unit").append(o2);
+      }
+      $3("intake-unit").value = amount.unit;
+      $3("intake-amount").value = String(amount.value);
+      $3("intake-unit").disabled = amount.unit === "g";
+      $3("intake-date").value = operation === "update" ? entry.date : day || stateDay();
+      $3("intake-time").value = operation === "update" ? entryClock(entry) || "" : "";
+      for (const option of Array.from($3("intake-meal").options || [])) if (option.dataset.legacy) option.remove();
+      if (entry?.meal && !MEALS[entry.meal]) {
+        const option = el2("option", "", entry.meal);
+        option.value = "legacy";
+        option.dataset.legacy = "true";
+        $3("intake-meal").append(option);
+      }
+      $3("intake-meal").value = entry?.meal ? MEALS[entry.meal] ? entry.meal : "legacy" : "";
+      $3("intake-note").value = entry?.note || "";
+      selection.initial = { date: $3("intake-date").value, time: $3("intake-time").value || null, meal: $3("intake-meal").value, note: $3("intake-note").value.trim() };
+      const zone = entry?.timezone || getState()?.profile?.timezone;
+      $3("intake-zone").textContent = zone ? "\u0412\u0440\u0435\u043C\u044F \u0435\u0434\u044B \xB7 " + zone : "\u0414\u043B\u044F \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u0435\u0434\u044B \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0432 \u043F\u0440\u043E\u0444\u0438\u043B\u0435.";
+      $3("intake-note-options").open = false;
+      $3("intake-time-detail").open = false;
+      $3("intake-fold").value = "";
+      updateAmountHelp();
+    }
+    openDialog("intake", choosing ? "intake-recipe" : $3("intake-amount-row").hidden ? "intake-date" : "intake-amount");
+  }
+  function updateAmountHelp() {
+    const u2 = $3("intake-unit").value;
+    $3("intake-amount-help").textContent = u2 === "batch" ? "1 \u2014 \u0432\u0441\u0451 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E; 0,5 \u2014 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430." : u2 === "portion" ? "1 \u2014 \u043E\u0434\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044F \u0440\u0435\u0446\u0435\u043F\u0442\u0430; 0,5 \u2014 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u043E\u0434\u043D\u043E\u0439 \u043F\u043E\u0440\u0446\u0438\u0438." : "\u041C\u0430\u0441\u0441\u0430 \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430. \u041C\u0438\u043B\u043B\u0438\u043B\u0438\u0442\u0440\u044B \u043D\u0435 \u043F\u0440\u0438\u0440\u0430\u0432\u043D\u0438\u0432\u0430\u044E\u0442\u0441\u044F \u043A \u0433\u0440\u0430\u043C\u043C\u0430\u043C.";
+  }
+  $3("intake-unit").onchange = updateAmountHelp;
+  $3("intake-now").onclick = () => {
+    const clock = profileClock(selection?.entry?.timezone || getState()?.profile?.timezone);
+    if (!clock) {
+      showStatus("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0432 \u043F\u0440\u043E\u0444\u0438\u043B\u0435.");
+      return;
+    }
+    $3("intake-date").value = clock.date;
+    $3("intake-time").value = clock.time;
+  };
+  $3("intake-close").onclick = () => closeDialog();
+  $3("intake-recipe").onclick = () => setView2("recipes");
+  $3("intake-product").onclick = () => setView2("products");
+  $3("intake-note-choice").onclick = () => {
+    setView2("diary");
+    $3("diary-note-details").open = true;
+    $3("diary-date").value = day || stateDay();
+    $3("diary-note").focus();
+  };
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    if (submitting || !selection) return;
+    run2(async () => {
+      const values2 = { operation: selection.operation || "add" }, time = $3("intake-time").value || null;
+      if (values2.operation !== "update" || $3("intake-date").value !== selection.initial?.date) values2.date = $3("intake-date").value;
+      if (values2.operation !== "update" || time !== selection.initial?.time) values2.time = time;
+      if (selection.origin) values2.origin = structuredClone(selection.origin);
+      if (selection.generation_id) values2.generation_id = selection.generation_id;
+      if (selection.entry) values2.entry_id = selection.entry.entry_id;
+      else if (selection.food_id) values2.food_id = selection.food_id;
+      else values2.recipe_id = selection.recipe_id;
+      if (!$3("intake-amount-row").hidden) {
+        const value = Number($3("intake-amount").value.trim().replace(",", "."));
+        if (!Number.isFinite(value) || value <= 0) {
+          showStatus("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0443\u043B\u044F.");
+          return;
+        }
+        const amount = { value, unit: $3("intake-unit").value }, original = intakeAmount(selection.entry);
+        if (values2.operation !== "update" || original?.value !== amount.value || original?.unit !== amount.unit) values2.amount = amount;
+      }
+      const meal = $3("intake-meal").value, note = $3("intake-note").value.trim();
+      if (meal !== "legacy" && (values2.operation !== "update" || meal !== selection.initial?.meal)) values2.meal = meal;
+      if (values2.operation !== "update" || note !== selection.initial?.note) values2.note = note;
+      if ($3("intake-fold").value !== "") values2.time_fold = Number($3("intake-fold").value);
+      const token = generation, stamp = epoch(), thread = selection.thread_id || getState().active_thread || "main";
+      submitting = true;
+      buttons();
+      showStatus("");
+      try {
+        const result = await call2("keto_kitchen", { action: "intake", thread_id: thread, values: values2, expected_revision: selection.revision ?? getState().revision });
+        if (stamp !== epoch()) return;
+        const stillOpen = validScope(token, stamp) && $3("intake-dialog").open;
+        accept2(stillOpen ? result : { ...result, proposal: null, message: "\u0417\u0430\u043F\u0438\u0441\u044C \u043E\u0436\u0438\u0434\u0430\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F \u0432\u0432\u0435\u0440\u0445\u0443." });
+      } catch (error) {
+        if (validScope(token, stamp)) {
+          showStatus(error.message);
+          if (/дважды|неоднознач|двусмыслен|переход.*час|перевод.*час/i.test(error.message)) {
+            $3("intake-note-options").open = true;
+            $3("intake-time-detail").open = true;
+          }
+        }
+      } finally {
+        if (stamp === epoch()) {
+          submitting = false;
+          buttons();
+        }
+      }
+    });
+  };
+  function renderSummary(summary) {
+    const box = $3("diary-summary");
+    box.replaceChildren();
+    box.hidden = allDates;
+    if (allDates || !summary) return;
+    const count = summary.entry_count ?? summary.entries_count ?? summary.recorded_entries ?? (summary.known_entries || 0) + (summary.unquantified_entries || 0);
+    if (summary.empty === true || count === 0) {
+      box.append(el2("p", "muted", "\u041D\u0430 \u044D\u0442\u0443 \u0434\u0430\u0442\u0443 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442."));
+      return;
+    }
+    box.append(el2("h2", "", "\u0418\u0442\u043E\u0433\u0438 \u0437\u0430\u043F\u0438\u0441\u0435\u0439"), ...nutritionNodes(el2, { nutrition: summary.nutrition, coverage: summary.coverage }));
+    const incomplete = summary.incomplete_entries ?? summary.unquantified_entries ?? 0;
+    box.append(el2("p", "muted", incomplete ? `\u0417\u0430\u043F\u0438\u0441\u0435\u0439 \u0441 \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u043C\u0438 \u0434\u0430\u043D\u043D\u044B\u043C\u0438: ${incomplete}. \u041F\u043E\u043A\u0430\u0437\u0430\u043D\u0430 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u0447\u0430\u0441\u0442\u044C \u0441\u043E\u0441\u0442\u0430\u0432\u0430.` : "\u0421\u0443\u043C\u043C\u0430 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u0437\u0430 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u0443\u044E \u0434\u0430\u0442\u0443."));
+  }
+  function renderRows() {
+    const box = $3("diary-entries");
+    box.replaceChildren();
+    if (!rows.length && !loading) box.append(el2("p", "muted", allDates ? "\u0412 \u0434\u043D\u0435\u0432\u043D\u0438\u043A\u0435 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u0435\u0439." : "\u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0435\u0434\u0443 \u0438\u043B\u0438 \u0437\u0430\u043C\u0435\u0442\u043A\u0443 \u0437\u0430 \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C."));
+    for (const entry of rows) {
+      const card = el2("article", "diary-entry");
+      card.dataset.entryId = entry.entry_id;
+      const clock = entryClock(entry), meta = [allDates ? dayLabel(entry.date) : null, clock || "\u0412\u0440\u0435\u043C\u044F \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043E", MEALS[entry.meal]].filter(Boolean).join(" \xB7 ");
+      card.append(el2("p", "diary-entry-meta", meta), el2("h3", "", intakeName(entry)));
+      const amount = intakeAmount(entry);
+      if (amount) card.append(el2("p", "", amountLabel(amount)));
+      if (entry.note && entry.note !== intakeName(entry)) card.append(el2("p", "muted", entry.note));
+      const calc = entry.calculation || entry.nutrition_snapshot?.calculation;
+      if (calc?.nutrition) {
+        const n = calc.nutrition;
+        card.append(el2("p", "muted", `\u042D\u043D\u0435\u0440\u0433\u0438\u044F: ${n.energy_kcal == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : number(n.energy_kcal, 0) + " \u043A\u043A\u0430\u043B"} \xB7 \u0431\u0435\u043B\u043A\u0438: ${n.protein_g == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : number(n.protein_g) + " \u0433"} \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B: ${n.carbohydrate_total_g == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : number(n.carbohydrate_total_g) + " \u0433"}`));
+      }
+      if (entry.legacy_estimate) card.append(el2("p", "muted", "\u0421\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u043D \u043F\u043E \u0442\u0435\u043A\u0443\u0449\u0435\u043C\u0443 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0443."));
+      const actions = el2("div", "diary-actions");
+      for (const [label, operation] of [["\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C", "update"], ["\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C", "repeat"]]) {
+        const b2 = el2("button", "text-btn", label);
+        b2.type = "button";
+        b2.onclick = () => open({ operation, entry, revision: historyRevision });
+        actions.append(b2);
+      }
+      const more = el2("details", "diary-entry-more");
+      more.append(el2("summary", "", "\u0415\u0449\u0451"));
+      const del = el2("button", "text-btn danger-button", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C");
+      del.type = "button";
+      del.onclick = () => run2(() => propose2("diary.delete", { entry_id: entry.entry_id }, historyRevision));
+      more.append(del);
+      actions.append(more);
+      card.append(actions);
+      box.append(card);
+    }
+    $3("diary-more").hidden = !hasMore;
+    $3("diary-more").disabled = loading;
+  }
+  async function load(append = false) {
+    if (!getState()?.profile?.consent?.storage || !getState()?.profile?.consent?.health_data) return;
+    if (!day) day = stateDay();
+    if (!day && !allDates) {
+      $3("diary-status").textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0430\u0442\u0443 \u0438\u043B\u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0432 \u043F\u0440\u043E\u0444\u0438\u043B\u0435.";
+      return;
+    }
+    const token = ++historyGeneration, stamp = epoch(), key = historyKey(), current = () => token === historyGeneration && stamp === epoch(), values2 = { offset: append ? rows.length : 0, limit: 30 };
+    if (!allDates) values2.date = day;
+    const args = { action: "diary_history", values: values2 };
+    if (append) args.expected_revision = historyRevision;
+    loading = true;
+    loadingKey = key;
+    $3("diary-status").textContent = "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u0437\u0430\u043F\u0438\u0441\u0438\u2026";
+    $3("diary-more").disabled = true;
+    if (!append) {
+      rows = [];
+      hasMore = false;
+      renderSummary(null);
+      renderRows();
+    }
+    try {
+      const result = await call2("keto_kitchen", args);
+      if (!current()) return;
+      $3("diary-refresh").hidden = true;
+      rows = append ? [...rows, ...result.entries] : result.entries;
+      historyRevision = result.revision;
+      loadedKey = key;
+      hasMore = result.has_more;
+      loading = false;
+      renderSummary(result.summary);
+      renderRows();
+      $3("diary-status").textContent = allDates ? `\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u043E ${rows.length} \u0438\u0437 ${result.total}` : "";
+    } catch (error) {
+      if (!current()) return;
+      loading = false;
+      loadedKey = key;
+      $3("diary-status").textContent = error.message;
+      renderRows();
+      if (append) {
+        hasMore = false;
+        $3("diary-more").hidden = true;
+      }
+      $3("diary-refresh").hidden = false;
+    }
+  }
+  function historyKey() {
+    return [day, allDates, getState()?.revision].join("|");
+  }
+  function render() {
+    if (!day) day = stateDay();
+    $3("diary-day").value = day;
+    $3("diary-all").textContent = allDates ? "\u041A \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u043C\u0443 \u0434\u043D\u044E" : "\u0412\u0441\u044F \u0438\u0441\u0442\u043E\u0440\u0438\u044F";
+    $3("diary-day-controls").hidden = allDates;
+    if (isDiaryActive() && loadedKey !== historyKey() && (!loading || loadingKey !== historyKey())) run2(() => load());
+  }
+  function selectDate(next) {
+    day = next;
+    allDates = false;
+    loadedKey = null;
+    render();
+    if (!isDiaryActive()) setView2("diary");
+  }
+  $3("diary-day").onchange = () => selectDate($3("diary-day").value);
+  for (const [id, delta] of [["diary-prev", -1], ["diary-next", 1]]) $3(id).onclick = () => {
+    if (!day) return;
+    const d2 = /* @__PURE__ */ new Date(day + "T12:00:00Z");
+    d2.setUTCDate(d2.getUTCDate() + delta);
+    selectDate(d2.toISOString().slice(0, 10));
+  };
+  $3("diary-today").onclick = () => selectDate(stateDay());
+  $3("diary-all").onclick = () => {
+    allDates = !allDates;
+    loadedKey = null;
+    render();
+  };
+  $3("diary-more").onclick = () => run2(() => load(true));
+  $3("diary-refresh").onclick = () => {
+    $3("diary-refresh").hidden = true;
+    run2(() => load());
+  };
+  $3("diary-add").onclick = () => open();
+  function afterApplied(result) {
+    if (!result?.receipt) return;
+    loadedKey = null;
+    if (result.receipt.type === "diary.delete") {
+      $3("diary-receipt").hidden = true;
+      receiptEntry = null;
+    }
+    if (result.entry) {
+      receiptEntry = result.entry;
+      day = result.entry.date;
+      allDates = false;
+      const box = $3("diary-receipt");
+      box.hidden = false;
+      box.replaceChildren(el2("p", "", "\u0417\u0430\u043F\u0438\u0441\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0430"));
+      const edit = el2("button", "text-btn", "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C");
+      edit.type = "button";
+      edit.onclick = () => open({ operation: "update", entry: receiptEntry });
+      box.append(edit);
+      setView2("diary");
+    }
+    render();
+  }
+  function reset() {
+    generation++;
+    historyGeneration++;
+    selection = null;
+    submitting = false;
+    day = "";
+    allDates = false;
+    rows = [];
+    historyRevision = null;
+    loadedKey = null;
+    loadingKey = null;
+    loading = false;
+    hasMore = false;
+    receiptEntry = null;
+    form.reset();
+    showStatus("");
+    $3("intake-name").textContent = "";
+    $3("intake-zone").textContent = "";
+    $3("diary-summary").replaceChildren();
+    $3("diary-receipt").replaceChildren();
+    $3("diary-receipt").hidden = true;
+    $3("diary-status").textContent = "";
+    $3("diary-day").value = "";
+    $3("diary-more").hidden = true;
+    buttons();
+  }
+  return { open, render, afterApplied, reset, selectDate, reload: () => load(), get selectedDate() {
+    return day;
+  } };
 }
 
 // cloudflare-saas/vendor/firebase-13.2.0/firebase-app.js
@@ -8533,6 +10405,81 @@ var el = (tag, cls, txt) => {
 };
 var uiConfirmation = null;
 var screenEpoch = 0;
+var scrollMemory = createScrollMemory();
+var dialogs = createDialogController({ $: $2, getRouter: () => router });
+var presentationEpoch = 0;
+var renderedRoute = "";
+var renderedChatThread = null;
+var renderedChatKey = "";
+var chatSubmitted = false;
+var selectedProposal = null;
+var proposalSubmissions = /* @__PURE__ */ new Set();
+var nextFrame = (fn) => typeof requestAnimationFrame === "function" ? requestAnimationFrame(fn) : fn();
+function chatScroll() {
+  return document.querySelector("[data-testid=chat-scroll]");
+}
+function saveViewScroll() {
+  if (renderedRoute) scrollMemory.saveRoute(renderedRoute, $2("content").scrollTop);
+  if (view === "chat" && renderedChatThread) scrollMemory.saveThread(renderedChatThread, chatScroll()?.scrollTop || 0);
+}
+function restoreViewScroll(route) {
+  const epoch = screenEpoch;
+  nextFrame(() => {
+    if (epoch !== screenEpoch || renderedRoute !== route) return;
+    $2("content").scrollTop = scrollMemory.route(route);
+    if (view === "chat") {
+      const scroll = chatScroll();
+      if (scroll) scroll.scrollTop = scrollMemory.thread(state?.active_thread || "main") ?? scroll.scrollHeight;
+    }
+  });
+}
+function renderChat() {
+  const thread = state.active_thread || "main", key = JSON.stringify(state.chat || []), scroll = chatScroll();
+  const position = chatScrollPosition({ previousThread: renderedChatThread, nextThread: thread, previousKey: renderedChatKey, nextKey: key, top: scroll?.scrollTop || 0, height: scroll?.scrollHeight || 0, clientHeight: scroll?.clientHeight || 0, saved: scrollMemory.thread(thread), submitted: chatSubmitted });
+  if (renderedChatThread !== thread) {
+    if (renderedChatThread && view === "chat") scrollMemory.saveThread(renderedChatThread, scroll?.scrollTop || 0);
+    $2("chat-extras").replaceChildren();
+  }
+  $2("onboard-open").hidden = Boolean(state.guidance?.ready);
+  $2("suggestions").hidden = Boolean(state.chat?.length && state.guidance?.ready);
+  if (!position.render) return;
+  renderedChatThread = thread;
+  renderedChatKey = key;
+  chatSubmitted = false;
+  const focused = document.activeElement?.dataset?.actionId ? { message: document.activeElement.closest("[data-message-id]")?.dataset.messageId, action: document.activeElement.dataset.actionId } : null;
+  if (state.chat?.length) $2("messages").replaceChildren(...state.chat.map((x) => chatActions.render(x)));
+  else $2("messages").replaceChildren(el("div", "bubble assistant", "\u0427\u0442\u043E \u0432\u0430\u043C \u0441\u0435\u0439\u0447\u0430\u0441 \u043D\u0443\u0436\u043D\u043E: \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E \u0438\u043B\u0438 \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A?"));
+  if (focused) {
+    const message = Array.from($2("messages").children).find((x) => x.dataset.messageId === focused.message);
+    const action = message && Array.from(message.querySelectorAll("[data-action-id]")).find((x) => x.dataset.actionId === focused.action);
+    action?.focus({ preventScroll: true });
+  }
+  const epoch = screenEpoch;
+  nextFrame(() => {
+    if (epoch !== screenEpoch || renderedChatThread !== thread) return;
+    const target = chatScroll();
+    if (!target) return;
+    if (view === "chat") {
+      target.scrollTop = position.bottom ? target.scrollHeight : position.top;
+      scrollMemory.saveThread(thread, target.scrollTop);
+    } else if (!position.bottom) scrollMemory.saveThread(thread, position.top);
+  });
+}
+function showProposal(id = null) {
+  selectedProposal = id;
+  renderProposals();
+  dialogs.open("proposal", "proposal-close");
+}
+function proposalTitle(p) {
+  return { ui: "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", configuration: "\u041E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0438 \u0440\u0435\u0436\u0438\u043C", "profile.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0442\u0432\u0435\u0442\u044B", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A?", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C?", "kitchen.intake": "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435", "diary.update": "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "plan.accept": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E", "catalog.food.add": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442", "catalog.recipe.add": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", "guidance.setup": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435", "guidance.targets": "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "targets.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" }[p.type] || kitchenActionLabels[p.type.replace("kitchen.", "")] || "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435";
+}
+var recipeNavigation = 0;
+var recipesLoaded = false;
+var recipeLoadScheduledFor = null;
+var automaticRecipeLoad = Promise.resolve();
+var recipePageCalls = createRecipePageCalls({ call: (...args) => call(...args), epoch: () => screenEpoch });
+var recipePageCall = (...args) => recipePageCalls.invoke(...args);
+var settleRecipePageRequests = (current) => recipePageCalls.settle(current);
 var csrf = null;
 var state = null;
 var view = "chat";
@@ -8543,13 +10490,13 @@ var questionPage = 0;
 var currentPlan = null;
 var currentPlanIsDraft = false;
 var uiLabels = { theme: "\u041E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", text_size: "\u0420\u0430\u0437\u043C\u0435\u0440 \u0442\u0435\u043A\u0441\u0442\u0430", density: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0438", simple_mode: "\u041F\u0440\u043E\u0441\u0442\u043E\u0439 \u0440\u0435\u0436\u0438\u043C", home: "\u041D\u0430\u0447\u0430\u043B\u044C\u043D\u044B\u0439 \u0440\u0430\u0437\u0434\u0435\u043B", show_nutrition: "\u041F\u0438\u0449\u0435\u0432\u043E\u0439 \u0441\u043E\u0441\u0442\u0430\u0432", energy_min_kcal: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F \u043E\u0442, \u043A\u043A\u0430\u043B", energy_max_kcal: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F \u0434\u043E, \u043A\u043A\u0430\u043B", protein_min_g: "\u0411\u0435\u043B\u043E\u043A \u043E\u0442, \u0433", protein_max_g: "\u0411\u0435\u043B\u043E\u043A \u0434\u043E, \u0433", carb_basis: "\u0421\u043F\u043E\u0441\u043E\u0431 \u043F\u043E\u0434\u0441\u0447\u0451\u0442\u0430 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", carb_max_g: "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u0434\u043E, \u0433", fiber_min_g: "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 \u043E\u0442, \u0433", saturated_fat_max_pct: "\u041D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u044B\u0435 \u0436\u0438\u0440\u044B \u0434\u043E, %", max_active_minutes: "\u041C\u0438\u043D\u0443\u0442 \u043D\u0430 \u0433\u043E\u0442\u043E\u0432\u043A\u0443", meals_per_day: "\u041F\u0440\u0438\u0451\u043C\u043E\u0432 \u043F\u0438\u0449\u0438", max_recipe_repeats_per_week: "\u041F\u043E\u0432\u0442\u043E\u0440\u043E\u0432 \u0431\u043B\u044E\u0434\u0430 \u0432 \u043D\u0435\u0434\u0435\u043B\u044E", show_calories: "\u041F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0442\u044C \u043A\u0430\u043B\u043E\u0440\u0438\u0438", note: "\u0417\u0430\u043F\u0438\u0441\u044C", date: "\u0414\u0430\u0442\u0430", timezone: "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441", display_name: "\u0418\u043C\u044F", goal: "\u0426\u0435\u043B\u044C", basis_note: "\u041E\u0441\u043D\u043E\u0432\u0430\u043D\u0438\u0435", source_ref: "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A" };
-var values = { normal: "\u043E\u0431\u044B\u0447\u043D\u044B\u0439", large: "\u043A\u0440\u0443\u043F\u043D\u044B\u0439", compact: "\u043A\u043E\u043C\u043F\u0430\u043A\u0442\u043D\u044B\u0435", comfortable: "\u043F\u0440\u043E\u0441\u0442\u043E\u0440\u043D\u044B\u0435", dark: "\u0442\u0451\u043C\u043D\u0430\u044F", light: "\u0441\u0432\u0435\u0442\u043B\u0430\u044F", "ivory-plum": "Tranquil Dawn", chat: "\u043E\u0431\u0449\u0435\u043D\u0438\u0435", today: "\u043C\u0435\u043D\u044E", recipes: "\u0440\u0435\u0446\u0435\u043F\u0442\u044B", diary: "\u0434\u043D\u0435\u0432\u043D\u0438\u043A" };
+var values = { normal: "\u043E\u0431\u044B\u0447\u043D\u044B\u0439", large: "\u043A\u0440\u0443\u043F\u043D\u044B\u0439", compact: "\u043A\u043E\u043C\u043F\u0430\u043A\u0442\u043D\u044B\u0435", comfortable: "\u043F\u0440\u043E\u0441\u0442\u043E\u0440\u043D\u044B\u0435", dark: "\u0442\u0451\u043C\u043D\u0430\u044F", light: "\u0441\u0432\u0435\u0442\u043B\u0430\u044F", "ivory-plum": "\u0441\u0432\u0435\u0442\u043B\u0430\u044F", chat: "\u043E\u0431\u0449\u0435\u043D\u0438\u0435", today: "\u043C\u0435\u043D\u044E", recipes: "\u0440\u0435\u0446\u0435\u043F\u0442\u044B", diary: "\u0434\u043D\u0435\u0432\u043D\u0438\u043A" };
 Object.assign(uiLabels, { age_years: "\u0412\u043E\u0437\u0440\u0430\u0441\u0442, \u043B\u0435\u0442", height_cm: "\u0420\u043E\u0441\u0442, \u0441\u043C", weight_kg: "\u0412\u0435\u0441, \u043A\u0433", equation_category: "\u041A\u043E\u044D\u0444\u0444\u0438\u0446\u0438\u0435\u043D\u0442 \u0443\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u044F", activity_factor: "\u041C\u043D\u043E\u0436\u0438\u0442\u0435\u043B\u044C \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u0438", activity_note: "\u0410\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u044C", measured_at: "\u0414\u0430\u0442\u0430 \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u044F", mode: "\u0420\u0435\u0436\u0438\u043C \u043F\u0438\u0442\u0430\u043D\u0438\u044F" });
 Object.assign(values, { female: "\u0436\u0435\u043D\u0441\u043A\u0438\u0439 \u043A\u043E\u044D\u0444\u0444\u0438\u0446\u0438\u0435\u043D\u0442", male: "\u043C\u0443\u0436\u0441\u043A\u043E\u0439 \u043A\u043E\u044D\u0444\u0444\u0438\u0446\u0438\u0435\u043D\u0442", not_selected: "\u043D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D", maintain: "\u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435 \u0432\u0435\u0441\u0430", loss: "\u043C\u044F\u0433\u043A\u043E\u0435 \u0441\u043D\u0438\u0436\u0435\u043D\u0438\u0435 \u0432\u0435\u0441\u0430", gain: "\u043D\u0430\u0431\u043E\u0440 \u0432\u0435\u0441\u0430 \u2014 \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u0439 \u043F\u043B\u0430\u043D", starter: "\u043D\u0438\u0437\u043A\u043E\u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043D\u044B\u0439 \u0441\u0442\u0430\u0440\u0442: \u0434\u043E 100 \u0433 \u043E\u0431\u0449\u0438\u0445 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", keto: "\u043A\u0435\u0442\u043E-\u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439: \u0434\u043E 50 \u0433 \u043E\u0431\u0449\u0438\u0445 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", total: "\u043E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", net_estimate: "\u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0435 net-\u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B" });
 var QUESTIONS = [["adult", "\u0412\u0430\u043C \u0443\u0436\u0435 \u0438\u0441\u043F\u043E\u043B\u043D\u0438\u043B\u043E\u0441\u044C 18 \u043B\u0435\u0442?"], ["pregnant", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0431\u0435\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0441\u0442\u044C?"], ["breastfeeding", "\u041A\u043E\u0440\u043C\u0438\u0442\u0435 \u0433\u0440\u0443\u0434\u044C\u044E?"], ["type1_diabetes", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0434\u0438\u0430\u0431\u0435\u0442 1 \u0442\u0438\u043F\u0430?"], ["sglt2", "\u041F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u0442\u0435 SGLT2-\u043F\u0440\u0435\u043F\u0430\u0440\u0430\u0442 \u2014 \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 \u0424\u043E\u0440\u0441\u0438\u0433\u0443 \u0438\u043B\u0438 \u0414\u0436\u0430\u0440\u0434\u0438\u043D\u0441?"], ["hypoglycemia_medication", "\u041F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u0442\u0435 \u0438\u043D\u0441\u0443\u043B\u0438\u043D \u0438\u043B\u0438 \u0434\u0440\u0443\u0433\u043E\u0439 \u043F\u0440\u0435\u043F\u0430\u0440\u0430\u0442, \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u043C\u043E\u0436\u0435\u0442 \u0432\u044B\u0437\u0432\u0430\u0442\u044C \u0433\u0438\u043F\u043E\u0433\u043B\u0438\u043A\u0435\u043C\u0438\u044E?"], ["kidney_disease", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0437\u0430\u0431\u043E\u043B\u0435\u0432\u0430\u043D\u0438\u0435 \u043F\u043E\u0447\u0435\u043A?"], ["liver_pancreas_gallbladder_disease", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0437\u0430\u0431\u043E\u043B\u0435\u0432\u0430\u043D\u0438\u0435 \u043F\u0435\u0447\u0435\u043D\u0438, \u043F\u043E\u0434\u0436\u0435\u043B\u0443\u0434\u043E\u0447\u043D\u043E\u0439 \u0436\u0435\u043B\u0435\u0437\u044B \u0438\u043B\u0438 \u0436\u0435\u043B\u0447\u043D\u043E\u0433\u043E \u043F\u0443\u0437\u044B\u0440\u044F?"], ["metabolic_contraindication", "\u0418\u0437\u0432\u0435\u0441\u0442\u043D\u044B \u043B\u0438 \u043D\u0430\u0440\u0443\u0448\u0435\u043D\u0438\u044F \u043E\u0431\u043C\u0435\u043D\u0430 \u0436\u0438\u0440\u043E\u0432 \u0438\u043B\u0438 \u0438\u043D\u044B\u0435 \u043F\u0440\u043E\u0442\u0438\u0432\u043E\u043F\u043E\u043A\u0430\u0437\u0430\u043D\u0438\u044F \u043A \u043A\u0435\u0442\u043E\u0433\u0435\u043D\u043D\u043E\u0439 \u0434\u0438\u0435\u0442\u0435?"], ["eating_disorder_risk", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0441\u0435\u0439\u0447\u0430\u0441 \u0438\u043B\u0438 \u0432 \u043F\u0440\u043E\u0448\u043B\u043E\u043C \u0440\u0430\u0441\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u043E \u043F\u0438\u0449\u0435\u0432\u043E\u0433\u043E \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F?"], ["other_clinical_restrictions", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0434\u0440\u0443\u0433\u0438\u0435 \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u0438\u0435 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u043F\u0438\u0442\u0430\u043D\u0438\u044F?"], ["medications_reviewed", "\u0412\u044B \u043F\u0435\u0440\u0435\u0447\u0438\u0441\u043B\u0438\u043B\u0438 \u0432\u0441\u0435 \u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u043C\u044B\u0435 \u043B\u0435\u043A\u0430\u0440\u0441\u0442\u0432\u0430 \u0438\u043B\u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u043B\u0438, \u0447\u0442\u043E \u0438\u0445 \u043D\u0435\u0442?"], ["allergies_reviewed", "\u0412\u044B \u0443\u043A\u0430\u0437\u0430\u043B\u0438 \u0432\u0441\u0435 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u043F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438?"]];
 var ALLERGENS = [["egg", "\u042F\u0439\u0446\u0430"], ["milk", "\u041C\u043E\u043B\u043E\u043A\u043E"], ["fish", "\u0420\u044B\u0431\u0430"], ["crustacean_shellfish", "\u0420\u0430\u043A\u043E\u043E\u0431\u0440\u0430\u0437\u043D\u044B\u0435"], ["tree_nut", "\u041E\u0440\u0435\u0445\u0438"], ["peanut", "\u0410\u0440\u0430\u0445\u0438\u0441"], ["soy", "\u0421\u043E\u044F"], ["wheat", "\u041F\u0448\u0435\u043D\u0438\u0446\u0430"], ["sesame", "\u041A\u0443\u043D\u0436\u0443\u0442"], ["celery", "\u0421\u0435\u043B\u044C\u0434\u0435\u0440\u0435\u0439"], ["coconut", "\u041A\u043E\u043A\u043E\u0441"], ["mollusc", "\u041C\u043E\u043B\u043B\u044E\u0441\u043A\u0438"], ["gluten", "\u0413\u043B\u044E\u0442\u0435\u043D"], ["mustard", "\u0413\u043E\u0440\u0447\u0438\u0446\u0430"], ["lupin", "\u041B\u044E\u043F\u0438\u043D"], ["sulfite", "\u0421\u0443\u043B\u044C\u0444\u0438\u0442\u044B"]];
 var foodStates = { raw: "\u0441\u044B\u0440\u043E\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442", ready_to_eat: "\u0433\u043E\u0442\u043E\u0432\u044B\u0439 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E", cooked_roasted: "\u0437\u0430\u043F\u0435\u0447\u0451\u043D\u043D\u044B\u0439", cooked_dry_heat: "\u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u044B\u0439 \u0441\u0443\u0445\u0438\u043C \u0436\u0430\u0440\u043E\u043C", canned_drained: "\u043A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439 \u0431\u0435\u0437 \u0436\u0438\u0434\u043A\u043E\u0441\u0442\u0438", ready_to_cook: "\u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u044B\u0439 \u043A \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044E", cooked_boiled: "\u0432\u0430\u0440\u0451\u043D\u044B\u0439", cooked: "\u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u044B\u0439", dry: "\u0441\u0443\u0445\u043E\u0439", canned: "\u043A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439", frozen: "\u0437\u0430\u043C\u043E\u0440\u043E\u0436\u0435\u043D\u043D\u044B\u0439" };
-var numberRu = (n) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(n);
+var numberRu = (n, precision = 3) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: precision }).format(n);
 var foodState = (x) => foodStates[x] || "\u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435: \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0432 \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430";
 function readable(message) {
   return String(message).replace(/(?:Сначала скрининг|План не разрешён):[^\n]*/g, "\u0414\u043B\u044F \u043C\u0435\u043D\u044E \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0435 \u0432\u043E\u043F\u0440\u043E\u0441\u044B \u0432 \u0440\u0430\u0437\u0434\u0435\u043B\u0435 \xAB\u0417\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E \u0438 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F\xBB \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u043D\u044B\u0435 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F.");
@@ -8589,7 +10536,7 @@ async function call(name2, args = {}, options = {}) {
   if (epoch !== screenEpoch) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
   if (!r.ok) {
     if (r.status === 401) showLogin();
-    throw Error({ BRIDGE_NOT_CONFIGURED: "\u0421\u0435\u0440\u0432\u0438\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", COMPUTE_UNAVAILABLE: "\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D.", REQUEST_PENDING: "\u0417\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u043E\u0431\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F.", REQUEST_FAILED: "\u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u043B\u0441\u044F; \u043D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u044B\u0439.", STATE_CHANGED: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u043B\u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.", BUSY_OR_CONSENT_OR_LIMIT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", VALIDATION_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435: \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u0432\u0435\u0442\u044B, \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B." }[d2.error] || d2.message || d2.detail || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435.");
+    throw Error({ BRIDGE_NOT_CONFIGURED: "\u0421\u0435\u0440\u0432\u0438\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", COMPUTE_UNAVAILABLE: "\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D.", REQUEST_PENDING: "\u0417\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u043E\u0431\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F.", REQUEST_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0435\u0440\u0435\u0434 \u043F\u043E\u0432\u0442\u043E\u0440\u043E\u043C.", STATE_CHANGED: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u043B\u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.", BUSY_OR_CONSENT_OR_LIMIT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", VALIDATION_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435: \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u0432\u0435\u0442\u044B, \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B." }[d2.error] || d2.message || d2.detail || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435.");
   }
   return d2;
 }
@@ -8600,7 +10547,7 @@ function tranquilSummary(next) {
   return { cards: [
     { label: "\u041F\u0440\u043E\u0444\u0438\u043B\u044C", value: held === true ? "\u041D\u0443\u0436\u0435\u043D \u0440\u0430\u0437\u0431\u043E\u0440" : typeof next.screening?.can_plan !== "boolean" ? "\u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : screened && held === false ? "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D \u0434\u043B\u044F \u043C\u0435\u043D\u044E" : "\u041D\u0443\u0436\u043D\u0430 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430", note: "\u041F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u043C \u043E\u0442\u0432\u0435\u0442\u0430\u043C; \u043D\u0435 \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u043E\u0435 \u0437\u0430\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435.", view: "setup", icon: "profile" },
     { label: "\u041B\u0438\u0447\u043D\u044B\u0439 \u043F\u043B\u0430\u043D", value: target === void 0 ? "\u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : target === null ? "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D" : stale === true ? "\u041D\u0443\u0436\u0435\u043D \u043F\u0435\u0440\u0435\u0441\u043C\u043E\u0442\u0440" : held === true ? "\u041F\u0440\u0438\u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D" : stale === false && held === false ? "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B" : "\u0421\u0442\u0430\u0442\u0443\u0441 \u043D\u0435 \u0443\u0442\u043E\u0447\u043D\u0451\u043D", note: "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u0438\u0442\u0430\u043D\u0438\u044F, \u043D\u0435 \u043E\u0446\u0435\u043D\u043A\u0430 \u0437\u0434\u043E\u0440\u043E\u0432\u044C\u044F.", view: "targets", icon: "plan" },
-    { label: "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F", value: pantry === null ? "\u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : String(pantry.length), note: pantry === null ? "\u0421\u043E\u0441\u0442\u0430\u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D." : "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0445 \u043F\u043E\u0437\u0438\u0446\u0438\u0439. \u041C\u0430\u0441\u0441\u0430 \u043C\u043E\u0436\u0435\u0442 \u0431\u044B\u0442\u044C \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430.", view: "recipes", icon: "pantry" },
+    { label: "\u041C\u043E\u0438 \u0437\u0430\u043F\u0430\u0441\u044B", value: pantry === null ? "\u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : String(pantry.length), note: pantry === null ? "\u0421\u043E\u0441\u0442\u0430\u0432 \u0437\u0430\u043F\u0430\u0441\u043E\u0432 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D." : "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0445 \u043F\u043E\u0437\u0438\u0446\u0438\u0439. \u041C\u0430\u0441\u0441\u0430 \u043C\u043E\u0436\u0435\u0442 \u0431\u044B\u0442\u044C \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430.", view: "recipes", icon: "pantry" },
     { label: "\u0414\u043D\u0435\u0432\u043D\u0438\u043A", value: diary === null ? "\u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : String(diary.length), note: diary === null ? "\u0417\u0430\u043F\u0438\u0441\u0438 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u044B." : "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439. \u042D\u0442\u043E \u043D\u0435 \u0441\u0443\u043C\u043C\u0430 \u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044F.", view: "diary", icon: "diary" }
   ], steps, completed: steps.filter(([, done]) => done).length };
 }
@@ -8633,10 +10580,36 @@ function renderTranquilSummary(next) {
   host.hidden = false;
 }
 function clearScreen() {
+  dialogs.reset();
+  chatActions.reset();
+  intake.reset();
+  scrollMemory.clear();
+  renderedRoute = "";
+  renderedChatThread = null;
+  renderedChatKey = "";
+  chatSubmitted = false;
+  selectedProposal = null;
+  proposalSubmissions.clear();
+  $2("pending-open").hidden = true;
+  $2("pending-count").textContent = "";
+  $2("proposal-list").replaceChildren();
+  $2("today-empty").hidden = false;
+  recipeNavigation++;
+  recipesLoaded = false;
+  recipeLibrary.invalidate();
+  setRecipeReadLoading(false);
+  measurementEditing = null;
+  measurementOriginal = null;
+  measurementSavedDraft = null;
+  measurementSubmissions.clear();
+  portionFoods = [];
+  portionSearchVersion++;
+  portionCalcVersion++;
+  shop.reset();
+  ownDish.reset();
   screenEpoch++;
   renderTranquilSummary(null);
   developer.reset();
-  kitchen.reset();
   guided.reset();
   router.reset();
   busy = false;
@@ -8652,8 +10625,9 @@ function clearScreen() {
   screenDraft = {};
   questionPage = 0;
   document.querySelectorAll("form").forEach((form) => form.reset());
+  kitchen.reset();
   $2("toast").hidden = true;
-  for (const id of ["recipe-detail", "recipes", "history", "allergy-options", "screen-questions", "source-list", "admin-summary", "invite-link"]) $2(id).replaceChildren();
+  for (const id of ["recipe-detail", "recipes", "history", "allergy-options", "screen-questions", "source-list", "admin-summary", "invite-link", "measurement-list", "portion-result"]) $2(id).replaceChildren();
   for (const id of ["display-name", "goal", "timezone", "medications", "diary-note", "recipe-query", "photo"]) $2(id).value = "";
   if ($2("recipe-dialog").open) $2("recipe-dialog").close();
   $2("messages").replaceChildren();
@@ -8684,24 +10658,62 @@ function localDate() {
 function setView(next, options = {}) {
   router.go(guided.resolve(next), options);
 }
+function setRecipeReadLoading(loading) {
+  $2("kitchen-studio").setAttribute("aria-busy", String(loading));
+}
 function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) {
+  presentationEpoch++;
   if (next === "developer" && (!session || session.user.role !== "admin" || image || attachedSource || recipeSource)) {
     notify("\u0420\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u043A\u0430 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430 \u0432\u043B\u0430\u0434\u0435\u043B\u044C\u0446\u0443 \u0431\u0435\u0437 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u043B\u0451\u043D\u043D\u044B\u0445 \u0444\u043E\u0442\u043E \u0438\u043B\u0438 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u043E\u0432.");
     router.go("more", { replace: true });
     return;
   }
   const route = next;
+  saveViewScroll();
+  renderedRoute = route;
   next = next.startsWith("setup-") ? "setup" : next;
+  const previousView = view;
+  const navigation = previousView === next ? recipeNavigation : ++recipeNavigation;
+  if (previousView === "chat" && next !== "chat") mobile.leave?.();
+  if (previousView === "products" && next !== "products") shop.leave();
+  if (["recipes", "products"].includes(previousView) && previousView !== next) {
+    recipeLibrary.invalidate();
+    kitchen.invalidatePageLookups();
+    setRecipeReadLoading(false);
+  }
   view = next;
   document.body.dataset.view = next;
   document.querySelectorAll("[data-page]").forEach((p) => p.hidden = p.dataset.page !== next);
-  document.querySelectorAll("[data-view]").forEach((b2) => {
-    b2.classList.toggle("active", b2.dataset.view === (["chat", "today", "diary"].includes(next) ? next : "more"));
-    b2.setAttribute("aria-current", b2.dataset.view === (["chat", "today", "diary"].includes(next) ? next : "more") ? "page" : "false");
+  document.querySelectorAll("#nav [data-view],.head-actions [data-view]").forEach((b2) => {
+    b2.classList.toggle("active", b2.dataset.view === mainTab(next));
+    b2.setAttribute("aria-current", b2.dataset.view === mainTab(next) ? "page" : "false");
   });
-  if (next === "recipes" && reason !== "history") {
-    run(loadRecipes);
-    run(() => kitchen.load());
+  if (["recipes", "products"].includes(next) && recipeLoadScheduledFor !== navigation && (reason !== "history" || !recipesLoaded)) {
+    recipeLoadScheduledFor = navigation;
+    setRecipeReadLoading(true);
+    const sessionEpoch = screenEpoch, current = () => navigation === recipeNavigation && sessionEpoch === screenEpoch && view === next;
+    automaticRecipeLoad = automaticRecipeLoad.catch(() => {
+    }).then(async () => {
+      if (!current() || !await settleRecipePageRequests(current)) return;
+      let recipesOK = next === "products";
+      if (next === "recipes") $2("recipe-note").textContent = "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u0440\u0435\u0446\u0435\u043F\u0442\u044B\u2026";
+      try {
+        if (next === "recipes") {
+          await loadRecipes();
+          recipesOK = true;
+        }
+      } catch (e) {
+        if (current()) notify(e.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442\u044B.");
+      }
+      if (!current()) return;
+      const kitchenOK = await kitchen.load(current);
+      if (current() && next === "recipes" && recipesOK && kitchenOK) recipesLoaded = true;
+    }).finally(() => {
+      if (recipeLoadScheduledFor === navigation) {
+        recipeLoadScheduledFor = null;
+        if (current()) setRecipeReadLoading(false);
+      }
+    });
   }
   if (route === "setup-restrictions") fillOnboard();
   if (next === "settings") fillSettings();
@@ -8709,29 +10721,38 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
   if (next === "admin" && reason !== "history") run(admin);
   if (next === "developer") run(() => developer.load());
   guided.render(route);
-  $2("nav-back").hidden = ["chat", "today", "diary", "more"].includes(next);
+  $2("nav-back").hidden = MAIN_ROUTES.includes(next);
   const parents = { "setup-consent": "recipes", "setup-about": "setup-consent", "setup-restrictions": "setup-about", "setup-targets": "setup-restrictions" };
-  const parent = depth > 0 ? origin : parents[route] || "more";
-  const parentLabel = { chat: "\u0427\u0430\u0442", today: "\u041C\u0435\u043D\u044E", more: "\u0415\u0449\u0451", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", targets: "\u041F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439", "setup-consent": "\u0421\u043E\u0433\u043B\u0430\u0441\u0438\u0435", "setup-about": "\u041E \u0432\u0430\u0441", "setup-restrictions": "\u041E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F", "setup-targets": "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" }[parent] || "\u0415\u0449\u0451";
+  const parent = route === "today" ? "recipes" : route === "more" && depth === 0 ? "chat" : depth > 0 ? origin : parents[route] || "more";
+  const parentLabel = { chat: "\u0427\u0430\u0442", today: "\u041C\u043E\u0451 \u043C\u0435\u043D\u044E", more: "\u041F\u0440\u043E\u0444\u0438\u043B\u044C", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", targets: "\u041F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439", "setup-consent": "\u0421\u043E\u0433\u043B\u0430\u0441\u0438\u0435", "setup-about": "\u041E \u0432\u0430\u0441", "setup-restrictions": "\u041E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F", "setup-targets": "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" }[parent] || "\u0415\u0449\u0451";
   $2("nav-back").textContent = "\u2039";
   $2("nav-back").setAttribute("aria-label", "\u041D\u0430\u0437\u0430\u0434: " + parentLabel);
   $2("nav-back").title = "\u041D\u0430\u0437\u0430\u0434: " + parentLabel;
+  if (next === "chat") mobile.resizeComposer();
+  if (next === "diary") intake.render();
+  restoreViewScroll(route);
 }
 function setState(next) {
   if (state && state.profile.owner_account_id !== next.profile.owner_account_id) clearScreen();
   if (!next.processing_consent || !next.profile.consent.storage || !next.profile.consent.health_data) clearScreen();
   state = next;
+  ownDish.update(state);
   developer.identity();
   renderState();
 }
 function accept(d2) {
+  const reviewed = selectedProposal;
   if (d2?.state) {
     setState(d2.state);
   }
+  if (dialogs.current === "proposal" && (d2?.receipt && (!reviewed || d2.receipt.id === reviewed) || reviewed && d2?.state?.pending && !d2.state.pending.some((p) => p.id === reviewed))) dialogs.dismiss();
   if (d2?.shopping) renderShopping(d2.shopping);
   if (d2?.message) notify(d2.message);
   guided.afterApplied(d2);
+  shop.afterApplied(d2);
+  intake.afterApplied(d2);
   if (d2?.receipt?.type === "profile.update" && router.current === "setup-restrictions") fillOnboard();
+  if (d2?.proposal && state?.processing_consent && state?.profile?.consent?.storage && state?.profile?.consent?.health_data) showProposal(d2.proposal.id);
   return d2;
 }
 function renderState() {
@@ -8752,14 +10773,9 @@ function renderState() {
   guided.render(router.current);
   renderProposals();
   renderDiary();
+  renderMeasurements();
   renderHistory();
-  if (state.chat.length) {
-    $2("messages").replaceChildren(...state.chat.map((x) => el("div", "bubble " + x.role, x.text)));
-    const scroll = document.querySelector("[data-testid=chat-scroll]");
-    if (scroll) scroll.scrollTop = scroll.scrollHeight;
-  } else {
-    $2("messages").replaceChildren(el("div", "bubble assistant", "\u041D\u0430\u0447\u043D\u0451\u043C \u0441 \u0442\u043E\u0433\u043E, \u0447\u0442\u043E \u0432\u0430\u043C \u0441\u0435\u0439\u0447\u0430\u0441 \u043D\u0443\u0436\u043D\u043E: \u0438\u0434\u0435\u044F \u0431\u043B\u044E\u0434\u0430, \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u0438\u043B\u0438 \u0437\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E?"));
-  }
+  renderChat();
   const ready = state.screening.can_plan && !state.holds.length && state.profile.targets && !state.guidance?.targets_stale;
   $2("menu-gate").textContent = ready ? "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B. \u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0439 \u043F\u043B\u0430\u043D \u0431\u0443\u0434\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D \u043F\u043E \u043D\u0438\u043C." : "\u0414\u043B\u044F \u043F\u0435\u0440\u0441\u043E\u043D\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u043C\u0435\u043D\u044E \u043D\u0443\u0436\u043D\u044B \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D\u043D\u044B\u0435 \u0432\u043E\u043F\u0440\u043E\u0441\u044B \u0438 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B. \u041C\u043E\u0436\u043D\u043E \u043F\u043E\u043A\u0430 \u0432\u044B\u0431\u0438\u0440\u0430\u0442\u044C \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u044B\u0435 \u0440\u0435\u0446\u0435\u043F\u0442\u044B.";
   if (state.plans.length) {
@@ -8767,10 +10783,12 @@ function renderState() {
     renderPlan(currentPlan, false);
   } else if (currentPlan && (!currentPlanIsDraft || currentPlan.profile_revision !== state.profile.profile_revision)) {
     currentPlan = null;
+    $2("today-empty").hidden = false;
     $2("menu-result").replaceChildren(el("div", "notice", "\u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F \u2014 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043D\u0443\u0436\u043D\u043E \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0442\u044C."));
   }
   if (state.holds.length) {
     currentPlan = null;
+    $2("today-empty").hidden = false;
     $2("menu-result").replaceChildren(el("div", "notice danger", "\u0420\u0430\u043D\u0435\u0435 \u043F\u043E\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E \u043D\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442\u0441\u044F: \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u0440\u0430\u0437\u0431\u043E\u0440 \u043D\u043E\u0432\u043E\u0433\u043E \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F."));
   }
 }
@@ -8783,24 +10801,56 @@ function flatten(payload, prefix = "") {
   return out;
 }
 function renderProposals() {
+  const pending = state.pending || [];
+  $2("pending-open").hidden = !pending.length;
+  $2("pending-count").textContent = String(pending.length);
+  $2("pending-open").setAttribute("aria-label", "\u041E\u0436\u0438\u0434\u0430\u044E\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F: " + pending.length);
+  if (selectedProposal && !pending.some((p) => p.id === selectedProposal)) selectedProposal = null;
+  $2("proposal-list").replaceChildren();
+  $2("proposal-list").hidden = Boolean(selectedProposal);
+  $2("proposal-all").hidden = !selectedProposal || pending.length < 2;
+  const selected = pending.find((p) => p.id === selectedProposal), intakeSelected = selected?.type === "kitchen.intake";
+  $2("proposal-heading").textContent = intakeSelected ? selected.payload.operation === "update" ? "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C" : "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A" : "\u041D\u0430 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443";
+  $2("proposal-context").textContent = selectedProposal ? intakeSelected ? "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E, \u0432\u0440\u0435\u043C\u044F \u0438 \u0441\u043E\u0441\u0442\u0430\u0432." : "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435. \u0417\u0430\u043A\u0440\u044B\u0442\u0438\u0435 \u043E\u043A\u043D\u0430 \u043E\u0441\u0442\u0430\u0432\u0438\u0442 \u0435\u0433\u043E \u043D\u0430 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0435." : pending.length ? "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438." : "\u041E\u0436\u0438\u0434\u0430\u044E\u0449\u0438\u0445 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0439 \u043D\u0435\u0442.";
   $2("proposals").replaceChildren();
-  for (const p of state.pending) {
+  for (const p of pending) {
+    const open = el("button", "pending-item", proposalTitle(p) + (p.preview?.entry ? " \xB7 " + p.preview.entry.name_ru + " \xB7 " + formatDate(p.preview.entry.date) : ""));
+    open.type = "button";
+    open.onclick = () => showProposal(p.id);
+    $2("proposal-list").append(open);
     const card = el("div", "proposal");
+    card.hidden = p.id !== selectedProposal;
     card.setAttribute("role", "region");
     card.setAttribute("aria-label", "\u0418\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F");
-    card.append(el("span", "eyebrow", "\u041D\u0410 \u041F\u0420\u041E\u0412\u0415\u0420\u041A\u0423"), el("h3", "", { "ui": "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", "configuration": "\u041F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0438 \u0440\u0435\u0436\u0438\u043C", "profile.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0442\u0432\u0435\u0442\u044B", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "plan.accept": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E", "catalog.recipe.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442", "guidance.setup": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0438 \u0432\u044B\u0431\u043E\u0440", "guidance.targets": "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "targets.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0443\u0447\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "feature.request": "\u041F\u043E\u0436\u0435\u043B\u0430\u043D\u0438\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0443", "ui.rollback": "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0432\u0438\u0434" }[p.type] || kitchenActionLabels[p.type.replace("kitchen.", "")] || "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435"));
+    if (p.type !== "kitchen.intake") card.append(el("span", "eyebrow", "\u041D\u0410 \u041F\u0420\u041E\u0412\u0415\u0420\u041A\u0423"), el("h3", "", { "ui": "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", "configuration": "\u041F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0438 \u0440\u0435\u0436\u0438\u043C", "profile.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0442\u0432\u0435\u0442\u044B", "measurement.add": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "measurement.update": "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "measurement.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A?", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "plan.accept": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E", "catalog.recipe.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442", "catalog.food.add": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442", "guidance.setup": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0438 \u0432\u044B\u0431\u043E\u0440", "guidance.targets": "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "targets.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0443\u0447\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "feature.request": "\u041F\u043E\u0436\u0435\u043B\u0430\u043D\u0438\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0443", "ui.rollback": "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0432\u0438\u0434" }[p.type] || kitchenActionLabels[p.type.replace("kitchen.", "")] || "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435"));
+    if (p.type === "kitchen.pantry" && Array.isArray(p.preview?.items)) {
+      const retained = new Set(p.payload.items.map((i) => i.food_id));
+      const removed = (state.kitchen?.pantry || []).filter((i) => !retained.has(i.food_id));
+      card.append(el("p", "", `\u041D\u043E\u0432\u044B\u0435 \u0437\u0430\u043F\u0430\u0441\u044B \u0437\u0430\u043C\u0435\u043D\u044F\u0442 \u0442\u0435\u043A\u0443\u0449\u0438\u0435. \u0423\u0434\u0430\u043B\u044F\u0435\u0442\u0441\u044F \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${removed.length}` + (removed.length ? " \u2014 " + removed.map((i) => i.name_ru || "\u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E").join(", ") : "")));
+    }
     const dl = el("dl");
-    const pairs = p.type === "plan.accept" ? [["\u0414\u043D\u0435\u0439", p.payload.days?.length], ["\u0421\u0442\u0430\u0442\u0443\u0441", "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0439 \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"]] : p.type === "guidance.targets" ? flatten(p.payload.candidate) : flatten(p.payload);
+    const shopFood = p.type === "catalog.food.add" && p.payload?.provenance?.type === "shop_label";
+    const isKitchen = p.type.startsWith("kitchen.");
+    const pairs = p.type.startsWith("measurement.") ? measurementPreview(p) : p.type === "kitchen.intake" || p.preview?.entry ? [] : p.type === "diary.delete" ? [["\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C \u0438\u0437 \u0434\u043D\u0435\u0432\u043D\u0438\u043A\u0430"]] : shopFood ? [] : p.type === "kitchen.pantry" ? [["\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", p.preview?.items || []]] : isKitchen ? ["kitchen.diary", "kitchen.own_dish_diary"].includes(p.type) ? [...p.payload.date ? [["\u0414\u0430\u0442\u0430", formatDate(p.payload.date)]] : [], ["\u0421\u043A\u043E\u043B\u044C\u043A\u043E", `${numberRu(p.payload.fraction)} ${p.payload.basis === "batch" ? "\u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430" : "\u043F\u043E\u0440\u0446\u0438\u0438"}`]] : p.type === "kitchen.remember" ? [["\u041F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", p.payload.text]] : p.type === "kitchen.forget" ? [["\u0417\u0430\u0431\u044B\u0442\u044C", state.kitchen?.preferences?.find((f) => f.id === p.payload.fact_id)?.text || "\u041F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E"]] : p.type === "kitchen.accept_day" ? [["\u0411\u043B\u044E\u0434\u0430 \u0434\u043D\u044F", (p.preview?.day_items || []).join(", ")]] : p.type === "kitchen.rate" ? [["\u041E\u0446\u0435\u043D\u043A\u0430", p.payload.rating + " \u0438\u0437 5"]] : [] : p.type === "plan.accept" ? [["\u0414\u043D\u0435\u0439", p.payload.days?.length], ["\u0421\u0442\u0430\u0442\u0443\u0441", "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0439 \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"]] : p.type === "guidance.targets" ? flatten(p.payload.candidate) : flatten(p.payload);
     for (const [key, val] of pairs.slice(0, 22)) {
       const leaf = key.split(".").at(-1);
       const label = uiLabels[leaf] || QUESTIONS.find((x) => x[0] === leaf)?.[1] || { allergies: "\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", medications: "\u041B\u0435\u043A\u0430\u0440\u0441\u0442\u0432\u0430", screening: "\u0412\u043E\u043F\u0440\u043E\u0441\u044B \u0430\u043D\u043A\u0435\u0442\u044B" }[leaf] || leaf;
-      dl.append(el("dt", "", label), el("dd", "", Array.isArray(val) ? val.map((x) => typeof x === "object" ? x.name || x.recipe_id || (x.food_id ? x.food_id + " \xB7 " + numberRu(x.grams_edible) + " \u0433 \xB7 " + foodState(x.state) : "\u0437\u0430\u043F\u0438\u0441\u044C") : ALLERGENS.find((a2) => a2[0] === x)?.[1] || human(x)).join(", ") : human(val)));
+      dl.append(el("dt", "", label), el("dd", "", Array.isArray(val) ? val.map((x) => typeof x === "object" ? x.name_ru ? x.name_ru + " \xB7 " + foodState(x.state) + " \xB7 " + (x.grams == null ? "\u043C\u0430\u0441\u0441\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430" : numberRu(x.grams) + " \u0433") : x.name || "\u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E" : ALLERGENS.find((a2) => a2[0] === x)?.[1] || human(x)).join(", ") : human(val)));
     }
     card.append(dl);
-    if (p.preview) {
+    if (p.preview?.entry) card.append(...intakeReviewNodes(el, p.preview));
+    if (shopFood) {
+      const f = p.payload, l2 = f.declared_label || {}, basis = { per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E" }[l2.basis] || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430", v2 = (x) => x == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : numberRu(x, 2), al = (f.allergens || []).map((id) => ALLERGENS.find((a2) => a2[0] === id)?.[1] || "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E");
+      card.append(el("p", "", f.name_ru + " \xB7 " + foodState(f.state)), el("p", "", "\u0410\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B: " + (al.length ? al.join(", ") : "\u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E: \u043D\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u044B")), el("p", "", "\u041E\u0441\u043D\u043E\u0432\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438: " + basis + (l2.basis === "per100g" ? "" : "; \u043C\u0430\u0441\u0441\u0430 " + v2(l2.mass_g) + " \u0433")), el("p", "", "\u041D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435: \u044D\u043D\u0435\u0440\u0433\u0438\u044F " + v2(l2.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043A\u0438 " + v2(l2.protein_g) + " \u0433 \xB7 \u0436\u0438\u0440\u044B " + v2(l2.fat_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + v2(l2.carbohydrate_g) + " \u0433 \xB7 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 " + v2(l2.fiber_g) + " \u0433"), el("p", "", "\u041E\u0441\u043D\u043E\u0432\u0430 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432: " + ({ total_includes_fiber: "\u0432\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443", available_excludes_fiber: "\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438", unknown: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430" }[l2.carbohydrate_basis] || "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430")), el("p", "", "\u041D\u0430 100 \u0433: \u044D\u043D\u0435\u0440\u0433\u0438\u044F " + v2(f.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043A\u0438 " + v2(f.protein_g) + " \u0433 \xB7 \u0436\u0438\u0440\u044B " + v2(f.fat_g) + " \u0433 \xB7 \u043E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + v2(f.carbohydrate_total_g) + " \u0433 \xB7 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 " + v2(f.fiber_g) + " \u0433"), el("p", "muted", f.provenance.provider === "open_food_facts" ? "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: Open Food Facts \xB7 ODbL \xB7 " + f.source_ref : "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: \u043B\u0438\u0447\u043D\u0430\u044F \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430"));
+    }
+    if (p.type === "kitchen.source_import" && p.preview?.food) {
+      card.append(...sourceImportPreview(el, p.preview.food, p.preview.original_name, ALLERGENS, foodState));
+    }
+    if (p.type === "kitchen.own_dish_save" && p.preview?.whole_batch) ownDish.preview(card, p.preview);
+    if (p.preview && !p.preview.entry && Array.isArray(p.preview.ingredients) && !p.preview.items && !p.preview.day_items && !p.preview.food && !p.preview.whole_batch) {
       card.append(el("h4", "", p.preview.name_ru + " \xB7 " + numberRu(p.preview.portions) + " \u043F\u043E\u0440\u0446\u0438\u0438"));
-      for (const i of p.preview.ingredients) card.append(el("p", "", i.name_ru + " \u2014 " + numberRu(i.grams_edible) + " \u0433 \xB7 " + foodState(i.state)));
-      card.append(el("p", "nutrition", "\u0420\u0430\u0441\u0447\u0451\u0442: " + numberRu(p.preview.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + numberRu(p.preview.nutrition.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + numberRu(p.preview.nutrition.carbohydrate_total_g) + " \u0433"));
+      for (const i of p.preview.ingredients) card.append(el("p", "", i.name_ru + " \u2014 " + (i.stock_quantity_unknown ? "\u043D\u0443\u0436\u043D\u043E " + numberRu(i.required_grams) + " \u0433; \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043F\u0430\u0441" : numberRu(i.grams_edible) + " \u0433") + " \xB7 " + foodState(i.state)));
+      card.append(el("p", "nutrition", "\u0420\u0430\u0441\u0447\u0451\u0442: " + numberRu(p.preview.nutrition.energy_kcal, 0) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + numberRu(p.preview.nutrition.protein_g, 1) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + numberRu(p.preview.nutrition.carbohydrate_total_g, 1) + " \u0433"));
     }
     if (p.type === "plan.accept") {
       const details = el("details"), summary = el("summary", "", "\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0431\u043B\u044E\u0434\u0430 \u0438 \u0433\u0440\u0430\u043C\u043C\u043E\u0432\u043A\u0438 \u043F\u0435\u0440\u0435\u0434 \u0432\u044B\u0431\u043E\u0440\u043E\u043C");
@@ -8810,90 +10860,114 @@ function renderProposals() {
         for (const meal of day.meals) {
           details.append(el("p", "", meal.name_ru));
           const ul = el("ul");
-          for (const i of meal.ingredients) ul.append(el("li", "", i.name_ru + " \u2014 " + numberRu(i.grams_edible) + " \u0433 \xB7 " + foodState(i.state)));
+          for (const i of meal.ingredients) ul.append(el("li", "", i.name_ru + " \u2014 " + (i.stock_quantity_unknown ? "\u043D\u0443\u0436\u043D\u043E " + numberRu(i.required_grams) + " \u0433; \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043F\u0430\u0441" : numberRu(i.grams_edible) + " \u0433") + " \xB7 " + foodState(i.state)));
           details.append(ul);
         }
       }
       card.append(details);
     }
-    const ok = el("button", "primary", "\u041F\u0440\u0438\u043C\u0435\u043D\u0438\u0442\u044C"), no = el("button", "secondary", "\u041E\u0442\u043C\u0435\u043D\u0430");
+    const cta = p.type === "kitchen.intake" ? p.payload.operation === "update" ? "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435" : "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A" : shopFood ? "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442" : { "kitchen.own_dish_save": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E", "kitchen.own_dish_diary": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", "kitchen.source_import": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442", "kitchen.pantry": `\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${p.payload.items?.length ?? 0}`, "kitchen.save": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", "kitchen.diary": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", "measurement.add": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "measurement.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435", "measurement.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "kitchen.favorite": "\u0412 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", "kitchen.rate": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0446\u0435\u043D\u043A\u0443", "kitchen.accept_day": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C" }[p.type] || "\u041F\u0440\u0438\u043C\u0435\u043D\u0438\u0442\u044C";
+    const ok = el("button", "primary", cta), no = el("button", "secondary", "\u041E\u0442\u043C\u0435\u043D\u0430");
     ok.addEventListener("click", () => run(async () => {
-      ok.disabled = true;
+      if (proposalSubmissions.has(p.id)) return;
+      proposalSubmissions.add(p.id);
+      ok.disabled = no.disabled = true;
       try {
-        accept(await call("keto_apply_proposal", { proposal_id: p.id, expected_revision: state.revision, approved: true }));
+        const applied = await call("keto_apply_proposal", { proposal_id: p.id, expected_revision: state.revision, approved: true });
+        accept(applied);
+        if (applied.receipt?.id === p.id) {
+          if (p.type === "kitchen.own_dish_save") ownDish.savedReceipt(p.payload);
+          if (p.type === "measurement.add" || p.type === "measurement.update") finishMeasurementReceipt(p);
+          if (p.type === "diary.add" && $2("diary-note").value === p.payload.note && $2("diary-date").value === p.payload.date) $2("diary-note").value = "";
+          if (p.type === "kitchen.intake") $2("toast").hidden = true;
+          else notify(p.type === "diary.add" || p.type === "kitchen.diary" ? "\u0417\u0430\u043F\u0438\u0441\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0430 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A\u0435." : "\u0418\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E.");
+        }
       } finally {
-        ok.disabled = false;
+        proposalSubmissions.delete(p.id);
+        ok.disabled = no.disabled = false;
       }
     }));
-    no.addEventListener("click", () => run(async () => accept(await call("keto_apply_proposal", { proposal_id: p.id, expected_revision: state.revision, approved: false }))));
+    no.addEventListener("click", () => run(async () => {
+      if (proposalSubmissions.has(p.id)) return;
+      proposalSubmissions.add(p.id);
+      ok.disabled = no.disabled = true;
+      try {
+        accept(await call("keto_apply_proposal", { proposal_id: p.id, expected_revision: state.revision, approved: false }));
+      } finally {
+        proposalSubmissions.delete(p.id);
+        ok.disabled = no.disabled = false;
+      }
+    }));
     card.append(ok, no);
-    if (p.expired || p.base_revision !== state.revision) {
+    const missingPantryPreview = p.type === "kitchen.pantry" && (!Array.isArray(p.preview?.items) || p.preview.items.length !== p.payload.items?.length);
+    const missingSubject = p.type === "kitchen.intake" && !p.preview?.entry || p.type === "kitchen.source_import" && !p.preview?.food || p.type === "kitchen.forget" && !state.kitchen?.preferences?.some((f) => f.id === p.payload.fact_id) || p.type === "kitchen.accept_day" && !p.preview?.day_items?.length;
+    if (p.expired || p.base_revision !== state.revision || missingPantryPreview || missingSubject) {
       ok.disabled = true;
-      card.append(el("p", "muted", p.expired ? "\u0421\u0440\u043E\u043A \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F \u0438\u0441\u0442\u0451\u043A. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0435\u0433\u043E \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0437\u0430\u043D\u043E\u0432\u043E." : "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0437\u0430\u043D\u043E\u0432\u043E."));
+      card.append(el("p", "muted", missingPantryPreview || missingSubject ? "\u0421\u043E\u0441\u0442\u0430\u0432 \u044D\u0442\u043E\u0433\u043E \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0435\u0433\u043E \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0437\u0430\u043D\u043E\u0432\u043E." : p.expired ? "\u0421\u0440\u043E\u043A \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F \u0438\u0441\u0442\u0451\u043A. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0435\u0433\u043E \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0437\u0430\u043D\u043E\u0432\u043E." : "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0437\u0430\u043D\u043E\u0432\u043E."));
     }
     $2("proposals").append(card);
   }
 }
-async function propose(type, payload) {
-  const anchor = document.activeElement?.closest("form") || document.querySelector(`[data-page="${view}"] .page-heading`);
-  const r = await call("keto_propose_change", { event_type: type, payload, expected_revision: state.revision });
+async function propose(type, payload, expectedRevision = state.revision) {
+  const r = await call("keto_propose_change", { event_type: type, payload, expected_revision: expectedRevision });
   accept(r);
-  if (anchor) anchor.insertAdjacentElement("afterend", $2("proposals"));
-  $2("proposals").setAttribute("tabindex", "-1");
-  $2("proposals").focus();
-  $2("proposals").scrollIntoView({ behavior: "smooth", block: "start" });
   return r;
 }
 function recipeCard(r) {
   const b2 = el("button", "recipe-card");
-  b2.append(el("span", "tag", r.category === "breakfast" ? "\u041A \u0437\u0430\u0432\u0442\u0440\u0430\u043A\u0443" : "\u041D\u0430 \u0432\u0430\u0448\u0435\u0439 \u043A\u0443\u0445\u043D\u0435"), el("h3", "", r.name_ru));
+  b2.append(el("span", "tag", { breakfast: "\u0417\u0430\u0432\u0442\u0440\u0430\u043A", main: "\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E", side: "\u0413\u0430\u0440\u043D\u0438\u0440", component: "\u041A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442" }[r.category] || "\u0411\u043B\u044E\u0434\u043E"), el("h3", "", r.name_ru));
   const meta = el("div", "recipe-meta");
-  meta.append(el("span", "", r.active_minutes + " \u043C\u0438\u043D"), el("span", "nutrition", Math.round(r.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0440\u0430\u0441\u0447\u0451\u0442"));
+  meta.append(el("span", "", r.active_minutes + " \u043C\u0438\u043D"), el("span", "nutrition", numberRu(r.nutrition.energy_kcal, 0) + " \u043A\u043A\u0430\u043B \xB7 \u0440\u0430\u0441\u0447\u0451\u0442"));
   if (r.fit_note) b2.append(el("p", "muted", r.fit_note));
   b2.append(meta, el("span", "open", "\u0418\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u044B \u0438 \u0448\u0430\u0433\u0438 \u2192"));
   b2.addEventListener("click", () => openRecipe(r));
   return b2;
 }
-function openRecipe(r) {
+function openRecipe(r, originSource = null) {
   const box = $2("recipe-detail");
   box.replaceChildren(el("span", "eyebrow", "\u0420\u0415\u0426\u0415\u041F\u0422 \xB7 " + r.active_minutes + " \u041C\u0418\u041D"), el("h2", "", r.name_ru));
+  if (r.fit_note) box.append(el("p", "notice", r.fit_note));
+  const record = el("button", "primary", "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435");
+  record.type = "button";
+  record.onclick = () => intake.open({ recipe_id: r.recipe_id, name_ru: r.name_ru, amount: { value: Number.isFinite(r.portions) ? r.portions : 1, unit: "portion" }, thread_id: originSource?.thread_id || state.active_thread || "main", origin: originSource?.origin, generation_id: originSource?.generation_id || r.generation_id });
+  box.append(record);
   const list = el("ul", "ingredient-list");
   for (const i of r.ingredients) {
     const li = el("li");
-    li.append(el("span", "", i.name_ru + " \xB7 " + foodState(i.state) + (i.food_id ? " \xB7 \u043A\u043E\u0434 " + i.food_id : "")), el("strong", "", numberRu(i.grams_edible) + " \u0433"));
+    li.append(el("span", "", i.name_ru + " \xB7 " + foodState(i.state)), el("strong", "", numberRu(i.grams_edible) + " \u0433"));
     list.append(li);
   }
   box.append(list);
   const steps = el("ol", "steps");
   const source = Array.isArray(r.steps_ru) ? r.steps_ru : [r.steps_ru];
   for (const st of source) steps.append(el("li", "", st));
-  box.append(steps, el("p", "nutrition muted", `\u0420\u0430\u0441\u0447\u0451\u0442 \u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E: ${Math.round(r.nutrition.energy_kcal)} \u043A\u043A\u0430\u043B; \u0431\u0435\u043B\u043E\u043A ${numberRu(r.nutrition.protein_g)} \u0433; \u043E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B ${numberRu(r.nutrition.carbohydrate_total_g)} \u0433. \u041E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0449\u0438\u0435 \u043D\u0443\u0442\u0440\u0438\u0435\u043D\u0442\u044B \u043D\u0435 \u0441\u0447\u0438\u0442\u0430\u044E\u0442\u0441\u044F \u043D\u0443\u043B\u0451\u043C.`), el("p", "muted", "\u0410\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B: " + (r.allergens.map((x) => ALLERGENS.find((a2) => a2[0] === x)?.[1] || "\u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432").join(", ") || "\u043D\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u044B \u0432 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435; \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438") + ". \u0420\u0435\u0446\u0435\u043F\u0442\u0443\u0440\u0430 \u043D\u0435 \u043F\u0440\u043E\u0448\u043B\u0430 \u043A\u0443\u0445\u043E\u043D\u043D\u043E\u0435 \u0442\u0435\u0441\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435."));
+  box.append(steps, el("p", "nutrition muted", `\u0420\u0430\u0441\u0447\u0451\u0442 \u043D\u0430 ${numberRu(Number.isFinite(r.portions) ? r.portions : 1)} \u043F\u043E\u0440\u0446\u0438\u0438: ${numberRu(r.nutrition.energy_kcal, 0)} \u043A\u043A\u0430\u043B; \u0431\u0435\u043B\u043E\u043A ${numberRu(r.nutrition.protein_g)} \u0433; \u043E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B ${numberRu(r.nutrition.carbohydrate_total_g)} \u0433. \u041E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0449\u0438\u0435 \u043D\u0443\u0442\u0440\u0438\u0435\u043D\u0442\u044B \u043D\u0435 \u0441\u0447\u0438\u0442\u0430\u044E\u0442\u0441\u044F \u043D\u0443\u043B\u0451\u043C.`), el("p", "muted", "\u0410\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B: " + (r.allergens.map((x) => ALLERGENS.find((a2) => a2[0] === x)?.[1] || "\u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432").join(", ") || "\u043D\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u044B \u0432 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435; \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438") + ". \u0420\u0435\u0446\u0435\u043F\u0442\u0443\u0440\u0430 \u043D\u0435 \u043F\u0440\u043E\u0448\u043B\u0430 \u043A\u0443\u0445\u043E\u043D\u043D\u043E\u0435 \u0442\u0435\u0441\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435."));
   const fav = el("button", "secondary", "\u041F\u043E\u043D\u0440\u0430\u0432\u0438\u043B\u043E\u0441\u044C");
   fav.addEventListener("click", () => run(async () => {
-    router.closeDialog();
     await propose("feedback.add", { recipe_id: r.recipe_id, rating: 5, would_repeat: true });
   }));
   box.append(fav);
-  $2("recipe-dialog").showModal();
-  router.openDialog();
+  dialogs.open("recipe", "close-recipe");
 }
+var recipeLibrary = createRecipeLibrary({ clear: () => $2("recipes").replaceChildren(), call: (args) => recipePageCall("keto_recipes", args), readFilters: () => {
+  const args = { query: $2("recipe-query").value };
+  if ($2("recipe-category").value) args.category = $2("recipe-category").value;
+  if ($2("recipe-minutes").value) args.max_minutes = Number($2("recipe-minutes").value);
+  return args;
+}, epoch: () => screenEpoch, status: (t) => $2("recipe-note").textContent = t, more: (show, retry) => {
+  $2("recipe-more").hidden = !show;
+  $2("recipe-more").textContent = retry ? "\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0443" : "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451";
+}, render: (d2, append) => {
+  const cards = d2.recipes.map((r) => r.draft_label ? kitchen.card(r) : recipeCard(r));
+  if (append) $2("recipes").append(...cards);
+  else $2("recipes").replaceChildren(...cards);
+  if (!d2.total) $2("recipes").append(el("div", "panel", "\u041D\u0435 \u043D\u0430\u0448\u043B\u043E\u0441\u044C \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u044F. \u0418\u0437\u043C\u0435\u043D\u0438\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u0438\u043B\u0438 \u0444\u0438\u043B\u044C\u0442\u0440\u044B."));
+} });
 async function loadRecipes() {
-  const d2 = await call("keto_recipes", { query: $2("recipe-query").value, limit: 24 });
-  $2("recipe-note").textContent = d2.note;
-  $2("recipes").replaceChildren(...d2.recipes.map((r) => r.draft_label ? kitchen.card(r) : recipeCard(r)));
-  if (!d2.recipes.length) $2("recipes").append(el("div", "panel", "\u041D\u0435 \u043D\u0430\u0448\u043B\u043E\u0441\u044C \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u044F. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430."));
+  return recipeLibrary.load(false);
 }
 function renderDiary() {
-  $2("diary-entries").replaceChildren();
-  if (!state.diary.length) $2("diary-entries").append(el("div", "panel muted", "\u041F\u043E\u043A\u0430 \u043D\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u0435\u0439. \u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u043F\u0435\u0440\u0432\u0443\u044E \u0437\u0430\u043C\u0435\u0442\u043A\u0443 \u2014 \u0431\u0435\u0437 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0432\u0435\u0441\u0430 \u0438 \u043A\u0430\u043B\u043E\u0440\u0438\u0439."));
-  for (const e of [...state.diary].reverse()) {
-    const card = el("article", "diary-entry");
-    card.append(el("time", "", formatDate(e.date)), el("p", "", e.note || "\u0417\u0430\u043F\u0438\u0441\u044C \u043E \u043F\u0438\u0442\u0430\u043D\u0438\u0438"));
-    const del = el("button", "text-btn", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C");
-    del.addEventListener("click", () => run(() => propose("diary.delete", { entry_id: e.entry_id })));
-    card.append(del);
-    $2("diary-entries").append(card);
-  }
+  intake.render();
 }
 function renderHistory() {
   $2("history").replaceChildren();
@@ -8915,33 +10989,13 @@ function fillSettings() {
 function renderPlan(plan, draft = true) {
   currentPlan = plan;
   currentPlanIsDraft = draft;
-  const root = $2("menu-result");
-  root.replaceChildren(el("h2", "", draft ? "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043C\u0435\u043D\u044E" : "\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E"));
-  if (plan.status === "stale_requires_recheck") root.append(el("div", "notice danger", "\u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F: \u044D\u0442\u043E \u043C\u0435\u043D\u044E \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043F\u0435\u0440\u0435\u0441\u0447\u0451\u0442\u0430. \u041D\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u0430\u043A \u0430\u043A\u0442\u0443\u0430\u043B\u044C\u043D\u043E\u0435."));
-  for (const d2 of plan.days) {
-    const box = el("article", "menu-day");
-    box.append(el("h3", "", formatDate(d2.date)));
-    for (const m of d2.meals) {
-      const part = el("div", "meal");
-      part.append(el("h3", "", m.name_ru));
-      const b2 = el("button", "text-btn", "\u0413\u0440\u0430\u043C\u043C\u043E\u0432\u043A\u0438 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435");
-      b2.addEventListener("click", () => openRecipe(m));
-      part.append(b2);
-      box.append(part);
-    }
-    root.append(box);
-  }
-  if (draft) {
-    const b2 = el("button", "primary", "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E");
-    b2.addEventListener("click", () => run(() => propose("plan.accept", plan)));
-    root.append(b2);
-  }
+  renderTodayPlan({ plan, draft, root: $2("menu-result"), empty: $2("today-empty"), el, formatDate, openRecipe, acceptPlan: () => run(() => propose("plan.accept", plan)) });
 }
 function renderShopping(items) {
   const root = $2("menu-result"), box = el("div", "panel");
   box.append(el("h2", "", "\u0421\u043F\u0438\u0441\u043E\u043A \u043F\u043E\u043A\u0443\u043F\u043E\u043A"), el("p", "muted", "\u0423\u043A\u0430\u0437\u0430\u043D\u0430 \u043C\u0430\u0441\u0441\u0430 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u043E\u0439 \u0447\u0430\u0441\u0442\u0438; \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432."));
   const list = el("ul");
-  for (const i of items) list.append(el("li", "", i.name_ru + " \u2014 " + numberRu(i.grams_edible) + " \u0433 \xB7 " + foodState(i.state)));
+  for (const i of items) list.append(el("li", "", i.name_ru + " \u2014 " + (i.stock_quantity_unknown ? "\u043D\u0443\u0436\u043D\u043E " + numberRu(i.required_grams) + " \u0433; \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043F\u0430\u0441" : numberRu(i.grams_edible) + " \u0433") + " \xB7 " + foodState(i.state)));
   box.append(list);
   root.append(box);
 }
@@ -9003,7 +11057,7 @@ async function send(message) {
     notify("\u0421\u0441\u044B\u043B\u043A\u0430 \u0441\u0430\u043C\u0430 \u043F\u043E \u0441\u0435\u0431\u0435 \u043D\u0435 \u0434\u0430\u0451\u0442 \u0434\u043E\u0441\u0442\u0443\u043F \u043A \u0444\u043E\u0442\u043E \u0438\u043B\u0438 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0435. \u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u0435 \u043F\u0440\u044F\u043C\u043E\u0435 \u0444\u043E\u0442\u043E \u043F\u043E \u0441\u0441\u044B\u043B\u043A\u0435 \u043B\u0438\u0431\u043E \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B, \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442 \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442.");
     return;
   }
-  if (mobile.recording()) return;
+  if (mobile.recording() || mobile.changingTopic()) return;
   if (!message.trim() && image) message = "\u041F\u043E\u043C\u043E\u0433\u0438 \u043E\u0431\u0441\u0443\u0434\u0438\u0442\u044C \u044D\u0442\u043E \u0444\u043E\u0442\u043E; \u0441\u043E\u0441\u0442\u0430\u0432 \u0438 \u043C\u0430\u0441\u0441\u0443 \u043D\u0443\u0436\u043D\u043E \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u044C.";
   if (busy) {
     if (!/(не могу дышать|задыхаюсь|теряю сознание|сильная боль в груди|непрекращающаяся рвота)/i.test(message)) return;
@@ -9017,6 +11071,7 @@ async function send(message) {
     return;
   }
   busy = true;
+  chatSubmitted = true;
   mobile.setChatBusy(true);
   const submittedDraft = $2("message").value, submittedImage = image;
   $2("send").disabled = true;
@@ -9030,35 +11085,22 @@ async function send(message) {
     if (attachedSource) args.source_id = attachedSource;
     const d2 = await call("keto_chat", args);
     if (sendEpoch !== screenEpoch) return;
-    attachedSource = null;
+    const responseThread = d2.response_thread_id || args.thread_id, sameThread = (d2.state?.active_thread || state?.active_thread || "main") === responseThread;
     wait.remove();
-    if (d2.state) accept(d2);
-    if (!d2.state?.chat?.length || d2.error_code || d2.requires_consent) $2("messages").append(el("div", "bubble assistant", d2.message));
+    if (d2.state) accept({ ...d2, message: null, proposal: sameThread ? d2.proposal : null });
+    if (sameThread && (!d2.state?.chat?.length || d2.error_code || d2.requires_consent)) $2("messages").append(el("div", "bubble assistant", d2.message));
     markSafetyHold(d2);
-    if ($2("message").value === submittedDraft) $2("message").value = "";
-    if (image === submittedImage) mobile.resetPhoto();
-    const actionLabels = { reminders: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043D\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u043D\u0438\u044F", setup: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0437\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E", targets: "\u0412\u0430\u0448 \u043F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", today: "\u041C\u0435\u043D\u044E", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439", memory: "\u0427\u0442\u043E \u044F \u043F\u043E\u043C\u043D\u044E" };
-    for (const action of d2.actions || (d2.open_view ? [{ view: d2.open_view, label: actionLabels[d2.open_view] || "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0440\u0430\u0437\u0434\u0435\u043B" }] : [])) {
-      const open = el("button", "secondary", actionLabels[action.view] || action.label);
-      open.onclick = () => setView(action.view);
-      $2("chat-extras").append(open);
-    }
-    if (d2.recipes) {
-      const cards = el("div", "recipe-grid");
-      cards.append(...d2.recipes.map((r) => r.draft_label ? kitchen.card(r) : recipeCard(r)));
-      $2("chat-extras").replaceChildren(el("h2", "", d2.day ? "\u0418\u0434\u0435\u0438 \u043D\u0430 \u0434\u0435\u043D\u044C" : "\u0418\u0434\u0435\u0438 \u0434\u043B\u044F \u0432\u0430\u0441"), cards);
-      if (d2.day) $2("chat-extras").append(kitchen.dayCard(d2));
-    }
-    if (d2.plan) {
-      renderPlan(d2.plan);
-      if (d2.shopping) renderShopping(d2.shopping);
-      setView("today");
-    }
-    if (d2.proposal) {
-      $2("chat-confirmations").append($2("proposals"));
-      $2("proposals").setAttribute("tabindex", "-1");
-      $2("proposals").focus();
-      $2("proposals").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (sameThread) {
+      attachedSource = null;
+      if ($2("message").value === submittedDraft) {
+        $2("message").value = "";
+        mobile.resizeComposer();
+      }
+      if (image === submittedImage) mobile.resetPhoto();
+      if (d2.plan) {
+        renderPlan(d2.plan);
+        if (d2.shopping) renderShopping(d2.shopping);
+      }
     }
   } catch (e) {
     if (sendEpoch === screenEpoch) {
@@ -9089,13 +11131,21 @@ async function refresh() {
     if (d2.shopping) renderShopping(d2.shopping);
   }
 }
-$2("help").onclick = () => $2("help-dialog").showModal();
-$2("close-help").onclick = () => $2("help-dialog").close();
+$2("help").onclick = () => dialogs.open("help", "close-help");
+$2("close-help").onclick = () => dialogs.close();
 $2("close-recipe").textContent = "\u041D\u0430\u0437\u0430\u0434 \u043A \u0441\u043F\u0438\u0441\u043A\u0443";
-$2("close-recipe").onclick = () => router.closeDialog();
-$2("recipe-dialog").addEventListener("cancel", (e) => {
+$2("close-recipe").onclick = () => dialogs.close();
+$2("proposal-close").onclick = () => dialogs.close();
+$2("proposal-all").onclick = () => showProposal();
+$2("pending-open").onclick = () => showProposal();
+$2("attachments-open").onclick = () => dialogs.open("attachments", "attachments-close");
+$2("attachments-close").onclick = () => dialogs.close();
+for (const id of ["recipe-dialog", "help-dialog", "proposal-dialog", "attachments-dialog", "topic-dialog", "source-recipe-dialog", "intake-dialog"]) $2(id).addEventListener("cancel", (e) => {
   e.preventDefault();
-  router.closeDialog();
+  dialogs.close();
+});
+$2("photo").addEventListener("change", (e) => {
+  if (e.target.files?.length && dialogs.current === "attachments") dialogs.close();
 });
 $2("nav-back").onclick = () => router.back();
 $2("refresh").onclick = () => run(refresh);
@@ -9103,6 +11153,7 @@ document.querySelectorAll("[data-view]").forEach((b2) => b2.addEventListener("cl
 document.querySelectorAll("[data-prompt]").forEach((b2) => b2.addEventListener("click", () => {
   setView("chat");
   $2("message").value = b2.dataset.prompt;
+  mobile.resizeComposer();
   $2("message").focus();
 }));
 $2("onboard-open").onclick = $2("open-onboarding-settings").onclick = () => setView("setup");
@@ -9123,10 +11174,199 @@ $2("message").addEventListener("keydown", (e) => {
     if ($2("message").value.trim() || image) send($2("message").value);
   }
 });
+$2("recipe-query").addEventListener("input", () => recipeLibrary.invalidate());
 $2("recipe-search").addEventListener("submit", (e) => {
   e.preventDefault();
-  run(loadRecipes);
+  run(() => loadRecipes());
 });
+$2("recipe-more").addEventListener("click", () => run(() => recipeLibrary.next()));
+for (const id of ["recipe-category", "recipe-minutes"]) $2(id).addEventListener("change", () => run(() => loadRecipes()));
+var measurementEditing = null;
+var measurementOriginal = null;
+var measurementSavedDraft = null;
+var portionFoods = [];
+var portionSearchVersion = 0;
+var portionCalcVersion = 0;
+function glucoseUnitLabel(unit) {
+  return unit === "mg/dL" ? "\u043C\u0433/\u0434\u043B" : "\u043C\u043C\u043E\u043B\u044C/\u043B";
+}
+function measurementTimeLabel(m) {
+  try {
+    return new Intl.DateTimeFormat("ru-RU", { timeZone: m.timezone, year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(m.measured_at));
+  } catch {
+    return m.measured_at;
+  }
+}
+var measurementSubmissions = /* @__PURE__ */ new Map();
+var measurementFields = ["measurement-time", "measurement-glucose", "measurement-unit", "measurement-bhb", "measurement-context"];
+function measurementDraft() {
+  return { editing: measurementEditing, original: measurementOriginal, fields: measurementFields.map((id) => $2(id).value) };
+}
+function restoreMeasurementDraft(d2) {
+  measurementEditing = d2?.editing || null;
+  measurementOriginal = d2?.original || null;
+  if (d2) measurementFields.forEach((id, i) => $2(id).value = d2.fields[i]);
+  else $2("measurement-form").reset();
+  $2("measurement-cancel").hidden = !measurementEditing;
+  $2("measurement-zone").textContent = "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430: " + Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+function draftFingerprint() {
+  return JSON.stringify(measurementDraft());
+}
+function finishMeasurementReceipt(p) {
+  const fp = measurementSubmissions.get(p.id);
+  measurementSubmissions.delete(p.id);
+  if (fp !== void 0 && fp === draftFingerprint()) {
+    const saved = measurementSavedDraft;
+    measurementSavedDraft = null;
+    restoreMeasurementDraft(saved);
+  }
+}
+function measurementPreview(p) {
+  const m = p.type === "measurement.update" ? p.payload.session : p.type === "measurement.delete" ? (state.measurements || []).find((x) => x.measurement_id === p.payload.measurement_id) : p.payload;
+  if (!m) return [["\u0418\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E"]];
+  return [["\u0414\u0430\u0442\u0430 \u0438 \u0432\u0440\u0435\u043C\u044F", measurementTimeLabel(m)], ["\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441", m.timezone], ["\u0413\u043B\u044E\u043A\u043E\u0437\u0430", m.glucose ? numberRu(m.glucose.value) + " " + glucoseUnitLabel(m.glucose.unit) : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"], ["BHB \u043A\u0440\u043E\u0432\u0438", m.bhb ? numberRu(m.bhb.value) + " \u043C\u043C\u043E\u043B\u044C/\u043B" : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D"], ["\u041A\u043E\u043D\u0442\u0435\u043A\u0441\u0442", m.context || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D"]];
+}
+function readDecimal(id) {
+  const v2 = $2(id).value.trim();
+  if (!v2) return null;
+  if (!/^\d+(?:[.,]\d+)?$/.test(v2)) throw Error("\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0435\u043E\u0442\u0440\u0438\u0446\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435 \u0447\u0438\u0441\u043B\u043E.");
+  const n = Number(v2.replace(",", "."));
+  if (!Number.isFinite(n)) throw Error("\u041D\u0435\u0432\u0435\u0440\u043D\u043E\u0435 \u0447\u0438\u0441\u043B\u043E.");
+  return n;
+}
+function renderMeasurements() {
+  const box = $2("measurement-list");
+  box.replaceChildren();
+  if (!Array.isArray(state.measurements)) box.append(el("p", "muted", "\u0418\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u044B."));
+  else if (!state.measurements.length) box.append(el("p", "muted", "\u0418\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0439 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442."));
+  for (const m of [...state.measurements || []].reverse()) {
+    const card = el("article", "diary-entry");
+    card.append(el("p", "", measurementTimeLabel(m) + " \xB7 " + m.timezone), el("p", "", `\u0413\u043B\u044E\u043A\u043E\u0437\u0430: ${m.glucose ? numberRu(m.glucose.value) + " " + glucoseUnitLabel(m.glucose.unit) : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"} \xB7 BHB \u043A\u0440\u043E\u0432\u0438: ${m.bhb ? numberRu(m.bhb.value) + " \u043C\u043C\u043E\u043B\u044C/\u043B" : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D"}`), el("p", "", m.gki?.value == null ? m.gki?.reason : "GKI: " + numberRu(m.gki.value, 2)), ...m.context ? [el("p", "muted", m.context)] : []);
+    const edit = el("button", "", "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C"), del = el("button", "text-btn", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C");
+    edit.type = del.type = "button";
+    edit.onclick = () => {
+      if (measurementEditing) {
+        notify("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0435 \u0438\u043B\u0438 \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0442\u0435\u043A\u0443\u0449\u0435\u0435 \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435.");
+        return;
+      }
+      measurementSavedDraft = measurementDraft();
+      measurementEditing = m.measurement_id;
+      measurementOriginal = { measured_at: m.measured_at, timezone: m.timezone, display: m.measured_at.slice(0, 16) };
+      $2("measurement-time").value = measurementOriginal.display;
+      $2("measurement-glucose").value = m.glucose?.value ?? "";
+      $2("measurement-unit").value = m.glucose?.unit || "mmol/L";
+      $2("measurement-bhb").value = m.bhb?.value ?? "";
+      $2("measurement-context").value = m.context || "";
+      $2("measurement-zone").textContent = "\u0418\u0441\u0445\u043E\u0434\u043D\u044B\u0439 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441: " + m.timezone + ". \u0415\u0441\u043B\u0438 \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u0432\u0440\u0435\u043C\u044F, \u0431\u0443\u0434\u0435\u0442 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430.";
+      $2("measurement-cancel").hidden = false;
+    };
+    del.onclick = () => run(() => propose("measurement.delete", { measurement_id: m.measurement_id }));
+    card.append(edit, del);
+    box.append(card);
+  }
+}
+$2("measurement-zone").textContent = "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430: " + Intl.DateTimeFormat().resolvedOptions().timeZone;
+$2("measurement-cancel").onclick = () => {
+  const saved = measurementSavedDraft;
+  measurementSavedDraft = null;
+  restoreMeasurementDraft(saved);
+};
+$2("measurement-form").onsubmit = (e) => {
+  e.preventDefault();
+  run(async () => {
+    const raw = $2("measurement-time").value;
+    let m;
+    if (measurementOriginal && raw === measurementOriginal.display) {
+      m = { measured_at: measurementOriginal.measured_at, timezone: measurementOriginal.timezone };
+    } else {
+      const dt = new Date(raw);
+      if (!raw || !Number.isFinite(dt.getTime())) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0434\u0430\u0442\u0443 \u0438 \u0432\u0440\u0435\u043C\u044F.");
+      const local = [dt.getFullYear(), String(dt.getMonth() + 1).padStart(2, "0"), String(dt.getDate()).padStart(2, "0")].join("-") + "T" + [dt.getHours(), dt.getMinutes()].map((n) => String(n).padStart(2, "0")).join(":");
+      if (local !== raw) throw Error("\u042D\u0442\u043E \u043C\u0435\u0441\u0442\u043D\u043E\u0435 \u0432\u0440\u0435\u043C\u044F \u043D\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442 \u043F\u0440\u0438 \u043F\u0435\u0440\u0435\u0432\u043E\u0434\u0435 \u0447\u0430\u0441\u043E\u0432; \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0435 \u0432\u0440\u0435\u043C\u044F.");
+      const offset2 = -dt.getTimezoneOffset(), sign = offset2 >= 0 ? "+" : "-", pad = (n) => String(Math.abs(n)).padStart(2, "0");
+      m = { measured_at: raw + ":00" + sign + pad(Math.trunc(offset2 / 60)) + ":" + pad(offset2 % 60), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
+    }
+    const g = readDecimal("measurement-glucose"), b2 = readDecimal("measurement-bhb");
+    if (g !== null) m.glucose = { value: g, unit: $2("measurement-unit").value };
+    if (b2 !== null) m.bhb = { value: b2, unit: "mmol/L" };
+    if (g === null && b2 === null) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0445\u043E\u0442\u044F \u0431\u044B \u043E\u0434\u043D\u043E \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435.");
+    if ($2("measurement-context").value.trim()) m.context = $2("measurement-context").value.trim();
+    const fingerprint = draftFingerprint();
+    const r = await propose(measurementEditing ? "measurement.update" : "measurement.add", measurementEditing ? { measurement_id: measurementEditing, session: m } : m);
+    if (r?.proposal?.id) measurementSubmissions.set(r.proposal.id, fingerprint);
+  });
+};
+function clearPortionResult() {
+  portionCalcVersion++;
+  $2("portion-result").replaceChildren();
+}
+function clearPortionGI() {
+  $2("portion-gi").value = "";
+  $2("portion-source").value = "";
+  $2("portion-match").checked = false;
+}
+function portionFingerprint() {
+  const f = portionFoods.find((x) => x.food_id === $2("portion-food").value);
+  return JSON.stringify([f?.food_id, f?.state, $2("portion-grams").value, $2("portion-gi").value, $2("portion-source").value, $2("portion-match").checked]);
+}
+$2("portion-query").addEventListener("input", () => {
+  portionSearchVersion++;
+  clearPortionResult();
+});
+$2("portion-food").addEventListener("change", () => {
+  clearPortionGI();
+  clearPortionResult();
+});
+for (const id of ["portion-grams", "portion-gi", "portion-source", "portion-match"]) {
+  for (const event of ["input", "change"]) $2(id).addEventListener(event, clearPortionResult);
+}
+$2("portion-search").onsubmit = (e) => {
+  e.preventDefault();
+  const query = $2("portion-query").value, token = ++portionSearchVersion, epoch = screenEpoch;
+  clearPortionResult();
+  run(async () => {
+    const r = await call("keto_kitchen", { action: "foods", query, thread_id: state.active_thread || "main", values: {} });
+    if (token !== portionSearchVersion || epoch !== screenEpoch || query !== $2("portion-query").value) return;
+    portionFoods = r.foods || [];
+    const select = $2("portion-food");
+    select.replaceChildren();
+    for (const f of portionFoods) {
+      const option = el("option", "", f.name_ru + " \xB7 " + foodState(f.state));
+      option.value = f.food_id;
+      select.append(option);
+    }
+    clearPortionGI();
+    clearPortionResult();
+    if (!portionFoods.length) throw Error("\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u044B.");
+  });
+};
+$2("portion-form").onsubmit = (e) => {
+  e.preventDefault();
+  run(async () => {
+    const food = portionFoods.find((f) => f.food_id === $2("portion-food").value);
+    if (!food) throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442.");
+    const grams = readDecimal("portion-grams");
+    if (grams === null || grams <= 0) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u043C\u0430\u0441\u0441\u0443 \u043F\u043E\u0440\u0446\u0438\u0438.");
+    const values2 = { food_id: food.food_id, grams };
+    const gi = readDecimal("portion-gi");
+    if (gi !== null) {
+      if (!$2("portion-match").checked || !$2("portion-source").value.trim()) throw Error("\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F \u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A \u0413\u0418.");
+      values2.gi = { value: gi, source: $2("portion-source").value.trim(), preparation: food.state, scale: "glucose_100" };
+    }
+    const fingerprint = portionFingerprint(), token = ++portionCalcVersion, epoch = screenEpoch;
+    $2("portion-result").replaceChildren();
+    const r = await call("keto_kitchen", { action: "food_portion", thread_id: state.active_thread || "main", values: values2 });
+    if (token !== portionCalcVersion || epoch !== screenEpoch || fingerprint !== portionFingerprint()) return;
+    const v2 = r.portion, n = v2.calculation.nutrition;
+    const out = $2("portion-result");
+    out.replaceChildren(el("p", "", r.food.name_ru + " \xB7 " + foodState(r.food.state) + " \xB7 " + numberRu(grams) + " \u0433"), el("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A \u0441\u043E\u0441\u0442\u0430\u0432\u0430: " + r.food.source_url + "; \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043D\u0430 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0438\u0437 \u043E\u0441\u043D\u043E\u0432\u044B \u043D\u0430 100 \u0433."), el("p", "", [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043A\u0438", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"]].map(([key, label, unit]) => label + ": " + (n[key] == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : numberRu(n[key], 2) + " " + unit)).join(" \xB7 ")), el("p", "", "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B: " + (v2.available_carbohydrate_g == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : numberRu(v2.available_carbohydrate_g, 2) + " \u0433")), el("p", "", v2.gi_status === "unknown" ? "\u0413\u0418: \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u0435\u043D." : `\u0413\u0418: ${numberRu(v2.gi)} (\u0432\u0440\u0443\u0447\u043D\u0443\u044E, \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D \u0432\u0430\u043C\u0438: ${values2.gi.source})`), el("p", "", v2.gl == null ? "\u0413\u041D: " + v2.gl_reason : "\u0413\u041D: " + numberRu(v2.gl, 2)));
+    const record = el("button", "primary", "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435");
+    record.type = "button";
+    record.onclick = () => intake.open({ food_id: food.food_id, name_ru: r.food.name_ru, amount: { value: grams, unit: "g" } });
+    out.append(record);
+  });
+};
 $2("diary-form").addEventListener("submit", (e) => {
   e.preventDefault();
   run(() => propose("diary.add", { date: $2("diary-date").value, note: $2("diary-note").value, intake_status: "unquantified" }));
@@ -9216,8 +11456,6 @@ $2("menu-import").addEventListener("change", (e) => run(async () => {
   if (!f) return;
   if (f.size > 15e4) throw Error("\u0424\u0430\u0439\u043B \u0431\u043E\u043B\u044C\u0448\u0435 150 \u041A\u0411.");
   accept(await call("keto_import_menu", { content: await f.text(), format: f.name.toLowerCase().endsWith(".csv") ? "csv" : "json", expected_revision: state.revision }));
-  $2("menu-import").closest(".panel").insertAdjacentElement("afterend", $2("proposals"));
-  $2("proposals").scrollIntoView({ behavior: "smooth", block: "start" });
   e.target.value = "";
 }));
 $2("revoke").onclick = () => run(async () => {
@@ -9304,7 +11542,7 @@ async function sources() {
       recipe.onclick = () => {
         recipeSource = s2.id;
         $2("source-recipe-form").reset();
-        $2("source-recipe-dialog").showModal();
+        dialogs.open("source", "sr-name");
       };
       card.append(recipe);
       if (s2.status === "draft") {
@@ -9364,7 +11602,7 @@ async function admin() {
     }
   }
 }
-$2("sr-close").onclick = () => $2("source-recipe-dialog").close();
+$2("sr-close").onclick = () => dialogs.close();
 $2("source-recipe-form").onsubmit = (e) => {
   e.preventDefault();
   run(async () => {
@@ -9381,7 +11619,6 @@ $2("source-recipe-form").onsubmit = (e) => {
     const d2 = await call("keto_propose_change", { event_type: "catalog.recipe.add", payload, expected_revision: state.revision, source_id: recipeSource });
     $2("source-recipe-dialog").close();
     accept(d2);
-    $2("proposals").scrollIntoView({ behavior: "smooth", block: "start" });
   });
 };
 $2("cf-login").onclick = () => run(async () => {
@@ -9453,7 +11690,7 @@ async function start() {
     $2("cf-login-message").textContent = e.message;
   }
 }
-var mobile = setupMobile({ $: $2, el, call, accept, getState: () => state, setView, run, notify, epoch: () => screenEpoch, setImage: (value) => image = value, getImage: () => image, loadImageLink: async (url) => (await cfApi("/api/media/image-link", { method: "POST", body: { url, remote_request_acknowledged: true } })).image_data_url });
+var mobile = setupMobile({ $: $2, el, call, accept, getState: () => state, setView, run, notify, openDialog: (kind, focus) => dialogs.open(kind, focus), closeDialog: () => dialogs.close(), epoch: () => screenEpoch, setImage: (value) => image = value, getImage: () => image, loadImageLink: async (url) => (await cfApi("/api/media/image-link", { method: "POST", body: { url, remote_request_acknowledged: true } })).image_data_url });
 var developer = setupDeveloper({ $: $2, el, api: cfApi, preview: async (path) => {
   const stamp = screenEpoch, r = await fetch(path, { credentials: "same-origin" });
   if (!r.ok) throw Error("\u041F\u0440\u0435\u0434\u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D.");
@@ -9463,8 +11700,32 @@ var developer = setupDeveloper({ $: $2, el, api: cfApi, preview: async (path) =>
 }, epoch: () => screenEpoch, notify, setView, isOwner: () => session?.user?.role === "admin", hasAttachment: () => Boolean(image || attachedSource || recipeSource) });
 mountDeveloperExtension($2("chat-extras"));
 var guided = setupGuidance({ $: $2, el, getState: () => state, call, accept, notify, run, setView, epoch: () => screenEpoch });
-var router = createRouter({ location, history, listen: (name2, fn) => window.addEventListener(name2, fn), render: renderView, closeDialog: () => {
-  if ($2("recipe-dialog").open) $2("recipe-dialog").close();
-}, fallback: () => state?.guidance?.ready ? state.ui.home || "chat" : guided.resolve("setup") });
-var kitchen = setupKitchen({ $: $2, el, call, getState: () => state, accept, run, notify, setView, epoch: () => screenEpoch });
+var router = createRouter({ location, history, listen: (name2, fn) => window.addEventListener(name2, fn), render: renderView, closeDialog: (kind, options) => dialogs.sync(kind, options), fallback: () => state?.guidance?.ready ? state.ui.home || "chat" : guided.resolve("setup") });
+var intake = setupIntake({ $: $2, el, call: recipePageCall, getState: () => state, accept, notify, run, openDialog: (kind, focus) => dialogs.open(kind, focus), closeDialog: () => dialogs.close(), setView, epoch: () => screenEpoch, isDiaryActive: () => view === "diary", propose });
+var kitchen = setupKitchen({ $: $2, el, call: recipePageCall, getState: () => state, accept, run, notify, setView, epoch: () => screenEpoch, openIntake: (source) => intake.open(source) });
+var chatActions = setupChatActions({ el, call: recipePageCall, getState: () => state, epoch: () => screenEpoch, getContext: () => presentationEpoch + "|" + dialogs.version, refresh, run, notify, navigate: setView, chooseMode: (mode) => {
+  kitchen.chooseMode(mode);
+  setView("recipes");
+  $2("recipe-kitchen-disclosure").open = true;
+  $2("recipe-kitchen-disclosure").scrollIntoView({ block: "start" });
+}, openRecipe: (recipe, source) => {
+  if (recipe.draft_label) {
+    $2("recipe-detail").replaceChildren(kitchen.card(recipe, { source }));
+    dialogs.open("recipe", "close-recipe");
+  } else openRecipe(recipe, source);
+}, openIntake: (source) => intake.open(source), showProposal });
+var shop = setupShop({ $: $2, el, call: recipePageCall, api: (path, method, body) => cfApi(path, { method, body }), getState: () => state, accept, run, epoch: () => screenEpoch, allergens: ALLERGENS, onPantryPreview: (name2) => {
+  setView("recipes");
+  $2("recipe-kitchen-disclosure").open = true;
+  kitchen.previewSavedPantry(name2);
+}, onPantryReset: () => kitchen.cancelSavedPreview(), onOwnFood: (food) => ownDish.addConfirmedFood(food), openIntake: (source) => intake.open(source), setView });
+$2("menu-shop").onclick = () => {
+  setView("products");
+  const panel = $2("shop-root").querySelector("details");
+  if (panel) {
+    panel.open = true;
+    panel.scrollIntoView({ block: "nearest" });
+  }
+};
+var ownDish = setupOwnDish({ $: $2, el, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu, openIntake: (source) => intake.open(source) });
 run(start);
