@@ -3,11 +3,11 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/workspace/scratch/bbdbdb895c38/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T23:21:23.435969+00:00",
+  "updated_at": "2026-11-09T23:29:07.832640+00:00",
   "active_task": {
     "id": "AGR-306-C15-UI",
     "status": "in_progress",
-    "stage": "native_failed_same_image_verification_pending",
+    "stage": "runtime_accepted_ordinary_release_pending",
     "source_base": "892e06363f7d04dcf795f6f56d8d9fdb245dc7ce",
     "branch": "codex/keto-ui-polish-c15",
     "scope": "Typography, spacing, local SVG icons and form/detail layouts; existing private-family frontend release",
@@ -35,7 +35,15 @@
     "build_uuid": "14208a93-3d47-40bd-87fd-35069f338b6d",
     "failed_native_build": "14208a93-3d47-40bd-87fd-35069f338b6d",
     "deployed_candidate_image": "sha256:059d675cda4a8f89d0fda2d842940e1df2f2a479de8a83a18cc71c03217075c2",
-    "failure_receipt": "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json"
+    "failure_receipt": "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json",
+    "diagnostic_commit": "b1d02582e7c28f9d54b94c2d096125eee26a262f",
+    "diagnostic_build": "c1ed4836-1b42-49d6-a29b-3990949135a0",
+    "diagnostic_job_id": "aac31f40-f057-4125-b948-630756d1b2ee",
+    "diagnostic_post_count": 1,
+    "verification_commit": "b1d02582e7c28f9d54b94c2d096125eee26a262f",
+    "native_build": "c1ed4836-1b42-49d6-a29b-3990949135a0",
+    "runtime_image": "sha256:059d675cda4a8f89d0fda2d842940e1df2f2a479de8a83a18cc71c03217075c2",
+    "native_receipt": "docs/evidence/AGR_306_C15_NATIVE_ACCEPTANCE.json"
   },
   "last_completed": {
     "id": "AGR-306-C14-RELEASE",
@@ -67,9 +75,9 @@
     "broader_audit": "deferred; not claimed complete"
   },
   "next_task": {
-    "id": "AGR-306-C15-CANDIDATE-VERIFY",
+    "id": "AGR-306-C15-ORDINARY",
     "status": "ready",
-    "action": "Commit C15 exact candidate constants/evidence only; verify existing image once, no rollout or publication; preserve approved-runtime pin."
+    "action": "Commit exact accepted pin and evidence only; protected baseline must remain unchanged; run one ordinary build and save its UUID immediately."
   },
   "no_relaunch": {
     "recorded_local_jobs": [],
@@ -78,8 +86,8 @@
     "temporary_probes": [],
     "active_container_instances": [],
     "accepted_runtime_pin": "ops/approved-runtime.json",
-    "accepted_runtime_baseline": "eb13ec9de519b4a82d368cd71f67749616df18dcdf1a9ad65387c7b04e8309eb",
-    "accepted_runtime_image": "sha256:2a9b8e3b417d52a1c6216f682b5c2872a25f45034238a11f03f4fc5fa1e2085f",
+    "accepted_runtime_baseline": "4a555cb91706137e3bd58972a5dc6870a4210f733129a252548ed98110bcf614",
+    "accepted_runtime_image": "sha256:059d675cda4a8f89d0fda2d842940e1df2f2a479de8a83a18cc71c03217075c2",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
     "new_runtime_image_required": "Only for actual protected runtime baseline changes; no build required for final documentation or physical acceptance.",
     "implementation_writer": "root"
