@@ -1,47 +1,47 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-09T18:38:36.930626+00:00",
+  "updated_at": "2026-11-09T22:04:33.712146+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "AGR-306",
     "status": "In Progress",
-    "stage": "C9_release_accepted_device_partial_wrapup",
+    "stage": "C14_native_accepted_publication_pending",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/iphone-keto-overhaul",
-    "release_performed": true,
-    "source_acceptance": "docs/evidence/AGR_306_SOURCE_ACCEPTANCE.json",
-    "source_commit": "2eed11d44e5b86a28f31d998b793789c6ce34e2d",
-    "native_build": "7ce93b5a-49f0-45ea-a0b8-a23c7b9abc75",
+    "release_performed": false,
+    "source_acceptance": "docs/evidence/AGR_306_C14_ACCEPTANCE.json",
+    "source_commit": "4a96d858549b02725d420c792d6c4281ecabce8b",
+    "native_build": "91c9326b-8fca-4200-883c-427e5b623adf",
     "implementation_paused": false,
     "audit_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/owner-pause-audit/AUDIT_RESULT.md",
     "audit_linear_comment": "03b56ead-fa9a-44af-a3d8-0b7495ce4d2b",
-    "next_action": "Owner directly verifies phone typing, camera barcode/label and dictation; no new code/build/feature work. Keep AGR-306 open until physical acceptance.",
+    "next_action": "Commit actual accepted runtime pin and release documentation, deploy the matching existing Azure ZIP, then run the ordinary full-source/pinned-runtime Cloudflare release for the exact release commit.",
     "physical_iPhone_acceptance": "PARTIAL: actual connected iPhone Chrome nav/library/datalist/help/steppers accepted; keyboard/camera/voice and scroll observation remain.",
     "C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_BUILD_EVIDENCE.json",
     "C8_independent_control": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
-    "technical_release_acceptance": "Native newimage and ordinary no-rebuild builds bothSUCCESS; exactapp8/runner/probeabsence/staging/ordinarycontrols verified.",
-    "owner_continuation": "Latest owner resumes implementation, requests mature open-source reuse and Russia/Belarus focus",
+    "technical_release_acceptance": "Native source and isolated runtime accepted; exact Azure ZIP and final ordinary main Worker release still pending.",
+    "owner_continuation": "Owner authorized implementation, verification and existing private-family release; one writer and GPT-6 Astra maximum-reasoning independent reviewers.",
     "research_root": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional",
     "resume_linear_comment": "46694022-f549-4dce-a8ee-e6d045d04a6c",
     "C9_source_acceptance": "docs/evidence/AGR_306_C9_SOURCE_ACCEPTANCE.json",
     "C9_native_acceptance": "docs/evidence/AGR_306_C9_NATIVE_ACCEPTANCE.json",
-    "C9_release_device": "docs/evidence/AGR_306_C9_RELEASE_DEVICE.json"
+    "C9_release_device": "docs/evidence/AGR_306_C9_RELEASE_DEVICE.json",
+    "native_acceptance": "docs/evidence/AGR_306_C14_NATIVE_ACCEPTANCE.json"
   },
   "last_completed": "AGR-305-LOGIN: same-origin Google sign-in repair deployed; owner confirms iPhone login",
   "next_task": {
-    "id": "OWNER-DEVELOPER-ACCEPTANCE",
-    "github_issue": 10,
-    "status": "requires_actual_owner_session",
-    "action": "Owner opens More→Development or chat Development mode, enables one hour, submits a harmless technical help/UI request and reviews exact task before one allowed generation. Test/private preview only; no automatic live publication."
+    "id": "AGR-306-C14-PUBLICATION",
+    "status": "authorized_pending",
+    "action": "Commit actual accepted runtime pin and release documentation, deploy the matching existing Azure ZIP, then run the ordinary full-source/pinned-runtime Cloudflare release for the exact release commit."
   },
   "staging": {
     "deployed": true,
     "compute_connected": true,
     "google_real_user_login_verified": true,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "473ab8f983861cea13544408ecbcb1a0eb1c4b01",
+    "source_commit": "715a2931edf7831abde8d7b5eed6536115caa677",
     "http_checks_passed": 24,
     "synthetic_e2e_checks": 20,
     "synthetic_cleanup_verified": true,
@@ -50,7 +50,7 @@
     "backend_source_commit": "a794090e3487f910f26272edde9170bb792e4609",
     "kitchen_deployed": true,
     "audit_fixes_deployed": true,
-    "family_release_acceptance": "C8 technical release accepted; label/OFF bounded live receipts; full spouse/iPhone acceptance pending; implementation paused",
+    "family_release_acceptance": "Previous C9 release remains live; C14 source and runtime accepted, Azure/main deployment pending. Full spouse/iPhone acceptance not completed.",
     "developer_preview_runner_connected": true,
     "design_applied": "Tranquil Dawn",
     "google_real_user_login_evidence": "Owner reports successful sign-in on affected iPhone2026-11-09; agent preserved existing desktop admin session",
@@ -62,8 +62,8 @@
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 551,
-    "node_synthetic_tests": 196,
+    "python_tests": 627,
+    "node_synthetic_tests": 253,
     "local_workerd_checks": 30,
     "workerd_compatibility_date": "2026-10-03",
     "target_cloud_compatibility_date": "2026-11-07",
@@ -76,9 +76,11 @@
     "appliance_ui_checks": 36,
     "GitHub_hosted_execution": "not_required",
     "specification_links_checked": 857,
-    "Cloudflare_full_gate": "passed_exact_AGR306_C1",
+    "Cloudflare_full_gate": "C14_corrected_exact_source_passed",
     "current_client_synthetic_checks": 75,
-    "current_layouts_checked": 39
+    "current_layouts_checked": 39,
+    "python_subtests": 6,
+    "current_browser_scenarios": 31
   },
   "not_verified": [
     "Developer pilot is owner-enabled and limited to three UI sources, one active job, three generations/day; private preview/diff, not automatic publication or arbitrary Codex",
@@ -95,7 +97,7 @@
     "checkpoint_commit": "33cfab4e9991e4c8c15877934dcc8f43f96cb741",
     "checkpoint_issue": 1,
     "staging_issue": 2,
-    "ci_status": "Cloudflare_native_full_gate_and_container_passed",
+    "ci_status": "C14_native_source_and_runtime_passed_main_publication_pending",
     "ci_run_ids": [
       42410047614,
       42410148697
@@ -112,7 +114,7 @@
     "kitchen_pr": 12,
     "audit_pr": 14,
     "audit_merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0",
-    "active_release_pr": null,
+    "active_release_pr": 20,
     "developer_media_release_pr": 17,
     "developer_media_merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca"
   },
@@ -175,7 +177,7 @@
     "publication_broker": "not_configured",
     "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
   },
-  "release_blocker_legacy": "GitHub Actions not required: nativeCloudflare verified baseline; final0.7 gate pending",
+  "release_blocker_legacy": "Historical only; GitHub Actions not required; existing Azure browser connection restored.",
   "current_release_receipt": "docs/evidence/CF_DEV_MEDIA_08_RELEASE_RECEIPT.json",
   "google_login_repair": {
     "status": "completed_private_staging; owner_iPhone_confirmed",
@@ -185,5 +187,20 @@
     "fresh_owner_login_verified": true,
     "fresh_owner_login_evidence_kind": "owner_submitted_message",
     "normal_pinned_build": "8dcf7355-feea-4c8f-b116-6247fdf5d1e3"
+  },
+  "current_delivery": {
+    "task": "AGR-306",
+    "implemented": [
+      "C10 shell",
+      "C11 intake/history",
+      "C12 contextual actions",
+      "C13 food source journeys"
+    ],
+    "stage": "C14_native_accepted_publication_pending",
+    "native_receipt": "docs/evidence/AGR_306_C14_NATIVE_ACCEPTANCE.json",
+    "local_browser_receipt": "docs/evidence/AGR_306_C14_ACCEPTANCE.json",
+    "runtime_baseline": "eb13ec9de519b4a82d368cd71f67749616df18dcdf1a9ad65387c7b04e8309eb",
+    "runtime_image": "sha256:2a9b8e3b417d52a1c6216f682b5c2872a25f45034238a11f03f4fc5fa1e2085f",
+    "prior_status": "docs/evidence/AGR_306_PRE_C14_STATUS.json"
   }
 }
