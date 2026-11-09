@@ -1,0 +1,106 @@
+{
+  "issue": "AGR-306",
+  "build": {
+    "id": "0e2a0a1c-bee7-44b2-8a58-d078e4eb1c82",
+    "status": "stopped",
+    "outcome": "success",
+    "commit": "a56502268f3490b3cc44d9d1c8c69eb0bce9f0e2"
+  },
+  "full_gate": {
+    "checks": [
+      {
+        "name": "python_env",
+        "exit": 0
+      },
+      {
+        "name": "python_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "node_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "container_sdk",
+        "exit": 0
+      },
+      {
+        "name": "container_worker_build",
+        "exit": 0
+      },
+      {
+        "name": "runtime_fonts",
+        "exit": 0
+      },
+      {
+        "name": "all_python",
+        "exit": 0
+      },
+      {
+        "name": "all_node",
+        "exit": 0
+      },
+      {
+        "name": "legacy_ui",
+        "exit": 0
+      },
+      {
+        "name": "legacy_oauth_ui",
+        "exit": 0
+      },
+      {
+        "name": "contracts",
+        "exit": 0
+      },
+      {
+        "name": "specification",
+        "exit": 0
+      },
+      {
+        "name": "web_build",
+        "exit": 0
+      },
+      {
+        "name": "legacy_build",
+        "exit": 0
+      },
+      {
+        "name": "hygiene",
+        "exit": 0
+      },
+      {
+        "name": "generated_assets_match",
+        "exit": 0
+      }
+    ],
+    "seconds": 164.72,
+    "scope": "trusted reviewed source; no real data or paid model calls",
+    "github_actions_required": false
+  },
+  "pinned_runtime": {
+    "baseline": "27437fded5bfdeeb63154fc5e127d85660f1a898e44aa130c3fc315b1625be28",
+    "image_digest": "sha256:1ac7ef67cec8c257c9449de7b78e271501ac05327a78606052ddfb4a69d21341",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "ordinary_config": {
+    "branch": "release/staging-0.3.0",
+    "build_command": "python scripts/cloudflare_ci.py",
+    "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+    "previews_enabled": false,
+    "triggers": [
+      {
+        "id": "88639670-f75a-46f5-ae89-85a2d8387a7c",
+        "branches": [
+          "release/staging-0.3.0"
+        ],
+        "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+      }
+    ]
+  },
+  "observed_at": "2026-11-09T11:58:11.743Z"
+}

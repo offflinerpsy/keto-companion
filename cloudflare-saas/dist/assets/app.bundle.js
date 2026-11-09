@@ -265,7 +265,7 @@ function setupChatImages({ root, $: $3, prepare = prepareImage, link, epoch, set
 }
 
 // cloudflare-saas/public/shop-ui.js
-function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2, run: run2, epoch, allergens, onPantryPreview = () => {
+function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2, run: run2, epoch, allergens, prepare = prepareImage, onPantryPreview = () => {
 }, onPantryReset = () => {
 } }) {
   const root = $3("shop-root");
@@ -279,6 +279,8 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     l2.prepend(i);
     $3("shop-allergens").append(l2);
   }
+  const unresolvedLabels = { name: "\u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435", brand: "\u0431\u0440\u0435\u043D\u0434", barcode: "\u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434", basis: "\u043E\u0441\u043D\u043E\u0432\u0430 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439", serving_mass: "\u043C\u0430\u0441\u0441\u0430 \u043F\u043E\u0440\u0446\u0438\u0438", serving_unit: "\u0435\u0434\u0438\u043D\u0438\u0446\u0430 \u043F\u043E\u0440\u0446\u0438\u0438", nutrients: "\u043F\u0438\u0449\u0435\u0432\u044B\u0435 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F", carbohydrate_basis: "\u043E\u0441\u043D\u043E\u0432\u0430 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", carbohydrate_caption: "\u043F\u043E\u0434\u043F\u0438\u0441\u044C \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", ingredients_text: "\u0441\u043E\u0441\u0442\u0430\u0432", allergen_statement_text: "\u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u043E\u0431 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u0430\u0445", readability: "\u0447\u0438\u0442\u0430\u0435\u043C\u043E\u0441\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438", reshoot_hint: "\u043A\u0430\u0447\u0435\u0441\u0442\u0432\u043E \u0444\u043E\u0442\u043E" };
+  const unresolvedLabel = (key) => Object.hasOwn(unresolvedLabels, key) ? "\u0422\u0440\u0435\u0431\u0443\u0435\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438: " + unresolvedLabels[key] + "." : "\u0414\u0440\u0443\u0433\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438.";
   const current = (g, e) => g === generation && e === epoch();
   function setReady(value) {
     ready = value;
@@ -328,7 +330,7 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     preview.hidden = true;
     $3("shop-read").disabled = true;
     if (!file) return;
-    const data = await prepareImage(file);
+    const data = await prepare(file);
     if (!current(g, e)) return;
     image2 = data;
     preview.src = data;
@@ -350,7 +352,7 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     if (c2.name) form.elements.name.value = c2.name;
     $3("shop-barcode").value = typeof c2.barcode === "string" && /^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(c2.barcode) ? c2.barcode : "";
     host.append(el2("h3", "", "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0434\u043B\u044F \u0441\u0432\u0435\u0440\u043A\u0438 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439"));
-    for (const line of [c2.name, c2.brand, c2.barcode ? "\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434: " + c2.barcode : null, "\u041E\u0441\u043D\u043E\u0432\u0430: " + ({ per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E", unknown: "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" }[c2.basis] || "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430"), ...c2.nutrients.map((x) => `${x.name}: ${x.value ?? "?"} ${x.unit ?? ""} (${x.column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`), c2.ingredients_text, c2.allergen_statement_text, ...c2.unresolved_fields, c2.reshoot_hint]) if (line) host.append(el2("p", "", line));
+    for (const line of [c2.name, c2.brand, c2.barcode ? "\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434: " + c2.barcode : null, "\u041E\u0441\u043D\u043E\u0432\u0430: " + ({ per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E", unknown: "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" }[c2.basis] || "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430"), ...c2.nutrients.map((x) => `${x.name}: ${x.value ?? "?"} ${x.unit ?? ""} (${x.column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`), c2.ingredients_text, c2.allergen_statement_text, ...c2.unresolved_fields.map(unresolvedLabel), c2.reshoot_hint]) if (line) host.append(el2("p", "", line));
     const columns = [...new Set(c2.nutrients.map((x) => x.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"))];
     function applyColumn(column) {
       setReady(true);
@@ -366,11 +368,16 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
         if (/^(energy|energy kcal|энергия|энергетическая ценность)$/.test(n) && ["kcal", "\u043A\u043A\u0430\u043B"].includes(u2)) key = "energy_kcal";
         else if (/^(protein|proteins|белки|белок)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "protein_g";
         else if (/^(fat|fats|жиры|жир)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "fat_g";
-        else if (/^(carbohydrate|carbohydrates|углеводы)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "carb";
+        else if (["g", "\u0433"].includes(u2) && (/^(carbohydrate|carbohydrates|углеводы)$/.test(n) || /^(total carbohydrates? \(includes fib(?:er|re)\))$/.test(n) && c2.carbohydrate_basis === "total_includes_fiber" && typeof c2.carbohydrate_caption === "string" && c2.carbohydrate_caption.toLowerCase().trim() === n)) key = "carb";
         else if (/^(fiber|fibre|клетчатка|пищевые волокна)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "fiber_g";
         if (key && typeof r.value === "number" && Number.isFinite(r.value) && r.value >= 0) keys[key].push(r.value);
       }
       for (const [key, values2] of Object.entries(keys)) if (values2.length === 1) f[key].value = String(values2[0]);
+      if (columns.length === 1 && keys.carb.length === 1 && c2.carbohydrate_basis === "total_includes_fiber" && typeof c2.carbohydrate_caption === "string") {
+        const caption = c2.carbohydrate_caption.toLowerCase().trim();
+        const matching = c2.nutrients.filter((r) => (r.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430") === column && (r.name || "").toLowerCase().trim() === caption && /^(total carbohydrates? \(includes fib(?:er|re)\))$/.test(caption) && ["g", "\u0433"].includes((r.unit || "").toLowerCase().trim()) && typeof r.value === "number" && Number.isFinite(r.value) && r.value >= 0 && r.value === keys.carb[0]);
+        if (matching.length === 1) f.basis.value = "total_includes_fiber";
+      }
       status.textContent = "\u0427\u0438\u0441\u043B\u0430 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u044B \u0432 \u0438\u0441\u0445\u043E\u0434\u043D\u043E\u0439 \u043E\u0441\u043D\u043E\u0432\u0435. \u0421\u0432\u0435\u0440\u044C\u0442\u0435 \u043A\u0430\u0436\u0434\u044B\u0439 \u043F\u0443\u043D\u043A\u0442, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443 \u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435.";
     }
     if (columns.length === 1) applyColumn(columns[0]);

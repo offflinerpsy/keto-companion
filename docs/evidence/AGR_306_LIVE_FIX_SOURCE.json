@@ -1,0 +1,28 @@
+{
+  "issue": "AGR-306",
+  "stage": "live-observed shop correction source accepted; release pending",
+  "base_commit": "a56502268f3490b3cc44d9d1c8c69eb0bce9f0e2",
+  "baseline": "04f4f0259f4449ebfb6f15b3b64445e73c5672b0fd241beb60094ace07a83920",
+  "observed_live_label_request": "9987171b3b334dc7aec526d88e725466",
+  "observed_defects": [
+    "qualified Total carbohydrate(includesfiber)5 was not recognized for input; real model values were correct",
+    "raw unresolved field names appeared in source review"
+  ],
+  "correction": "qualified same-row finite unique carbohydrate+matching caption/basis; ambiguous, null-source and sugar/starch exclusions retained; Russian unknown labels; unchecked confirmation",
+  "review": "independent Sol product accepted; Sol domain residual null-row P2 fixed and accepted",
+  "checks": {
+    "focused_node": 36,
+    "contracts": "export passed",
+    "specification": "passed879links",
+    "repository": "passed478files",
+    "build": "passed",
+    "diff_check": "passed"
+  },
+  "OFF": {
+    "first_call": "HTTP503 PROVIDER_UNAVAILABLE, no cache/backoff, one admission",
+    "Mac_public_probe": "same official URL/query/UA laterHTTP200; Worker root cause still unknown",
+    "change": "fixed bounded timeout/network/HTTP error codes only; no raw messages/URLs/headers/body; no retry, timeout/provider/cache/consent unchanged"
+  },
+  "Azure_backend": "unchanged actual source a794090; do not redeploy or change models for this frontend/Worker correction",
+  "actual_new_browser_and_cloud": "pending"
+}

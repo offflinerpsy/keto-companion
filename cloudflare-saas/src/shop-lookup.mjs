@@ -20,9 +20,9 @@ export async function lookup(barcode,env,h,fetcher=fetch){
  await h.dbrun(env,'DELETE FROM shop_provider_requests WHERE requested_at<=?',t-60);
  const reservation=await h.dbrun(env,'INSERT INTO shop_provider_requests(requested_at) SELECT ? WHERE (SELECT COUNT(*) FROM shop_provider_requests WHERE requested_at>?)<15',t,t-60);
  if(reservation.meta.changes!==1)h.fail(429,'PROVIDER_THROTTLED');
- let r;try{r=await fetcher('https://world.openfoodfacts.org/api/v2/product/'+barcode+'?fields=code,product_name,brands,ingredients_text,nutriments',{headers:{'User-Agent':'KetoCompanion/0.7 (https://github.com/offflinerpsy/keto-companion)','Accept':'application/json'},redirect:'error',signal:AbortSignal.timeout(8000)})}catch{h.fail(503,'PROVIDER_UNAVAILABLE')}
+ let r;try{r=await fetcher('https://world.openfoodfacts.org/api/v2/product/'+barcode+'?fields=code,product_name,brands,ingredients_text,nutriments',{headers:{'User-Agent':'KetoCompanion/0.7 (https://github.com/offflinerpsy/keto-companion)','Accept':'application/json'},redirect:'error',signal:AbortSignal.timeout(8000)})}catch(error){h.fail(503,['AbortError','TimeoutError'].includes(error?.name)?'PROVIDER_TIMEOUT':'PROVIDER_NETWORK_ERROR')}
  if(r.status===429||r.status===503){await h.dbrun(env,'INSERT INTO shop_provider_backoff(provider,until_at) VALUES(?,?) ON CONFLICT(provider) DO UPDATE SET until_at=MAX(until_at,excluded.until_at)','off',t+60);h.fail(503,'PROVIDER_BACKOFF')}
- if(!r.ok&&r.status!==404)h.fail(503,'PROVIDER_UNAVAILABLE');let bytes;try{bytes=await h.readBounded(r,262144)}catch{h.fail(503,'PROVIDER_RESPONSE_TOO_LARGE')}
+ if(!r.ok&&r.status!==404)h.fail(503,Number.isInteger(r.status)&&r.status>=300&&r.status<=599?'PROVIDER_HTTP_'+r.status:'PROVIDER_HTTP_ERROR');let bytes;try{bytes=await h.readBounded(r,262144)}catch{h.fail(503,'PROVIDER_RESPONSE_TOO_LARGE')}
  let d;try{d=JSON.parse(new TextDecoder().decode(bytes))}catch{h.fail(503,'PROVIDER_INVALID_RESPONSE')}
  if(!d||![0,1].includes(d.status)||(r.status===404&&d.status!==0)||(d.status===1&&(!d.product||String(d.code||d.product.code)!==barcode))||(d.status===0&&(d.product||String(d.code)!==barcode)))h.fail(503,'PROVIDER_INVALID_RESPONSE');
  const result=d.status===1?{review_candidate:candidate(d.product,barcode)}:{review_candidate:null};
