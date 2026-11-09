@@ -1,28 +1,11 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-09T06:49:59.262555+00:00",
+  "updated_at": "2026-11-09T07:04:13.757925+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
-  "active_task": {
-    "id": "AGR-305-LOGIN",
-    "linear_issue": "https://linear.app/agregator/issue/AGR-305",
-    "stage": "staging_technical_repair_active; owner_iPhone_reauthentication_pending",
-    "branch": "codex/fix-google-login-state",
-    "scope": "Repair existing owner Google login; broad audit deferred",
-    "accepted_local_checks": {
-      "python_baseline": "523 passed,1 macOS skip",
-      "node_current": "153 passed",
-      "focused_auth": "77 passed",
-      "independent_review": "no actionable findings"
-    },
-    "next_action": "Verify ordinary pinned runtime release, then owner retries Google sign-in on affected iPhone; do not terminate existing owner session.",
-    "browser_authority": "Explicit background Chrome permission granted2026-11-09; exact owner Google account verified",
-    "owner_login_verified": false,
-    "release_receipt": "docs/evidence/GOOGLE_LOGIN_RECOVERY_RECEIPT.json",
-    "accepted_native_build": "a5d04c7b-ba71-4828-9a30-ef66c11ac65c"
-  },
-  "last_completed": "CF-DEV-MEDIA-08: Cloudflare-tested developer preview, media and supplied Tranquil Dawn design",
+  "active_task": null,
+  "last_completed": "AGR-305-LOGIN: same-origin Google sign-in repair deployed; owner confirms iPhone login",
   "next_task": {
     "id": "OWNER-DEVELOPER-ACCEPTANCE",
     "github_issue": 10,
@@ -32,9 +15,9 @@
   "staging": {
     "deployed": true,
     "compute_connected": true,
-    "google_real_user_login_verified": false,
+    "google_real_user_login_verified": true,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
+    "source_commit": "37feca4e922d9c66304503316054f85e7b7b6654",
     "http_checks_passed": 24,
     "synthetic_e2e_checks": 20,
     "synthetic_cleanup_verified": true,
@@ -45,7 +28,8 @@
     "audit_fixes_deployed": true,
     "family_release_acceptance": "actual_owner_pilot_and_physical_device_pending",
     "developer_preview_runner_connected": true,
-    "design_applied": "Tranquil Dawn"
+    "design_applied": "Tranquil Dawn",
+    "google_real_user_login_evidence": "Owner reports successful sign-in on affected iPhone2026-11-09; agent preserved existing desktop admin session"
   },
   "production": {
     "saas_deployed": false,
@@ -168,10 +152,12 @@
   "release_blocker_legacy": "GitHub Actions not required: nativeCloudflare verified baseline; final0.7 gate pending",
   "current_release_receipt": "docs/evidence/CF_DEV_MEDIA_08_RELEASE_RECEIPT.json",
   "google_login_repair": {
-    "status": "active_private_staging; device_acceptance_pending",
+    "status": "completed_private_staging; owner_iPhone_confirmed",
     "receipt": "docs/evidence/GOOGLE_LOGIN_RECOVERY_RECEIPT.json",
     "authDomain": "keto-companion-saas-staging.offflinerpsy.workers.dev",
     "existing_desktop_admin_session_verified": true,
-    "fresh_owner_login_verified": false
+    "fresh_owner_login_verified": true,
+    "fresh_owner_login_evidence_kind": "owner_submitted_message",
+    "normal_pinned_build": "8dcf7355-feea-4c8f-b116-6247fdf5d1e3"
   }
 }
