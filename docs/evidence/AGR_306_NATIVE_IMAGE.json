@@ -1,0 +1,106 @@
+{
+  "issue": "AGR-306",
+  "build_uuid": "01506935-73f1-4917-b8a9-17037e351bd3",
+  "source_commit": "a794090e3487f910f26272edde9170bb792e4609",
+  "observed_at": "2026-11-09T11:48:23.140Z",
+  "build_outcome": "success",
+  "native_receipt": {
+    "task": "CF-DEV-MEDIA-08",
+    "baseline": "27437fded5bfdeeb63154fc5e127d85660f1a898e44aa130c3fc315b1625be28",
+    "image_digest": "sha256:1ac7ef67cec8c257c9449de7b78e271501ac05327a78606052ddfb4a69d21341",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "network_policy": "Container class enableInternet=false; no egress exceptions",
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "private_credentials_transported_to_agent": false,
+    "publication_broker": false,
+    "runtime_user_flow_tested": false,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true
+  },
+  "independent_live_controls": {
+    "compatibility_date": "2026-11-07",
+    "bindings": [
+      {
+        "name": "AUTH_PROVIDER",
+        "text": "firebase_google",
+        "type": "plain_text"
+      },
+      {
+        "database_id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+        "id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+        "name": "DB",
+        "type": "d1"
+      },
+      {
+        "name": "DEVELOPER_BASELINE",
+        "text": "27437fded5bfdeeb63154fc5e127d85660f1a898e44aa130c3fc315b1625be28",
+        "type": "plain_text"
+      },
+      {
+        "name": "DEVELOPER_IMAGE_DIGEST",
+        "text": "sha256:1ac7ef67cec8c257c9449de7b78e271501ac05327a78606052ddfb4a69d21341",
+        "type": "plain_text"
+      },
+      {
+        "entrypoint": "DeveloperRunner",
+        "environment": "production",
+        "name": "DEVELOPER_RUNNER",
+        "service": "keto-companion-developer-runner",
+        "type": "service"
+      },
+      {
+        "name": "FIREBASE_AUTH_HELPER_MODE",
+        "text": "same-origin",
+        "type": "plain_text"
+      },
+      {
+        "name": "PUBLIC_ORIGIN",
+        "text": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+        "type": "plain_text"
+      },
+      {
+        "bucket_name": "keto-companion-private-staging",
+        "name": "UPLOADS",
+        "type": "r2_bucket"
+      }
+    ],
+    "firebase_public_identity": {
+      "projectId": "keto-companion-auth-261107",
+      "authDomain": "keto-companion-auth-261107.firebaseapp.com"
+    },
+    "container": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "name": "keto-companion-developer-runner",
+      "max_instances": 1,
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:1ac7ef67cec8c257c9449de7b78e271501ac05327a78606052ddfb4a69d21341",
+      "scheduling_policy": "default"
+    }
+  },
+  "web_asset_urllib_probe": "HTTP403; normal authenticated browser adoption verification pending; not retried with spoofed headers"
+}

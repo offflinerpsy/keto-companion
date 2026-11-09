@@ -2,21 +2,24 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T11:27:40.694087+00:00",
+  "updated_at": "2026-11-09T11:49:35.334322+00:00",
   "active_task": {
     "id": "AGR-306",
-    "stage": "phase6_existing_cloud_release",
+    "stage": "phase6_ordinary_promotion_then_live_acceptance",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/iphone-keto-overhaul",
     "base_commit": "d9e54d9d7e4bff24c364a3bcf472cc22f94280c5",
-    "next_action": "Commit reviewed source, run existing native Cloudflare CI/new image acceptance, then accepted pin and existing Azure/Worker release; physical iPhone remains final.",
+    "next_action": "Restore ordinary pinned build controls; deploy receipt/pin commit through existing release branch, then live Azure label/OFF and final physical iPhone.",
     "owner_iPhone_test": "Owner will connect Mirroring only after technical readiness; not yet requested",
     "previous_login": "accepted; preserve existing identity/runtime",
     "phase1_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/phase1-acceptance.json",
     "phase2B_receipt": "product-overhaul/verification/phase2B-acceptance.json",
     "shop_receipt": "product-overhaul/verification/shop-acceptance.json",
     "FR009": "Source review accepted current-stock preview/explicit selection; actual browser acceptance pending",
-    "source_acceptance": "docs/evidence/AGR_306_SOURCE_ACCEPTANCE.json"
+    "source_acceptance": "docs/evidence/AGR_306_SOURCE_ACCEPTANCE.json",
+    "native_build": "01506935-73f1-4917-b8a9-17037e351bd3",
+    "source_commit": "a794090e3487f910f26272edde9170bb792e4609",
+    "runtime_image": "sha256:1ac7ef67cec8c257c9449de7b78e271501ac05327a78606052ddfb4a69d21341"
   },
   "last_completed": {
     "id": "AGR-305-LOGIN",

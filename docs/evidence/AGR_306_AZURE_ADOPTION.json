@@ -1,0 +1,21 @@
+{
+  "issue": "AGR-306",
+  "checked_at": "2026-11-09T11:40:17.305935+00:00",
+  "app": "keto-companion-ay-20261107",
+  "deployment_id": "00946c8e-4f6d-45a1-a612-74ee542800fe",
+  "source_commit": "a794090e3487f910f26272edde9170bb792e4609",
+  "public_static_http": 200,
+  "actual_static_sha256": "6f42e9fe4f8b1effc2872a602a33c3642cfd6a50f3bfe91a32159eddcc067d58",
+  "expected_C1_static_sha256": "6f42e9fe4f8b1effc2872a602a33c3642cfd6a50f3bfe91a32159eddcc067d58",
+  "actual_static_matches_C1": true,
+  "public_model_settings": {
+    "AZURE_OPENAI_DEPLOYMENT": "keto-terra-61",
+    "KETO_SOURCE_COMMIT": "a794090e3487f910f26272edde9170bb792e4609",
+    "KETO_RECIPE_DEPLOYMENT": "gpt-6.1-sol",
+    "KETO_RECIPE_REASONING": "high",
+    "KETO_RECIPE_MAX_OUTPUT_TOKENS": "5000"
+  },
+  "model_settings_preserved": true,
+  "new_label_capability": "actualauthenticatedcallpending",
+  "personal_state_changed": false
+}

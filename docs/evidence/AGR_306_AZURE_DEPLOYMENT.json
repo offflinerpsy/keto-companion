@@ -1,0 +1,13 @@
+{
+  "task": "AGR-306",
+  "source_commit": "a794090e3487f910f26272edde9170bb792e4609",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "6008e56841dc21cfeac635de95c2f5c2339ab228d7063b4111e926e418917445",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "model_settings_preserved": true,
+  "status": 4,
+  "complete": true,
+  "deployment_id": "00946c8e-4f6d-45a1-a612-74ee542800fe",
+  "checked_at": "2026-11-09T11:37:51.457791+00:00"
+}

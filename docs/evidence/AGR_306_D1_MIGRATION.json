@@ -1,0 +1,43 @@
+{
+  "issue": "AGR-306",
+  "source_commit": "a794090e3487f910f26272edde9170bb792e4609",
+  "checked_at": "2026-11-09T11:34:40.370Z",
+  "account": "0609100baf768271ea2811c9a9ee2b16",
+  "database": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+  "migration": "0008_shop_lookup.sql",
+  "sha256": "38af85819867a6cfa68da1251059a92cbb31f91a343e4969a73f7f8c4168df39",
+  "state": "independently_verified",
+  "schema": [
+    {
+      "type": "index",
+      "name": "shop_provider_requests_time",
+      "tbl_name": "shop_provider_requests",
+      "sql": "CREATE INDEX shop_provider_requests_time ON shop_provider_requests(requested_at)"
+    },
+    {
+      "type": "table",
+      "name": "shop_provider_backoff",
+      "tbl_name": "shop_provider_backoff",
+      "sql": "CREATE TABLE shop_provider_backoff (provider TEXT PRIMARY KEY, until_at INTEGER NOT NULL)"
+    },
+    {
+      "type": "table",
+      "name": "shop_provider_requests",
+      "tbl_name": "shop_provider_requests",
+      "sql": "CREATE TABLE shop_provider_requests (id INTEGER PRIMARY KEY AUTOINCREMENT, requested_at INTEGER NOT NULL)"
+    },
+    {
+      "type": "table",
+      "name": "shop_public_cache",
+      "tbl_name": "shop_public_cache",
+      "sql": "CREATE TABLE shop_public_cache (barcode TEXT PRIMARY KEY, payload TEXT NOT NULL, expires_at INTEGER NOT NULL)"
+    }
+  ],
+  "migration_record": [
+    {
+      "name": "0008_shop_lookup.sql",
+      "applied_at": "2026-11-09 11:34:23"
+    }
+  ],
+  "private_state_rows_read_or_changed": false
+}
