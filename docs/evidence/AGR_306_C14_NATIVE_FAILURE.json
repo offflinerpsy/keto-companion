@@ -1,0 +1,66 @@
+{
+  "task": "AGR-306-C14",
+  "status": "native_image_rollout_complete_acceptance_failed",
+  "source_commit": "22768691dc720396e2e6c099aa5b657f80c0fcf3",
+  "build_uuid": "3d27fc52-b960-4443-a40f-f150f5da9fb9",
+  "full_source_gate": {
+    "passed": 16,
+    "python": 627,
+    "python_subtests": 6,
+    "node": 253,
+    "http_guards": 8,
+    "promotion_guards": 3
+  },
+  "rollout_id": "7d3f5c36-c0b0-452d-a815-773c698b3272",
+  "readback": {
+    "build": {
+      "id": "3d27fc52-b960-4443-a40f-f150f5da9fb9",
+      "status": "stopped",
+      "outcome": "fail",
+      "commit": "22768691dc720396e2e6c099aa5b657f80c0fcf3",
+      "stopped_on": "2026-11-09T21:34:18.594Z"
+    },
+    "app": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "name": "keto-companion-developer-runner",
+      "version": 9,
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:79b76cf29fd9edd2f2b32254cb81c9cf2bf200f8fa10bf5574a220e257e77885",
+      "max_instances": 1,
+      "scheduling_policy": "default"
+    },
+    "runner": {
+      "bindings": [
+        {
+          "name": "DEVELOPER_BASELINE",
+          "text": "97541c77d758419484d908aa3e6dc5fab86bb8368970b832d82eceb13a352015",
+          "type": "plain_text"
+        },
+        {
+          "name": "DEVELOPER_IMAGE_DIGEST",
+          "text": "sha256:79b76cf29fd9edd2f2b32254cb81c9cf2bf200f8fa10bf5574a220e257e77885",
+          "type": "plain_text"
+        },
+        {
+          "name": "KETO_TESTER",
+          "type": "durable_object_namespace",
+          "class_name": "KetoTester"
+        }
+      ]
+    },
+    "probes": []
+  },
+  "active_instances": 0,
+  "total_instances_observed": 16,
+  "acceptance_failure": "cloud_container_acceptance exit=1 after about21s; outer native runner captured the bounded HTTP markers, so precise failure reason not visible",
+  "ordinary_trigger_restored": true,
+  "approved_pin_updated": false,
+  "main_worker_updated": false,
+  "azure_deployed": false,
+  "azure_archive_transfer": {
+    "status": "verified_in_existing_cloud_shell",
+    "bytes": 1532556,
+    "members": 71,
+    "sha256": "58d23318fc88d80c768671da99f53eb6135b6a651c419cd0d59e4a6c9a562ec3"
+  },
+  "next_action": "Existing acceptance-only verifier for exact installed immutable candidate; no image rebuild or rollout. Full ordinary source/ops/pinned promotion gate still required after actual acceptance."
+}
