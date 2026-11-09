@@ -1,5 +1,9 @@
 # KETO mobile interface — AGR-306
 
+## Approved continuation — 2026-11-09
+
+The owner approved the independent product review and resumed implementation through the existing private-family release. [The delivery contract](PRODUCT_DELIVERY_2026_11_09.md) now controls navigation and task flow: Chat / Diary / Recipes / Products; Today remains a nested meal plan; one consumed-food editor; contextual chat actions; compact system-style forms. Prior C9 technical receipts remain historical evidence, not acceptance of the newly requested product.
+
 The current owner brief replaces the earlier Tranquil Dawn direction with a practical Russian interface for iPhone. The existing vanilla application, router, saved theme values and private state stay in place. Source changes are under review; release and physical iPhone acceptance are separate stages.
 
 ## Current design rules

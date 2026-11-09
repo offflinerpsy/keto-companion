@@ -2,14 +2,14 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T18:38:36.929054+00:00",
+  "updated_at": "2026-11-09T19:58:04.453212+00:00",
   "active_task": {
     "id": "AGR-306",
-    "stage": "C9_release_accepted_device_partial_wrapup",
+    "stage": "C10_shell_in_progress",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/iphone-keto-overhaul",
     "base_commit": "d9e54d9d7e4bff24c364a3bcf472cc22f94280c5",
-    "next_action": "Owner directly verifies phone typing, camera barcode/label and dictation; no new code/build/feature work. Keep AGR-306 open until physical acceptance.",
+    "next_action": "Complete and verify compact four-tab shell, scoped confirmation dialog, chat/route scroll preservation; then begin unified intake.",
     "owner_iPhone_test": "Deferred until next ready candidate after owner-requested audit; no foreground window requested",
     "previous_login": "accepted; preserve existing identity/runtime",
     "phase1_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/phase1-acceptance.json",
@@ -29,12 +29,17 @@
     "C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_BUILD_EVIDENCE.json",
     "C8_independent_control": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
     "technical_release_acceptance": "Native newimage and ordinary no-rebuild builds bothSUCCESS; exactapp8/runner/probeabsence/staging/ordinarycontrols verified.",
-    "owner_continuation": "Latest owner resumes implementation, requests mature open-source reuse and Russia/Belarus focus",
+    "owner_continuation": "Owner approved 2026-11-09 product review and explicitly authorized implementation, testing and existing private-family release without intermediate questions.",
     "research_root": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional",
     "resume_linear_comment": "46694022-f549-4dce-a8ee-e6d045d04a6c",
     "C9_source_acceptance": "docs/evidence/AGR_306_C9_SOURCE_ACCEPTANCE.json",
     "C9_native_acceptance": "docs/evidence/AGR_306_C9_NATIVE_ACCEPTANCE.json",
-    "C9_release_device": "docs/evidence/AGR_306_C9_RELEASE_DEVICE.json"
+    "C9_release_device": "docs/evidence/AGR_306_C9_RELEASE_DEVICE.json",
+    "reviewed_baseline": "e755bb5934cdb3ecbc8d0233dfdbae42c8b76729",
+    "implementation_writer": "root; one isolated Stage 1 candidate prepared by GPT-6 Astra ultra reviewer for root integration",
+    "review_models": "GPT-6 Astra ultra only",
+    "previous_recovery": "docs/evidence/AGR_306_C9_RECOVERY_BEFORE_C10.json",
+    "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md"
   },
   "last_completed": {
     "id": "AGR-305-LOGIN",
@@ -50,10 +55,9 @@
     "broader_audit": "deferred; not claimed complete"
   },
   "next_task": {
-    "id": "OWNER-DEVELOPER-ACCEPTANCE",
-    "github_issue": 10,
-    "status": "requires_actual_owner_session",
-    "action": "Owner opens More→Development or chat Development mode, enables one hour, submits a harmless technical help/UI request and reviews exact task before one allowed generation. Test/private preview only; no automatic live publication."
+    "id": "AGR-306-C11-INTAKE",
+    "status": "queued",
+    "action": "After C10 checks, implement common consumed-food editor and server snapshot/history through existing confirmation/CAS contracts."
   },
   "no_relaunch": {
     "recorded_local_jobs": [],
