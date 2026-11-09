@@ -129,7 +129,7 @@ def main():
         app=api('POST',prefix,{'name':NAME,'scheduling_policy':'default','instances':0,'max_instances':1,'durable_objects':{'script_name':NAME,'class_name':'KetoTester'},'configuration':{'image':image,'instance_type':'standard-1'},'observability':{'logs':{'enabled':False}}})
     # Give immutable-image and Worker metadata a bounded propagation interval.
     time.sleep(10)
-    run('cloud_container_acceptance',['node','scripts/verify_developer_cloud_runtime.mjs'],timeout=390)
+    run('cloud_container_acceptance',['node','ops/run_guarded_runtime_acceptance.mjs'],timeout=390)
     result=json.loads((ROOT/'docs/evidence/CF_DEV_CLOUD_RUNTIME_ACCEPTANCE.json').read_text())
     if result['baseline']!=baseline or result['image_digest']!=digest or result['status']!='passed' or not result['temporary_probe_deleted']:raise RuntimeError('Cloud runtime acceptance incomplete')
     receipt={'task':'CF-DEV-MEDIA-08','baseline':baseline,'image_digest':digest,'application_id':app['id'],'max_instances':1,'network_policy':'Container class enableInternet=false; no egress exceptions','stages':[{k:v for k,v in s.items() if k!='log'} for s in result['stages']],'private_credentials_transported_to_agent':False,'publication_broker':False,'runtime_user_flow_tested':False,'actual_cloud_container_acceptance':True,'temporary_probe_deleted':result['temporary_probe_deleted']}

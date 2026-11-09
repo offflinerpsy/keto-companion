@@ -10,9 +10,9 @@ test('Kitchen tool dispatcher, labels, memory route and strict mode identities',
  assert.equal(typeof setupKitchen,'function');const ui=read('../public/kitchen-ui.js');for(const id of ['kitchen-composer','kitchen-candidate','pantry-chips','product-questions','kitchen-day','memory-fact'])assert(ui.includes(id));
  assert(ui.includes("basis:'portion'"));assert(ui.includes("basis:'batch'"));assert(ui.includes("type='submit'"));assert(!ui.includes('innerHTML'));
 });
-test('Studio keeps secondary reference library, four tabs and mobile minimum widths',()=>{
+test('Studio keeps secondary reference library, five tabs and mobile minimum widths',()=>{
  const html=read('../public/index.html'),css=read('../public/app.css');assert(html.includes('data-testid="kitchen-studio"'));assert(html.includes('data-testid="recipe-library"'));assert(html.includes('data-testid="kitchen-memory"'));
- const nav=html.match(/<nav id="nav"[\s\S]*?<\/nav>/)[0];assert.equal((nav.match(/data-view=/g)||[]).length,4);
+ const nav=html.match(/<nav id="nav"[\s\S]*?<\/nav>/)[0];assert.equal((nav.match(/data-view=/g)||[]).length,5);
  assert(css.includes('@media(max-width:600px)'));assert(css.includes('grid-template-columns:minmax(0,1fr)'));assert(css.includes('min-height:44px'));assert(css.includes('minmax(min(100%,300px),1fr)'));
  const app=read('../public/app.js');assert(app.includes('memory:\'Что я помню\''));assert(app.includes('r.draft_label?kitchen.card(r)'));assert(app.includes('kitchen.reset()'));
 });
@@ -57,14 +57,12 @@ test('new parsed ingredient keeps its stated mass',async()=>{
  setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async()=>({pantry:[{food_id:'z',state:'raw',grams:200}],food_names:{z:'Кабачок'},questions:[]}),getState:()=>({}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1});
  let all=descendants(host);all.find(n=>n.id==='kitchen-free').value='кабачок 200 г';await all.find(n=>n.textContent==='Разобрать продукты').onclick();all=descendants(host);assert.equal(all.find(n=>n.attributes['aria-label']==='Кабачок: граммы').value,200);
 });
-test('selected named product survives debounce and an older search response',async()=>{
- const host=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':new Node(),proposals:new Node()};let finish,searches=[];
+test('selected named product uses loaded catalog without another request',async()=>{
+ const host=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':new Node(),proposals:new Node()};let searches=0;
  const food={food_id:'id-cheese',name_ru:'Чеддер',state:'ready_to_eat'},other={food_id:'other',name_ru:'Авокадо',state:'raw'};
- const ui=setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async(_,p)=>{if(p.action==='status')return {};if(p.action==='foods'&&!p.query)return {foods:[food,other],total:2};searches.push(p.query);return new Promise(r=>finish=r)},getState:()=>({active_thread:'main'}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1});
- await ui.load();const input=descendants(host).find(n=>n.id==='kitchen-product');input.value='аво';input.oninput();await new Promise(r=>setTimeout(r,300));assert.deepEqual(searches,['аво']);
- input.value='Чеддер · готов к употреблению';input.oninput();finish({foods:[other],total:1});await new Promise(r=>setTimeout(r,300));assert.deepEqual(searches,['аво']);await descendants(host).find(n=>n.textContent==='Добавить').onclick();assert(descendants(host).some(n=>n.textContent==='Чеддер'));assert(!descendants(host).some(n=>n.textContent==='id-cheese'));
+ const ui=setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async(_,p)=>{if(p.action==='status')return {};if(p.action==='foods'){searches++;return {foods:[food,other],total:2}}},getState:()=>({active_thread:'main'}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1});
+ await ui.load();const input=descendants(host).find(n=>n.id==='kitchen-product');input.value='аво';input.oninput();input.value='Чеддер · готов к употреблению';input.oninput();await descendants(host).find(n=>n.textContent==='Добавить в запасы').onclick();assert.equal(searches,1);assert(descendants(host).some(n=>n.textContent==='Чеддер'));
 });
-
 test('selected exclusion survives debounce and stale response in actual generation request',async()=>{
  const host=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':new Node(),proposals:new Node()};let finish,generated,queries=[];
  const cheese={food_id:'cheddar-key',name_ru:'Чеддер',state:'ready_to_eat'},other={food_id:'other-key',name_ru:'Авокадо',state:'raw'};
@@ -90,8 +88,8 @@ test('food picker bounds results, cancels pending detail after trusted selection
  const host=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':new Node(),proposals:new Node()};let resolveDetail,calls=[];const detail=new Promise(r=>resolveDetail=r);
  const foods=Array.from({length:19},(_,i)=>({food_id:'F'+i,name_ru:'Продукт '+i,state:'raw'}));
  const ui=setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async(_,p)=>{calls.push(p.action);if(p.action==='status')return {};if(p.action==='foods')return {foods,total:foods.length};if(p.action==='source_search')return {total:1,candidates:[{candidate_id:'USDA1',name_en:'Reference',category_ru:'Категория'}],next_cursor:null};if(p.action==='source_detail')return detail},getState:()=>({active_thread:'main',revision:1}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1});
- await ui.load();let all=descendants(host),list=all.find(n=>n.attributes['aria-label']==='Продукты справочника и личные продукты');assert.equal(list.children.filter(n=>n.textContent.includes('справочник / личный')).length,8);await list.children.find(n=>n.textContent==='Следующие продукты').onclick();assert(list.children.some(n=>n.textContent.startsWith('Продукт 8')));assert(!list.children.some(n=>n.textContent.startsWith('Продукт 0')));await list.children.find(n=>n.textContent==='Следующие продукты').onclick();assert(list.children.some(n=>n.textContent.startsWith('Продукт 18')));await list.children.find(n=>n.textContent==='Предыдущие продукты').onclick();
- const product=all.find(n=>n.id==='kitchen-product');product.value='example';await all.find(n=>n.textContent==='Искать в USDA').onclick();all=descendants(host);const pending=all.find(n=>n.textContent.includes('Reference · USDA')).onclick();await list.children.find(n=>n.textContent.startsWith('Продукт 8')).onclick();assert.equal(list.hidden,true);resolveDetail({candidate:{name_en:'Late reference'}});await pending;assert(!descendants(host).some(n=>n.textContent==='Проверка записи USDA'));
+ await ui.load();await descendants(host).find(n=>n.textContent==='Показать все продукты').onclick();let all=descendants(host),list=all.find(n=>n.attributes['aria-label']==='Продукты справочника и личные продукты');assert.equal(list.children.filter(n=>n.className==='secondary kitchen-food-row').length,8);await list.children.find(n=>n.textContent==='Следующие продукты').onclick();assert(list.children.some(n=>n.children.some(c=>c.textContent==='Продукт 8')));assert(!list.children.some(n=>n.children.some(c=>c.textContent==='Продукт 0')));await list.children.find(n=>n.textContent==='Следующие продукты').onclick();assert(list.children.some(n=>n.children.some(c=>c.textContent==='Продукт 18')));await list.children.find(n=>n.textContent==='Предыдущие продукты').onclick();
+ const product=all.find(n=>n.id==='kitchen-product');product.value='example';await all.find(n=>n.textContent==='Искать в USDA').onclick();all=descendants(host);const pending=all.find(n=>n.textContent.includes('Reference · USDA')).onclick();await list.children.find(n=>n.children.some(c=>c.textContent==='Продукт 8')).onclick();assert.equal(list.hidden,true);resolveDetail({candidate:{name_en:'Late reference'}});await pending;assert(!descendants(host).some(n=>n.textContent==='Проверка записи USDA'));
  const picker=all.find(n=>n.cls==='kitchen-picker');let blocked=0;for(const tagName of ['INPUT','SELECT'])picker.onkeydown({key:'Enter',target:{tagName},preventDefault(){blocked++}});assert.equal(blocked,2);assert(!calls.includes('generate')&&!calls.includes('source_import'));
 });
 test('source import preview renders Russian allergen names and understandable unknowns',()=>{
@@ -115,4 +113,23 @@ test('late kitchen status cannot overwrite changed meal controls or pantry draft
 });
 test('kitchen load stops before foods when route becomes stale during status',async()=>{
  const host=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':new Node(),proposals:new Node()};let finish,valid=true,calls=[];const ui=setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async(_,p)=>{calls.push(p.action);return await new Promise(r=>finish=r)},getState:()=>({active_thread:'main'}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1});const pending=ui.load(()=>valid);valid=false;finish({});assert.equal(await pending,false);assert.deepEqual(calls,['status']);
+});
+
+test('everyday matching preserves state and refuses invented brand or percentages',async()=>{
+ const {filterEverydayFoods}=await import('../public/kitchen-ui.js');const foods=[{name_ru:'Огурец с кожурой',state:'raw'},{name_ru:'Огурец с кожурой',state:'cooked'},{name_ru:'Капуста белокочанная',state:'raw'},{name_ru:'Творог',state:'ready_to_eat'},{name_ru:'Сметана',state:'ready_to_eat'},{name_ru:'Минтай',state:'raw'},{name_ru:'Сыр чеддер',state:'ready_to_eat'}];for(const q of ['сыр','творог','сметана','свежий огурец','белокочанная капуста','минтай'])assert.equal(filterEverydayFoods(foods,q).length,1,q);for(const q of ['сыр российский','сметана 20%','минтай бренд'])assert.equal(filterEverydayFoods(foods,q).length,0,q);assert.equal(filterEverydayFoods(foods,'свежий огурец')[0].state,'raw');
+});
+
+test('reset removes previous personal food from picker before next account loads',async()=>{
+ const host=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':new Node(),proposals:new Node()};let session=1,finishB;const ui=setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async(_,p)=>{if(p.action==='status')return {};if(p.action==='foods')return session===1?{foods:[{food_id:'UA',name_ru:'Личный продукт А',state:'raw'}],total:1}:new Promise(r=>finishB=r)},getState:()=>({active_thread:'main'}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>session});
+ await ui.load();await descendants(host).find(x=>x.textContent==='Показать все продукты').onclick();assert(descendants(host).some(x=>x.textContent.includes('Личный продукт А')));const avoid=descendants(host).find(x=>x.id==='kitchen-avoid');avoid.value='Личный';avoid.oninput();await new Promise(r=>setTimeout(r,300));assert(descendants(host).find(x=>x.id==='kitchen-avoid-list').children.some(x=>x.value.includes('Личный продукт А')));ui.reset();session=2;const loading=ui.load();await Promise.resolve();const input=descendants(host).find(x=>x.id==='kitchen-product');input.value='Личный';input.oninput();assert(!descendants(host).some(x=>x.textContent.includes('Личный продукт А')||x.value.includes('Личный продукт А')));finishB({foods:[{food_id:'UB',name_ru:'Продукт Б',state:'raw'}],total:1});await loading;assert(!descendants(host).some(x=>x.textContent.includes('Личный продукт А')||x.value.includes('Личный продукт А')));
+});
+
+test('moved recipe form sends each selected mode with one shared pantry',async()=>{
+ const products=new Node(),recipes=new Node(),nodes={'kitchen-studio':products,'recipe-kitchen-slot':recipes,'kitchen-memory':new Node(),proposals:new Node()};const sent=[];
+ const old=globalThis.FormData;globalThis.FormData=class{constructor(form){this.form=form}get(name){return descendants(this.form).find(x=>x.name===name&&x.checked)?.value}};
+ try{setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async(_,p)=>{if(p.action==='generate'){sent.push(p.spec);return {recipes:[]}}},getState:()=>({active_thread:'main',revision:1}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1});
+ const form=descendants(recipes).find(n=>n.tag==='form'),radios=descendants(form).filter(n=>n.name==='mode');assert.equal(radios.length,3);assert(!descendants(products).some(n=>n.name==='mode'));
+ for(const selected of radios){for(const radio of radios)radio.checked=radio===selected;await form.onsubmit({preventDefault(){}});await new Promise(r=>setImmediate(r))}
+ assert.deepEqual(sent.map(x=>x.mode),['pantry_only','pantry_plus','inspiration']);assert(sent.every(x=>Array.isArray(x.pantry)));
+ }finally{globalThis.FormData=old}
 });

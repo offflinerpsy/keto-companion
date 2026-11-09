@@ -1,7 +1,7 @@
-export const ROUTES=['chat','today','diary','more','recipes','settings','sources','reminders','admin','developer','targets','knowledge','memory','setup-consent','setup-about','setup-restrictions','setup-targets'];
-const MAIN=['chat','today','diary','more'];
+export const ROUTES=['chat','today','diary','more','recipes','products','settings','sources','reminders','admin','developer','targets','knowledge','memory','setup-consent','setup-about','setup-restrictions','setup-targets'];
+const MAIN=['chat','today','recipes','products','diary'];
 export function routeValue(hash,fallback='chat'){const value=String(hash||'').replace(/^#/,'');return ROUTES.includes(value)?value:fallback}
-export function initialRoute(state,hash){const g=state.guidance;if(g&&!g.ready){if(routeValue(hash,'')==='recipes')return 'recipes';return 'setup-'+g.stage}return routeValue(hash,state.ui?.home||'chat')}
+export function initialRoute(state,hash){const g=state.guidance;if(g&&!g.ready){if(['recipes','products'].includes(routeValue(hash,'')))return routeValue(hash,'');return 'setup-'+g.stage}return routeValue(hash,state.ui?.home||'chat')}
 export function createRouter({location,history,listen,render,closeDialog=()=>{},fallback=()=> 'chat'}){
  let current='',depth=0,origin='more';
  function display(route,reason){depth=history.state?.ketoDepth||0;origin=history.state?.ketoOrigin||origin;if(!history.state?.ketoDialog)closeDialog();if(route===current&&reason==='history')return;current=route;depth=history.state?.ketoDepth||0;render(route,{reason,origin,depth})}

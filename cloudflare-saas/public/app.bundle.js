@@ -1,3 +1,65 @@
+// cloudflare-saas/public/recipe-page-calls.js
+function createRecipePageCalls({ call: call2, epoch }) {
+  let tail = Promise.resolve();
+  const pending = /* @__PURE__ */ new Set();
+  function invoke(...args) {
+    const stamp = epoch();
+    const result = tail.catch(() => {
+    }).then(() => {
+      if (stamp !== epoch()) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
+      if (args[2]?.signal?.aborted) throw Object.assign(Error("\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E."), { name: "AbortError" });
+      return call2(...args);
+    });
+    tail = result;
+    pending.add(result);
+    result.then(() => pending.delete(result), () => pending.delete(result));
+    return result;
+  }
+  async function settle(current) {
+    while (pending.size) {
+      await Promise.allSettled([...pending]);
+      if (!current()) return false;
+    }
+    return current();
+  }
+  return { invoke, settle };
+}
+
+// cloudflare-saas/public/today-plan.js
+function localCalendarDate(date = /* @__PURE__ */ new Date()) {
+  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+}
+function renderTodayPlan({ plan, draft, root, empty, el: el2, formatDate: formatDate2, openRecipe: openRecipe2, acceptPlan, now = /* @__PURE__ */ new Date() }) {
+  const today = localCalendarDate(now), days = plan.days || [], todayDays = days.filter((d2) => d2.date === today), otherDays = days.filter((d2) => d2.date !== today);
+  empty.hidden = !draft && plan.status !== "stale_requires_recheck" && todayDays.some((d2) => d2.meals.length > 0);
+  root.replaceChildren(el2("h2", "", draft ? "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043C\u0435\u043D\u044E" : "\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E"));
+  if (plan.status === "stale_requires_recheck") root.append(el2("div", "notice danger", "\u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F: \u044D\u0442\u043E \u043C\u0435\u043D\u044E \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043F\u0435\u0440\u0435\u0441\u0447\u0451\u0442\u0430. \u041D\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u0430\u043A \u0430\u043A\u0442\u0443\u0430\u043B\u044C\u043D\u043E\u0435."));
+  function dayCard(day) {
+    const box = el2("article", "menu-day");
+    box.append(el2("h3", "", formatDate2(day.date)));
+    for (const meal of day.meals) {
+      const part = el2("div", "meal");
+      part.append(el2("h3", "", meal.name_ru));
+      const b2 = el2("button", "text-btn", "\u0413\u0440\u0430\u043C\u043C\u043E\u0432\u043A\u0438 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435");
+      b2.addEventListener("click", () => openRecipe2(meal));
+      part.append(b2);
+      box.append(part);
+    }
+    return box;
+  }
+  for (const day of todayDays) root.append(dayCard(day));
+  if (otherDays.length) {
+    const details = el2("details", "panel");
+    details.append(el2("summary", "", "\u0414\u0440\u0443\u0433\u0438\u0435 \u0434\u043D\u0438 \u043F\u043B\u0430\u043D\u0430"), ...otherDays.map(dayCard));
+    root.append(details);
+  }
+  if (draft) {
+    const b2 = el2("button", "primary", "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E");
+    b2.addEventListener("click", acceptPlan);
+    root.append(b2);
+  }
+}
+
 // cloudflare-saas/public/media.js
 var RecorderController = class {
   constructor({ mediaDevices, Recorder, onState, onAudio, clock = () => Date.now(), interval = (fn, ms) => globalThis.setInterval(fn, ms), clear = (id) => globalThis.clearInterval(id) }) {
@@ -264,14 +326,216 @@ function setupChatImages({ root, $: $3, prepare = prepareImage, link, epoch, set
   } };
 }
 
+// cloudflare-saas/public/shop-scanner.js
+var libraryPromise;
+function loadScanner() {
+  if (globalThis.Quagga) return Promise.resolve(globalThis.Quagga);
+  if (!libraryPromise) libraryPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "/quagga-1.13.0.min.js";
+    script.onload = () => globalThis.Quagga ? resolve(globalThis.Quagga) : reject(Error("scanner unavailable"));
+    script.onerror = () => reject(Error("scanner unavailable"));
+    document.head.append(script);
+  }).catch((e) => {
+    libraryPromise = null;
+    throw e;
+  });
+  return libraryPromise;
+}
+function validScanCode(s2) {
+  if (typeof s2 !== "string" || !/^\d+$/.test(s2) || ![8, 12, 13].includes(s2.length)) return false;
+  let sum = 0;
+  for (let i = s2.length - 2, j2 = 0; i >= 0; i--, j2++) sum += Number(s2[i]) * (j2 % 2 ? 1 : 3);
+  return (10 - sum % 10) % 10 === Number(s2.at(-1));
+}
+function createScanner({ video, load = loadScanner, getMedia = (constraints) => navigator.mediaDevices.getUserMedia(constraints), replaceVideo = (old) => {
+  const fresh = old.cloneNode(false);
+  old.replaceWith(fresh);
+  return fresh;
+}, capture = (preview) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = preview.videoWidth;
+  canvas.height = preview.videoHeight;
+  if (!canvas.width || !canvas.height) return null;
+  canvas.getContext("2d").drawImage(preview, 0, 0);
+  return canvas.toDataURL("image/jpeg", 0.85);
+}, schedule = (fn, ms) => setTimeout(fn, ms), cancelTimer = (id) => clearTimeout(id), onState = () => {
+}, onCode = () => {
+} }) {
+  let token = 0, stream = null, active = false, timer = null, flight = Promise.resolve();
+  function stop() {
+    token++;
+    active = false;
+    if (timer !== null) cancelTimer(timer);
+    timer = null;
+    const s2 = stream;
+    stream = null;
+    if (s2) for (const track of s2.getTracks()) track.stop();
+    video.srcObject = null;
+    video.hidden = true;
+  }
+  async function start2() {
+    stop();
+    const id = token;
+    active = true;
+    onState("opening");
+    try {
+      video = replaceVideo(video);
+      const preview = video;
+      preview.hidden = false;
+      const lib = await load();
+      if (id !== token) return;
+      const acquired = await getMedia({ audio: false, video: { facingMode: "environment" } });
+      if (id !== token) {
+        for (const t of acquired.getTracks()) t.stop();
+        return;
+      }
+      stream = acquired;
+      for (const track of acquired.getTracks()) track.addEventListener?.("ended", () => {
+        if (id === token) {
+          stop();
+          onState("error");
+        }
+      }, { once: true });
+      preview.srcObject = acquired;
+      await preview.play();
+      if (id !== token) return;
+      onState("scanning");
+      async function scan() {
+        try {
+          await flight.catch(() => {
+          });
+          if (id !== token || !active) return;
+          const src = capture(preview);
+          if (src) {
+            const work = Promise.resolve().then(() => lib.decodeSingle({ src, numOfWorkers: 0, locate: true, decoder: { readers: ["ean_reader", "ean_8_reader", "upc_reader"] } }));
+            flight = work;
+            const result = await work;
+            if (id !== token || !active) return;
+            const code = result?.codeResult?.code;
+            if (validScanCode(code)) {
+              stop();
+              onCode(code);
+              return;
+            }
+          }
+          if (id === token && active) timer = schedule(() => {
+            timer = null;
+            scan();
+          }, 500);
+        } catch (e) {
+          if (id === token) {
+            stop();
+            onState("error");
+          }
+        }
+      }
+      scan();
+    } catch (e) {
+      if (id !== token) return;
+      stop();
+      onState(e?.name === "NotAllowedError" || e?.name === "SecurityError" ? "denied" : "error");
+    }
+  }
+  return { start: start2, stop };
+}
+
 // cloudflare-saas/public/shop-ui.js
-function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2, run: run2, epoch, allergens, prepare = prepareImage, onPantryPreview = () => {
+function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2, run: run2, epoch, allergens, prepare = prepareImage, scannerFactory = createScanner, onPantryPreview = () => {
 }, onPantryReset = () => {
+}, onOwnFood = () => {
+}, setView: setView2 = () => {
 } }) {
   const root = $3("shop-root");
   let image2 = null, generation = 0, pending = null, saved = null, source = null, abort = null, ready = true, preparing = false, ownHint = null, pantryPending = null, pantryBusy = false;
-  root.innerHTML = `<details class="panel"><summary>\u0412 \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0435</summary><p>\u0421\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u0443\u0439\u0442\u0435 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0444\u043E\u0442\u043E, \u043D\u0430\u0439\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0438\u043B\u0438 \u0432\u043D\u0435\u0441\u0438\u0442\u0435 \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u0432\u0440\u0443\u0447\u043D\u0443\u044E. \u0414\u0430\u043D\u043D\u044B\u0435 \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435.</p><div class="shop-photo-actions"><label class="secondary photo-button shop-file-label">\u041A\u0430\u043C\u0435\u0440\u0430<input id="shop-camera" type="file" accept="image/*" capture="environment"></label><label class="secondary photo-button shop-file-label">\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0444\u043E\u0442\u043E<input id="shop-photo" type="file" accept="image/*"></label></div><img id="shop-preview" alt="\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438" hidden style="max-width:100%;max-height:240px"><button id="shop-read" type="button" disabled>\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443</button><button id="shop-cancel" type="button">\u041E\u0442\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0436\u0438\u0434\u0430\u043D\u0438\u0435</button><label>\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434<input id="shop-barcode" inputmode="numeric" maxlength="14"></label><button id="shop-find" type="button">\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443</button><p id="shop-status" role="status"></p><div id="shop-candidate"></div><button id="shop-manual" type="button">\u0412\u0432\u0435\u0441\u0442\u0438 \u0432\u0440\u0443\u0447\u043D\u0443\u044E</button><form id="shop-form"><h3>\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442</h3><p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u043A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u043E \u043D\u0430 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443. \u0414\u043B\u044F 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438 \u043D\u0443\u0436\u043D\u0430 \u044F\u0432\u043D\u043E \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u043C\u0430\u0441\u0441\u0430 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u0435 \u043E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u043F\u0443\u0441\u0442\u044B\u043C.</p><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435<select name="state" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435</option><option value="ready_to_eat">\u0413\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E</option><option value="raw">\u0421\u044B\u0440\u043E\u0439</option><option value="dry">\u0421\u0443\u0445\u043E\u0439</option><option value="cooked">\u0413\u043E\u0442\u043E\u0432\u044B\u0439</option><option value="canned">\u041A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439</option><option value="ready_to_cook">\u0414\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F</option></select></label><label>\u041E\u0441\u043D\u043E\u0432\u0430 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439<select name="unit_basis" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443</option><option value="per100g">\u041D\u0430 100 \u0433</option><option value="per100ml">\u041D\u0430 100 \u043C\u043B</option><option value="perserving">\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E</option></select></label><label>\u041C\u0430\u0441\u0441\u0430 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438, \u0433 (\u0435\u0441\u043B\u0438 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430)<input name="basis_mass" inputmode="decimal"></label><label>\u042D\u043D\u0435\u0440\u0433\u0438\u044F, \u043A\u043A\u0430\u043B<input name="energy_kcal" inputmode="decimal"></label><label>\u0411\u0435\u043B\u043A\u0438, \u0433<input name="protein_g" inputmode="decimal"></label><label>\u0416\u0438\u0440\u044B, \u0433<input name="fat_g" inputmode="decimal"></label><label>\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433<input name="carb" inputmode="decimal"></label><label>\u041A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B<select name="basis"><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438</option><option value="unknown">\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E</option><option value="total_includes_fiber">\u0412\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443</option><option value="available_excludes_fiber">\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438</option></select></label><label>\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433<input name="fiber_g" inputmode="decimal"></label><fieldset id="shop-allergens"><legend>\u041E\u0442\u043C\u0435\u0442\u044C\u0442\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438</legend></fieldset><label class="check"><input name="confirm" type="checkbox"> \u042F \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u043B(\u0430) \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043E\u0441\u043D\u043E\u0432\u0443, \u043C\u0430\u0441\u0441\u0443, \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</label><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0434\u043B\u044F \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0439 \u0435\u0434\u0438\u043D\u0438\u0446\u0435 (\u0433, \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0439)<input name="portion" inputmode="decimal"></label><button id="shop-portion" type="button">\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0434\u043B\u044F \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u0430</button><p id="shop-portion-result" role="status"></p><p>\u0413\u043B\u0438\u043A\u0435\u043C\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0438\u043D\u0434\u0435\u043A\u0441: \u043D\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445.</p><button id="shop-submit" type="submit">\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442</button></form><div id="shop-next" hidden><p id="shop-saved-name"></p><p>\u041C\u043E\u0436\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u0438\u043B\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0432 \u0441\u0432\u043E\u0451\u043C \u0431\u043B\u044E\u0434\u0435.</p><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439, \u0433<input id="shop-grams" inputmode="decimal"></label><button id="shop-pantry" type="button">\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E</button><button id="shop-own" type="button">\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</button><button id="shop-suggest" type="button" hidden>\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0439 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439</button></div></details>`;
+  root.innerHTML = `<details class="panel"><summary>\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</summary><p>\u0421\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u0443\u0439\u0442\u0435 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0444\u043E\u0442\u043E, \u043D\u0430\u0439\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0438\u043B\u0438 \u0432\u043D\u0435\u0441\u0438\u0442\u0435 \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u0432\u0440\u0443\u0447\u043D\u0443\u044E. \u0414\u0430\u043D\u043D\u044B\u0435 \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435.</p><div id="shop-search-stage" hidden><form id="shop-search-form"><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0431\u0440\u0435\u043D\u0434<input id="shop-query" minlength="2" maxlength="80" required></label><label class="check"><input id="shop-wide" type="checkbox"> \u0418\u0441\u043A\u0430\u0442\u044C \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C</label><button type="submit">\u041D\u0430\u0439\u0442\u0438 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443</button></form><p class="muted">\u041F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E \u0438\u0449\u0435\u043C \u0437\u0430\u043F\u0438\u0441\u0438 \u0434\u043B\u044F \u0420\u043E\u0441\u0441\u0438\u0438 \u0438 \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438. \u0423\u043A\u0430\u0437\u0430\u043D\u043D\u0430\u044F \u0441\u0442\u0440\u0430\u043D\u0430 \u043D\u0435 \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u0440\u0443\u0435\u0442 \u043D\u0430\u043B\u0438\u0447\u0438\u0435 \u0432 \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0435.</p><div id="shop-search-results" aria-live="polite"></div></div><div class="shop-methods"><button id="shop-name-method" type="button">\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044E</button><button id="shop-scan" type="button">\u0421\u043A\u0430\u043D\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434</button><button id="shop-barcode-method" type="button">\u0412\u0432\u0435\u0441\u0442\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434</button><button id="shop-photo-method" type="button">\u0424\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438</button><button id="shop-manual" type="button">\u0412\u0432\u0435\u0441\u0442\u0438 \u0432\u0440\u0443\u0447\u043D\u0443\u044E</button></div><div id="shop-scanner" hidden><video id="shop-video" muted playsinline></video><button id="shop-stop-scan" type="button">\u0417\u0430\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u043C\u0435\u0440\u0443</button></div><div id="shop-photo-stage" hidden><div class="shop-photo-actions"><label class="secondary photo-button shop-file-label">\u0421\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443<input id="shop-camera" type="file" accept="image/*" capture="environment"></label><label class="secondary photo-button shop-file-label">\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0444\u043E\u0442\u043E<input id="shop-photo" type="file" accept="image/*"></label></div><img id="shop-preview" alt="\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438" hidden style="max-width:100%;max-height:240px"><button id="shop-read" type="button" disabled>\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443</button><button id="shop-cancel" type="button" hidden>\u041E\u0442\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0436\u0438\u0434\u0430\u043D\u0438\u0435</button></div><div id="shop-barcode-stage" hidden><label>\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434<input id="shop-barcode" inputmode="numeric" maxlength="14"></label><button id="shop-find" type="button">\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443</button></div><p id="shop-status" role="status"></p><div id="shop-candidate"></div><form id="shop-form" hidden><h3>\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442</h3><p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u043A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u043E \u043D\u0430 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443. \u0414\u043B\u044F 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438 \u043D\u0443\u0436\u043D\u0430 \u044F\u0432\u043D\u043E \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u043C\u0430\u0441\u0441\u0430 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u0435 \u043E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u043F\u0443\u0441\u0442\u044B\u043C.</p><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435<select name="state" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435</option><option value="ready_to_eat">\u0413\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E</option><option value="raw">\u0421\u044B\u0440\u043E\u0439</option><option value="dry">\u0421\u0443\u0445\u043E\u0439</option><option value="cooked">\u0413\u043E\u0442\u043E\u0432\u044B\u0439</option><option value="canned">\u041A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439</option><option value="ready_to_cook">\u0414\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F</option></select></label><label>\u041E\u0441\u043D\u043E\u0432\u0430 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439<select name="unit_basis" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443</option><option value="per100g">\u041D\u0430 100 \u0433</option><option value="per100ml">\u041D\u0430 100 \u043C\u043B</option><option value="perserving">\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E</option></select></label><label>\u041C\u0430\u0441\u0441\u0430 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438, \u0433 (\u0435\u0441\u043B\u0438 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430)<input name="basis_mass" inputmode="decimal"></label><label>\u042D\u043D\u0435\u0440\u0433\u0438\u044F, \u043A\u043A\u0430\u043B<input name="energy_kcal" inputmode="decimal"></label><label>\u0411\u0435\u043B\u043A\u0438, \u0433<input name="protein_g" inputmode="decimal"></label><label>\u0416\u0438\u0440\u044B, \u0433<input name="fat_g" inputmode="decimal"></label><label>\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433<input name="carb" inputmode="decimal"></label><label>\u041A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B<select name="basis"><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438</option><option value="unknown">\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E</option><option value="total_includes_fiber">\u0412\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443</option><option value="available_excludes_fiber">\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438</option></select></label><label>\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433<input name="fiber_g" inputmode="decimal"></label><fieldset id="shop-allergens"><legend>\u041E\u0442\u043C\u0435\u0442\u044C\u0442\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438</legend></fieldset><label class="check"><input name="confirm" type="checkbox"> \u042F \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u043B(\u0430) \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043E\u0441\u043D\u043E\u0432\u0443, \u043C\u0430\u0441\u0441\u0443, \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</label><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0434\u043B\u044F \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0439 \u0435\u0434\u0438\u043D\u0438\u0446\u0435 (\u0433, \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0439)<input name="portion" inputmode="decimal"></label><button id="shop-portion" type="button">\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0434\u043B\u044F \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u0430</button><p id="shop-portion-result" role="status"></p><p>\u0413\u043B\u0438\u043A\u0435\u043C\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0438\u043D\u0434\u0435\u043A\u0441: \u043D\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445.</p><button id="shop-submit" type="submit">\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C</button></form><div id="shop-next" hidden><p id="shop-saved-name"></p><p>\u041C\u043E\u0436\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u0438\u043B\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0432 \u0441\u0432\u043E\u0451\u043C \u0431\u043B\u044E\u0434\u0435.</p><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439, \u0433<input id="shop-grams" inputmode="decimal"></label><button id="shop-pantry" type="button">\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E</button><button id="shop-own" type="button">\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</button><button id="shop-suggest" type="button" hidden>\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0439 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439</button></div></details>`;
   const form = $3("shop-form"), status = $3("shop-status"), preview = $3("shop-preview"), next = $3("shop-next");
+  const scanner = scannerFactory({ video: $3("shop-video"), onState(state2) {
+    status.textContent = { opening: "\u041E\u0436\u0438\u0434\u0430\u0435\u043C \u0434\u043E\u0441\u0442\u0443\u043F \u043A \u043A\u0430\u043C\u0435\u0440\u0435. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u043C\u0435\u0440\u0443 \u0438\u043B\u0438 \u0432\u0432\u0435\u0441\u0442\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.", scanning: "\u041D\u0430\u0432\u0435\u0434\u0438\u0442\u0435 \u043A\u0430\u043C\u0435\u0440\u0443 \u043D\u0430 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434.", denied: "\u041D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u0430 \u043A \u043A\u0430\u043C\u0435\u0440\u0435. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0434\u043E\u0441\u0442\u0443\u043F \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.", error: "\u041A\u0430\u043C\u0435\u0440\u0430 \u0438\u043B\u0438 \u0441\u043A\u0430\u043D\u0435\u0440 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B. \u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438\u043B\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438." }[state2];
+    if (state2 === "denied" || state2 === "error") $3("shop-scanner").hidden = true;
+  }, onCode(code) {
+    $3("shop-scanner").hidden = true;
+    $3("shop-barcode").value = code;
+    $3("shop-find").onclick();
+  } });
+  function stopScanner() {
+    scanner.stop();
+    $3("shop-scanner").hidden = true;
+  }
+  let searchToken = 0;
+  $3("shop-query").addEventListener("input", () => {
+    searchToken++;
+    $3("shop-search-results").replaceChildren();
+  });
+  $3("shop-wide").addEventListener("change", () => {
+    searchToken++;
+    $3("shop-search-results").replaceChildren();
+  });
+  $3("shop-search-form").onsubmit = (e) => {
+    e.preventDefault();
+    run2(async () => {
+      const token = ++searchToken, stamp = epoch(), query = $3("shop-query").value.trim(), wide = $3("shop-wide").checked, box = $3("shop-search-results");
+      box.replaceChildren(el2("p", "muted", "\u0418\u0449\u0435\u043C \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438\u2026"));
+      try {
+        const d2 = await api("/api/shop/search", "POST", { query, wide });
+        if (token !== searchToken || stamp !== epoch()) return;
+        box.replaceChildren();
+        if (!d2.hits.length) box.append(el2("p", "muted", "\u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041C\u043E\u0436\u043D\u043E \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u043F\u043E\u0438\u0441\u043A \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C, \u0441\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443 \u0438\u043B\u0438 \u0432\u0432\u0435\u0441\u0442\u0438 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E."));
+        for (const hit of d2.hits) {
+          const b2 = el2("button", "secondary", [hit.name, hit.brand, ...hit.countries.map((c2) => ({ "en:russia": "\u0420\u043E\u0441\u0441\u0438\u044F", "en:belarus": "\u0411\u0435\u043B\u0430\u0440\u0443\u0441\u044C" })[c2]).filter(Boolean)].filter(Boolean).join(" \xB7 "));
+          b2.type = "button";
+          b2.onclick = () => {
+            searchToken++;
+            $3("shop-barcode").value = hit.code;
+            $3("shop-find").onclick();
+          };
+          box.append(b2);
+        }
+        box.append(el2("p", "muted", "Open Food Facts \xB7 ODbL. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u0438 \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439."));
+      } catch (err) {
+        if (token === searchToken && stamp === epoch()) box.replaceChildren(el2("p", "muted", "\u041F\u043E\u0438\u0441\u043A \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D: " + err.message));
+      }
+    });
+  };
+  function leave() {
+    stopScanner();
+    searchToken++;
+    generation++;
+    const waiting = !$3("shop-cancel").hidden;
+    abort?.abort();
+    abort = null;
+    if (waiting) {
+      $3("shop-cancel").hidden = true;
+      $3("shop-read").disabled = !image2;
+      status.textContent = "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E. \u0417\u0430\u043F\u0440\u043E\u0441 \u043C\u043E\u0433 \u0431\u044B\u0442\u044C \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u0430\u043D; \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442\u0441\u044F. \u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435.";
+    }
+  }
+  function method(name2) {
+    leave();
+    $3("shop-search-stage").hidden = name2 !== "name";
+    $3("shop-barcode-stage").hidden = name2 !== "barcode" && name2 !== "scan";
+    $3("shop-photo-stage").hidden = name2 !== "photo";
+    form.hidden = name2 !== "manual";
+  }
+  $3("shop-name-method").onclick = () => method("name");
+  $3("shop-barcode-method").onclick = () => method("barcode");
+  $3("shop-scan").onclick = () => {
+    method("scan");
+    $3("shop-scanner").hidden = false;
+    scanner.start();
+  };
+  $3("shop-stop-scan").onclick = () => {
+    stopScanner();
+    status.textContent = "\u041A\u0430\u043C\u0435\u0440\u0430 \u0437\u0430\u043A\u0440\u044B\u0442\u0430.";
+  };
+  $3("shop-photo-method").onclick = () => method("photo");
+  const panel = root.querySelector("details");
+  panel.addEventListener("toggle", () => {
+    if (!panel.open) stopScanner();
+  });
+  if (typeof document !== "undefined") document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopScanner();
+  });
   for (const [id, label] of allergens) {
     const l2 = el2("label", "check", label), i = el2("input");
     i.type = "checkbox";
@@ -318,11 +582,13 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     }
   });
   $3("shop-manual").onclick = () => {
+    method("manual");
     if (saved) clearCandidate();
     setReady(true);
     status.textContent = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0438\u0445 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435.";
   };
   async function select(file) {
+    stopScanner();
     const g = ++generation, e = epoch();
     abort?.abort();
     image2 = null;
@@ -340,11 +606,12 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
   }
   for (const id of ["shop-camera", "shop-photo"]) $3(id).onchange = () => run2(() => select($3(id).files?.[0]));
   function nutrientLine(x) {
-    const off = source?.provider === "Open Food Facts", name2 = off ? { Energy: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", Protein: "\u0411\u0435\u043B\u043A\u0438", Fat: "\u0416\u0438\u0440\u044B", Carbohydrates: "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B", Fiber: "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430" }[x.name] || x.name : x.name, unit = off ? { kcal: "\u043A\u043A\u0430\u043B", g: "\u0433", ml: "\u043C\u043B" }[x.unit] || x.unit : x.unit, column = off && x.column === "100 g/ml (provider; verify label)" ? "\u043D\u0430 100 \u0433 \u0438\u043B\u0438 100 \u043C\u043B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435" : x.column;
+    const off = source?.provider === "Open Food Facts", name2 = { Energy: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", Protein: "\u0411\u0435\u043B\u043A\u0438", Fat: "\u0416\u0438\u0440\u044B", Carbohydrates: "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B", Fiber: "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430" }[x.name] || x.name, unit = { kcal: "\u043A\u043A\u0430\u043B", g: "\u0433", ml: "\u043C\u043B" }[x.unit] || x.unit, column = off && x.column === "100 g/ml (provider; verify label)" ? "\u043D\u0430 100 \u0433 \u0438\u043B\u0438 100 \u043C\u043B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435" : x.column;
     return `${name2}: ${x.value ?? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445"} ${unit ?? ""} (${column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`;
   }
   function show(c2) {
     clearCandidate();
+    form.hidden = !c2;
     source = c2?.provenance || null;
     const host = $3("shop-candidate");
     if (!c2) {
@@ -357,6 +624,10 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     $3("shop-barcode").value = typeof c2.barcode === "string" && /^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(c2.barcode) ? c2.barcode : "";
     host.append(el2("h3", "", "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0434\u043B\u044F \u0441\u0432\u0435\u0440\u043A\u0438 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439"));
     for (const line of [c2.name, c2.brand, c2.barcode ? "\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434: " + c2.barcode : null, "\u041E\u0441\u043D\u043E\u0432\u0430: " + ({ per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E", unknown: "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" }[c2.basis] || "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430"), ...c2.nutrients.map(nutrientLine), c2.ingredients_text, c2.allergen_statement_text, ...c2.unresolved_fields.map(unresolvedLabel), c2.reshoot_hint]) if (line) host.append(el2("p", "", line));
+    const original = el2("details");
+    original.append(el2("summary", "", "\u0418\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u043F\u043E\u0434\u043F\u0438\u0441\u0438 \u0438 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F"));
+    for (const x of c2.nutrients) original.append(el2("p", "", `${x.name}: ${x.value ?? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445"} ${x.unit ?? ""} (${x.column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`));
+    host.append(original);
     const columns = [...new Set(c2.nutrients.map((x) => x.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"))];
     function applyColumn(column) {
       setReady(true);
@@ -409,27 +680,34 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     const g = ++generation, e = epoch();
     abort = new AbortController();
     $3("shop-read").disabled = true;
+    $3("shop-cancel").hidden = false;
     status.textContent = "\u0427\u0438\u0442\u0430\u044E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443\u2026";
     try {
       const d2 = await call2("keto_label_extract", { request_id: crypto.randomUUID().replaceAll("-", ""), image_data_url: image2 }, { signal: abort.signal });
       if (current(g, e)) show(d2.review_candidate);
     } finally {
-      if (current(g, e)) $3("shop-read").disabled = false;
+      if (current(g, e)) {
+        $3("shop-read").disabled = false;
+        $3("shop-cancel").hidden = true;
+      }
     }
   });
   $3("shop-cancel").onclick = () => {
     generation++;
     abort?.abort();
     abort = null;
+    $3("shop-cancel").hidden = true;
     $3("shop-read").disabled = !image2;
     status.textContent = "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E. \u0417\u0430\u043F\u0440\u043E\u0441 \u043C\u043E\u0433 \u0431\u044B\u0442\u044C \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u0430\u043D; \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442\u0441\u044F. \u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435.";
   };
   $3("shop-barcode").oninput = () => {
+    stopScanner();
     generation++;
     abort?.abort();
     clearCandidate();
   };
   $3("shop-find").onclick = () => run2(async () => {
+    stopScanner();
     const barcode = $3("shop-barcode").value.trim(), g = ++generation, e = epoch();
     clearCandidate();
     status.textContent = "\u0418\u0449\u0443\u2026";
@@ -526,10 +804,12 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
   };
   $3("shop-own").onclick = () => {
     if (!saved) return;
+    setView2("recipes");
     const d2 = $3("own-dish-root").querySelector("details");
     if (!d2) return;
     ownHint?.remove();
-    ownHint = el2("p", "notice", "\u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \xAB" + saved.name + "\xBB \u0447\u0435\u0440\u0435\u0437 \u043F\u043E\u0438\u0441\u043A \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u0430 \u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443.");
+    onOwnFood(saved);
+    ownHint = el2("p", "notice", "\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0434\u043B\u044F \xAB" + saved.name + "\xBB.");
     d2.prepend(ownHint);
     d2.open = true;
     d2.scrollIntoView({ block: "start" });
@@ -550,15 +830,21 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
       pending = null;
       if (p.generation === generation) {
         saved = p;
+        form.hidden = true;
+        $3("shop-candidate").replaceChildren();
         next.hidden = false;
         $3("shop-saved-name").textContent = "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + p.name;
         $3("shop-pantry").textContent = "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E: " + p.name;
         status.textContent = "\u041B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D.";
+        next.scrollIntoView?.({ block: "nearest" });
       }
     } else if (pending && d2?.state?.pending && !d2.state.pending.some((p) => p.id === pending.proposal)) {
       pending = null;
     }
-  }, reset() {
+  }, stopScanner, leave, reset() {
+    stopScanner();
+    searchToken++;
+    $3("shop-search-results").replaceChildren();
     generation++;
     pantryPending = null;
     pantryBusy = false;
@@ -575,6 +861,9 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     setReady(true);
     preview.removeAttribute("src");
     preview.hidden = true;
+    form.hidden = true;
+    $3("shop-photo-stage").hidden = true;
+    $3("shop-cancel").hidden = true;
     $3("shop-read").disabled = true;
     $3("shop-candidate").replaceChildren();
     status.textContent = "";
@@ -584,6 +873,10 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     $3("shop-camera").value = "";
     $3("shop-photo").value = "";
     $3("shop-barcode").value = "";
+    $3("shop-query").value = "";
+    $3("shop-wide").checked = false;
+    $3("shop-search-stage").hidden = true;
+    $3("shop-barcode-stage").hidden = true;
   } };
 }
 
@@ -860,7 +1153,14 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     }
     $3("own-intake").hidden = false;
   }
-  return { reset, preview, savedReceipt, update };
+  function addConfirmedFood(food) {
+    if (!rows.some((r) => r.food_id === food.id)) {
+      rows.push({ food_id: food.id, name_ru: food.name, state: food.state, grams: "" });
+      draw();
+      changed();
+    }
+  }
+  return { reset, preview, savedReceipt, update, addConfirmedFood };
 }
 
 // cloudflare-saas/public/developer-ui.js
@@ -1059,8 +1359,20 @@ function sourceImportPreview(el2, food, original, allergens, foodState2) {
   const labels2 = food.allergens.map((id) => allergens.find((row) => row[0] === id)?.[1] || "\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D (" + String(id) + ")");
   return [el2("p", "", food.name_ru + " \xB7 " + foodState2(food.state)), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: " + original + " \xB7 USDA; \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B: " + (labels2.length ? labels2.join(", ") : "\u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E: \u043D\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u044B")), el2("p", "muted", "\u041F\u043E\u0441\u043B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F \u043D\u0430\u0439\u0434\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435, \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u043C\u0430\u0441\u0441\u0443. \u0415\u0433\u043E \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0434\u043B\u044F \u0440\u0430\u0441\u0447\u0451\u0442\u0430 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430. \u0414\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0445 \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432 \u0438 \u043C\u0435\u043D\u044E \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438 \u0435\u0449\u0451 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E.")];
 }
+function filterEverydayFoods(foods, query) {
+  const q2 = query.trim().toLocaleLowerCase("ru").replace(/ё/g, "\u0435").replace(/\s+/g, " ");
+  if (!q2) return foods;
+  const aliases = { "\u0441\u0432\u0435\u0436\u0438\u0439 \u043E\u0433\u0443\u0440\u0435\u0446": ["\u043E\u0433\u0443\u0440\u0435\u0446 \u0441 \u043A\u043E\u0436\u0443\u0440\u043E\u0439", "raw"], "\u0431\u0435\u043B\u043E\u043A\u043E\u0447\u0430\u043D\u043D\u0430\u044F \u043A\u0430\u043F\u0443\u0441\u0442\u0430": ["\u043A\u0430\u043F\u0443\u0441\u0442\u0430 \u0431\u0435\u043B\u043E\u043A\u043E\u0447\u0430\u043D\u043D\u0430\u044F", "raw"] };
+  const alias = aliases[q2];
+  return foods.filter((f) => {
+    const name2 = String(f.name_ru || "").toLocaleLowerCase("ru").replace(/ё/g, "\u0435");
+    if (alias) return name2 === alias[0] && f.state === alias[1];
+    if (q2 === "\u0441\u044B\u0440") return /(^|[^а-яё])сыр(?:$|[^а-яё]|н)/u.test(name2) || /моцарелл|фета|чеддер/u.test(name2);
+    return name2.includes(q2);
+  });
+}
 function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, notify: notify2, setView: setView2, epoch }) {
-  let pantry = [], foods = [], result = null, busy2 = false, parsing = false, parseNumber = 0, localEpoch = 0, dirty = false;
+  let pantry = [], foods = [], allFoods = [], result = null, busy2 = false, parsing = false, parseNumber = 0, localEpoch = 0, dirty = false;
   const host = $3("kitchen-studio");
   if (!host) return { render() {
   }, load: async () => {
@@ -1081,6 +1393,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   };
   const number = (n) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(n);
   const states = { raw: "\u0441\u044B\u0440\u043E\u0439", ready_to_eat: "\u0433\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E", cooked_roasted: "\u0437\u0430\u043F\u0435\u0447\u0451\u043D\u043D\u044B\u0439", cooked: "\u0433\u043E\u0442\u043E\u0432\u044B\u0439", cooked_dry_heat: "\u0433\u043E\u0442\u043E\u0432\u044B\u0439, \u0441\u0443\u0445\u043E\u0439 \u0436\u0430\u0440", cooked_boiled: "\u0432\u0430\u0440\u0451\u043D\u044B\u0439", frozen: "\u0437\u0430\u043C\u043E\u0440\u043E\u0436\u0435\u043D\u043D\u044B\u0439", dry: "\u0441\u0443\u0445\u043E\u0439", canned: "\u043A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439", canned_drained: "\u0431\u0435\u0437 \u0436\u0438\u0434\u043A\u043E\u0441\u0442\u0438", ready_to_cook: "\u0434\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F" };
+  const stock = el2("div", "kitchen-composer");
   const form = el2("form", "kitchen-composer");
   form.dataset.testid = "kitchen-composer";
   const modes = el2("fieldset", "kitchen-modes");
@@ -1095,7 +1408,6 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     label.append(input, el2("strong", "", title), el2("span", "muted", note));
     modes.append(label);
   }
-  form.append(modes);
   const picker = el2("div", "kitchen-picker"), product = el2("input"), datalist = el2("datalist");
   product.id = "kitchen-product";
   product.setAttribute("list", "kitchen-food-list");
@@ -1103,7 +1415,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   product.autocomplete = "off";
   product.dataset.testid = "kitchen-food-input";
   datalist.id = "kitchen-food-list";
-  const productLabel = el2("label", "", "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0438\u0437 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430");
+  const productLabel = el2("label", "", "\u041D\u0430\u0439\u0442\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442");
   productLabel.htmlFor = product.id;
   const trustedList = el2("div", "kitchen-food-results");
   trustedList.setAttribute("aria-label", "\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430 \u0438 \u043B\u0438\u0447\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B");
@@ -1116,7 +1428,8 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   const status = el2("p", "muted");
   status.setAttribute("role", "status");
   status.dataset.testid = "kitchen-status";
-  let searchNumber = 0, selectedFood = null, trustedStart = 0;
+  status.textContent = "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\u2026";
+  let searchNumber = 0, selectedFood = null, trustedStart = 0, browsing = false;
   function invalidateSource() {
     sourceToken++;
     sourceCursor = null;
@@ -1125,19 +1438,29 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     review.hidden = true;
   }
   function renderTrusted() {
-    trustedList.hidden = false;
     trustedList.replaceChildren();
+    if (!browsing && !product.value.trim()) {
+      trustedList.hidden = true;
+      return;
+    }
+    trustedList.hidden = false;
     const page = foods.slice(trustedStart, trustedStart + 8);
     trustedList.append(el2("p", "muted", `\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B: ${foods.length ? trustedStart + 1 : 0}\u2013${trustedStart + page.length} \u0438\u0437 ${foods.length}`));
-    for (const f of page) trustedList.append(button(f.name_ru + " \xB7 " + (states[f.state] || f.state) + " \xB7 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A / \u043B\u0438\u0447\u043D\u044B\u0439", async () => {
-      searchNumber++;
-      clearTimeout(product.timer);
-      invalidateSource();
-      selectedFood = f;
-      product.value = f.name_ru + " \xB7 " + (states[f.state] || f.state);
-      trustedList.hidden = true;
-      status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + f.name_ru + ". \u041D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C\xBB.";
-    }));
+    for (const f of page) {
+      const row = button("", async () => {
+        searchNumber++;
+        clearTimeout(product.timer);
+        invalidateSource();
+        selectedFood = f;
+        product.value = f.name_ru + " \xB7 " + (states[f.state] || f.state);
+        trustedList.hidden = true;
+        add.disabled = false;
+        status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + f.name_ru;
+      });
+      row.className = "secondary kitchen-food-row";
+      row.append(el2("strong", "", f.name_ru), el2("span", "muted", states[f.state] || f.state));
+      trustedList.append(row);
+    }
     if (trustedStart > 0) trustedList.append(button("\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
       trustedStart = Math.max(0, trustedStart - 8);
       renderTrusted();
@@ -1158,21 +1481,19 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   }
   product.oninput = () => {
     invalidateSource();
-    const token = ++searchNumber;
+    searchNumber++;
     clearTimeout(product.timer);
-    selectedFood = foods.find((f) => product.value === f.name_ru + " \xB7 " + (states[f.state] || f.state)) || null;
+    selectedFood = allFoods.find((f) => product.value === f.name_ru + " \xB7 " + (states[f.state] || f.state)) || null;
+    add.disabled = !selectedFood;
     if (selectedFood) {
       trustedList.hidden = true;
       status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + selectedFood.name_ru;
       return;
     }
-    product.timer = setTimeout(() => run2(async () => {
-      const e = epoch(), d2 = await call2("keto_kitchen", { action: "foods", query: product.value.slice(0, 200) });
-      if (token !== searchNumber || e !== epoch()) return;
-      foods = d2.foods;
-      foodOptions();
-      status.textContent = `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${d2.total ?? foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.`;
-    }), 250);
+    browsing = false;
+    foods = filterEverydayFoods(allFoods, product.value);
+    foodOptions();
+    status.textContent = foods.length ? product.value.trim() ? `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.` : "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u043F\u043E\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B." : "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438, \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u0438\u043B\u0438 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA.";
   };
   function addFood(food) {
     if (pantry.some((i) => i.food_id === food.food_id)) return;
@@ -1180,7 +1501,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     dirty = true;
     renderChips();
   }
-  const add = button("\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C", async () => {
+  const add = button("\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0437\u0430\u043F\u0430\u0441\u044B", async () => {
     const food = selectedFood || foods.find((f) => product.value === f.name_ru + " \xB7 " + (states[f.state] || f.state));
     if (!food) {
       status.textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438\u0437 \u0441\u043F\u0438\u0441\u043A\u0430. \u0414\u043B\u044F \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0433\u043E \u0441\u043F\u0438\u0441\u043A\u0430 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \xAB\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\xBB. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u043C\u0443 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0443 \u043D\u0443\u0436\u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430.";
@@ -1189,11 +1510,21 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     addFood(food);
     product.value = "";
     selectedFood = null;
+    add.disabled = true;
+    browsing = false;
+    renderTrusted();
   });
+  add.disabled = true;
   picker.onkeydown = (e) => {
     if (e.key === "Enter" && e.target.tagName !== "BUTTON") e.preventDefault();
   };
-  picker.append(productLabel, product, datalist, trustedList, add);
+  const browse = button("\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+    browsing = true;
+    foods = filterEverydayFoods(allFoods, product.value);
+    trustedStart = 0;
+    renderTrusted();
+  });
+  picker.append(productLabel, product, datalist, browse, trustedList, add);
   const sourceSearch = button("\u0418\u0441\u043A\u0430\u0442\u044C \u0432 USDA", async () => {
     invalidateSource();
     sourceQuery = product.value.trim();
@@ -1267,8 +1598,10 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     review.focus?.({ preventScroll: true });
     review.scrollIntoView?.({ block: "nearest" });
   }
-  picker.append(sourceSearch, sourceResults, review);
-  form.append(picker);
+  const sourceDetails = el2("details");
+  sourceDetails.append(el2("summary", "", "\u0414\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA"), sourceSearch, sourceResults, review);
+  picker.append(sourceDetails);
+  stock.append(picker);
   const free = el2("textarea");
   free.id = "kitchen-free";
   free.placeholder = "\u0415\u0441\u0442\u044C \u044F\u0439\u0446\u0430, \u043A\u0430\u0431\u0430\u0447\u043E\u043A \u0438 \u0448\u0430\u043C\u043F\u0438\u043D\u044C\u043E\u043D\u044B";
@@ -1322,7 +1655,9 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       }
     }
   });
-  form.append(freeLabel, free, parseButton, questions, chips);
+  const freeDetails = el2("details");
+  freeDetails.append(el2("summary", "", "\u041F\u0435\u0440\u0435\u0447\u0438\u0441\u043B\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441\u0432\u043E\u0438\u043C\u0438 \u0441\u043B\u043E\u0432\u0430\u043C\u0438"), freeLabel, free, parseButton);
+  stock.append(freeDetails, questions, chips);
   function renderChips() {
     chips.replaceChildren();
     for (const item of pantry) {
@@ -1349,7 +1684,8 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     if (!pantry.length) chips.append(el2("p", "muted", "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043F\u0443\u0441\u0442\u0430. \u0412 \u0440\u0435\u0436\u0438\u043C\u0435 \u0438\u0434\u0435\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u043D\u0435 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B."));
   }
   const stockNote = el2("p", "muted", "\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0432 \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u043C \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0438. \u0428\u0442\u0443\u043A\u0438 \u043D\u0435 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u044B\u0432\u0430\u044E\u0442\u0441\u044F \u0432 \u0433\u0440\u0430\u043C\u043C\u044B. \u041F\u0440\u043E\u0441\u043C\u043E\u0442\u0440 \u0440\u0435\u0446\u0435\u043F\u0442\u0430 \u043D\u0435 \u0441\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u0442 \u0437\u0430\u043F\u0430\u0441.");
-  form.append(stockNote, button("\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E", () => act("pantry", null, { items: cleanPantry() })), button("\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0443\u044E", async () => {
+  stock.append(stockNote, button("\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F", () => act("pantry", null, { items: cleanPantry() })), button("\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0437\u0430\u043F\u0430\u0441\u044B", async () => {
+    if (dirty && !globalThis.confirm("\u0417\u0430\u043C\u0435\u043D\u0438\u0442\u044C \u043D\u0435\u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0439 \u0441\u043F\u0438\u0441\u043E\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u043C\u0438 \u0437\u0430\u043F\u0430\u0441\u0430\u043C\u0438?")) return;
     dirty = false;
     pantry = (getState()?.kitchen?.pantry || []).map((i) => ({ ...i }));
     renderChips();
@@ -1435,18 +1771,25 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   };
   controls.append(avoidList);
   controls.append(avoidLabel, avoid);
-  form.append(controls);
+  form.append(modes, controls);
   const generate = el2("button", "primary", "\u041F\u0440\u0435\u0434\u043B\u043E\u0436\u0438\u0442\u044C \u0431\u043B\u044E\u0434\u0430");
   generate.type = "submit";
   generate.dataset.testid = "kitchen-generate";
-  form.append(generate, status);
+  const generateStatus = el2("p", "muted");
+  generateStatus.setAttribute("role", "status");
+  form.append(generate, generateStatus);
+  stock.append(status);
   const results = el2("div");
   results.dataset.testid = "kitchen-results";
   const savedPreview = el2("section", "panel");
   savedPreview.hidden = true;
   savedPreview.dataset.testid = "confirmed-pantry-preview";
   let savedToken = 0;
-  host.replaceChildren(savedPreview, form, results);
+  const recipeHost = $3("recipe-kitchen-slot");
+  if (recipeHost) {
+    host.replaceChildren(stock);
+    recipeHost.replaceChildren(savedPreview, form, results);
+  } else host.replaceChildren(stock, savedPreview, form, results);
   const cleanPantry = () => pantry.map(({ food_id, state: state2, grams }) => ({ food_id, state: state2, grams: grams === null || grams === "" ? null : decimal(grams, 0.1, 3e4) }));
   async function act(action, rid, values2 = {}) {
     const state2 = getState();
@@ -1454,7 +1797,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     accept2(d2);
     if (d2.proposal) {
       $3("proposals").dataset.testid = "kitchen-confirmation";
-      const surface = document.body.dataset.view === "chat" ? $3("chat-confirmations") || $3("chat-extras") : document.body.dataset.view === "memory" ? memory : host;
+      const surface = document.body.dataset.view === "chat" ? $3("chat-confirmations") || $3("chat-extras") : document.body.dataset.view === "memory" ? memory : document.body.dataset.view === "recipes" ? recipeHost || host : host;
       surface.append($3("proposals"));
       $3("proposals").setAttribute("tabindex", "-1");
       $3("proposals").focus();
@@ -1474,7 +1817,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         throw Error(parsing ? "\u0414\u043E\u0436\u0434\u0438\u0442\u0435\u0441\u044C \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0438\u044F \u0440\u0430\u0437\u0431\u043E\u0440\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432." : "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438\u043B\u0438 \u044F\u0432\u043D\u043E \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435 \u0431\u0435\u0437 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0445.");
       }
       const e2 = epoch(), token = ++localEpoch;
-      status.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u044E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438 \u0441\u043F\u043E\u0441\u043E\u0431\u044B \u0433\u043E\u0442\u043E\u0432\u043A\u0438\u2026";
+      generateStatus.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u044E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438 \u0441\u043F\u043E\u0441\u043E\u0431\u044B \u0433\u043E\u0442\u043E\u0432\u043A\u0438\u2026";
       try {
         const selected = selectedAvoid || avoidFoods.find((f) => avoid.value === f.name_ru + " \xB7 " + (states[f.state] || f.state));
         if (avoid.value && !selected) throw Error("\u0414\u043B\u044F \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.");
@@ -1484,7 +1827,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         if (e2 !== epoch() || token !== localEpoch) return;
         accept2(d2);
         show(d2);
-        status.textContent = d2.message || "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D\u043D\u044B\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B.";
+        generateStatus.textContent = d2.message || "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D\u043D\u044B\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B.";
       } finally {
         if (e2 === epoch()) {
           busy2 = false;
@@ -1612,7 +1955,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         $3("proposals").scrollIntoView({ block: "nearest" });
       }
     }));
-    for (const [title, value, view2] of [["\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", state2.profile.allergies.join(", ") || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B", "setup"], ["\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u0438\u0442\u0430\u043D\u0438\u044F", state2.profile.targets ? "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B" : "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D\u044B", "targets"], ["\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", state2.profile.settings.favorites.length + " \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", "recipes"], ["\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F", info.pantry.length + " \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "recipes"]]) {
+    for (const [title, value, view2] of [["\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", state2.profile.allergies.map((id) => ({ milk: "\u043C\u043E\u043B\u043E\u043A\u043E", egg: "\u044F\u0439\u0446\u0430", fish: "\u0440\u044B\u0431\u0430", wheat: "\u043F\u0448\u0435\u043D\u0438\u0446\u0430", gluten: "\u0433\u043B\u044E\u0442\u0435\u043D", soy: "\u0441\u043E\u044F", peanut: "\u0430\u0440\u0430\u0445\u0438\u0441", tree_nut: "\u043E\u0440\u0435\u0445\u0438", sesame: "\u043A\u0443\u043D\u0436\u0443\u0442" })[id] || "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u2014 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435").join(", ") || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B", "setup"], ["\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u0438\u0442\u0430\u043D\u0438\u044F", state2.profile.targets ? "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B" : "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D\u044B", "targets"], ["\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", state2.profile.settings.favorites.length + " \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", "recipes"], ["\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F", info.pantry.length + " \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "recipes"]]) {
       const row = el2("article", "panel");
       row.append(el2("h3", "", title), el2("p", "", value), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0439 \u043F\u0440\u043E\u0444\u0438\u043B\u044C; \u0434\u0430\u0442\u0430 \u043F\u0440\u0435\u0436\u043D\u0438\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u043C\u043E\u0436\u0435\u0442 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u043E\u0432\u0430\u0442\u044C."), button("\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C / \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C", async () => setView2(view2)));
       memory.append(row);
@@ -1634,14 +1977,14 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     savedPreview.replaceChildren();
   }
   function previewSavedPantry(name2) {
-    const state2 = getState(), stock = state2?.kitchen?.pantry;
-    if (!Array.isArray(stock)) throw Error("\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0430\u044F \u043A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430.");
+    const state2 = getState(), stock2 = state2?.kitchen?.pantry;
+    if (!Array.isArray(stock2)) throw Error("\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0430\u044F \u043A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430.");
     const stamp = state2.revision, token = ++savedToken;
     savedPreview.hidden = false;
     savedPreview.replaceChildren();
     savedPreview.append(el2("h2", "", "\u041F\u043E\u0434\u0431\u043E\u0440 \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0439 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439"), el2("p", "", `\u0414\u043E\u0431\u0430\u0432\u043B\u0435\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \xAB${name2}\xBB. \u041B\u0438\u0447\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u043F\u043E\u043A\u0430 \u043D\u0435 \u0434\u043E\u043F\u0443\u0449\u0435\u043D\u044B \u043A \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u043C \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438; \u0438\u0445 \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0432 \u0441\u0432\u043E\u0451\u043C \u0431\u043B\u044E\u0434\u0435.`), el2("p", "muted", dirty ? "\u0412\u0430\u0448 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043A\u0443\u0445\u043D\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435. \u041F\u043E\u0434\u0431\u043E\u0440 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0443\u044E \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E." : "\u041F\u043E\u0434\u0431\u043E\u0440 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u0443\u044E \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u0438 \u0442\u0435\u043A\u0443\u0449\u0438\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u043D\u0438\u0436\u0435."));
     const list = el2("ul");
-    for (const i of stock) list.append(el2("li", "", (i.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442") + " \xB7 " + (i.grams == null ? "\u043C\u0430\u0441\u0441\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430" : number(i.grams) + " \u0433")));
+    for (const i of stock2) list.append(el2("li", "", (i.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442") + " \xB7 " + (i.grams == null ? "\u043C\u0430\u0441\u0441\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430" : number(i.grams) + " \u0433")));
     savedPreview.append(list);
     const output = el2("div");
     const start2 = button("\u041D\u0430\u0447\u0430\u0442\u044C \u043F\u043E\u0434\u0431\u043E\u0440 \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0439 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439", async () => {
@@ -1685,15 +2028,18 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   }, async load(isCurrent = () => true) {
     const e = epoch(), searchAtStart = searchNumber, draft = () => JSON.stringify([meal.value, servings.value, time.value, missing.value, equipment.value, avoid.value, free.value, product.value, ...Array.from(modes.children, (x) => Boolean(x.children[0]?.checked))]), draftAtStart = draft();
     try {
-      const d2 = await call2("keto_kitchen", { action: "status", thread_id: getState()?.active_thread || "main" });
-      if (e !== epoch() || !isCurrent() || searchAtStart !== searchNumber) return false;
+      let d2 = {};
+      try {
+        d2 = await call2("keto_kitchen", { action: "status", thread_id: getState()?.active_thread || "main" });
+      } catch {
+      }
+      if (e !== epoch() || !isCurrent()) return false;
       const f = await call2("keto_kitchen", { action: "foods" });
       if (e !== epoch() || !isCurrent()) return false;
-      if (searchAtStart === searchNumber) {
-        foods = f.foods;
-        foodOptions();
-        status.textContent = `\u0412 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${f.total ?? foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.`;
-      }
+      allFoods = f.foods;
+      foods = filterEverydayFoods(allFoods, product.value);
+      foodOptions();
+      status.textContent = foods.length ? product.value.trim() ? `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.` : "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u043F\u043E\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B." : "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438, \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u0438\u043B\u0438 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA.";
       const unchanged = !dirty && draft() === draftAtStart;
       if (d2.spec && unchanged) {
         for (const name2 of ["meal", "servings", "equipment"]) {
@@ -1716,6 +2062,13 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   }, reset() {
     cancelSavedPreview();
     pantry = [];
+    foods = [];
+    allFoods = [];
+    trustedStart = 0;
+    datalist.replaceChildren();
+    trustedList.replaceChildren();
+    trustedList.hidden = true;
+    status.textContent = "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\u2026";
     result = null;
     dirty = false;
     busy2 = false;
@@ -1725,11 +2078,15 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     searchNumber++;
     sourceToken++;
     sourceResults.replaceChildren();
+    review.replaceChildren();
     review.hidden = true;
     avoidSearchNumber++;
     selectedFood = null;
+    add.disabled = true;
+    browsing = false;
     selectedAvoid = null;
     avoidFoods = [];
+    avoidList.replaceChildren();
     avoid.value = "";
     localEpoch++;
     servings.value = "1";
@@ -1738,6 +2095,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     clearTimeout(product.timer);
     clearTimeout(avoid.timer);
     results.replaceChildren();
+    generateStatus.textContent = "";
     questions.replaceChildren();
     product.value = "";
     free.value = "";
@@ -3673,8 +4031,8 @@ function linkSlider(element, inputs, { min, max, step, labels: labels2, localWin
 }
 
 // cloudflare-saas/public/routes.js
-var ROUTES = ["chat", "today", "diary", "more", "recipes", "settings", "sources", "reminders", "admin", "developer", "targets", "knowledge", "memory", "setup-consent", "setup-about", "setup-restrictions", "setup-targets"];
-var MAIN = ["chat", "today", "diary", "more"];
+var ROUTES = ["chat", "today", "diary", "more", "recipes", "products", "settings", "sources", "reminders", "admin", "developer", "targets", "knowledge", "memory", "setup-consent", "setup-about", "setup-restrictions", "setup-targets"];
+var MAIN = ["chat", "today", "recipes", "products", "diary"];
 function routeValue(hash, fallback = "chat") {
   const value = String(hash || "").replace(/^#/, "");
   return ROUTES.includes(value) ? value : fallback;
@@ -3682,7 +4040,7 @@ function routeValue(hash, fallback = "chat") {
 function initialRoute(state2, hash) {
   const g = state2.guidance;
   if (g && !g.ready) {
-    if (routeValue(hash, "") === "recipes") return "recipes";
+    if (["recipes", "products"].includes(routeValue(hash, ""))) return routeValue(hash, "");
     return "setup-" + g.stage;
   }
   return routeValue(hash, state2.ui?.home || "chat");
@@ -9372,20 +9730,9 @@ var recipeNavigation = 0;
 var recipesLoaded = false;
 var recipeLoadScheduledFor = null;
 var automaticRecipeLoad = Promise.resolve();
-var recipePageRequests = /* @__PURE__ */ new Set();
-function recipePageCall(...args) {
-  const pending = call(...args);
-  recipePageRequests.add(pending);
-  pending.then(() => recipePageRequests.delete(pending), () => recipePageRequests.delete(pending));
-  return pending;
-}
-async function settleRecipePageRequests(current) {
-  while (recipePageRequests.size) {
-    await Promise.allSettled([...recipePageRequests]);
-    if (!current()) return false;
-  }
-  return current();
-}
+var recipePageCalls = createRecipePageCalls({ call: (...args) => call(...args), epoch: () => screenEpoch });
+var recipePageCall = (...args) => recipePageCalls.invoke(...args);
+var settleRecipePageRequests = (current) => recipePageCalls.settle(current);
 var csrf = null;
 var state = null;
 var view = "chat";
@@ -9442,7 +9789,7 @@ async function call(name2, args = {}, options = {}) {
   if (epoch !== screenEpoch) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
   if (!r.ok) {
     if (r.status === 401) showLogin();
-    throw Error({ BRIDGE_NOT_CONFIGURED: "\u0421\u0435\u0440\u0432\u0438\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", COMPUTE_UNAVAILABLE: "\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D.", REQUEST_PENDING: "\u0417\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u043E\u0431\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F.", REQUEST_FAILED: "\u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u043B\u0441\u044F; \u043D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u044B\u0439.", STATE_CHANGED: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u043B\u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.", BUSY_OR_CONSENT_OR_LIMIT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", VALIDATION_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435: \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u0432\u0435\u0442\u044B, \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B." }[d2.error] || d2.message || d2.detail || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435.");
+    throw Error({ BRIDGE_NOT_CONFIGURED: "\u0421\u0435\u0440\u0432\u0438\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", COMPUTE_UNAVAILABLE: "\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D.", REQUEST_PENDING: "\u0417\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u043E\u0431\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F.", REQUEST_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0435\u0440\u0435\u0434 \u043F\u043E\u0432\u0442\u043E\u0440\u043E\u043C.", STATE_CHANGED: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u043B\u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.", BUSY_OR_CONSENT_OR_LIMIT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", VALIDATION_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435: \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u0432\u0435\u0442\u044B, \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B." }[d2.error] || d2.message || d2.detail || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435.");
   }
   return d2;
 }
@@ -9486,6 +9833,7 @@ function renderTranquilSummary(next) {
   host.hidden = false;
 }
 function clearScreen() {
+  $2("today-empty").hidden = false;
   recipeNavigation++;
   recipesLoaded = false;
   recipeLibrary.invalidate();
@@ -9551,9 +9899,6 @@ function setView(next, options = {}) {
   router.go(guided.resolve(next), options);
 }
 function setRecipeReadLoading(loading) {
-  for (const id of ["kitchen-studio", "shop-root"]) $2(id).inert = loading;
-  const library = document.querySelector("[data-testid=recipe-library]");
-  if (library) library.inert = loading;
   $2("kitchen-studio").setAttribute("aria-busy", String(loading));
 }
 function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) {
@@ -9566,7 +9911,8 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
   next = next.startsWith("setup-") ? "setup" : next;
   const previousView = view;
   const navigation = previousView === next ? recipeNavigation : ++recipeNavigation;
-  if (previousView === "recipes" && next !== "recipes") {
+  if (previousView === "products" && next !== "products") shop.leave();
+  if (["recipes", "products"].includes(previousView) && previousView !== next) {
     recipeLibrary.invalidate();
     kitchen.invalidatePageLookups();
     setRecipeReadLoading(false);
@@ -9575,17 +9921,18 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
   document.body.dataset.view = next;
   document.querySelectorAll("[data-page]").forEach((p) => p.hidden = p.dataset.page !== next);
   document.querySelectorAll("[data-view]").forEach((b2) => {
-    b2.classList.toggle("active", b2.dataset.view === (next === "recipes" ? "today" : ["chat", "today", "diary"].includes(next) ? next : "more"));
-    b2.setAttribute("aria-current", b2.dataset.view === (next === "recipes" ? "today" : ["chat", "today", "diary"].includes(next) ? next : "more") ? "page" : "false");
+    b2.classList.toggle("active", b2.dataset.view === (["chat", "today", "recipes", "products", "diary"].includes(next) ? next : "more"));
+    b2.setAttribute("aria-current", b2.dataset.view === (["chat", "today", "recipes", "products", "diary"].includes(next) ? next : "more") ? "page" : "false");
   });
-  if (next === "recipes" && recipeLoadScheduledFor !== navigation && (reason !== "history" || !recipesLoaded)) {
+  if (["recipes", "products"].includes(next) && recipeLoadScheduledFor !== navigation && (reason !== "history" || !recipesLoaded)) {
     recipeLoadScheduledFor = navigation;
     setRecipeReadLoading(true);
-    const sessionEpoch = screenEpoch, current = () => navigation === recipeNavigation && sessionEpoch === screenEpoch && view === "recipes";
+    const sessionEpoch = screenEpoch, current = () => navigation === recipeNavigation && sessionEpoch === screenEpoch && view === next;
     automaticRecipeLoad = automaticRecipeLoad.catch(() => {
     }).then(async () => {
       if (!current() || !await settleRecipePageRequests(current)) return;
       let recipesOK = false;
+      $2("recipe-note").textContent = "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u0440\u0435\u0446\u0435\u043F\u0442\u044B\u2026";
       try {
         await loadRecipes();
         recipesOK = true;
@@ -9608,7 +9955,7 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
   if (next === "admin" && reason !== "history") run(admin);
   if (next === "developer") run(() => developer.load());
   guided.render(route);
-  $2("nav-back").hidden = ["chat", "today", "diary", "more"].includes(next);
+  $2("nav-back").hidden = ["chat", "today", "recipes", "products", "diary", "more"].includes(next);
   const parents = { "setup-consent": "recipes", "setup-about": "setup-consent", "setup-restrictions": "setup-about", "setup-targets": "setup-restrictions" };
   const parent = depth > 0 ? origin : parents[route] || "more";
   const parentLabel = { chat: "\u0427\u0430\u0442", today: "\u041C\u0435\u043D\u044E", more: "\u0415\u0449\u0451", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", targets: "\u041F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439", "setup-consent": "\u0421\u043E\u0433\u043B\u0430\u0441\u0438\u0435", "setup-about": "\u041E \u0432\u0430\u0441", "setup-restrictions": "\u041E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F", "setup-targets": "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" }[parent] || "\u0415\u0449\u0451";
@@ -9669,10 +10016,12 @@ function renderState() {
     renderPlan(currentPlan, false);
   } else if (currentPlan && (!currentPlanIsDraft || currentPlan.profile_revision !== state.profile.profile_revision)) {
     currentPlan = null;
+    $2("today-empty").hidden = false;
     $2("menu-result").replaceChildren(el("div", "notice", "\u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F \u2014 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043D\u0443\u0436\u043D\u043E \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0442\u044C."));
   }
   if (state.holds.length) {
     currentPlan = null;
+    $2("today-empty").hidden = false;
     $2("menu-result").replaceChildren(el("div", "notice danger", "\u0420\u0430\u043D\u0435\u0435 \u043F\u043E\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E \u043D\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442\u0441\u044F: \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u0440\u0430\u0437\u0431\u043E\u0440 \u043D\u043E\u0432\u043E\u0433\u043E \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F."));
   }
 }
@@ -9853,27 +10202,7 @@ function fillSettings() {
 function renderPlan(plan, draft = true) {
   currentPlan = plan;
   currentPlanIsDraft = draft;
-  const root = $2("menu-result");
-  root.replaceChildren(el("h2", "", draft ? "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043C\u0435\u043D\u044E" : "\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E"));
-  if (plan.status === "stale_requires_recheck") root.append(el("div", "notice danger", "\u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F: \u044D\u0442\u043E \u043C\u0435\u043D\u044E \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043F\u0435\u0440\u0435\u0441\u0447\u0451\u0442\u0430. \u041D\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u0430\u043A \u0430\u043A\u0442\u0443\u0430\u043B\u044C\u043D\u043E\u0435."));
-  for (const d2 of plan.days) {
-    const box = el("article", "menu-day");
-    box.append(el("h3", "", formatDate(d2.date)));
-    for (const m of d2.meals) {
-      const part = el("div", "meal");
-      part.append(el("h3", "", m.name_ru));
-      const b2 = el("button", "text-btn", "\u0413\u0440\u0430\u043C\u043C\u043E\u0432\u043A\u0438 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435");
-      b2.addEventListener("click", () => openRecipe(m));
-      part.append(b2);
-      box.append(part);
-    }
-    root.append(box);
-  }
-  if (draft) {
-    const b2 = el("button", "primary", "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E");
-    b2.addEventListener("click", () => run(() => propose("plan.accept", plan)));
-    root.append(b2);
-  }
+  renderTodayPlan({ plan, draft, root: $2("menu-result"), empty: $2("today-empty"), el, formatDate, openRecipe, acceptPlan: () => run(() => propose("plan.accept", plan)) });
 }
 function renderShopping(items) {
   const root = $2("menu-result"), box = el("div", "panel");
@@ -10134,6 +10463,8 @@ function readDecimal(id) {
 function renderMeasurements() {
   const box = $2("measurement-list");
   box.replaceChildren();
+  if (!Array.isArray(state.measurements)) box.append(el("p", "muted", "\u0418\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u044B."));
+  else if (!state.measurements.length) box.append(el("p", "muted", "\u0418\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0439 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442."));
   for (const m of [...state.measurements || []].reverse()) {
     const card = el("article", "diary-entry");
     card.append(el("p", "", measurementTimeLabel(m) + " \xB7 " + m.timezone), el("p", "", `\u0413\u043B\u044E\u043A\u043E\u0437\u0430: ${m.glucose ? numberRu(m.glucose.value) + " " + glucoseUnitLabel(m.glucose.unit) : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"} \xB7 BHB \u043A\u0440\u043E\u0432\u0438: ${m.bhb ? numberRu(m.bhb.value) + " \u043C\u043C\u043E\u043B\u044C/\u043B" : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D"}`), el("p", "", m.gki?.value == null ? m.gki?.reason : "GKI: " + numberRu(m.gki.value, 2)), ...m.context ? [el("p", "muted", m.context)] : []);
@@ -10601,9 +10932,13 @@ var router = createRouter({ location, history, listen: (name2, fn) => window.add
   }
 }, fallback: () => state?.guidance?.ready ? state.ui.home || "chat" : guided.resolve("setup") });
 var kitchen = setupKitchen({ $: $2, el, call: recipePageCall, getState: () => state, accept, run, notify, setView, epoch: () => screenEpoch });
-var shop = setupShop({ $: $2, el, call: recipePageCall, api: (path, method, body) => cfApi(path, { method, body }), getState: () => state, accept, run, epoch: () => screenEpoch, allergens: ALLERGENS, onPantryPreview: (name2) => kitchen.previewSavedPantry(name2), onPantryReset: () => kitchen.cancelSavedPreview() });
-$2("menu-shop").onclick = () => {
+var shop = setupShop({ $: $2, el, call: recipePageCall, api: (path, method, body) => cfApi(path, { method, body }), getState: () => state, accept, run, epoch: () => screenEpoch, allergens: ALLERGENS, onPantryPreview: (name2) => {
   setView("recipes");
+  $2("recipe-kitchen-disclosure").open = true;
+  kitchen.previewSavedPantry(name2);
+}, onPantryReset: () => kitchen.cancelSavedPreview(), onOwnFood: (food) => ownDish.addConfirmedFood(food), setView });
+$2("menu-shop").onclick = () => {
+  setView("products");
   const panel = $2("shop-root").querySelector("details");
   if (panel) {
     panel.open = true;

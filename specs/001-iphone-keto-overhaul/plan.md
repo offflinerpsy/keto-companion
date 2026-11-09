@@ -32,3 +32,10 @@ UI public/{app.js,app.css,index.html,kitchen-ui.js,setup-controls.js,mobile-ui.j
 
 ## Complexity tracking
 No new app/server/reporting framework, new account, autonomous medical rule engine or parallel state store. Existing operational identity and one Linear issue. Optional source/data contracts documented concisely rather than adding speculative abstractions.
+
+## Owner continuation — open-source and regional integration, 2026-11-09
+Owner resumed implementation after the product audit. Reuse pinned Quagga2 1.13.0 MIT decoder and documented single-frame API with app-owned camera lifecycle, loaded only for scanning; keep current explicit Azure label extraction because generic OCR does not supply label semantics and Robotoff is not a drop-in component. Preserve library notices, same-origin assets, manual/photo fallback and review-before-save. Separate shop stages and remove idle cancel/full empty form.
+
+Use Open Food Facts for exact local package identities, preferring Russian names and retaining brand/country/source context without assuming regional formulation or completeness. Russia/Belarus country-tag counts are bounded research evidence, not coverage guarantees. Keep reviewed everyday foods first, add exact Russian aliases/state-aware matching, and clearly identify supplementary USDA results. No verified open national composition dataset was found; do not import unlicensed tables or copy model numbers into GI.
+
+Serial implementation: scanner/shop integration, then regional discovery plus audited first-screen/copy refinements on existing routes. Root accepts changed behavior and fresh mobile pixels; run required generated/full/release gates only for the integrated source. Same task and T021 physical-device boundary remain.

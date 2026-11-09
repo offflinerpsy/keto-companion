@@ -4,40 +4,48 @@
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "885dda2938925f9a4413799bf2d0b5b17bbfe3251c7b1f28376b3f503d4cb180",
-      "bytes": 1122705,
+      "sha256": "4619038ecf86291c3fa12724af971ba7fb55658b7ae2c36af9a15bc20459aa85",
+      "bytes": 1318679,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "f1005b9f27accdecf1a42994c1086db5e5a2609b09ee9a5f997558e29a091a51",
-      "bytes": 133371,
+      "sha256": "fc0b8e3babe9f2944f8dc8185bf6c90240ab7050bfaac7a9cc80dbb6b4c3d8ba",
+      "bytes": 138971,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/assets/index.html",
-      "sha256": "a10cd5888ec9302ad2b40a7e9ff69e46a99fc797f766b1f57d35bd8ceea8c865",
-      "bytes": 44634,
+      "sha256": "2dc8d309a839996a7f3502e5489ed4a9a2b4d8fa7ad48ca39aa64fc7a1573316",
+      "bytes": 45805,
       "mime": "text/plain",
       "module_name": "assets/index.html",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "d22893a4c2eeb898e6ae54079e6e6acd55316133414d00eed1f08ffafd12ec21",
-      "bytes": 654089,
+      "sha256": "c944c7900c7f388ba1cfceca9d92be2c5dd93a1b7fa00e58399d9569f8787e1e",
+      "bytes": 676047,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"
     },
     {
+      "path": "cloudflare-saas/dist/assets/quagga-1.13.0.min.js",
+      "sha256": "21391dcc0804d5089c639e27649ba9feb042f0cdeb3760e2ecc32fe21ff38a64",
+      "bytes": 162971,
+      "mime": "text/plain",
+      "module_name": "assets/quagga-1.13.0.min.js",
+      "module_type": "text"
+    },
+    {
       "path": "cloudflare-saas/dist/assets/style.css",
-      "sha256": "f864cfba9b91ad2eb3e5a190a42a782653c1d35f13e1207ba2b1eec53c13d327",
-      "bytes": 33534,
+      "sha256": "822538ba4f352db4ea2823752a9ee648507b2171c0ee649a0b88783e0d9b28de",
+      "bytes": 35431,
       "mime": "text/plain",
       "module_name": "assets/style.css",
       "module_type": "text"

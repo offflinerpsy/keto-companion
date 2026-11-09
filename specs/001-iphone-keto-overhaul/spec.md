@@ -42,6 +42,7 @@ Unknown food/state/quantity; same names with different preparation/brand; old se
 - FR-009: Shop recommendations reuse confirmed stock/preferences/targets and expose missing quantities; unknown inventory never becomes a precise shopping amount.
 - FR-010: Use system typography and lawfully reusable icons; clear active state, compact controls, explicit close and retained drafts; remove cuisine-style control and obsolete hero overlay.
 - FR-011: Preserve auth, account isolation, existing Azure model routing, consent, safety holds, revisions/CAS, unknown values and serving semantics. No new paid account/key assumed.
+- FR-012: Prioritize Russian/Belarus everyday foods and local packaged products. Barcode capture must use a pinned, self-hosted open-source decoder with notices and camera cleanup. Open Food Facts supplies attributed untrusted local-brand candidates; the existing reviewed generic catalog is primary for everyday ingredients, with precise Russian aliases and USDA as an explicitly named supplementary reference. Do not invent local nutrient values or treat a public website as an open data license.
 
 ### Key Entities
 Food; FoodCandidate; Source/provenance; GI observation; PantryItem; Dish/servings; Consumption; Measurement; Proposal; ShoppingRequirement. Confirmed versus candidate and per-person versus batch are distinct.

@@ -79,6 +79,7 @@
     "diary",
     "more",
     "recipes",
+    "products",
     "settings",
     "sources",
     "reminders",
@@ -94,11 +95,11 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "577bd2800526942d7ceda7ba9dccd34f83c20e1fb4a5e06fdd61877d37453312",
-    "cloudflare-saas/public/index.html": "a10cd5888ec9302ad2b40a7e9ff69e46a99fc797f766b1f57d35bd8ceea8c865",
-    "cloudflare-saas/public/routes.js": "c45eb01fdc79c9b9b3bd04541a6a383823bd6551a0dbbf2935dea23b66e10aae",
+    "cloudflare-saas/public/app.css": "effca984b999b8d040acd282c9ef05b5ec8a064bb393678f43ddb6ff936f8df4",
+    "cloudflare-saas/public/index.html": "2dc8d309a839996a7f3502e5489ed4a9a2b4d8fa7ad48ca39aa64fc7a1573316",
+    "cloudflare-saas/public/routes.js": "b84ee9b7c856363916dd05f3aab44876f2b057e6394c08cfc8e06af92e45c247",
     "cloudflare-saas/src/compute.mjs": "45a6b5e7aeb2685fd418771459b027c9c97b74dfe9b839869ee0dd0566496ae5",
-    "cloudflare-saas/src/worker.mjs": "4c51b2f885da22b0cefd06c83aac6d243e6232c6431c36d2764f0fcd069de07f",
+    "cloudflare-saas/src/worker.mjs": "091c18c3f990d3ad5eb93735a9e6f58c3144c22b042ab01cfd65f67b00d8f785",
     "service/app.py": "082a85e340832638af141652aa7eb243dc447b107ca8bc17163e37665e9a684f"
   },
   "static_elements": [
@@ -130,6 +131,11 @@
     {
       "id": "connection",
       "tag": "span"
+    },
+    {
+      "aria-label": "Профиль и настройки",
+      "data-view": "more",
+      "tag": "button"
     },
     {
       "aria-label": "Помощь",
@@ -192,11 +198,15 @@
       "tag": "nav"
     },
     {
-      "data-view": "chat",
+      "data-view": "today",
       "tag": "button"
     },
     {
-      "data-view": "today",
+      "data-view": "recipes",
+      "tag": "button"
+    },
+    {
+      "data-view": "products",
       "tag": "button"
     },
     {
@@ -204,7 +214,7 @@
       "tag": "button"
     },
     {
-      "data-view": "more",
+      "data-view": "chat",
       "tag": "button"
     },
     {
@@ -847,21 +857,8 @@
       "tag": "section"
     },
     {
-      "id": "shop-root",
-      "tag": "div"
-    },
-    {
-      "data-testid": "kitchen-studio",
-      "id": "kitchen-studio",
-      "tag": "div"
-    },
-    {
-      "id": "own-dish-root",
-      "tag": "div"
-    },
-    {
       "data-testid": "recipe-library",
-      "tag": "details"
+      "tag": "div"
     },
     {
       "id": "recipe-search",
@@ -881,6 +878,18 @@
       "type": "number"
     },
     {
+      "id": "own-dish-root",
+      "tag": "div"
+    },
+    {
+      "id": "recipe-kitchen-disclosure",
+      "tag": "details"
+    },
+    {
+      "id": "recipe-kitchen-slot",
+      "tag": "div"
+    },
+    {
       "id": "recipe-note",
       "tag": "p"
     },
@@ -892,6 +901,19 @@
       "id": "recipe-more",
       "tag": "button",
       "type": "button"
+    },
+    {
+      "data-page": "products",
+      "tag": "section"
+    },
+    {
+      "id": "shop-root",
+      "tag": "div"
+    },
+    {
+      "data-testid": "kitchen-studio",
+      "id": "kitchen-studio",
+      "tag": "div"
     },
     {
       "data-page": "diary",
@@ -994,6 +1016,10 @@
       "tag": "section"
     },
     {
+      "id": "today-empty",
+      "tag": "div"
+    },
+    {
       "data-view": "recipes",
       "tag": "button"
     },
@@ -1001,10 +1027,6 @@
       "id": "menu-shop",
       "tag": "button",
       "type": "button"
-    },
-    {
-      "data-view": "targets",
-      "tag": "button"
     },
     {
       "id": "menu-gate",
@@ -1033,7 +1055,7 @@
     },
     {
       "id": "dawn-overview-title",
-      "tag": "h2"
+      "tag": "summary"
     },
     {
       "id": "dawn-status-cards",

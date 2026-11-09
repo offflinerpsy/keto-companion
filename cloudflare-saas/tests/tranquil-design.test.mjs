@@ -5,6 +5,8 @@ import {readFileSync} from 'node:fs';
 import {webcrypto} from 'node:crypto';
 import {sourceImportPreview,setupKitchen} from '../public/kitchen-ui.js';
 import {createRecipeLibrary} from '../public/recipe-library.js';
+import {createRecipePageCalls} from '../public/recipe-page-calls.js';
+import {renderTodayPlan} from '../public/today-plan.js';
 const read=name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8');
 const html=read('index.html'),css=read('app.css'),app=read('app.js');
 const tokens=JSON.parse(readFileSync(new URL('../../docs/design/DESIGN_TOKENS.json',import.meta.url),'utf8'));
@@ -37,9 +39,10 @@ test('all baseline IDs, form boundaries, input names and validation contracts su
  assert.deepEqual(fieldContract(html).filter(f=>baselineKeys.has(fieldKey(f))),baselineFields);
  for(const key of ['dev-approval','dev-exact','dev-preview','image-link-details','chat-confirmations','target-confirmations','setup-confirmations','holds','proposals'])assert(ids.includes(key));
 });
-test('four primary destinations and source route keys remain usable with icon controls',()=>{
- const nav=html.match(/<nav id="nav"[\s\S]*?<\/nav>/)[0];assert.deepEqual([...nav.matchAll(/data-view="([^"]+)"/g)].map(x=>x[1]),['chat','today','diary','more']);
- assert.equal((nav.match(/aria-hidden="true"/g)||[]).length,4);
+test('five primary destinations and source route keys remain usable with icon controls',()=>{
+ const nav=html.match(/<nav id="nav"[\s\S]*?<\/nav>/)[0];assert.deepEqual([...nav.matchAll(/data-view="([^"]+)"/g)].map(x=>x[1]),['today','recipes','products','diary','chat']);
+ assert.deepEqual([...nav.matchAll(/<span>(Сегодня|Рецепты|Продукты|Дневник|Чат)<\/span>/g)].map(x=>x[1]),['Сегодня','Рецепты','Продукты','Дневник','Чат']);
+ assert.match(html,/<button data-view="more"[^>]*aria-label="Профиль и настройки"/);
  for(const value of ['developer','sources','memory','recipes','targets','settings'])assert(html.includes('data-view="'+value+'"'));
  assert.match(app,/button\.onclick=\(\)=>setView\(item\.view\)/);
  assert.match(html,/id="image-link-open"[^>]*aria-label="Фото по ссылке"/);
@@ -50,7 +53,7 @@ test('menu and login keep task content clear without decorative photo heroes',()
  assert.doesNotMatch(html,/class="dawn-hero/);
  const menuStart=html.indexOf('<section data-page="today"'),nextPage=html.indexOf('<section data-page="',menuStart+1);
  const menu=html.slice(menuStart,nextPage<0?html.length:nextPage);
- assert.match(menu,/<h1>Моё меню<\/h1>/);
+ assert.match(menu,/<h1>Сегодня<\/h1>/);
  assert.doesNotMatch(menu,/НЕ ЖЁСТКИЙ ГРАФИК|Начните с простого блюда/);
  const chat=html.slice(html.indexOf('<section data-page="chat"'),html.indexOf('<section data-page="setup"'));
  assert(!chat.includes('dawn-hero'));assert(!chat.includes('dawn-overview'));
@@ -63,13 +66,13 @@ class Element{
 }
 function harness(actualStateRender=false,realRecipeLoads=false){
  const nodes={},document={body:new Element(),getElementById(id){return nodes[id]??=new Element()},createElement:tag=>new Element(tag),querySelectorAll:()=>[],querySelector:()=>null};
-  const stubs={setupShop:'()=>({reset(){},afterApplied(){}})',createRecipeLibrary:'()=>({load:async()=>{},next:async()=>{},invalidate(){}})',setupOwnDish:'()=>({reset(){},update(){},savedReceipt(){}})',sourceImportPreview:'sourceImportPreviewFixture',setupDeveloper:'()=>({reset(){},identity(){},load(){}})',mountDeveloperExtension:'()=>{}',setupMobile:'()=>({reset(){},render(){},resetPhoto(){},setChatBusy(){}})',setupGuidance:'()=>({reset(){},render(){},afterApplied(){},resolve(x){return x}})',createRouter:'()=>({reset(){},go(x){globalThis.lastView=x},back(){}})',setupKitchen:'()=>({render(){},load:async()=>true,invalidatePageLookups(){},reset(){globalThis.kitchenReset?.()}})',kitchenActionLabels:'{}',firebaseLogin:'()=>{}'};
+  const stubs={createRecipePageCalls:'createRecipePageCallsFixture',renderTodayPlan:'renderTodayPlanFixture',setupShop:'()=>({reset(){},afterApplied(){}})',createRecipeLibrary:'()=>({load:async()=>{},next:async()=>{},invalidate(){}})',setupOwnDish:'()=>({reset(){},update(){},savedReceipt(){}})',sourceImportPreview:'sourceImportPreviewFixture',setupDeveloper:'()=>({reset(){},identity(){},load(){}})',mountDeveloperExtension:'()=>{}',setupMobile:'()=>({reset(){},render(){},resetPhoto(){},setChatBusy(){}})',setupGuidance:'()=>({reset(){},render(){},afterApplied(){},resolve(x){return x}})',createRouter:'()=>({reset(){},go(x){globalThis.lastView=x},back(){}})',setupKitchen:'()=>({render(){},load:async()=>true,invalidatePageLookups(){},reset(){globalThis.kitchenReset?.()}})',kitchenActionLabels:'{}',firebaseLogin:'()=>{}'};
  if(realRecipeLoads){stubs.setupKitchen='setupKitchenFixture';stubs.createRecipeLibrary='createRecipeLibraryFixture'}
  let source=app.replace(/^import \{([^}]+)\} from '[^']+';$/gm,(_,names)=>names.split(',').map(name=>'const '+name+'='+stubs[name]+';').join('')).replace('run(start);','');
  // Render only the changed overview; existing modules are exercised by their own focused tests.
  if(!actualStateRender)source+='\nrenderState=()=>renderTranquilSummary(state);';
  source+='\nglobalThis.api={tranquilSummary,setState,clearScreen,showLogin,call,accept,renderProposals,renderDiary,renderView,setSynthetic(value){state=value}};';
-  const context={sourceImportPreviewFixture:sourceImportPreview,setupKitchenFixture:setupKitchen,createRecipeLibraryFixture:createRecipeLibrary,document,window:{},history:{},location:{href:'https://synthetic.invalid/'},sessionStorage:{getItem(){return null}},URL,FormData,Blob,Response,crypto:webcrypto,Date,Intl,setTimeout,clearTimeout,console};vm.createContext(context);vm.runInContext(source,context);return{context,api:context.api,nodes};
+  const context={createRecipePageCallsFixture:createRecipePageCalls,renderTodayPlanFixture:renderTodayPlan,sourceImportPreviewFixture:sourceImportPreview,setupKitchenFixture:setupKitchen,createRecipeLibraryFixture:createRecipeLibrary,document,window:{},history:{},location:{href:'https://synthetic.invalid/'},sessionStorage:{getItem(){return null}},URL,FormData,Blob,Response,crypto:webcrypto,Date,Intl,setTimeout,clearTimeout,console};vm.createContext(context);vm.runInContext(source,context);return{context,api:context.api,nodes};
 }
 function accepted(){return {processing_consent:true,profile:{owner_account_id:'synthetic-a',profile_revision:5,consent:{storage:true,health_data:true},targets:{}},screening:{can_plan:true},holds:[],guidance:{targets_stale:false},kitchen:{pantry:[{grams:null}]},diary:[{intake_status:'unquantified'}],plans:[]}}
 const content=node=>[node.textContent,...node.children.map(content)].join(' ');
@@ -149,9 +152,9 @@ test('reset sequence clears forms before kitchen defaults, keeping body inputs b
  context.kitchenReset=()=>{events.push('kitchen');field.value='1'};
  api.clearScreen();assert.deepEqual(events,['forms','kitchen']);assert.equal(field.value,'1');assert.equal(body.value,'');
 });
-test('recipes route marks menu as active and exposes current page identity',()=>{
- const {api,context}=harness();const buttons=['chat','today','diary','more'].map(view=>{const b=new Element('button');b.dataset.view=view;b.classList={toggle(_,on){b.active=on}};return b});
- context.document.querySelectorAll=selector=>selector==='[data-view]'?buttons:[];api.renderView('recipes',{reason:'history'});const menu=buttons[1],more=buttons[3];assert.equal(menu.active,true);assert.equal(menu.attributes['aria-current'],'page');assert.equal(more.active,false);assert.match(html,/<section data-page="recipes"[^>]*>[\s\S]*?<h1>Что приготовим\?<\/h1>/);
+test('recipes route marks recipes as active and exposes current page identity',()=>{
+ const {api,context}=harness();const buttons=['today','recipes','products','diary','chat'].map(view=>{const b=new Element('button');b.dataset.view=view;b.classList={toggle(_,on){b.active=on}};return b});
+ context.document.querySelectorAll=selector=>selector==='[data-view]'?buttons:[];api.renderView('recipes',{reason:'history'});const recipes=buttons[1],today=buttons[0];assert.equal(recipes.active,true);assert.equal(recipes.attributes['aria-current'],'page');assert.equal(today.active,false);assert.match(html,/<section data-page="recipes"[^>]*>[\s\S]*?<h1>Рецепты<\/h1>/);
 });
 
 test('shop proposal renders a typed Russian review instead of internal fields',()=>{
@@ -161,13 +164,13 @@ test('actual recipe route serializes initial reads and drops stale navigation re
  const {api,context,nodes}=harness(false,true),s=accepted();s.active_thread='main';s.kitchen={pantry:[],preferences:[],legacy_disliked:[],favorites_details:[]};s.profile.allergies=[];s.profile.settings={favorites:[],disliked_food_ids:[]};api.setSynthetic(s);
  const requests=[],pending=[];let active=0,max=0;context.fetch=async(url,opts)=>{active++;max=Math.max(max,active);if(active>1)throw Error('synthetic server lock collision');const args=JSON.parse(opts.body);requests.push({url,args});return await new Promise(resolve=>pending.push(data=>{active--;resolve(new Response(JSON.stringify(data),{status:200,headers:{'Content-Type':'application/json'}}))}))};
  const flush=()=>new Promise(r=>setImmediate(r));const respond=async data=>{assert(pending.length,'pending fetch');pending.shift()(data);await flush()};
- api.renderView('recipes',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(requests.length,1);assert.match(requests[0].url,/keto_recipes/);assert.equal(nodes['kitchen-studio'].inert,true);
- await respond({recipes:[],total:0,note:'ok',has_more:false});assert.equal(requests[1].args.action,'status');await respond({});assert.equal(requests[2].args.action,'foods');await respond({foods:[],total:0});assert.equal(max,1);assert.equal(nodes['kitchen-studio'].inert,false);assert.equal(requests.length,3);
+ api.renderView('recipes',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(requests.length,1);assert.match(requests[0].url,/keto_recipes/);assert.equal(nodes['kitchen-studio'].attributes['aria-busy'],'true');
+ await respond({recipes:[],total:0,note:'ok',has_more:false});assert.equal(requests[1].args.action,'status');await respond({});assert.equal(requests[2].args.action,'foods');await respond({foods:[],total:0});assert.equal(max,1);assert.equal(nodes['kitchen-studio'].attributes['aria-busy'],'false');assert.equal(requests.length,3);
  api.renderView('today',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(requests.length,4);api.renderView('today',{reason:'user'});api.renderView('recipes',{reason:'user'});await respond({recipes:[],total:0,note:'STALE RESULT',has_more:false});assert.equal(requests.length,5);assert(!nodes['recipe-note'].textContent.includes('STALE RESULT'));await respond({recipes:[],total:0,note:'fresh',has_more:false});await respond({});await respond({foods:[],total:0});assert.equal(max,1);assert.match(nodes['recipe-note'].textContent,/fresh/);assert.equal(requests.length,7);
 });
 test('recipe reentry cancels debounced kitchen search and waits for an in-flight page lookup',async()=>{
  const {api,context,nodes}=harness(false,true),s=accepted();s.active_thread='main';s.kitchen={pantry:[],preferences:[],legacy_disliked:[],favorites_details:[]};s.profile.allergies=[];s.profile.settings={favorites:[],disliked_food_ids:[]};api.setSynthetic(s);
  const req=[],pending=[];let active=0,max=0;context.fetch=async(url,opts)=>{active++;max=Math.max(max,active);if(active>1)throw Error('synthetic server lock collision');const args=JSON.parse(opts.body);req.push({url,args});return await new Promise(resolve=>pending.push(data=>{active--;resolve(new Response(JSON.stringify(data),{status:200,headers:{'Content-Type':'application/json'}}))}))};const flush=()=>new Promise(r=>setImmediate(r));const respond=async data=>{assert(pending.length,'pending fetch');pending.shift()(data);await flush()};const finishLoad=async()=>{await respond({recipes:[],total:0,note:'ok',has_more:false});await respond({});await respond({foods:[],total:0})};const walk=n=>[n,...n.children.flatMap(walk)];
- api.renderView('recipes',{reason:'user'});await flush();await finishLoad();const product=walk(nodes['kitchen-studio']).find(n=>n.id==='kitchen-product'),avoid=walk(nodes['kitchen-studio']).find(n=>n.id==='kitchen-avoid');product.value='сохранённый ввод';product.oninput();avoid.value='не люблю сыр';avoid.oninput();api.renderView('today',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(req.length,4);await new Promise(r=>setTimeout(r,300));assert.equal(req.length,4,'cancelled debounce must not issue foods');assert.equal(product.value,'сохранённый ввод');assert.equal(avoid.value,'не люблю сыр');await finishLoad();
- product.value='поиск в процессе';product.oninput();await new Promise(r=>setTimeout(r,300));assert.equal(req.length,7);assert.equal(req[6].args.action,'foods');api.renderView('today',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(req.length,7,'automatic read waits for in-flight lookup');await respond({foods:[{food_id:'stale',name_ru:'СТАРЫЙ',state:'raw'}],total:1});assert.equal(req.length,8);assert.match(req[7].url,/keto_recipes/);assert(!walk(nodes['kitchen-studio']).some(n=>n.textContent.includes('СТАРЫЙ')));assert.equal(product.value,'поиск в процессе');await finishLoad();assert.equal(max,1);assert.equal(req.length,10);
+ api.renderView('recipes',{reason:'user'});await flush();await finishLoad();const product=walk(nodes['kitchen-studio']).find(n=>n.id==='kitchen-product'),avoid=walk(nodes['recipe-kitchen-slot']).find(n=>n.id==='kitchen-avoid');product.value='сохранённый ввод';product.oninput();avoid.value='не люблю сыр';avoid.oninput();api.renderView('today',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(req.length,4);await new Promise(r=>setTimeout(r,300));assert.equal(req.length,4,'cancelled debounce must not issue foods');assert.equal(product.value,'сохранённый ввод');assert.equal(avoid.value,'не люблю сыр');await finishLoad();
+ avoid.value='поиск в процессе';avoid.oninput();await new Promise(r=>setTimeout(r,300));assert.equal(req.length,7);assert.equal(req[6].args.action,'foods');api.renderView('today',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(req.length,7,'automatic read waits for in-flight lookup');await respond({foods:[{food_id:'stale',name_ru:'СТАРЫЙ',state:'raw'}],total:1});assert.equal(req.length,8);assert.match(req[7].url,/keto_recipes/);assert(!walk(nodes['kitchen-studio']).some(n=>n.textContent.includes('СТАРЫЙ')));assert.equal(avoid.value,'поиск в процессе');await finishLoad();assert.equal(max,1);assert.equal(req.length,10);
 });

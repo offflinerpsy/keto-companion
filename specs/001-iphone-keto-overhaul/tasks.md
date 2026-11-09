@@ -30,9 +30,16 @@ Input: spec.md, plan.md, research.md, data-model.md, contracts/flows.md. One wri
 
 ## Integration and acceptance
 - [x] T019 Complete focused numeric/privacy/UX tests and generated contracts/docs/build consistency in existing tests/scripts; independent Sol source/product review and exact isolated mobile screenshot checks.
-- [ ] T020 Run reviewed source/full CI + actual matching runtime acceptance and deploy only existing private family target; reconcile exact bindings/identity/data and restore ordinary controls using ops/scripts.
+- [x] T020 Run reviewed source/full CI + actual matching runtime acceptance and deploy only existing private family target; reconcile exact bindings/identity/data and restore ordinary controls using ops/scripts.
 - [ ] T021 Notify owner technical work ready, then test actual iPhone17ProMax through connected Mirroring with scoped foreground window; record camera/keyboard/help/food/dish/diary outcomes in same receipt.
 - [ ] T022 Close accepted issue/source/handoff with exact deployed/runtime receipts and owner-device limits in docs/CURRENT_STATUS.json and qa/RECOVERY_STATE.json.
 
 ## Dependencies and execution
 T001–T003 accepted. T004–T010 one coherent first increment; root verifies before T011+. T011–T018 serial implementation packets integrate on the same state; source/data research and reviews may run in parallel without writes. T019 before T020; T021 only at final technical readiness. Do not end the owner task at a partially helpful increment; checkpoint and continue the next authorized phase. Physical device absence is a final owner-only dependency, not permission to fabricate PASS.
+
+Owner-requested audit 2026-11-09: T020 accepted by actual C8 build `8b737ad0-055c-462b-91cc-4102f23a59ba` on `473ab8f`, independent live-control receipt in the same task verification folder. The latest owner request resumes implementation with reuse of open-source scanners and Russia/Belarus food discovery. T021/T022 remain open; retain previous C8 evidence as an earlier accepted stage.
+
+## Resumed product refinement
+- [x] T023 [US2] Integrate pinned, self-hosted Quagga2 camera barcode capture with explicit start, EAN validation, single lookup, late-permission/cancel/navigation cleanup and manual/photo fallback; progressive shop capture/result/review/save states, Russian OFF name/source context and preserved Azure/review/CAS contracts. Retain upstream notices; verify real decoder fixture and lifecycle boundaries.
+- [x] T024 [US1] Make reviewed everyday foods and precise Russian/state-aware search primary for Russia/Belarus use; keep USDA supplementary, distinguish local package identity from generic composition and retain sources/unknowns. Test representative local queries without inventing nutrient values or importing unlicensed tables.
+- [ ] T025 [US4] Apply accepted audit first-screen/navigation/type/copy/loading fixes on existing UI, review changed source independently, verify fresh 440/390 mobile pixels and complete meaningful regression/generated/full/native release gates for this integrated candidate. Preserve earlier receipts and leave physical T021 separate.

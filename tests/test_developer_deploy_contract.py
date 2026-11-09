@@ -66,3 +66,16 @@ def test_unpinned_bootstrap_only_when_no_existing_application(monkeypatch):
     module,_,existing,_=rollout_fixture(monkeypatch);prefix='/accounts/'+module.ACCOUNT+'/containers/applications'
     assert module.resolve_application(prefix,None,lambda *_:[]) is None
     with pytest.raises(RuntimeError,match='EXISTING_APPLICATION_REQUIRES_PIN'):module.resolve_application(prefix,None,lambda *_:[existing])
+
+
+def test_native_acceptance_stage_uses_guarded_wrapper():
+    import ast
+    tree=ast.parse((ROOT/'scripts/deploy_developer_native.py').read_text())
+    stages=[node for node in ast.walk(tree) if isinstance(node,ast.Call)
+            and isinstance(node.func,ast.Name) and node.func.id=='run'
+            and node.args and isinstance(node.args[0],ast.Constant)
+            and node.args[0].value=='cloud_container_acceptance']
+    assert len(stages)==1
+    stage=stages[0]
+    assert ast.literal_eval(stage.args[1])==['node','ops/run_guarded_runtime_acceptance.mjs']
+    assert {kw.arg:ast.literal_eval(kw.value) for kw in stage.keywords}=={'timeout':390}
