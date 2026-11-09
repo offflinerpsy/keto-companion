@@ -2,14 +2,14 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T14:23:47.736744+00:00",
+  "updated_at": "2026-11-09T14:35:55.664811+00:00",
   "active_task": {
     "id": "AGR-306",
-    "stage": "phase6_C7_existing_candidate_acceptance",
+    "stage": "phase6_C8_final_ordinary_release",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/iphone-keto-overhaul",
     "base_commit": "d9e54d9d7e4bff24c364a3bcf472cc22f94280c5",
-    "next_action": "Run independently reviewed OPS guard through original nativeCloudflareBuilds against already configured7cbe; no image/rollout; real acceptance beforepin/ordinarycontrols/liveUI/iPhone.",
+    "next_action": "Restore ordinary existing-runtime controls with all12opschecks; publish acceptedpin7cbe from actualC7receipt onreleasebranch; live frontend acceptance thenphysicaliPhone.",
     "owner_iPhone_test": "Owner will connect Mirroring only after technical readiness; not yet requested",
     "previous_login": "accepted; preserve existing identity/runtime",
     "phase1_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/phase1-acceptance.json",
@@ -17,10 +17,11 @@
     "shop_receipt": "product-overhaul/verification/shop-acceptance.json",
     "FR009": "Source review accepted current-stock preview/explicit selection; actual browser acceptance pending",
     "source_acceptance": "docs/evidence/AGR_306_C7_OPS_SOURCE.json",
-    "native_build": "8bee9b90 C6b fullsourcePASS, nativeacceptancefailed HTMLJSON",
-    "source_commit": "C7 prepared",
-    "runtime_image": "7cbe configured/unapproved; approvedpin95efunchanged",
-    "source_baseline": "0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8"
+    "native_build": "1f86363d-ea11-4d6d-8a34-846dcc16b9af",
+    "source_commit": "379bb2c6932e57a76cdbaa39a3e8395733889530",
+    "runtime_image": "sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008",
+    "source_baseline": "0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8",
+    "runtime_acceptance": "actualC7structured4stage+knownjob+rootexactprobe404andartifacted7verified"
   },
   "last_completed": {
     "id": "AGR-305-LOGIN",

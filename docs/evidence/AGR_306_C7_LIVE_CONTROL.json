@@ -1,0 +1,42 @@
+{
+  "issue": "AGR-306",
+  "scope": "Independent exact app/runner artifact/deployment and exact probe absence; no owner UI acceptance implied",
+  "observed_at": "2026-11-09T14:33:32.444Z",
+  "application": {
+    "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "name": "keto-companion-developer-runner",
+    "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008",
+    "max_instances": 1,
+    "scheduling_policy": "default",
+    "version": 7,
+    "env_count": 0,
+    "key_count": 0
+  },
+  "runner": {
+    "values": {
+      "DEVELOPER_BASELINE": "0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008"
+    },
+    "worker_sha256": "ed7fdc52c3e02b2947128a633134b3face929fdade30c34c371c905b99b268c3",
+    "binding_types": [
+      "plain_text",
+      "plain_text",
+      "durable_object_namespace"
+    ]
+  },
+  "exact_probe_deleted_independently": true,
+  "probe": "keto-developer-check-0336bc50be",
+  "deployments": [
+    {
+      "id": "b283a97a-8f1d-48bc-b4af-ce597479d1ce",
+      "created_on": "2026-11-09T14:31:17.635884Z",
+      "versions": [
+        {
+          "version_id": "274a9acc-3c96-4d75-8119-9d3e07c9d99a",
+          "percentage": 100
+        }
+      ],
+      "source": "api"
+    }
+  ]
+}
