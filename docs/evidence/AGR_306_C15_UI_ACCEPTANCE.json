@@ -1,7 +1,7 @@
 {
   "task": "AGR-306-C15-UI",
-  "status": "accepted_candidate_pending_cloud_release",
-  "updated_at": "2026-11-09T23:09:18.502767+00:00",
+  "status": "accepted_and_released",
+  "updated_at": "2026-11-09T23:38:04.556934+00:00",
   "base_commit": "892e06363f7d04dcf795f6f56d8d9fdb245dc7ce",
   "source_baseline": "4a555cb91706137e3bd58972a5dc6870a4210f733129a252548ed98110bcf614",
   "branch": "codex/keto-ui-polish-c15",
@@ -139,5 +139,7 @@
     "correction": "Local SVG definitions moved to protected ui-icons.css; same single style.css build output",
     "focused_rerun_passed": 33
   },
-  "recovery": "C14 was already released; new scoped UI task, no repetition of historical Azure release"
+  "recovery": "C14 was already released; new scoped UI task, no repetition of historical Azure release",
+  "deployed_frontend_commit": "ad5f4b63479e226ca080ae22f3102d4d34c9e3fb",
+  "release_receipt": "docs/evidence/AGR_306_C15_RELEASE_RECEIPT.json"
 }
