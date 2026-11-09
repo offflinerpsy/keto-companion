@@ -50,6 +50,23 @@ def api(method,path,body=None):
         raise RuntimeError('Cloudflare operation failed '+method+' HTTP'+str(e.code)+' codes='+str(codes)+' reasons='+','.join(reasons)) from None
     if data.get('success') is False:raise RuntimeError('Cloudflare operation unsuccessful')
     return data['result']
+def resolve_application(prefix,pin,request):
+    # A configured pin is authoritative; failed/mismatched detail never falls back
+    # to a stale list or to application creation.
+    if pin is not None:
+        app_id=pin.get('application_id')
+        if pin.get('account')!=ACCOUNT or pin.get('worker')!=NAME or pin.get('max_instances')!=1 or not isinstance(app_id,str) or not re.fullmatch(r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',app_id) or not re.fullmatch(r'sha256:[a-f0-9]{64}',pin.get('image_digest','')):raise RuntimeError('EXPLICIT_CURRENT_IMAGE_APPROVAL_REQUIRED')
+        app=request('GET',prefix+'/'+app_id)
+        expected='registry.cloudflare.com/'+ACCOUNT+'/keto-developer-runner@'+pin['image_digest']
+        if not isinstance(app,dict) or app.get('id')!=app_id or app.get('name')!=NAME or app.get('max_instances')!=1 or app.get('scheduling_policy')!='default' or not isinstance(app.get('configuration'),dict) or app['configuration'].get('image')!=expected or app['configuration'].get('environment_variables') or app['configuration'].get('authorized_keys'):raise RuntimeError('EXPLICIT_CURRENT_IMAGE_APPROVAL_REQUIRED')
+        return app
+    # Preserve initial bootstrap only if no approved pin and no existing app.
+    apps=request('GET',prefix)
+    if isinstance(apps,dict):apps=apps.get('applications',apps.get('items',[]))
+    if not isinstance(apps,list):raise RuntimeError('APPLICATION_DISCOVERY_INVALID')
+    if any(x.get('name')==NAME for x in apps):raise RuntimeError('EXISTING_APPLICATION_REQUIRES_PIN')
+    return None
+
 def approved_rollout(existing,pin,image,instances):
     expected='registry.cloudflare.com/'+ACCOUNT+'/keto-developer-runner@'+pin.get('image_digest','')
     if os.getenv('KETO_APPROVED_ROLLOUT')!='1' or pin.get('account')!=ACCOUNT or pin.get('worker')!=NAME or existing.get('id')!=pin.get('application_id') or existing.get('name')!=NAME or existing.get('configuration',{}).get('image')!=expected or existing.get('max_instances')!=1 or existing.get('scheduling_policy')!='default':raise RuntimeError('EXPLICIT_CURRENT_IMAGE_APPROVAL_REQUIRED')
@@ -88,13 +105,14 @@ def main():
     artifact=ROOT/'developer-runtime/dist/worker.mjs'
     release={'account':ACCOUNT,'worker':NAME,'baseline':baseline,'image':image,'image_digest':digest,'worker_sha256':hashlib.sha256(artifact.read_bytes()).hexdigest(),'max_instances':1,'instance_type':'standard-1','accepted_network':'none'}
     (ROOT/'developer-runtime/release.json').write_text(json.dumps(release,indent=2)+'\n')
-    prefix='/accounts/'+ACCOUNT+'/containers/applications';apps=api('GET',prefix)
-    if isinstance(apps,dict):apps=apps.get('applications',apps.get('items',[]))
-    existing=next((x for x in apps if x.get('name')==NAME),None)
+    prefix='/accounts/'+ACCOUNT+'/containers/applications'
+    pin_path=ROOT/'ops/approved-runtime.json'
+    pin=json.loads(pin_path.read_text()) if pin_path.exists() else None
+    existing=resolve_application(prefix,pin,api)
     if existing:
         if existing.get('max_instances')!=1:raise RuntimeError('Existing runtime bounds mismatch')
         if existing.get('configuration',{}).get('image')!=image:
-            pin=json.loads((ROOT/'ops/approved-runtime.json').read_text())
+            if pin is None:raise RuntimeError('EXISTING_APPLICATION_REQUIRES_PIN')
             instances=api('GET',prefix+'/'+existing['id']+'/instances-v2')
             request=approved_rollout(existing,pin,image,instances)
             rollout=api('POST',prefix+'/'+existing['id']+'/rollouts',request)

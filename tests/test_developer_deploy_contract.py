@@ -36,3 +36,33 @@ def test_rollout_never_interrupts_active_or_unknown_instances(monkeypatch):
     module,pin,existing,target=rollout_fixture(monkeypatch);monkeypatch.setenv('KETO_APPROVED_ROLLOUT','1')
     for state in ['running','starting','unknown']:
         with pytest.raises(RuntimeError,match='ACTIVE_JOB_NOT_INTERRUPTED'):module.approved_rollout(existing,pin,target,[{'status':{'state':state}}])
+
+def test_pinned_application_uses_exact_detail_not_stale_collection(monkeypatch):
+    import copy,pytest
+    module,pin,detail,target=rollout_fixture(monkeypatch)
+    prefix='/accounts/'+module.ACCOUNT+'/containers/applications'
+    stale=copy.deepcopy(detail);stale['configuration']['image']='registry.cloudflare.com/'+module.ACCOUNT+'/keto-developer-runner@sha256:'+'1'*64
+    paths=[]
+    def request(method,path):
+        paths.append((method,path))
+        if path==prefix:return [stale]
+        if path==prefix+'/'+pin['application_id']:return copy.deepcopy(detail)
+        raise AssertionError('unexpected API request')
+    resolved=module.resolve_application(prefix,pin,request)
+    assert resolved==detail and paths==[('GET',prefix+'/'+pin['application_id'])]
+    monkeypatch.setenv('KETO_APPROVED_ROLLOUT','1')
+    assert module.approved_rollout(resolved,pin,target,[])['target_configuration']=={'image':target}
+    for patch in [{'id':'other'},{'name':'other'},{'max_instances':2},{'scheduling_policy':'other'},{'configuration':{'image':stale['configuration']['image']}},{'configuration':{'image':detail['configuration']['image'],'environment_variables':[{'name':'x'}]}},{'configuration':{'image':detail['configuration']['image'],'authorized_keys':['x']}}]:
+        bad={**detail,**patch}
+        with pytest.raises(RuntimeError,match='EXPLICIT_CURRENT_IMAGE_APPROVAL_REQUIRED'):module.resolve_application(prefix,pin,lambda *_:bad)
+    calls=[]
+    def failed(*args):calls.append(args);raise RuntimeError('detail unavailable')
+    with pytest.raises(RuntimeError,match='detail unavailable'):module.resolve_application(prefix,pin,failed)
+    assert calls==[('GET',prefix+'/'+pin['application_id'])]
+    with pytest.raises(RuntimeError,match='EXPLICIT_CURRENT_IMAGE_APPROVAL_REQUIRED'):module.resolve_application(prefix,{**pin,'application_id':'../bad'},failed)
+
+def test_unpinned_bootstrap_only_when_no_existing_application(monkeypatch):
+    import pytest
+    module,_,existing,_=rollout_fixture(monkeypatch);prefix='/accounts/'+module.ACCOUNT+'/containers/applications'
+    assert module.resolve_application(prefix,None,lambda *_:[]) is None
+    with pytest.raises(RuntimeError,match='EXISTING_APPLICATION_REQUIRES_PIN'):module.resolve_application(prefix,None,lambda *_:[existing])

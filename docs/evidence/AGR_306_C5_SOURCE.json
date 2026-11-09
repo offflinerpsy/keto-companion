@@ -1,0 +1,46 @@
+{
+  "issue": "AGR-306",
+  "stage": "C5 source compatibility fix",
+  "created_at": "2026-11-09T13:10:24.857188+00:00",
+  "files": {
+    "cloudflare-saas/src/shop-lookup.mjs": "f32ffd656de0bb823802eeb911e5a557d654e8556738237c7d94ed5068e0f3d1",
+    "cloudflare-saas/tests/shop-lookup.test.mjs": "659f3a6073ed09e556e96c92e8ee0b36ab6c2648444ba0d194ed1c10739cd500",
+    "ops/promote_existing_runtime.mjs": "bef00678417cd38b5c11638b13ffdab30ee529635c46262a615adc51761283a1",
+    "ops/runtime-app-pin.mjs": "b0bd23e87d28f6823d9bd29c9ccc519f548a56c9eca767706e6f311344d7a764",
+    "ops/promotion.test.mjs": "edeaed37b21bb9115782bf4f5e75dc10f9cfae549fd2cb5ec4f0b262e2c7cedb",
+    "scripts/deploy_developer_native.py": "e409b50b1dde67e96a83d0d872456e79b1eba50c68697906e413ac43c602b55f",
+    "tests/test_developer_deploy_contract.py": "d615d040a91311476d8930ee35fdadae74f2e421fe816eff1283fa8e729ef296"
+  },
+  "source_baseline": "66dd980b4f3dc9d90c37fe100d5ddf24f8c272b7cace6d6565a1b6e92854e759",
+  "source_archive_sha256": "0e8d1505a22201378fb85ac8b423c370245e741bb3492f60c08d7c3be8ca6601",
+  "cause": "Workerd rejects redirect:error before outbound dispatch; manual permits explicit 3xx rejection. Containers collection observed stale while exact detail held accepted image.",
+  "review": {
+    "reviewer": "product_review Sol/high",
+    "result": "accepted except ordinary scheduling guard; root added fail-closed default scheduling and missing/nondefault fixture; changed-output ops4PASS"
+  },
+  "checks": {
+    "OFF_Node": {
+      "passed": 7,
+      "scope": "worker accepted unchanged output"
+    },
+    "native_python": {
+      "passed": 6,
+      "scope": "worker accepted unchanged output"
+    },
+    "ordinary_ops": {
+      "passed": 4,
+      "scope": "root after scheduling change"
+    },
+    "web_build": "passed",
+    "contracts": "passed",
+    "specification": "passed",
+    "repository": "passed",
+    "diff_check": "passed"
+  },
+  "live_status": "not deployed; requires full Cloudflare CI and separately accepted immutable source image; Azure source unchanged",
+  "limitations": [
+    "Local workerd probe uses compatibility_date2026-10-03; production2026-11-07 still requires actual release/browser verification",
+    "Exact application config readback is not independent digest measurement of each running instance",
+    "No physical iPhone acceptance yet"
+  ]
+}
