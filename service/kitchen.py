@@ -17,6 +17,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 from jsonschema import Draft202012Validator
 from .mobile import topic
+from .chat_actions import chat_context,check_chat_context,hunger_request
 from .recipe_brain import RecipeDesigner, RecipeUnavailable, recipe_schema
 from .store import Conflict
 from . import food_source
@@ -37,6 +38,10 @@ def init(d):
     block = d.setdefault('kitchen', {})
     for key, default in {'version':POLICY['version'], 'pantry':[], 'preferences':[], 'drafts':{}, 'requests':{}, 'ratings':{}, 'accepted':[]}.items():
         block.setdefault(key, copy.deepcopy(default))
+    for tid,t in d.get('topics',{}).items():
+        group=t.get('kitchen')
+        if group and not group.get('generation_id'):
+            group['generation_id']=hashlib.sha256(json.dumps([tid,group],sort_keys=True,ensure_ascii=False).encode()).hexdigest()[:32]
     return block
 
 def invalidate(d):
@@ -486,7 +491,7 @@ class KitchenService:
             invalidate(d)
         block['ratings']=dict(list(block['ratings'].items())[-30:])
 
-    def kitchen_card(self,d,rid,spec):
+    def kitchen_card(self,d,rid,spec,generation_id=None):
         k=core();entry=init(d)['drafts'].get(rid)
         if not entry:raise ValueError('Черновик устарел: приготовьте новые варианты')
         rec=entry['recipe'];raw={'method_id':entry['method_id'],'title':rec['name_ru'],'flavor':'домашний','servings':rec['base_servings'],'ingredients':[{'food_id':i['food_id'],'grams':i['grams_edible']} for i in rec['ingredients']]}
@@ -513,7 +518,7 @@ class KitchenService:
         groups={cat['foods'][i['food_id']]['group'] for i in rec['ingredients']}
         light=not (groups & {'egg','poultry','fish','meat','seafood','soy','dairy'}) or (kcal is not None and allocation is not None and kcal<allocation*.5)
         if light:note+=' Это небольшое блюдо или гарнир, не полноценный приём пищи по условному распределению дня. Дополнение можно подобрать в режиме докупки.'
-        return {**portion,'meal_role':'side_or_light' if light else 'meal_idea','servings':rec['base_servings'],'whole_batch':batch,'missing':missing_list(batch['ingredients'],spec['pantry']),'origin':entry['origin'],'draft_label':LABEL if entry['origin']=='sol' else FALLBACK_LABEL,'fit_note':note,'budget':budget,'method_id':entry['method_id'],'sources':[{'source_id':'food:'+i['food_id'],'url':i['source_url']} for i in portion['ingredients']]+[POLICY['safety_source']],'equipment':spec['equipment'],'equipment_note':POLICY.get('equipment_notes',{}).get(spec['equipment'],''),'quantity_note':'Граммы без указанного запаса требуют взвешивания; кладовая не списана.'}
+        return {**portion,**({'generation_id':generation_id} if generation_id else {}),'meal_role':'side_or_light' if light else 'meal_idea','servings':rec['base_servings'],'whole_batch':batch,'missing':missing_list(batch['ingredients'],spec['pantry']),'origin':entry['origin'],'draft_label':LABEL if entry['origin']=='sol' else FALLBACK_LABEL,'fit_note':note,'budget':budget,'method_id':entry['method_id'],'sources':[{'source_id':'food:'+i['food_id'],'url':i['source_url']} for i in portion['ingredients']]+[POLICY['safety_source']],'equipment':spec['equipment'],'equipment_note':POLICY.get('equipment_notes',{}).get(spec['equipment'],''),'quantity_note':'Граммы без указанного запаса требуют взвешивания; кладовая не списана.'}
 
     def kitchen_fit_day(self,d,spec,cat,entries):
         from .portion_search import fit_portions
@@ -584,9 +589,13 @@ class KitchenService:
         if require_valid and issues:raise k.SafetyError('День не принят: '+', '.join(issues))
         return {'plan':plan,'accepted':False,'status':'calculated_draft' if not issues else 'partial_not_accepted','issues':issues,'shopping':missing,'inventory_for_servings':spec['servings']}
 
-    def kitchen(self,subject,action='status',spec=None,request_id=None,thread_id=None,query='',recipe_id=None,values=None,expected_revision=None,kind='personal',recipe_timeout=None):
+    def kitchen(self,subject,action='status',spec=None,request_id=None,thread_id=None,query='',recipe_id=None,values=None,expected_revision=None,kind='personal',recipe_timeout=None,chat_context=None):
         from .domain import storage_consent
         k=core();d,v=self.load(subject,kind);block=init(d);cat=self.kitchen_catalog(d);tid=thread_id or d['active_thread'];t={} if action in ('intake','intake_preview','diary_history') else topic(d,tid)
+        if chat_context is not None:check_chat_context(d,chat_context)
+        if action=='chat_action':
+            if type(expected_revision)is not int or expected_revision!=d['revision']:raise Conflict('Разговор изменился; обновите экран')
+            return self.resolve_chat_action(d,tid,values,expected_revision)
         if action=='source_search':
             opts=values or {}
             if set(opts)-{'cursor','limit'}:raise ValueError('Неизвестные параметры поиска')
@@ -632,7 +641,7 @@ class KitchenService:
             result={'kitchen':self.kitchen_snapshot(d),'state':self.snapshot(d),'model_called':False}
             group=t.get('kitchen')
             if group:
-                result['spec']=group['spec'];result['recipes']=[self.kitchen_card(d,rid,group['spec']) for rid in group['candidate_ids'] if rid in block['drafts']]
+                result['spec']=group['spec'];result['recipes']=[self.kitchen_card(d,rid,group['spec'],group.get('generation_id')) for rid in group['candidate_ids'] if rid in block['drafts']]
                 if group['spec']['meal']=='day':result['day']=self.kitchen_day(d,group)
             return result
         if action=='parse':
@@ -649,7 +658,7 @@ class KitchenService:
             if expected_revision!=d['revision']:raise Conflict('Устаревшие варианты')
             group=t.get('kitchen',{})
             if recipe_id not in group.get('candidate_ids',[]):raise ValueError('Вариант не принадлежит текущей теме')
-            card=self.kitchen_card(d,recipe_id,group['spec']);group['selected_id']=recipe_id;self.save(subject,d,v)
+            card=self.kitchen_card(d,recipe_id,group['spec'],group.get('generation_id'));group['selected_id']=recipe_id;self.save(subject,d,v)
             return {'recipes':[card],'state':self.snapshot(d),'model_called':False,'message':'Вариант выбран для следующих действий; меню и дневник не изменены.'}
         if action!='generate':raise ValueError('Неизвестное действие кухни')
         spec=spec_valid(spec or {},block['pantry'],cat)
@@ -719,10 +728,10 @@ class KitchenService:
         d=latest;block=init(d);t=topic(d,tid)
         for entry in chosen:block['drafts'][entry['recipe']['recipe_id']]=entry
         block['drafts']=dict(list(block['drafts'].items())[-30:]);ids=[e['recipe']['recipe_id'] for e in chosen]
-        group={'spec':spec,'candidate_ids':ids,'selected_id':ids[0] if len(ids)==1 else None,'at':k.utc_now()};t['kitchen']=group;t['choices']=ids
+        group={'spec':spec,'candidate_ids':ids,'selected_id':ids[0] if len(ids)==1 else None,'at':k.utc_now(),'generation_id':uuid.uuid4().hex};t['kitchen']=group;t['choices']=ids
         for other in d['topics'].values():
             if other.get('kitchen') and any(rid not in block['drafts'] for rid in other['kitchen']['candidate_ids']):other.pop('kitchen',None);other['choices']=[]
-        result={'recipes':[self.kitchen_card(d,rid,spec) for rid in ids],'spec':spec,'questions':[],'model_called':bool(audit.get('attempted')),'model_roles':[audit],'model_usage':{key:int(audit.get(key,0)) for key in ('input_tokens','output_tokens')},'fallback_reason':failure,'message':('Azure-дизайн недоступен или не прошёл проверку. Показаны проверяемые шаблоны.' if failure else 'Варианты рассчитаны. Проверьте состав и подтвердите отдельные сохранения.')}
+        result={'recipes':[self.kitchen_card(d,rid,spec,group['generation_id']) for rid in ids],'spec':spec,'questions':[],'model_called':bool(audit.get('attempted')),'model_roles':[audit],'model_usage':{key:int(audit.get(key,0)) for key in ('input_tokens','output_tokens')},'fallback_reason':failure,'message':('Azure-дизайн недоступен или не прошёл проверку. Показаны проверяемые шаблоны.' if failure else 'Варианты рассчитаны. Проверьте состав и подтвердите отдельные сохранения.')}
         if len(ids)<3:result['questions'].append('С этими ограничениями получилось меньше трёх разных блюд; бесконечное разнообразие не обещается.')
         if spec['meal']=='day':result['day']=self.kitchen_day(d,group)
         if not audit.get('attempted'):d['usage']['calls']-=1
@@ -736,28 +745,39 @@ class KitchenService:
         self.save(subject,d,version)
         return {**result,'state':self.snapshot(d)}
 
-    def kitchen_chat(self,subject,message,request_id,kind='personal',thread_id=None):
+    def kitchen_chat(self,subject,message,request_id,kind='personal',thread_id=None,reservation=None):
         """Explicit kitchen commands are local tools, no paid intent call required.
 
         Ambiguous/clinical conversation continues through the existing safety/intent
         layer. External quotes never enter this dispatcher.
         """
-        from .domain import literal_guard, storage_consent
-        msg=message.casefold();d,_=self.load(subject,kind);tid=thread_id or 'main';t=topic(d,tid);block=init(d)
+        from .domain import literal_guard, storage_consent, text
+        message=text(message,6000);msg=message.casefold();d,v=self.load(subject,kind);tid=thread_id or 'main';t=topic(d,tid);block=init(d)
         if literal_guard(message) or re.search(r'беремен|диабет|инсулин|форсиг|джардинс|поч[екч]|лекарств|аллерги|сглт|sglt|рпп|кормлю',msg):return None
         group=t.get('kitchen');explicit=bool(re.search(r'подведи.*итог|итоги дня|итоги за сегодня|сколько.*съел|сводка.*дня|без покупок|можно докупить|ничего нет|только из|из кладовой|сохрани рецепт|что ты обо мне помнишь|забудь.*предпочт|запомни.*не люблю|есть .*(?:ужин|завтрак|приготов|обед)',msg))
         follow=bool(group and re.search(r'вариант|второй|первый|третий|запиши.*половин|сохрани|докупить|без сыра',msg))
         explicit=explicit or bool(re.search(r'приготов|сделай|испеки|хочу',msg) and any(re.search(pattern,msg) for pattern in POLICY['equipment_patterns'].values()))
-        if not explicit and not follow:return None
+        hungry=hunger_request(message) and not d['holds'] and core().screen_profile(d['core']['profile'])['status'] not in ('blocked','clinician_review')
+        if not explicit and not follow and not hungry:return None
         if not d['processing_consent'] or not storage_consent(d):return None
         if not re.fullmatch(r'[A-Za-z0-9_-]{8,100}',request_id):raise ValueError('Неверный request_id')
-        fingerprint=core().digest([message,tid]);old=d['requests'].get(request_id)
+        fingerprint=hashlib.sha256((message+'|'+('|thread:'+tid if tid!='main' else '')).encode()).hexdigest();legacy_fingerprint=core().digest([message,tid]);old=d['requests'].get(request_id)
         if old:
-            if old['hash']!=fingerprint:raise Conflict('request_id повторно использован с другим содержимым')
+            if old['hash'] not in (fingerprint,legacy_fingerprint):raise Conflict('request_id повторно использован с другим содержимым')
             if old['status']!='completed':raise Conflict('Запрос не завершён')
-            return {'message':old['reply'],'state':self.snapshot(d),'model_called':False,'replayed':True}
+            return {'message':old['reply'],'state':self.snapshot(d),'model_called':False,'replayed':True,'response_thread_id':tid,'message_id':old.get('message_id')}
+        previous=next((m for m in t['messages'] if m.get('request_id')==request_id and m.get('role')=='assistant'),None)
+        if previous:
+            if previous.get('request_hash') not in (fingerprint,legacy_fingerprint):raise Conflict('request_id повторно использован с другим содержимым')
+            return {'message':previous['text'],'state':self.snapshot(d),'model_called':False,'replayed':True,'response_thread_id':tid,'message_id':previous.get('id')}
+        context=chat_context(d,tid,request_id,fingerprint);d['active_thread']=tid
+        d['requests'][request_id]={'hash':fingerprint,'status':'pending','at':time.time(),'thread_id':tid}
+        d['requests']=dict(list(d['requests'].items())[-150:]);self.save(subject,d,v)
+        if reservation is not None:reservation['hash']=fingerprint
         result=None;action=None;values={};rid=group.get('selected_id') if group else None
-        if re.search(r'подведи.*итог|итоги дня|итоги за сегодня|сколько.*съел|сводка.*дня',msg):
+        if hungry:
+            result={'message':'Как подберём блюдо?','meal_modes':True,'model_called':False}
+        elif re.search(r'подведи.*итог|итоги дня|итоги за сегодня|сколько.*съел|сводка.*дня',msg):
             summary=daily_summary(d,self.kitchen_catalog(d));n=summary['nutrition']
             if n:
                 fields=[('energy_kcal','ккал'),('protein_g','г белка'),('carbohydrate_total_g','г общих углеводов'),('fiber_g','г клетчатки')]
@@ -788,8 +808,10 @@ class KitchenService:
             else:result={'message':'Какой вариант сохранить: первый, второй или третий?','model_called':False}
         elif group and re.search(r'запиши.*половин',msg):
             if not rid:result={'message':'Выберите вариант из этой темы. Затем уточните: половина порции или половина всего блюда?','model_called':False}
-            elif re.search(r'порци|всего блюда',msg):action='diary';values={'fraction':.5,'basis':'portion' if 'порци' in msg else 'batch'}
-            else:result={'message':'Половину одной порции или половину всего блюда? Масса будет рассчитана после уточнения и показана для подтверждения.','model_called':False}
+            else:
+                intake={'recipe_id':rid}
+                if re.search(r'порци|всего блюда',msg):intake['suggested_amount']={'value':.5,'unit':'portion' if 'порци' in msg else 'batch'}
+                result={'message':'Откройте запись: уточните долю порции или всего блюда, дату и время. Расчёт нужно проверить и подтвердить.','chat_intake':intake,'model_called':False}
         else:
             choice=re.search(r'второй|вторую|первый|первую|третий|третью|вариант\s*[123]',msg)
             number=(1 if 'втор' in choice[0] else 2 if 'трет' in choice[0] else int(choice[0][-1])-1 if choice[0][-1].isdigit() else 0) if choice else None
@@ -797,7 +819,7 @@ class KitchenService:
                 if number>=len(group['candidate_ids']):result={'message':'В этой теме такого варианта нет. Выберите показанный рецепт.','model_called':False}
                 else:
                     rid=group['candidate_ids'][number]
-                    result=self.kitchen(subject,'select',thread_id=tid,recipe_id=rid,expected_revision=d['revision'],kind=kind)
+                    result=self.kitchen(subject,'select',thread_id=tid,recipe_id=rid,expected_revision=d['revision'],kind=kind,chat_context=context)
             if result is None or group and re.search(r'без сыра|докупить',msg):
                 s=copy.deepcopy(group['spec'] if group else {})
                 parsed=parse_products(message,self.kitchen_catalog(d))
@@ -825,12 +847,11 @@ class KitchenService:
                         result={'message':'Режимы под давлением пока не поддерживаются: точная модель не задана. Выберите пар без давления, если он есть по инструкции, или другой прибор.','model_called':False,'open_view':'recipes'}
                     else:
                         if appliance_matches:s['equipment']=appliance_matches[0]
-                        result=self.kitchen(subject,'generate',spec=s,request_id=request_id,thread_id=tid,kind=kind)
-        if action:result=self.kitchen(subject,action,thread_id=tid,recipe_id=rid,values=values,expected_revision=d['revision'],kind=kind)
+                        result=self.kitchen(subject,'generate',spec=s,request_id=request_id,thread_id=tid,kind=kind,chat_context=context)
+        if action:result=self.kitchen(subject,action,thread_id=tid,recipe_id=rid,values=values,expected_revision=d['revision'],kind=kind,chat_context=context)
         latest,v=self.load(subject,kind)
         if not latest['processing_consent'] or not storage_consent(latest):raise Conflict('Согласие изменилось; ответ отброшен')
-        t=topic(latest,tid);latest['active_thread']=tid;now=core().utc_now();reply=result.get('message') or ' '.join(str(q) for q in result.get('questions',[])) or 'Нет подходящих вариантов; ограничения не изменены.';result['message']=reply
-        t['messages'] += [{'role':'user','text':message,'at':now},{'role':'assistant','text':reply,'at':now,'request_id':request_id,'request_hash':fingerprint}]
-        latest['requests'][request_id]={'hash':fingerprint,'status':'completed','reply':reply,'thread_id':tid}
-        latest['requests']=dict(list(latest['requests'].items())[-150:]);self.save(subject,latest,v)
-        return {**result,'intent':'kitchen','state':self.snapshot(latest)}
+        check_chat_context(latest,context);reply=result.get('message') or ' '.join(str(q) for q in result.get('questions',[])) or 'Нет подходящих вариантов; ограничения не изменены.';result['message']=reply
+        mid=self.append_chat_turn(latest,tid,message,reply,request_id,fingerprint,result,context)
+        self.save(subject,latest,v)
+        return {**result,'intent':'kitchen','state':self.snapshot(latest),'response_thread_id':tid,'message_id':mid}

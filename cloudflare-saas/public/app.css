@@ -319,3 +319,11 @@ body.large .inline-form,body.large .kitchen-controls{align-items:stretch}body.la
 #intake-status:empty{display:none}#intake-form details{margin:12px 0}#intake-form summary{padding-block:8px;min-height:44px}
 body.large .intake-two-fields{grid-template-columns:1fr}body.large .diary-actions{gap:4px}
 @media(max-width:370px){.intake-two-fields{grid-template-columns:1fr}.intake-nutrients{font-size:.9em}}
+
+/* Context actions remain with their persisted assistant message. */
+.chat-message{display:flex;flex-direction:column;align-self:flex-start;max-width:94%;min-width:0}
+.chat-message.user{align-self:flex-end}.chat-message>.bubble{max-width:100%}
+.message-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.message-actions button{min-height:44px;max-width:100%;padding:8px 12px;font-size:.88em;font-weight:500;white-space:normal;text-align:left}
+.message-action-status{font-size:.82em;color:var(--muted);margin:6px 0 0}.message-action-status:empty{display:none}
+.message-action-note{display:block;font-size:.9em;font-weight:400;line-height:1.35;color:var(--muted);margin-top:4px}

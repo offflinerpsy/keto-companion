@@ -8,13 +8,13 @@ const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 test('Kitchen tool dispatcher, labels, memory route and strict mode identities',()=>{
  assert.equal(OPS.keto_kitchen,'kitchen');assert(ROUTES.includes('memory'));assert.deepEqual(kitchenModes.map(m=>m[0]),['pantry_only','pantry_plus','inspiration']);for(const key of ['pantry','save','favorite','rate','diary','forget','accept_day'])assert(kitchenActionLabels[key]);
  assert.equal(typeof setupKitchen,'function');const ui=read('../public/kitchen-ui.js');for(const id of ['kitchen-composer','kitchen-candidate','pantry-chips','product-questions','kitchen-day','memory-fact'])assert(ui.includes(id));
- assert(ui.includes("basis:'portion'"));assert(ui.includes("basis:'batch'"));assert(ui.includes("type='submit'"));assert(!ui.includes('innerHTML'));
+ assert(ui.includes('openIntake'));assert(!ui.includes('В дневник: ½'));assert(ui.includes("type='submit'"));assert(!ui.includes('innerHTML'));
 });
 test('Studio keeps secondary reference library, four tabs and mobile minimum widths',()=>{
  const html=read('../public/index.html'),css=read('../public/app.css');assert(html.includes('data-testid="kitchen-studio"'));assert(html.includes('data-testid="recipe-library"'));assert(html.includes('data-testid="kitchen-memory"'));
  const nav=html.match(/<nav id="nav"[\s\S]*?<\/nav>/)[0];assert.equal((nav.match(/data-view=/g)||[]).length,4);
  assert(css.includes('@media(max-width:600px)'));assert(css.includes('grid-template-columns:minmax(0,1fr)'));assert(css.includes('min-height:44px'));assert(css.includes('minmax(min(100%,300px),1fr)'));
- const app=read('../public/app.js');assert(app.includes('memory:\'Что я помню\''));assert(app.includes('r.draft_label?kitchen.card(r)'));assert(app.includes('kitchen.reset()'));
+ const app=read('../public/app.js');assert(html.includes('data-view="memory"'));assert(app.includes('r.draft_label?kitchen.card(r)'));assert(app.includes('kitchen.reset()'));
 });
 test('Studio has no public deployment/model setting, model numbers or paid search on product input',()=>{
  const ui=read('../public/kitchen-ui.js');assert(!/KETO_RECIPE_DEPLOYMENT|AZURE_OPENAI|api_key|temperature_c\s*=/.test(ui));assert(ui.includes("action:'foods'"));assert(ui.includes("action:'parse'"));assert(!ui.includes('nutrition.energy_kcal='));
@@ -29,6 +29,13 @@ class Node {
  prepend(...items){this.children.unshift(...items)} querySelector(selector){return selector==='[data-source-more]'?this.children.find(x=>x.dataset.sourceMore):null} append(...items){this.children.push(...items)} replaceChildren(...items){this.children=items} setAttribute(k,v){this.attributes[k]=v} dispatchEvent(){} remove(){} focus(){} scrollIntoView(){}
 }
 function descendants(node){return [node,...node.children.flatMap(descendants)]}
+test('generated-card intake keeps the displayed recipe generation and originating topic',async()=>{
+ const nodes={'kitchen-studio':new Node()},state={active_thread:'original',revision:1};let opened,calls=0;
+ const ui=setupKitchen({$:id=>nodes[id],el:(...args)=>new Node(...args),call:async()=>{calls++;return{}},getState:()=>state,accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1,openIntake:value=>opened=value});
+ const card=ui.card({recipe_id:'RKsame',generation_id:'generation-one',name_ru:'Показанное блюдо',active_minutes:10,ingredients:[],nutrition:{},steps_ru:'Приготовить'});
+ state.active_thread='another';await descendants(card).find(n=>n.textContent==='Записать съеденное').onclick();
+ assert.equal(calls,0);assert.equal(opened.recipe_id,'RKsame');assert.equal(opened.thread_id,'original');assert.equal(opened.generation_id,'generation-one');assert.deepEqual(opened.amount,{value:1,unit:'portion'});
+});
 test('empty stepper recovers and parse preserves existing quantity and reports unresolved products',async()=>{
  const host=new Node(),memory=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':memory,proposals:new Node()};
  let parseCalls=0,resolveParse;const pending=new Promise(r=>resolveParse=r);

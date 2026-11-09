@@ -11,6 +11,7 @@ from . import planning
 from .kitchen import KitchenService, init as kitchen_init, invalidate as kitchen_invalidate
 from .recipe_brain import RecipeDesigner
 from .intake import IntakeService
+from .chat_actions import ChatActionService,chat_context,check_chat_context
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'library/skills/keto-companion/scripts'))
 import keto_core as k
@@ -61,7 +62,7 @@ def literal_guard(message):
     if re.search(r'(сильная боль в груди|сильно болит грудь|задыхаюсь|теряю сознание|не могу дышать|непрекращающаяся рвота)',t) and not re.search(r'(что делать если|если бы|нет сильной|не задыхаюсь|это цитата)',t):return 'urgent'
     return None
 
-class Service(IntakeService,KitchenService,MobileService,planning.PlanningService):
+class Service(ChatActionService,IntakeService,KitchenService,MobileService,planning.PlanningService):
     def __init__(self,store,brain,transcriber=None,recipe_designer=None):self.store=store;self.brain=brain;self.transcriber=transcriber;self.recipe_designer=recipe_designer or RecipeDesigner();self.base=k.load_catalog(ROOT/'library/skills/keto-menu/data')
     def load(self,subject,kind='personal'):
         d,v=self.store.read(subject)
@@ -80,7 +81,7 @@ class Service(IntakeService,KitchenService,MobileService,planning.PlanningServic
           'processing_consent':d['processing_consent'],'screening':screen,'holds':d['holds'],
           'measurements':[dict(x,gki=k.measurement_gki(x)) for x in d['core'].get('measurements',[])], 'diary':d['core']['diary'][-60:],'diary_total':len(d['core']['diary']),'plans':list(d['core']['plans'].values())[-8:],
           'checklists':d['core']['checklists'],'pending':[dict(x,expired=x['expires_at']<=time.time()) for x in d['pending'].values()],
-          'chat':topic(d,d['active_thread'])['messages'][-60:],'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'kitchen':self.kitchen_snapshot(d),'mobile_version':'0.7.0-dev-media-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
+          'chat':self.chat_messages(d,d['active_thread']),'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'kitchen':self.kitchen_snapshot(d),'mobile_version':'0.7.0-dev-media-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
           'capabilities':{'model':'Azure GPT-6.1 Terra','native_voice':'No continuous voice in web app; dictation to editable draft',
           'storage':getattr(self.store,'storage_scope','Azure private Blob' if os.getenv('KETO_STORAGE_URL') else 'local SQLite'),
           'google_sync':'Google sign-in does not grant Drive/Gmail/Calendar access; PDF/ICS manual export only',
@@ -97,7 +98,7 @@ class Service(IntakeService,KitchenService,MobileService,planning.PlanningServic
         d['processing_consent']=processing;d['revision']+=1
         if not storage or not health or not processing:
             d['chat']=[];d['pending']={};d['requests']={};d['audio_requests']={}
-            for t in d['topics'].values():t['messages']=[];t['choices']=[]
+            for t in d['topics'].values():t['messages']=[];t['choices']=[];t['epoch']=t.get('epoch',0)+1
         self.save(subject,d,v)
         return {'message':'Согласие обновлено. Напишите, что удобно готовить и есть ли известные ограничения.','state':self.snapshot(d)}
     def delete_profile(self,subject,expected_revision,confirmation,kind='personal'):
@@ -312,7 +313,7 @@ class Service(IntakeService,KitchenService,MobileService,planning.PlanningServic
         reservation={}
         try:
             if image is None and source is None and isinstance(message,str) and not literal_guard(message):
-                result=self.kitchen_chat(subject,message,request_id,kind,thread_id)
+                result=self.kitchen_chat(subject,message,request_id,kind,thread_id,reservation)
                 if result is not None:return result
             return self._chat(subject,message,request_id,kind,image,reservation,source,thread_id)
         except (InputError,k.KetoError,ValueError,Conflict):
@@ -349,7 +350,7 @@ class Service(IntakeService,KitchenService,MobileService,planning.PlanningServic
         if not d['processing_consent']:
             return {'message':CONSENT_TEXT,'requires_consent':True,'state':self.snapshot(d),'model_called':False}
         if not storage_consent(d):return {'message':'Для ведения личного диалога нужно согласие на сохранение профиля и дневника. Каталог рецептов доступен отдельно.','state':self.snapshot(d),'model_called':False}
-        tid=thread_id or 'main';topic(d,tid);d['active_thread']=tid
+        tid=thread_id or 'main';topic(d,tid)
         request_material=message+'|'+(image or '')
         if tid!='main':request_material+='|thread:'+tid
         if source is not None:request_material+='|'+json.dumps(source,ensure_ascii=False,sort_keys=True,separators=(',',':'))
@@ -357,21 +358,22 @@ class Service(IntakeService,KitchenService,MobileService,planning.PlanningServic
         requests=d.setdefault('requests',{})
         existing=requests.get(request_id)
         if existing:
-            if existing['hash']!=request_hash:raise Conflict('request_id повторно использован с другим содержимым')
+            if existing['hash']!=request_hash and not (image is None and source is None and existing['hash']==k.digest([message,tid])):raise Conflict('request_id повторно использован с другим содержимым')
             if existing['status']=='pending':raise Conflict('Этот запрос уже обрабатывается. Обновите экран.')
-            if existing['status']=='completed':return {'message':existing['reply'],'state':self.snapshot(d),'replayed':True,'model_called':False}
+            if existing['status']=='completed':return {'message':existing['reply'],'state':self.snapshot(d),'replayed':True,'model_called':False,'response_thread_id':tid,'message_id':existing.get('message_id')}
             raise Conflict('Запрос не завершился. Повторите с новым request_id.')
         today=datetime.now(timezone.utc).date().isoformat();u=d['usage']
         previous=next((x for x in topic(d,tid)['messages'] if x.get('request_id')==request_id and x['role']=='assistant'),None)
         if previous:
-            if previous.get('request_hash')!=request_hash:raise Conflict('request_id повторно использован с другим текстом')
-            return {'message':previous['text'],'state':self.snapshot(d),'replayed':True,'model_called':False}
+            if previous.get('request_hash')!=request_hash and not (image is None and source is None and previous.get('request_hash')==k.digest([message,tid])):raise Conflict('request_id повторно использован с другим текстом')
+            return {'message':previous['text'],'state':self.snapshot(d),'replayed':True,'model_called':False,'response_thread_id':tid,'message_id':previous.get('id')}
         if u.get('day')!=today:u.clear();u.update(day=today,calls=0,input_tokens=0,output_tokens=0)
         literal=literal_guard(message)
         local_guidance=not literal and bool(re.search(r'сколько.*калор|рассчитай|рассчитайте',message.casefold()))
         if not literal and not local_guidance and u['calls']>=int(os.getenv('KETO_DAILY_REQUEST_LIMIT','60')):raise InputError('Дневной лимит Azure достигнут. Дневник, каталог и настройки продолжают работать.')
         # Count only possible model calls; local safety responses do not spend the model quota.
         if not literal and not local_guidance:u['calls']+=1
+        context=chat_context(d,tid,request_id,request_hash);d['active_thread']=tid
         requests[request_id]={'hash':request_hash,'status':'pending','at':time.time(),'thread_id':tid}
         d['requests']=dict(list(requests.items())[-150:])
         v=self.save(subject,d,v)
@@ -391,12 +393,12 @@ class Service(IntakeService,KitchenService,MobileService,planning.PlanningServic
                 latest,version=self.load(subject,kind)
                 if request_id in latest.get('requests',{}):
                     latest['requests'][request_id]['status']='failed';self.save(subject,latest,version)
-                return {'message':'Сейчас Azure не ответила или ответ не прошёл проверку. Ничего не изменено. Каталог, дневник и настройки доступны через кнопки.','state':self.snapshot(d),'model_called':True,'error_code':'MODEL_UNAVAILABLE'}
+                return {'message':'Сейчас Azure не ответила или ответ не прошёл проверку. Ничего не изменено. Каталог, дневник и настройки доступны через кнопки.','state':self.snapshot(latest),'response_thread_id':tid,'model_called':True,'error_code':'MODEL_UNAVAILABLE'}
         # Re-read after inference: do not overwrite other tabs/devices or confirmation changes.
         d,v=self.load(subject,kind)
         if not d['processing_consent'] or not storage_consent(d):
             return {'message':'Согласие изменено. Ответ не сохранён и изменения не подготовлены.','state':self.snapshot(d),'model_called':called}
-        topic(d,tid);d['active_thread']=tid
+        check_chat_context(d,context)
         reply='';extra={};intent=parsed['intent'];signals=set(parsed.get('safety_signals',[]))-{'none'}
         if source is not None and not signals and intent in ('onboarding','preferences','diary','feature_request'):
             intent='other';parsed['reply_ru']='Источник можно обсудить, но он не меняет ваш профиль и настройки. Для записи или изменения используйте соответствующий раздел.'
@@ -415,13 +417,13 @@ class Service(IntakeService,KitchenService,MobileService,planning.PlanningServic
             spec={}
             for change in parsed.get('changes',[]):
                 if change.get('key')=='kitchen.spec':spec=json.loads(change['json_value'])
-            products=self.kitchen(subject,'parse',query=message,thread_id=tid,kind=kind)
+            products=self.kitchen(subject,'parse',query=message,thread_id=tid,kind=kind,chat_context=context)
             if products['questions']:
                 reply=' '.join(q['text'] for q in products['questions']);extra['product_questions']=products['questions']
             else:
                 if products['pantry']:spec['pantry']=products['pantry']
                 elapsed=time.monotonic()-chat_started
-                extra.update(self.kitchen(subject,'generate',spec=spec,request_id=request_id,thread_id=tid,kind=kind,recipe_timeout=max(0,50-elapsed)))
+                extra.update(self.kitchen(subject,'generate',spec=spec,request_id=request_id,thread_id=tid,kind=kind,recipe_timeout=max(0,50-elapsed),chat_context=context))
                 reply=extra.pop('message',None) or ' '.join(str(q) for q in extra.get('questions',[])) or 'Подходящих блюд пока нет; ограничения сохранены.';extra.pop('state',None)
                 d,v=self.load(subject,kind)
         elif intent=='preferences':
@@ -508,15 +510,12 @@ class Service(IntakeService,KitchenService,MobileService,planning.PlanningServic
         intent_usage=dict(usage)
         extra['model_roles']=[{'role':'intent','deployment':parsed.get('_deployment',getattr(self.brain,'deployment','unknown')),'attempted':called,**intent_usage}]+extra.get('model_roles',[])
         recipe_usage=extra.pop('model_usage',{})
-        called=called or extra.pop('model_called',False)
+        recipe_called=extra.pop('model_called',False);called=called or recipe_called
         for key in ('input_tokens','output_tokens'):usage[key]=int(usage.get(key,0))+int(recipe_usage.get(key,0))
         role=d['usage'].setdefault('roles',{}).setdefault('intent',{'calls':0,'input_tokens':0,'output_tokens':0})
         role['calls']+=int(called)
         for key in ('input_tokens','output_tokens'):role[key]+=int(intent_usage.get(key,0))
         d['usage']['input_tokens']+=int(intent_usage.get('input_tokens',0));d['usage']['output_tokens']+=int(intent_usage.get('output_tokens',0))
-        now=k.utc_now();topic(d,tid)['messages']+= [{'role':'user','text':message,'at':now}, {'role':'assistant','text':reply,'at':now,'request_id':request_id,'request_hash':request_hash}]
-        topic(d,tid)['messages']=topic(d,tid)['messages'][-60:]
-        d['chat']=copy.deepcopy(topic(d,'main')['messages'])
-        d['requests'][request_id].update(status='completed',reply=reply)
+        mid=self.append_chat_turn(d,tid,message,reply,request_id,request_hash,extra,context)
         self.save(subject,d,v)
-        return {'message':reply,'intent':intent,'model_called':called,'model_usage':usage,'latency_ms':parsed.get('_latency_ms'),'state':self.snapshot(d),**extra}
+        return {'message':reply,'intent':intent,'model_called':called,'model_usage':usage,'latency_ms':parsed.get('_latency_ms'),'state':self.snapshot(d),'response_thread_id':tid,'message_id':mid,**extra}

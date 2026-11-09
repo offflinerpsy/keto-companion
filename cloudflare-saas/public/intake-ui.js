@@ -72,6 +72,7 @@ export function setupIntake({$,el,call,getState,accept,notify,run,openDialog,clo
   // Omit unchanged fields on edits: old records can lack a historical calculation,
   // and a displayed HH:mm value must not erase stored seconds or a DST fold.
   if(values.operation!=='update'||time!==selection.initial?.time)values.time=time;
+  if(selection.origin)values.origin=structuredClone(selection.origin);if(selection.generation_id)values.generation_id=selection.generation_id;
   if(selection.entry)values.entry_id=selection.entry.entry_id;else if(selection.food_id)values.food_id=selection.food_id;else values.recipe_id=selection.recipe_id;
   if(!$('intake-amount-row').hidden){const value=Number($('intake-amount').value.trim().replace(',','.'));if(!Number.isFinite(value)||value<=0){showStatus('Укажите количество больше нуля.');return}const amount={value,unit:$('intake-unit').value},original=intakeAmount(selection.entry);if(values.operation!=='update'||original?.value!==amount.value||original?.unit!==amount.unit)values.amount=amount}
   const meal=$('intake-meal').value,note=$('intake-note').value.trim();

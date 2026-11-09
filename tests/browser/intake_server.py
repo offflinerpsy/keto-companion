@@ -28,7 +28,9 @@ CSRF='synthetic-ui-csrf'
 temporary=tempfile.TemporaryDirectory(prefix='keto-intake-ui-')
 
 class OfflineBrain:
+    calls=0
     def infer(self,*args,**kwargs):
+        self.calls+=1
         return {'intent':'help','reply_ru':'Синтетический разговор.','query':'','changes':[],
                 'safety_signals':['none'],'days':1,'diary_note':''}
 
@@ -40,6 +42,7 @@ headers={'Authorization':'Bearer '+KEY}
 app=FastAPI(docs_url=None,redoc_url=None,openapi_url=None)
 
 def reset(count=0):
+    service.brain.calls=0
     old,version=service.store.read(SUBJECT)
     if old is not None:service.store.delete(SUBJECT,version)
     service.consent(SUBJECT,True,True,True,True)
@@ -84,7 +87,7 @@ async def reset_fixture(request:Request):
     reset(count);return {'synthetic_only':True}
 
 @app.get('/__test__/state')
-def state():return dict(service.opened(SUBJECT),stored_diary=service.load(SUBJECT)[0]['core']['diary'])
+def state():return dict(service.opened(SUBJECT),stored_diary=service.load(SUBJECT)[0]['core']['diary'],intent_calls=service.brain.calls)
 
 @app.post('/__test__/concurrent-note')
 def concurrent_note():

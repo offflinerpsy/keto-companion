@@ -18,10 +18,11 @@ class IntakeService:
 
     def intake_event(self,d,payload):
         k=core()
-        allowed={'operation','recipe_id','food_id','entry_id','amount','date','time','time_fold','timezone','meal','note','thread_id'}
+        allowed={'operation','recipe_id','food_id','entry_id','amount','date','time','time_fold','timezone','meal','note','thread_id','origin','generation_id'}
         if not isinstance(payload,dict) or set(payload)-allowed:raise ValueError('Неверные поля съеденного')
-        for key in ('recipe_id','food_id','entry_id','thread_id'):
+        for key in ('recipe_id','food_id','entry_id','thread_id','generation_id'):
             if key in payload and (not isinstance(payload[key],str) or not payload[key] or len(payload[key])>100):raise ValueError('Неверный идентификатор еды или записи')
+        if 'origin' in payload:self.chat_intake_origin(d,payload)
         operation=payload.get('operation','add')
         if operation not in ('add','update','repeat'):raise ValueError('Неизвестное действие дневника')
         if not d.get('processing_consent'):raise ValueError('Сначала разрешите обработку личных данных')
@@ -31,6 +32,9 @@ class IntakeService:
             if not profile_zone:raise ValueError('Подтвердите часовой пояс в профиле')
             if 'entry_id' in payload or bool(payload.get('recipe_id'))==bool(payload.get('food_id')) or not {'date','amount'}<=set(payload):raise ValueError('Выберите еду, количество и дату')
             rid=payload.get('recipe_id')
+            if 'generation_id' in payload:
+                group=topic(d,payload.get('thread_id') or d['active_thread']).get('kitchen',{})
+                if payload['generation_id']!=group.get('generation_id') or rid not in group.get('candidate_ids',[]) or rid not in init(d)['drafts']:raise ValueError('Подбор изменился. Выберите рецепт заново.')
             if rid and rid not in cat['recipes']:
                 tid=payload.get('thread_id') or d['active_thread'];group=topic(d,tid).get('kitchen',{})
                 if rid not in group.get('candidate_ids',[]) or rid not in init(d)['drafts']:raise ValueError('Черновик не принадлежит выбранной теме или устарел')
@@ -38,15 +42,15 @@ class IntakeService:
                 recipe=init(d)['drafts'][rid]['recipe'];calc=k.calculate_ingredients(recipe['ingredients'],cat['foods'])
                 if d['holds'] or d['core']['profile']['screening'].get('allergies_reviewed') is not True or k.check_recipe(d['core']['profile'],calc):raise k.SafetyError('Сначала проверьте ограничения и полноту состава; пока это справочная идея')
                 cat['recipes'][rid]=recipe
-            entry={key:copy.deepcopy(value) for key,value in payload.items() if key not in ('operation','thread_id')}
+            entry={key:copy.deepcopy(value) for key,value in payload.items() if key not in ('operation','thread_id','origin','generation_id')}
             entry.update(intake_status='confirmed',timezone=payload.get('timezone') or profile_zone)
             kind='diary.add'
         else:
-            if set(payload)&{'recipe_id','food_id'} or not payload.get('entry_id'):raise ValueError('Выберите существующую запись')
+            if set(payload)&{'recipe_id','food_id','generation_id'} or not payload.get('entry_id'):raise ValueError('Выберите существующую запись')
             previous=next((e for e in d['core']['diary'] if e['entry_id']==payload['entry_id']),None)
             if previous is None:raise ValueError('Запись не найдена в вашем дневнике')
             if operation=='repeat' and 'date' not in payload:raise ValueError('Выберите дату повторной записи')
-            changes={key:copy.deepcopy(value) for key,value in payload.items() if key not in ('operation','entry_id','thread_id')}
+            changes={key:copy.deepcopy(value) for key,value in payload.items() if key not in ('operation','entry_id','thread_id','origin')}
             if operation=='repeat' or ('time' in changes and changes['time'] is not None and not previous.get('timezone')):
                 zone=previous.get('timezone') or profile_zone
                 if zone:changes.setdefault('timezone',zone)

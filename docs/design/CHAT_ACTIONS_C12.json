@@ -1,0 +1,123 @@
+{
+  "version": "C12-message-actions-v1",
+  "assistant_message": {
+    "id": "stable 32-character ID",
+    "thread_id": "owning topic",
+    "actions": "0..3 compact references"
+  },
+  "action": {
+    "id": "a1..a3, scoped to message",
+    "type": [
+      "navigate",
+      "choose_meal_mode",
+      "open_recipe",
+      "open_intake",
+      "review_proposal"
+    ],
+    "label": "server-controlled bounded display text",
+    "issued_revision": "provenance integer; need not equal current revision",
+    "target": "immutable closed object reference",
+    "status": [
+      "available",
+      "unavailable",
+      "expired",
+      "completed",
+      "stale"
+    ],
+    "reason": "optional display explanation",
+    "match": "optional exact|partial catalogue match provenance",
+    "fit_note": "optional server-owned catalogue explanation, at most600characters; also returned on command.recipe"
+  },
+  "resolve": {
+    "tool": "keto_kitchen",
+    "arguments": {
+      "action": "chat_action",
+      "thread_id": "message.thread_id",
+      "values": {
+        "message_id": "message.id",
+        "action_id": "action.id"
+      },
+      "expected_revision": "current state.revision"
+    },
+    "response_fields": [
+      "action",
+      "command",
+      "revision",
+      "response_thread_id",
+      "message_id",
+      "model_called"
+    ],
+    "notes": [
+      "Read-only, no apply/generate/model/quota call.",
+      "command is null when unavailable.",
+      "No returned state; do not accept() resolver output as a state refresh.",
+      "Malformed, foreign, deleted or compacted origin fails validation."
+    ]
+  },
+  "commands": {
+    "navigate": [
+      "type",
+      "view"
+    ],
+    "choose_meal_mode": [
+      "type",
+      "mode"
+    ],
+    "open_recipe": [
+      "type",
+      "recipe",
+      "source"
+    ],
+    "open_intake": [
+      "type",
+      "source",
+      "suggested_amount?"
+    ],
+    "review_proposal": [
+      "type",
+      "proposal_id"
+    ]
+  },
+  "source": {
+    "kind": [
+      "catalog_recipe",
+      "saved_recipe",
+      "generated_recipe"
+    ],
+    "recipe_id": "exact selected object",
+    "name_ru": "human name",
+    "thread_id": "owning topic",
+    "generation_id": "present for generated recipes",
+    "origin": {
+      "thread_id": "owning topic",
+      "message_id": "owning assistant",
+      "action_id": "owning action"
+    }
+  },
+  "intake_arguments": {
+    "values.origin": "Pass source.origin unchanged for preview and prepare; both open_recipe and open_intake origins accepted.",
+    "values.generation_id": "Pass source.generation_id or ordinary generated card generation_id when present.",
+    "thread_id": "Pass source.thread_id.",
+    "values.recipe_id": "Must match the stored source.",
+    "notes": [
+      "Origin and generation remain in proposal and are revalidated at apply.",
+      "Neither field is copied into diary entry.",
+      "Other ordinary catalog/product editor calls remain compatible without these optional fields."
+    ]
+  },
+  "rendering": [
+    "Render durable state.chat actions, not top-level response extras.",
+    "Status updates can occur when revision changes without message text changes.",
+    "Do not retarget using active thread or current selected recipe.",
+    "message_id and response_thread_id accompany persisted replies and replays.",
+    "New topic selection remains active when an older request completes.",
+    "Old text-only messages remain unchanged.",
+    "Display catalogue fit_note to explain partial matches; action.fit_note is available inline and command.recipe.fit_note after resolution."
+  ],
+  "lifetime": [
+    "Clear increments topic epoch; delete removes topic; old completion cannot resurrect either.",
+    "Pending proposals retain existing expiry/revision safety review rules after clear/delete.",
+    "Generated availability uses candidate-set identity and canonical draft presence; no invented draft TTL.",
+    "Current menu route is navigation; historical full unaccepted menu drafts are not copied into message storage."
+  ]
+}
