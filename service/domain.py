@@ -17,7 +17,7 @@ import keto_core as k
 VERSION='0.2.1'
 UI_DEFAULT={'theme':'ivory-plum','text_size':'normal','density':'comfortable','simple_mode':False,'home':'chat','show_nutrition':True}
 UI_ALLOWED={'theme':('ivory-plum','light','dark'),'text_size':('normal','large'),'density':('comfortable','compact'),'simple_mode':(True,False),'home':('chat','today','recipes','diary'),'show_nutrition':(True,False)}
-EVENTS={'consent.set','profile.update','targets.update','diary.add','diary.update','diary.delete','feedback.add','checklist.set','settings.update','settings.rollback','catalog.food.add','catalog.recipe.add','plan.accept'}
+EVENTS={'measurement.add','measurement.update','measurement.delete','consent.set','profile.update','targets.update','diary.add','diary.update','diary.delete','feedback.add','checklist.set','settings.update','settings.rollback','catalog.food.add','catalog.recipe.add','plan.accept'}
 HELP=('Я помогу подобрать еду под ваш день, составить покупки и вести дневник — без строгих команд. '
  'Сначала познакомимся и уточним ограничения. Затем вы сможете попросить меню, заменить блюдо или сказать, что было неудобно. '
  'Изменения показываются отдельно: вы подтверждаете их или отменяете. '
@@ -77,7 +77,7 @@ class Service(KitchenService,MobileService,planning.PlanningService):
         p=d['core']['profile'];screen=k.screen_profile(p)
         return {'version':VERSION,'revision':d['revision'],'subject_kind':p['subject_kind'],'profile':p,'ui':d['ui'],
           'processing_consent':d['processing_consent'],'screening':screen,'holds':d['holds'],
-          'diary':d['core']['diary'][-60:],'plans':list(d['core']['plans'].values())[-8:],
+          'measurements':[dict(x,gki=k.measurement_gki(x)) for x in d['core'].get('measurements',[])], 'diary':d['core']['diary'][-60:],'plans':list(d['core']['plans'].values())[-8:],
           'checklists':d['core']['checklists'],'pending':[dict(x,expired=x['expires_at']<=time.time()) for x in d['pending'].values()],
           'chat':topic(d,d['active_thread'])['messages'][-60:],'active_thread':d['active_thread'],'topics':[{'id':t['id'],'title':t['title'],'messages':len(t['messages'])} for t in d['topics'].values()],'reminders':copy.deepcopy(d['reminders']),'guidance':planning.status(d,k),'kitchen':self.kitchen_snapshot(d),'mobile_version':'0.7.0-dev-media-pilot','ui_history':d['ui_history'][-8:],'catalog':{'foods':len(self.base['foods']),'recipes':len(self.base['recipes'])},
           'capabilities':{'model':'Azure GPT-6.1 Terra','native_voice':'No continuous voice in web app; dictation to editable draft',
@@ -105,7 +105,7 @@ class Service(KitchenService,MobileService,planning.PlanningService):
         if d['revision']!=expected_revision:raise Conflict('Устаревшая версия профиля')
         if v is not None:self.store.delete(subject,v)
         return {'message':'Активный профиль удалён. Для нового профиля потребуется новое согласие. Сроки удаления из резервных копий зависят от политики хранилища.','state':self.snapshot(new_document(subject,kind))}
-    def catalog(self,subject,query='',limit=12,kind='personal',include_food_ids=None,exclude_food_ids=None,max_minutes=None):
+    def catalog(self,subject,query='',limit=12,kind='personal',include_food_ids=None,exclude_food_ids=None,max_minutes=None,offset=0,category=None):
         d,_=self.load(subject,kind);cat=k.merge_personal_catalog(self.base,d['core']);p=d['core']['profile']
         if include_food_ids is None and exclude_food_ids is None and query:
             inferred=self.recipe_filters(query,{},d);include_food_ids=inferred['include_food_ids'];exclude_food_ids=inferred['exclude_food_ids'];max_minutes=max_minutes if max_minutes is not None else inferred['max_minutes']
@@ -114,8 +114,12 @@ class Service(KitchenService,MobileService,planning.PlanningService):
         included=set(include_food_ids or []);excluded=set(exclude_food_ids or [])|set(p['settings'].get('disliked_food_ids',[]))
         if (included|excluded)-set(cat['foods']):raise InputError('Неизвестный продукт фильтра')
         if max_minutes is not None:max_minutes=k.integer(max_minutes,'max_minutes',1,180)
+        offset=k.integer(offset,'offset',0,100000)
+        limit=k.integer(limit,'limit',1,72)
+        if category is not None and category not in ('breakfast','main','side','component'):raise InputError('Неизвестная категория')
         candidates=[]
         for r in cat['recipes'].values():
+            if category and r['category']!=category:continue
             c=k.calculate_recipe(cat,r['recipe_id']);issues=k.check_recipe(p,c)
             ids={i['food_id'] for i in c['ingredients']}
             if issues or not included<=ids or ids&excluded or (max_minutes is not None and c['active_minutes']>max_minutes):continue
@@ -124,7 +128,16 @@ class Service(KitchenService,MobileService,planning.PlanningService):
             if tokens and not score and not included:continue
             candidates.append((score,c))
         candidates.sort(key=lambda x:(-x[0],x[1]['active_minutes'],x[1]['recipe_id']))
-        return {'recipes':[c for _,c in candidates[:max(1,min(int(limit),72))]],'personalized':k.screen_profile(p)['can_plan'] and not d['holds'],
+        if not tokens and not included:
+            groups={}
+            for row in candidates:groups.setdefault((row[1]['category'],row[1]['protein_family']),[]).append(row)
+            candidates=[]
+            while groups:
+                for key in sorted(list(groups)):
+                    candidates.append(groups[key].pop(0))
+                    if not groups[key]:del groups[key]
+        total=len(candidates)
+        return {'recipes':[c for _,c in candidates[offset:offset+limit]],'total':total,'offset':offset,'has_more':offset+limit<total,'personalized':k.screen_profile(p)['can_plan'] and not d['holds'],
           'note':'Справочные рецепты. Подбор не является медицинским назначением; состав рассчитан по ингредиентам.'}
     def _prepare(self,d,event_type,payload):
         if not storage_consent(d):raise PermissionError('Сначала согласие на сохранение профиля и дневника')
@@ -159,6 +172,7 @@ class Service(KitchenService,MobileService,planning.PlanningService):
                 for m in payload['medications']:
                     if m.get('class')=='reviewed_other' and not m.get('review_source'):raise InputError('Нужно проверенное основание классификации лекарства')
             cat=k.merge_personal_catalog(self.base,d['core'])
+            if event_type=='catalog.food.add' and isinstance(payload.get('provenance'),dict) and payload['provenance'].get('type')=='usda_reference':raise InputError('Импорт источника выполняется только через проверку кухни')
             if event_type=='catalog.recipe.add':
                 if d['core']['profile']['screening'].get('allergies_reviewed') is not True:raise k.SafetyError('Сначала проверьте пищевые аллергии в анкете')
                 recipe=k.validate_custom_recipe(payload,cat);calc=k.calculate_ingredients(recipe['ingredients'],cat['foods'])

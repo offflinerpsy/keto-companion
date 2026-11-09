@@ -41,6 +41,16 @@ class AzureBrain:
     def infer(self,message,context,image=None):
         p=self.payload(message,context,image);t=time.monotonic()
         try:
+            d=self.request(p)
+            parsed=self.parse_intent(d)
+            parsed['_usage']=d.get('usage',{});parsed['_latency_ms']=round((time.monotonic()-t)*1000)
+            parsed['_deployment']=self.deployment
+            return parsed
+        except BrainUnavailable:raise
+        except (ValueError,TypeError,KeyError,subprocess.SubprocessError,httpx.HTTPError) as e:
+            raise BrainUnavailable('Ответ модели не удалось проверить. Изменения не применены.') from e
+    def request(self,p):
+        try:
             if self.transport:d=self.transport(p)
             elif os.getenv('KETO_AZURE_AUTH')=='cli':
                 # Official authenticated CLI performs the call. No token/key extraction.
@@ -63,16 +73,16 @@ class AzureBrain:
                     if r.status_code!=200:raise BrainUnavailable('Azure temporarily unavailable ('+str(r.status_code)+')')
                     d=r.json()
             if d.get('status') not in ('completed',None):raise BrainUnavailable('Azure returned incomplete response')
-            text=''.join(c.get('text','') for x in d.get('output',[]) for c in x.get('content',[]) if c.get('type')=='output_text')
-            parsed=json.loads(text)
-            if not isinstance(parsed,dict) or set(parsed)!=set(SCHEMA['required']):raise ValueError('wrong shape')
-            if parsed['intent'] not in SCHEMA['properties']['intent']['enum']:raise ValueError('intent')
-            if not isinstance(parsed['changes'],list) or len(parsed['changes'])>10:raise ValueError('changes')
-            if not isinstance(parsed['reply_ru'],str) or len(parsed['reply_ru'])>2500:raise ValueError('reply too long')
-            if not isinstance(parsed['safety_signals'],list) or set(parsed['safety_signals'])-{'urgent','medication_review','pregnancy','eating_disorder','none'}:raise ValueError('signals')
-            parsed['_usage']=d.get('usage',{});parsed['_latency_ms']=round((time.monotonic()-t)*1000)
-            parsed['_deployment']=self.deployment
-            return parsed
+            return d
         except BrainUnavailable:raise
         except (ValueError,TypeError,KeyError,subprocess.SubprocessError,httpx.HTTPError) as e:
             raise BrainUnavailable('Ответ модели не удалось проверить. Изменения не применены.') from e
+    def parse_intent(self,d):
+        text=''.join(c.get('text','') for x in d.get('output',[]) for c in x.get('content',[]) if c.get('type')=='output_text')
+        parsed=json.loads(text)
+        if not isinstance(parsed,dict) or set(parsed)!=set(SCHEMA['required']):raise ValueError('wrong shape')
+        if parsed['intent'] not in SCHEMA['properties']['intent']['enum']:raise ValueError('intent')
+        if not isinstance(parsed['changes'],list) or len(parsed['changes'])>10:raise ValueError('changes')
+        if not isinstance(parsed['reply_ru'],str) or len(parsed['reply_ru'])>2500:raise ValueError('reply too long')
+        if not isinstance(parsed['safety_signals'],list) or set(parsed['safety_signals'])-{'urgent','medication_review','pregnancy','eating_disorder','none'}:raise ValueError('signals')
+        return parsed

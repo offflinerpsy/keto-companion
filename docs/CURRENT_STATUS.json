@@ -1,10 +1,18 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-09T07:04:13.757925+00:00",
+  "updated_at": "2026-11-09T11:27:40.694087+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
-  "active_task": null,
+  "active_task": {
+    "id": "AGR-306",
+    "status": "In Progress",
+    "stage": "source_and_synthetic_mobile_accepted_release_pending",
+    "spec_directory": "specs/001-iphone-keto-overhaul",
+    "source_branch": "codex/iphone-keto-overhaul",
+    "release_performed": false,
+    "source_acceptance": "docs/evidence/AGR_306_SOURCE_ACCEPTANCE.json"
+  },
   "last_completed": "AGR-305-LOGIN: same-origin Google sign-in repair deployed; owner confirms iPhone login",
   "next_task": {
     "id": "OWNER-DEVELOPER-ACCEPTANCE",

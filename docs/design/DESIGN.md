@@ -1,5 +1,7 @@
 # Tranquil Dawn — Style Reference
 
+> Historical reference: AGR-306 supersedes this visual direction. Current colors, system typography and task surfaces are described in [IMPLEMENTATION.md](IMPLEMENTATION.md) and [DESIGN_TOKENS.json](DESIGN_TOKENS.json). The coastal hero and wellness slogans are not current product requirements.
+
 > a serene morning ritual grounding wellness metrics in soft coastal light and airy pastel cards.
 
 **Theme:** light

@@ -1,3 +1,4 @@
+import {handleShopLookup} from './shop-lookup.mjs';
 import {handleDeveloper,expireDeveloper} from './developer.mjs';
 import {handleImageLink} from './image-link.mjs';
 import {firebaseClaims} from './firebase-identity.mjs';
@@ -116,6 +117,7 @@ async function handle(req,env){
  if(path==='/auth/google/start'&&method==='POST'&&env.AUTH_PROVIDER==='direct_google')return oauthStart(req,env);
  if(path==='/auth/google/callback'&&method==='GET'&&env.AUTH_PROVIDER==='direct_google')return oauthCallback(req,env);
  if(path.startsWith('/api/developer'))return handleDeveloper(req,env,{auth,bodyJson,json,fail,Fail,dbfirst,dbrun,sha});
+ if(path==='/api/shop/barcode'&&method==='POST')return handleShopLookup(req,env,{auth,bodyJson,json,fail,dbfirst,dbrun,sha,readBounded});
  if(path==='/api/media/image-link'&&method==='POST')return handleImageLink(req,env,{auth,bodyJson,json,fail,dbfirst,sha});
  if(path==='/api/session'&&method==='GET'){const {u,raw}=await auth(req,env,{pending:true});return json({user:{role:u.role,status:u.status,email:u.email},csrf:await csrfValue(env,raw),version:'0.7.1-tranquil-dev-pilot',capabilities:{chat:bridgeConfigured(env)?'configured_unverified':'not_configured',compute:bridgeConfigured(env)?'configured_unverified':'not_configured',google_integrations:false,instagram_fetch:false,plugin:'existing Azure only'}})}
  if(path==='/api/logout'&&method==='POST'){const {raw}=await auth(req,env,{pending:true,write:true});await dbrun(env,'DELETE FROM sessions WHERE token_hash=?',await sha(raw));return json({ok:true},200,{'set-cookie':cookieSet('keto_session','',0)})}

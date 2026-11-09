@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 import {webcrypto} from 'node:crypto';
+import {sourceImportPreview} from '../public/kitchen-ui.js';
 const read=name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8');
 const html=read('index.html'),css=read('app.css'),app=read('app.js');
 const tokens=JSON.parse(readFileSync(new URL('../../docs/design/DESIGN_TOKENS.json',import.meta.url),'utf8'));
@@ -14,26 +15,25 @@ const fieldContract=source=>[...source.matchAll(/<(?:input|select|textarea|form)
  return [tag.match(/^<(\w+)/)[1],selected,/\brequired(?:\s|>)/.test(tag)];
 });
 const expectedColors={'canvas-warm-cream':'#FAF9F6','card-surface-white':'#FFFFFF','mint-glaze-surface':'#F0F7F5','spruce-teal':'#0E3B36','deep-charcoal':'#1A2421','slate-neutral':'#6C7A76','verdant-mint':'#43A08A','muted-peach':'#F09E81','dusk-indigo':'#4F659C','coral-alert':'#E06A4E'};
-test('supplied named palette, shapes and local font policy reach the application',()=>{
- for(const [name,value]of Object.entries(expectedColors)){assert.equal(tokens.tokens['--color-'+name],value);assert(css.includes('--color-'+name+': '+value+';'));}
- for(const [name,value]of Object.entries(tokens.tokens))assert(css.includes(name+': '+value+';'),name);
- assert.equal(tokens.tokens['--radius'],'22px');assert.equal(tokens.tokens['--radius-hero'],'24px');assert.equal(tokens.tokens['--radius-input'],'12px');assert.equal(tokens.tokens['--radius-pill'],'999px');
- assert.match(css,/--bg: var\(--color-canvas-warm-cream\)/);assert.match(css,/--accent: var\(--color-spruce-teal\)/);
- assert.doesNotMatch(css,/@import|@font-face|https?:\/\//);assert.doesNotMatch(html,/fonts\.google/);
- const manifest=JSON.parse(read('manifest.webmanifest'));assert.equal(manifest.background_color,'#FAF9F6');assert.equal(manifest.theme_color,'#0E3B36');
+test('system typography and neutral blue application palette are explicit',()=>{
+ assert.match(css,/--color-canvas-warm-cream: #F2F2F7/);assert.match(css,/--color-card-surface-white: #FFFFFF/);
+ assert.match(css,/--color-spruce-teal: #005FCC/);assert.match(css,/--font-plus-jakarta-sans: -apple-system, BlinkMacSystemFont, system-ui, sans-serif/);
+ assert.match(css,/--text-body: 17px/);assert.doesNotMatch(css,/@import|@font-face|https?:\/\//);assert.doesNotMatch(html,/fonts\.google/);
 });
 function luminance(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0)}
 function contrast(a,b){const v=[luminance(a),luminance(b)].sort((a,b)=>a-b);return(v[1]+.05)/(v[0]+.05)}
 test('saved dark enum remains explicit, with readable foreground and control adaptations',()=>{
- assert.match(html,/<option value="ivory-plum">Tranquil Dawn<\/option>/);assert.match(html,/<option value="dark">Тёмная адаптация/);
+ assert.match(html,/<option value="ivory-plum">Светлая<\/option>/);assert.match(html,/<option value="light" hidden>Светлая<\/option>/);assert.match(html,/<option value="dark">Тёмная<\/option>/);
  assert.match(app,/u\.theme==='dark'\?'dark'/);assert.match(css,/body\.dark\{[^}]*color-scheme:dark/);
- for(const pair of [['#FFFFFF','#0E3B36'],['#5E6F68','#FAF9F6'],['#EFF5F1','#203630'],['#B5C9C0','#203630'],['#142521','#ACDCCD']])assert(contrast(...pair)>=4.5,pair.join('/'));
- assert.match(css,/color:var\(--on-accent\)/);assert.match(css,/--on-accent:#142521/);
+ for(const pair of [['#FFFFFF','#005FCC'],['#50545B','#F2F2F7'],['#F2F3F5','#1C1E24'],['#C3C7D0','#1C1E24'],['#101B2D','#83B8FF'],['#83B8FF','#263448']])assert(contrast(...pair)>=4.5,pair.join('/'));
+ assert.match(css,/color:var\(--on-accent\)/);assert.match(css,/--on-accent:#101B2D/);
 });
 test('all baseline IDs, form boundaries, input names and validation contracts survive',()=>{
  const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);assert.equal(ids.length,new Set(ids).size,'unique IDs');
  for(const id of baselineIds)assert(ids.includes(id),id);
- assert.deepEqual(fieldContract(html),baselineFields);
+ const fieldKey=([tag,a])=>tag+':'+(a.id?'id='+a.id:'name='+a.name);
+ const baselineKeys=new Set(baselineFields.map(fieldKey));
+ assert.deepEqual(fieldContract(html).filter(f=>baselineKeys.has(fieldKey(f))),baselineFields);
  for(const key of ['dev-approval','dev-exact','dev-preview','image-link-details','chat-confirmations','target-confirmations','setup-confirmations','holds','proposals'])assert(ids.includes(key));
 });
 test('four primary destinations and source route keys remain usable with icon controls',()=>{
@@ -44,24 +44,30 @@ test('four primary destinations and source route keys remain usable with icon co
  assert.match(html,/id="image-link-open"[^>]*aria-label="Фото по ссылке"/);
  assert(!html.includes('↗'));
 });
-test('decorative same-origin photograph is limited to login and menu, with readable text surfaces',()=>{
- const images=[...html.matchAll(/<img[^>]*src="\/tranquil-dawn\.webp"[^>]*>/g)].map(x=>x[0]);assert.equal(images.length,2);for(const image of images){assert.match(image,/alt=""/);assert.match(image,/width="960" height="480"/);assert.doesNotMatch(image,/https?:|auth|token/)}
- const chat=html.slice(html.indexOf('<section data-page="chat"'),html.indexOf('<section data-page="setup"'));assert(!chat.includes('dawn-hero'));assert(!chat.includes('dawn-overview'));
- assert.match(css,/background:var\(--hero-surface\)/);assert.match(css,/--hero-surface: rgba\(250,249,246,.96\)/);
+test('menu and login keep task content clear without decorative photo heroes',()=>{
+ assert.doesNotMatch(html,/<img[^>]*src="\/tranquil-dawn\.webp"/);
+ assert.doesNotMatch(html,/class="dawn-hero/);
+ const menuStart=html.indexOf('<section data-page="today"'),nextPage=html.indexOf('<section data-page="',menuStart+1);
+ const menu=html.slice(menuStart,nextPage<0?html.length:nextPage);
+ assert.match(menu,/<h1>Моё меню<\/h1>/);
+ assert.doesNotMatch(menu,/НЕ ЖЁСТКИЙ ГРАФИК|Начните с простого блюда/);
+ const chat=html.slice(html.indexOf('<section data-page="chat"'),html.indexOf('<section data-page="setup"'));
+ assert(!chat.includes('dawn-hero'));assert(!chat.includes('dawn-overview'));
  assert.doesNotMatch(html,/6,245|10,000|Breathe\. Move|3\/3|sleep.score/i);
 });
+
 class Element{
  constructor(tag='div'){this.tag=tag;this.hidden=false;this.value='';this.dataset={};this.children=[];this.textContent='';this.open=false;this.classList={toggle(){}};this.attributes={};}
- addEventListener(){} setAttribute(k,v){this.attributes[k]=v} replaceChildren(...nodes){this.children=nodes;this.textContent=''} append(...nodes){this.children.push(...nodes)} reset(){} close(){this.open=false} scrollIntoView(){} querySelectorAll(){return []}
+ addEventListener(name,fn){(this.listeners??={})[name]=fn} setAttribute(k,v){this.attributes[k]=v} replaceChildren(...nodes){this.children=nodes;this.textContent=''} append(...nodes){this.children.push(...nodes)} reset(){} close(){this.open=false} scrollIntoView(){} querySelectorAll(){return []}
 }
 function harness(actualStateRender=false){
  const nodes={},document={body:new Element(),getElementById(id){return nodes[id]??=new Element()},createElement:tag=>new Element(tag),querySelectorAll:()=>[],querySelector:()=>null};
- const stubs={setupDeveloper:'()=>({reset(){},identity(){},load(){}})',mountDeveloperExtension:'()=>{}',setupMobile:'()=>({reset(){},render(){},resetPhoto(){},setChatBusy(){}})',setupGuidance:'()=>({reset(){},render(){},afterApplied(){},resolve(x){return x}})',createRouter:'()=>({reset(){},go(x){globalThis.lastView=x},back(){}})',setupKitchen:'()=>({render(){},reset(){}})',kitchenActionLabels:'{}',firebaseLogin:'()=>{}'};
+  const stubs={setupShop:'()=>({reset(){},afterApplied(){}})',createRecipeLibrary:'()=>({load:async()=>{},next:async()=>{},invalidate(){}})',setupOwnDish:'()=>({reset(){},update(){},savedReceipt(){}})',sourceImportPreview:'sourceImportPreviewFixture',setupDeveloper:'()=>({reset(){},identity(){},load(){}})',mountDeveloperExtension:'()=>{}',setupMobile:'()=>({reset(){},render(){},resetPhoto(){},setChatBusy(){}})',setupGuidance:'()=>({reset(){},render(){},afterApplied(){},resolve(x){return x}})',createRouter:'()=>({reset(){},go(x){globalThis.lastView=x},back(){}})',setupKitchen:'()=>({render(){},reset(){globalThis.kitchenReset?.()}})',kitchenActionLabels:'{}',firebaseLogin:'()=>{}'};
  let source=app.replace(/^import \{([^}]+)\} from '[^']+';$/gm,(_,names)=>names.split(',').map(name=>'const '+name+'='+stubs[name]+';').join('')).replace('run(start);','');
  // Render only the changed overview; existing modules are exercised by their own focused tests.
  if(!actualStateRender)source+='\nrenderState=()=>renderTranquilSummary(state);';
- source+='\nglobalThis.api={tranquilSummary,setState,clearScreen,showLogin,call,accept};';
- const context={document,window:{},history:{},location:{href:'https://synthetic.invalid/'},sessionStorage:{getItem(){return null}},URL,FormData,Blob,Response,crypto:webcrypto,Date,Intl,setTimeout,clearTimeout,console};vm.createContext(context);vm.runInContext(source,context);return{context,api:context.api,nodes};
+ source+='\nglobalThis.api={tranquilSummary,setState,clearScreen,showLogin,call,accept,renderProposals,renderDiary,renderView,setSynthetic(value){state=value}};';
+  const context={sourceImportPreviewFixture:sourceImportPreview,document,window:{},history:{},location:{href:'https://synthetic.invalid/'},sessionStorage:{getItem(){return null}},URL,FormData,Blob,Response,crypto:webcrypto,Date,Intl,setTimeout,clearTimeout,console};vm.createContext(context);vm.runInContext(source,context);return{context,api:context.api,nodes};
 }
 function accepted(){return {processing_consent:true,profile:{owner_account_id:'synthetic-a',profile_revision:5,consent:{storage:true,health_data:true},targets:{}},screening:{can_plan:true},holds:[],guidance:{targets_stale:false},kitchen:{pantry:[{grams:null}]},diary:[{intake_status:'unquantified'}],plans:[]}}
 const content=node=>[node.textContent,...node.children.map(content)].join(' ');
@@ -106,4 +112,46 @@ test('actual full state renderer updates overview instead of leaving an isolated
  const {api,nodes}=harness(true);const s=accepted();Object.assign(s,{version:'test',mobile_version:'test',revision:1,subject_kind:'personal',ui:{theme:'ivory-plum',text_size:'normal',density:'comfortable',simple_mode:false,show_nutrition:true},catalog:{recipes:72},pending:[],chat:[],ui_history:[],diary:[]});s.profile.targets=null;
  api.setState(s);assert.equal(nodes['dawn-overview'].hidden,false);assert.equal(nodes['dawn-status-cards'].children.length,4);assert.match(content(nodes['dawn-status-cards']),/Не задан/);
  api.setState({...s,processing_consent:false});assert.equal(nodes['dawn-overview'].hidden,true);assert.equal(nodes['dawn-status-cards'].children.length,0);
+});
+
+test('pantry confirmation presents names and known or unknown mass without machine keys',()=>{
+ const {api,nodes}=harness();const s=accepted();Object.assign(s,{revision:4,pending:[{id:'p',type:'kitchen.pantry',base_revision:4,payload:{items:[{food_id:'ID123',state:'raw',grams:120},{food_id:'ID456',state:'raw',grams:null}]},preview:{items:[{food_id:'ID123',name_ru:'Яйца',state:'raw',grams:120},{food_id:'ID456',name_ru:'Кабачок',state:'raw',grams:null}]}}]});api.setSynthetic(s);api.renderProposals();const shown=content(nodes.proposals);assert.match(shown,/Яйца/);assert.match(shown,/120 г/);assert.match(shown,/Кабачок/);assert.match(shown,/масса не указана/);assert.doesNotMatch(shown,/ID123|ID456|items|undefined/);assert.match(shown,/Сохранить продуктов: 2/);
+});
+test('diary displays named quantified receipt',()=>{const {api,nodes}=harness();const s=accepted();s.kitchen.diary_recipe_names={r:'Омлет'};s.diary=[{date:'2026-11-09',recipe_id:'r',portions:.5,note:'Подтверждённая доля порции'}];api.setSynthetic(s);api.renderDiary();assert.match(content(nodes['diary-entries']),/Омлет · 0,5 порции/)});
+
+test('old pantry proposal with no readable preview cannot apply',()=>{
+ const {api,nodes}=harness();const s=accepted();Object.assign(s,{revision:4,pending:[{id:'old',type:'kitchen.pantry',base_revision:4,payload:{items:[{food_id:'hidden-id',state:'raw',grams:120}]}}]});api.setSynthetic(s);api.renderProposals();const card=nodes.proposals.children[0];const button=card.children.find(n=>n.textContent==='Сохранить продуктов: 1');assert.equal(button.disabled,true);assert.match(content(card),/Отмените его и подготовьте/);assert.doesNotMatch(content(card),/hidden-id/);
+});
+
+test('diary draft survives cancellation and clears only unchanged confirmed submission',async()=>{
+ for(const scenario of ['cancel','unchanged','edited']){
+  const {api,nodes,context}=harness(),s=accepted();const payload={date:'2026-11-09',note:'Заметка',intake_status:'unquantified'};
+  Object.assign(s,{revision:4,pending:[{id:'diary-p',type:'diary.add',base_revision:4,payload}]});api.setSynthetic(s);context.document.getElementById('diary-date').value=payload.date;context.document.getElementById('diary-note').value=scenario==='edited'?'Заметка изменена':payload.note;
+  let request;context.fetch=async(_,opts)=>{request=JSON.parse(opts.body);return new Response(JSON.stringify({state:{...s,pending:[]},...(request.approved?{receipt:{id:'diary-p',type:'diary.add'}}:{})}),{status:200})};
+  api.renderProposals();const card=nodes.proposals.children[0];const button=card.children.find(n=>n.textContent===(scenario==='cancel'?'Отмена':'Добавить в дневник'));await button.listeners.click();
+  assert.equal(request.approved,scenario!=='cancel');assert.equal(nodes['diary-note'].value,scenario==='unchanged'?'':scenario==='edited'?'Заметка изменена':payload.note);
+ }
+});
+
+test('kitchen action confirmations disclose preference, forgotten fact, day and pantry removals',()=>{
+ const {api,nodes}=harness(),s=accepted();Object.assign(s,{revision:4,kitchen:{pantry:[{food_id:'old',name_ru:'Молоко'},{food_id:'stay',name_ru:'Яйца'}],preferences:[{id:'f',text:'Не люблю рыбу'}]},pending:[
+ {id:'1',type:'kitchen.remember',base_revision:4,payload:{text:'Не люблю сыр',food_ids:['private']}},
+ {id:'2',type:'kitchen.forget',base_revision:4,payload:{fact_id:'f'}},
+ {id:'3',type:'kitchen.accept_day',base_revision:4,payload:{recipe_id:'internal',thread_id:'secret'},preview:{day_items:['Омлет','Рыба']}},
+ {id:'4',type:'kitchen.pantry',base_revision:4,payload:{items:[{food_id:'stay',state:'raw',grams:null}]},preview:{items:[{food_id:'stay',name_ru:'Яйца',state:'raw',grams:null}]}}]});
+ api.setSynthetic(s);api.renderProposals();const shown=content(nodes.proposals);for(const text of ['Не люблю сыр','Не люблю рыбу','Омлет','Рыба','Удаляется продуктов: 1 — Молоко'])assert(shown.includes(text),text);assert.doesNotMatch(shown,/private|internal|secret/);
+});
+test('reset sequence clears forms before kitchen defaults, keeping body inputs blank',()=>{
+ const {api,nodes,context}=harness();const events=[];const field=context.document.getElementById('synthetic-portions'),body=context.document.getElementById('baseline-weight');field.value='3';body.value='80';
+ context.document.querySelectorAll=selector=>selector==='form'?[{reset(){events.push('forms');field.value='';body.value=''}}]:[];
+ context.kitchenReset=()=>{events.push('kitchen');field.value='1'};
+ api.clearScreen();assert.deepEqual(events,['forms','kitchen']);assert.equal(field.value,'1');assert.equal(body.value,'');
+});
+test('recipes route marks menu as active and exposes current page identity',()=>{
+ const {api,context}=harness();const buttons=['chat','today','diary','more'].map(view=>{const b=new Element('button');b.dataset.view=view;b.classList={toggle(_,on){b.active=on}};return b});
+ context.document.querySelectorAll=selector=>selector==='[data-view]'?buttons:[];api.renderView('recipes',{reason:'history'});const menu=buttons[1],more=buttons[3];assert.equal(menu.active,true);assert.equal(menu.attributes['aria-current'],'page');assert.equal(more.active,false);assert.match(html,/<section data-page="recipes"[^>]*>[\s\S]*?<h1>Что приготовим\?<\/h1>/);
+});
+
+test('shop proposal renders a typed Russian review instead of internal fields',()=>{
+ const {api,nodes}=harness();const s=accepted();s.revision=4;s.pending=[{id:'p',type:'catalog.food.add',base_revision:4,payload:{food_id:'Uinternal123',name_ru:'Молоко',state:'ready_to_eat',allergens:['milk'],provenance:{type:'shop_label',provider:'open_food_facts',barcode:'3017620422003',license:'ODbL'},source_ref:'https://world.openfoodfacts.org/product/3017620422003',declared_label:{basis:'per100ml',mass_g:103,energy_kcal:52,protein_g:3.2,fat_g:3,carbohydrate_g:4.7,fiber_g:null,carbohydrate_basis:'available_excludes_fiber'},energy_kcal:50.49,protein_g:3.11,fat_g:2.91,carbohydrate_total_g:null,fiber_g:null}}];api.setSynthetic(s);api.renderProposals();const shown=content(nodes.proposals);for(const text of ['Молоко','На 100 мл','103 г','Молоко','нет данных','Open Food Facts','ODbL','Сохранить личный продукт'])assert(shown.toLowerCase().includes(text.toLowerCase()),text);assert.doesNotMatch(shown,/Uinternal123|declared_label|carbohydrate_total_g|provenance|Применить/);
 });

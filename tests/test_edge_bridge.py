@@ -89,3 +89,13 @@ def test_prompt_does_not_assume_adult():
 
 def test_nonurgent_literal_safety_does_not_consume_model_quota(env,monkeypatch):
  c,_,_,brain=env;monkeypatch.setenv('KETO_DAILY_REQUEST_LIMIT','0');initial=call(c,payload('consent',None,{'processing':True,'storage':True,'health':True,'confirmed':True})).json()['state'];r=call(c,payload('chat',initial,{'message':'Я принимаю Форсигу','request_id':'synthetic_safety_01'}),nonce='B'*43);assert r.status_code==200;assert r.json()['response']['model_called'] is False;assert r.json()['state']['usage']['calls']==0;assert brain.calls==0
+
+def test_label_image_is_sanitized_and_state_unchanged(tmp_path):
+ from service.brain import AzureBrain
+ from test_label import CANDIDATE,response
+ calls=[];brain=AzureBrain(transport=lambda p:(calls.append(p),response(CANDIDATE))[1]);replay=SQLiteStore(tmp_path/'r.db');bridge=EdgeBridge(KEY,replay,brain,TOOL_MAP,image_clean)
+ raw=io.BytesIO();image=Image.new('RGB',(20,20));exif=Image.Exif();exif[270]='SYNTHETIC_PRIVATE_METADATA';image.save(raw,format='JPEG',exif=exif)
+ doc=new_document('synthetic-one');b=payload('label_extract',doc,{'request_id':'label_test_001','image_data_url':'data:image/jpeg;base64,'+base64.b64encode(raw.getvalue()).decode()});h=signed(b)
+ out=bridge.execute('POST',PATH,h['x-keto-timestamp'],h['x-keto-nonce'],h['x-keto-signature'],b)
+ assert out['state']==doc and out['response']['review_candidate']==CANDIDATE and len(calls)==1
+ clean=base64.b64decode(calls[0]['input'][0]['content'][1]['image_url'].split(',')[1]);assert not Image.open(io.BytesIO(clean)).getexif();assert 'SYNTHETIC_PRIVATE_METADATA' not in json.dumps(out)

@@ -177,6 +177,7 @@ def test_full_day_deterministic_acceptance_export_import_roundtrip(kitchen):
  assert r['day']['issues']==[] and r['day']['status']=='calculated_draft'
  assert r['day']['plan']['days'][0]['nutrition']['fiber_g']>=25
  p=action(kitchen,'accept_day',r['recipes'][0]['recipe_id']);assert not p['state']['plans']
+ assert p['proposal']['preview']['day_items']==[x['name_ru'] for x in r['recipes']]
  result=confirm(kitchen,p);state=result['state'];assert state['plans'][-1]['status']=='user_accepted'
  assert all(x['recipe_id'] in state['kitchen']['saved_recipes'] for x in r['recipes'])
  csv=kitchen.export('synthetic-one','csv')['text'];assert all(x['recipe_id'] in csv for x in r['recipes'])
@@ -237,3 +238,31 @@ def test_pantry_fact_has_confirmation_origin_and_legacy_preferences_are_editable
  r=confirm(kitchen,action(kitchen,'pantry',values={'items':pantry(200)}))
  memory=kitchen.kitchen('synthetic-one','memory')['kitchen'];assert memory['pantry_origin']['at']==r['receipt']['at']
  assert memory['legacy_disliked'][0]['food_id']=='F171477'
+
+def test_food_results_reach_catalog_and_named_parse(kitchen):
+ foods=kitchen.kitchen('synthetic-one','foods')
+ assert foods['total']==len(foods['foods'])==len(kitchen.base['foods']) and foods['total']>40
+ cheeses=kitchen.kitchen('synthetic-one','foods',query='сыр')['foods']
+ assert any('моцарелл' in x['name_ru'].casefold() for x in cheeses)
+ assert any('сливоч' in x['name_ru'].casefold() for x in cheeses)
+ consent(kitchen)
+ parsed=kitchen.kitchen('synthetic-one','parse',query='Есть яйца 100 г и лунная мука')
+ assert parsed['food_names']['F171287']==kitchen.base['foods']['F171287']['name_ru']
+ assert set(parsed['pantry'][0])=={'food_id','state','grams'}
+ assert parsed['pantry'][0]['grams']==100 and parsed['questions']
+
+def test_pantry_preview_uses_authoritative_names_and_unknown_mass(kitchen):
+ consent(kitchen)
+ entries=[{'food_id':'F171287','state':'raw','grams':100},{'food_id':'F169291','state':'raw','grams':None}]
+ proposal=action(kitchen,'pantry',values={'items':entries})['proposal']
+ assert [(i['name_ru'],i['grams']) for i in proposal['preview']['items']]==[(kitchen.base['foods'][x['food_id']]['name_ru'],x['grams']) for x in entries]
+ assert kitchen.opened('synthetic-one')['state']['kitchen']['pantry']==[]
+
+
+def test_cheese_search_with_confirmed_personal_food_without_group(kitchen):
+ consent(kitchen)
+ food={'food_id':'U12345678','name_ru':'Йогурт по этикетке','state':'ready_to_eat','allergens':['milk'],'label_confirmed':True,'source_ref':'user-upload:label1','carb_basis':'total_includes_fiber','energy_kcal':60,'protein_g':8,'fat_g':2,'carbohydrate_total_g':3,'fiber_g':0}
+ event(kitchen,'catalog.food.add',food)
+ result=kitchen.kitchen('synthetic-one','foods',query='сыр')
+ assert result['total']==len(result['foods']) and any('моцарелл' in f['name_ru'].casefold() for f in result['foods'])
+ assert any(f['food_id']=='U12345678' for f in kitchen.kitchen('synthetic-one','foods',query='йогурт')['foods'])

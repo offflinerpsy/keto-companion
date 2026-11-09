@@ -1,6 +1,7 @@
 {
   "mobile_http_only": [
     "keto_guidance",
+    "keto_label_extract",
     "keto_reminders",
     "keto_topics",
     "keto_transcribe"
@@ -8,7 +9,7 @@
   "notice": "The listed Azure schemas are not a promise that all tools are exposed through every client. Cloudflare applies its own session/CSRF/operation map; UI-only capabilities remain mandatory.",
   "schema": "keto-tool-inventory-v1",
   "source": "service/app.py",
-  "source_sha256": "ef66602e8108ec640d0186bd9996339ec633e34091642dcaf35a961e29db6d0f",
+  "source_sha256": "082a85e340832638af141652aa7eb243dc447b107ca8bc17163e37665e9a684f",
   "tools": [
     {
       "_meta": {
@@ -112,6 +113,15 @@
       "inputSchema": {
         "additionalProperties": false,
         "properties": {
+          "category": {
+            "enum": [
+              "breakfast",
+              "main",
+              "side",
+              "component"
+            ],
+            "type": "string"
+          },
           "exclude_food_ids": {
             "items": {
               "type": "string"
@@ -134,6 +144,11 @@
           "max_minutes": {
             "maximum": 180,
             "minimum": 1,
+            "type": "integer"
+          },
+          "offset": {
+            "maximum": 100000,
+            "minimum": 0,
             "type": "integer"
           },
           "query": {
@@ -770,6 +785,51 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
+      "description": "Только неподтверждённый черновик; без сохранения.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "image_data_url": {
+            "maxLength": 1500000,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9_-]{8,100}$",
+            "type": "string"
+          },
+          "thread_id": {
+            "maxLength": 80,
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "image_data_url"
+        ],
+        "type": "object"
+      },
+      "name": "keto_label_extract",
+      "title": "Прочитать этикетку"
+    },
+    {
+      "_meta": {
+        "ui": {
+          "visibility": [
+            "model",
+            "app"
+          ]
+        }
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      },
       "description": "Единая кладовая, рецепты и память. Генерация может вызвать Azure Sol high; сохранения только через отдельное подтверждение.",
       "inputSchema": {
         "additionalProperties": false,
@@ -778,6 +838,14 @@
             "enum": [
               "status",
               "foods",
+              "source_search",
+              "source_detail",
+              "source_import",
+              "food_portion",
+              "own_dish_calculate",
+              "own_dish_detail",
+              "own_dish_save",
+              "own_dish_diary",
               "parse",
               "generate",
               "select",

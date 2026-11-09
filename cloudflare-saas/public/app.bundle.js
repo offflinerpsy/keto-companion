@@ -1,3 +1,857 @@
+// cloudflare-saas/public/media.js
+var RecorderController = class {
+  constructor({ mediaDevices, Recorder, onState, onAudio, clock = () => Date.now(), interval = (fn, ms) => globalThis.setInterval(fn, ms), clear = (id) => globalThis.clearInterval(id) }) {
+    Object.assign(this, { mediaDevices, Recorder, onState, onAudio, clock, interval, clear });
+    this.generation = 0;
+    this.mode = "idle";
+  }
+  emit(mode, message = "") {
+    this.mode = mode;
+    this.onState({ mode, message, seconds: Math.min(60, Math.floor((this.clock() - (this.started ?? this.clock())) / 1e3)) });
+  }
+  release() {
+    if (this.timer) this.clear(this.timer);
+    this.timer = null;
+    for (const track of this.stream?.getTracks() || []) {
+      track.onended = null;
+      track.stop();
+    }
+    this.stream = null;
+  }
+  async start() {
+    if (this.mode !== "idle") return;
+    const generation = ++this.generation;
+    this.emit("permission", "\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438.");
+    try {
+      if (!this.mediaDevices?.getUserMedia || !this.Recorder) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0434\u0438\u043A\u0442\u043E\u0432\u043A\u0443 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u044B \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442.");
+      const mime = ["audio/mp4", "audio/webm"].find((x) => this.Recorder.isTypeSupported(x));
+      if (!mime) throw Error("\u042D\u0442\u043E\u0442 \u0431\u0440\u0430\u0443\u0437\u0435\u0440 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u044C MP4/WebM. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u0443.");
+      const stream = await this.mediaDevices.getUserMedia({ audio: true });
+      if (generation !== this.generation) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      this.stream = stream;
+      for (const track of stream.getTracks()) track.onended = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C.");
+      const recorder = new this.Recorder(stream, { mimeType: mime, audioBitsPerSecond: 64e3 });
+      this.recorder = recorder;
+      this.parts = [];
+      this.bytes = 0;
+      this.started = this.clock();
+      recorder.ondataavailable = (e) => {
+        if (generation !== this.generation) return;
+        if (e.data?.size) {
+          this.parts.push(e.data);
+          this.bytes += e.data.size;
+          if (this.bytes > 1e6) this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u043A\u043E\u0440\u043E\u0447\u0435.");
+        }
+      };
+      recorder.onerror = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
+      recorder.onstop = async () => {
+        this.release();
+        if (generation !== this.generation) return;
+        try {
+          const blob = new Blob(this.parts, { type: mime });
+          this.parts = [];
+          if (!blob.size) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0443\u0441\u0442\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
+          if (blob.size > 1e6) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411.");
+          this.abort = new AbortController();
+          this.emit("recognizing", "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u044E\u2026 \u041C\u043E\u0436\u043D\u043E \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.");
+          const text = await this.onAudio(blob, mime, this.abort.signal);
+          if (generation !== this.generation) return;
+          this.emit("idle", "\u0422\u0435\u043A\u0441\u0442 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C\xBB.");
+        } catch (e) {
+          if (generation === this.generation) this.emit("idle", e.name === "AbortError" ? "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u0432\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E." : e.message);
+        } finally {
+          this.parts = [];
+        }
+      };
+      recorder.start(250);
+      this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
+      this.timer = this.interval(() => {
+        this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
+        if (this.clock() - this.started >= 6e4) this.stop();
+      }, 250);
+    } catch (e) {
+      this.release();
+      if (generation === this.generation) this.emit("idle", e.name === "NotAllowedError" ? "\u041D\u0435\u0442 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u043D\u0430 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0435\u0433\u043E \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0441\u0430\u0439\u0442\u0430 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0442\u0435\u043A\u0441\u0442." : e.message);
+    }
+  }
+  stop() {
+    if (this.mode === "recording" && this.recorder?.state === "recording") {
+      this.recorder.stop();
+      this.release();
+    }
+  }
+  cancel(message = "\u0417\u0430\u043F\u0438\u0441\u044C \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430.") {
+    this.generation++;
+    this.abort?.abort();
+    if (this.recorder?.state === "recording") this.recorder.stop();
+    this.release();
+    this.parts = [];
+    this.emit("idle", message);
+  }
+};
+async function blobBase64(blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let text = "";
+  for (const b2 of bytes) text += String.fromCharCode(b2);
+  return btoa(text);
+}
+async function prepareImage(file, { bitmap = globalThis.createImageBitmap, document: document2 = globalThis.document, URL: URL2 = globalThis.URL, Image = globalThis.Image } = {}) {
+  if (!file || !file.type?.startsWith("image/") || file.size > 12e6) throw Error("\u041D\u0443\u0436\u043D\u043E \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0434\u043E 12 \u041C\u0411.");
+  let source, url;
+  try {
+    if (bitmap) source = await bitmap(file);
+    else {
+      url = URL2.createObjectURL(file);
+      source = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+    const width = source.width || source.naturalWidth, height = source.height || source.naturalHeight;
+    if (!width || !height || width * height > 24e6) throw Error("\u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0435.");
+    const canvas = document2.createElement("canvas");
+    let scale = Math.min(1, 1024 / Math.max(width, height));
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
+    const result = canvas.toDataURL("image/jpeg", 0.78);
+    if (result.length > 13e5) throw Error("\u041F\u043E\u0441\u043B\u0435 \u0441\u0436\u0430\u0442\u0438\u044F \u0444\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043C\u0435\u043D\u044C\u0448\u0438\u0439 \u0441\u043D\u0438\u043C\u043E\u043A.");
+    return result;
+  } catch (e) {
+    throw Error(e.message?.includes("\u041C\u0411") ? e.message : "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u0444\u043E\u0442\u043E. \u0414\u043B\u044F HEIC \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u044D\u043A\u0441\u043F\u043E\u0440\u0442 \u0432 JPEG/PNG \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
+  } finally {
+    source?.close?.();
+    if (url) URL2.revokeObjectURL(url);
+  }
+}
+function setupChatImages({ root, $: $3, prepare = prepareImage, link, epoch, setImage, notify: notify2 }) {
+  let generation = 0;
+  const current = (g, e) => g === generation && e === epoch();
+  function closeLink() {
+    const d2 = $3("image-link-details");
+    if (typeof d2.close === "function") {
+      if (d2.open) d2.close();
+    } else d2.open = false;
+  }
+  function openLink() {
+    const d2 = $3("image-link-details");
+    if (typeof d2.showModal === "function") {
+      if (!d2.open) d2.showModal();
+    } else d2.open = true;
+    $3("image-link-url").focus();
+  }
+  function reset() {
+    generation++;
+    closeLink();
+    $3("image-link-load").disabled = false;
+    setImage(null);
+    $3("message").required = true;
+    $3("photo-preview").hidden = true;
+    $3("photo-preview-image").removeAttribute("src");
+    $3("photo").value = "";
+    $3("photo-status").textContent = "";
+    $3("image-link-url").value = "";
+    $3("image-drop-zone").classList.remove("dragging");
+  }
+  function display(value) {
+    setImage(value);
+    $3("message").required = false;
+    $3("photo-preview-image").src = value;
+    $3("photo-preview").hidden = false;
+    $3("photo-status").textContent = "\u0424\u043E\u0442\u043E \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E. \u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0441 \u0432\u0430\u0448\u0438\u043C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435\u043C.";
+  }
+  async function attach(file) {
+    const g = ++generation, e = epoch();
+    try {
+      const value = await prepare(file);
+      if (current(g, e)) display(value);
+    } catch (error) {
+      if (current(g, e)) notify2(error.message);
+    }
+  }
+  function first(files) {
+    const images = [...files].filter((f) => f.type?.startsWith("image/"));
+    if (images.length) {
+      if (images.length > 1) notify2("\u0417\u0430 \u043E\u0434\u043D\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u043E\u0434\u043D\u043E \u0444\u043E\u0442\u043E. \u0412\u044B\u0431\u0440\u0430\u043D\u043E \u043F\u0435\u0440\u0432\u043E\u0435.");
+      void attach(images[0]);
+      return true;
+    }
+    if (files.length) notify2("\u041D\u0443\u0436\u0435\u043D \u0444\u0430\u0439\u043B \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F. \u0421\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u043C\u043E\u0436\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0442\u0435\u043A\u0441\u0442\u043E\u043C \u0438\u043B\u0438 \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442\u043E\u043C.");
+    return false;
+  }
+  function offerUrl(value) {
+    const url = String(value || "").split("\n").find((x) => x.trim() && !x.startsWith("#"));
+    if (!url) return;
+    try {
+      if (new URL(url).protocol !== "https:") throw Error();
+      $3("image-link-url").value = url;
+      openLink();
+      notify2("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u0441\u044B\u043B\u043A\u0443 \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0444\u043E\u0442\u043E \u043F\u043E \u0441\u0441\u044B\u043B\u043A\u0435\xBB.");
+    } catch {
+      notify2("\u041D\u0443\u0436\u043D\u0430 \u043F\u0440\u044F\u043C\u0430\u044F \u043F\u0443\u0431\u043B\u0438\u0447\u043D\u0430\u044F HTTPS-\u0441\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435.");
+    }
+  }
+  $3("photo").onchange = (e) => first(e.target.files || []);
+  $3("photo-remove").onclick = reset;
+  root.addEventListener("paste", (e) => {
+    const files = [...e.clipboardData?.items || []].filter((x) => x.kind === "file" && x.type.startsWith("image/")).map((x) => x.getAsFile()).filter(Boolean);
+    if (!files.length) {
+      const text2 = (e.clipboardData?.getData("text/plain") || "").trim();
+      if (/^https:\/\/[^\s]+$/i.test(text2) && (/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(text2) || /^https:\/\/(?:images\.unsplash\.com|images\.pexels\.com|upload\.wikimedia\.org)\//i.test(text2))) offerUrl(text2);
+      return;
+    }
+    const text = e.clipboardData?.getData("text/plain");
+    if (!text) e.preventDefault();
+    first(files);
+  });
+  const zone = $3("image-drop-zone");
+  zone.onclick = () => $3("photo").click();
+  zone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      $3("photo").click();
+    }
+  });
+  const relevant = (e) => [...e.dataTransfer?.types || []].some((t) => ["Files", "text/uri-list"].includes(t));
+  root.addEventListener("dragover", (e) => {
+    if (relevant(e)) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      zone.classList.add("dragging");
+    }
+  });
+  root.addEventListener("dragleave", (e) => {
+    if (!root.contains(e.relatedTarget)) zone.classList.remove("dragging");
+  });
+  root.addEventListener("drop", (e) => {
+    if (!relevant(e)) return;
+    e.preventDefault();
+    zone.classList.remove("dragging");
+    if (!first(e.dataTransfer.files || [])) offerUrl(e.dataTransfer.getData("text/uri-list"));
+  });
+  $3("image-link-open").onclick = openLink;
+  $3("image-link-close").onclick = () => {
+    generation++;
+    closeLink();
+    $3("image-link-load").disabled = false;
+  };
+  $3("image-link-details").addEventListener("cancel", () => {
+    generation++;
+    $3("image-link-load").disabled = false;
+  });
+  $3("image-link-load").onclick = async () => {
+    const g = ++generation, e = epoch(), url = $3("image-link-url").value;
+    $3("image-link-load").disabled = true;
+    try {
+      const value = await link(url);
+      if (current(g, e)) {
+        display(value);
+        closeLink();
+      }
+    } catch (error) {
+      if (current(g, e)) notify2(error.message);
+    } finally {
+      if (current(g, e)) $3("image-link-load").disabled = false;
+    }
+  };
+  return { reset, attach, offerUrl, invalidate() {
+    generation++;
+  } };
+}
+
+// cloudflare-saas/public/shop-ui.js
+function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2, run: run2, epoch, allergens, onPantryPreview = () => {
+}, onPantryReset = () => {
+} }) {
+  const root = $3("shop-root");
+  let image2 = null, generation = 0, pending = null, saved = null, source = null, abort = null, ready = true, preparing = false, ownHint = null, pantryPending = null, pantryBusy = false;
+  root.innerHTML = `<details class="panel"><summary>\u0412 \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0435</summary><p>\u0421\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u0443\u0439\u0442\u0435 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0444\u043E\u0442\u043E, \u043D\u0430\u0439\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0438\u043B\u0438 \u0432\u043D\u0435\u0441\u0438\u0442\u0435 \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u0432\u0440\u0443\u0447\u043D\u0443\u044E. \u0414\u0430\u043D\u043D\u044B\u0435 \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435.</p><div class="shop-photo-actions"><label class="secondary photo-button shop-file-label">\u041A\u0430\u043C\u0435\u0440\u0430<input id="shop-camera" type="file" accept="image/*" capture="environment"></label><label class="secondary photo-button shop-file-label">\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0444\u043E\u0442\u043E<input id="shop-photo" type="file" accept="image/*"></label></div><img id="shop-preview" alt="\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438" hidden style="max-width:100%;max-height:240px"><button id="shop-read" type="button" disabled>\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443</button><button id="shop-cancel" type="button">\u041E\u0442\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0436\u0438\u0434\u0430\u043D\u0438\u0435</button><label>\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434<input id="shop-barcode" inputmode="numeric" maxlength="14"></label><button id="shop-find" type="button">\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443</button><p id="shop-status" role="status"></p><div id="shop-candidate"></div><button id="shop-manual" type="button">\u0412\u0432\u0435\u0441\u0442\u0438 \u0432\u0440\u0443\u0447\u043D\u0443\u044E</button><form id="shop-form"><h3>\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442</h3><p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u043A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u043E \u043D\u0430 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443. \u0414\u043B\u044F 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438 \u043D\u0443\u0436\u043D\u0430 \u044F\u0432\u043D\u043E \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u043C\u0430\u0441\u0441\u0430 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u0435 \u043E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u043F\u0443\u0441\u0442\u044B\u043C.</p><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435<select name="state" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435</option><option value="ready_to_eat">\u0413\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E</option><option value="raw">\u0421\u044B\u0440\u043E\u0439</option><option value="dry">\u0421\u0443\u0445\u043E\u0439</option><option value="cooked">\u0413\u043E\u0442\u043E\u0432\u044B\u0439</option><option value="canned">\u041A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439</option><option value="ready_to_cook">\u0414\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F</option></select></label><label>\u041E\u0441\u043D\u043E\u0432\u0430 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439<select name="unit_basis" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443</option><option value="per100g">\u041D\u0430 100 \u0433</option><option value="per100ml">\u041D\u0430 100 \u043C\u043B</option><option value="perserving">\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E</option></select></label><label>\u041C\u0430\u0441\u0441\u0430 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438, \u0433 (\u0435\u0441\u043B\u0438 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430)<input name="basis_mass" inputmode="decimal"></label><label>\u042D\u043D\u0435\u0440\u0433\u0438\u044F, \u043A\u043A\u0430\u043B<input name="energy_kcal" inputmode="decimal"></label><label>\u0411\u0435\u043B\u043A\u0438, \u0433<input name="protein_g" inputmode="decimal"></label><label>\u0416\u0438\u0440\u044B, \u0433<input name="fat_g" inputmode="decimal"></label><label>\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433<input name="carb" inputmode="decimal"></label><label>\u041A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B<select name="basis"><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438</option><option value="unknown">\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E</option><option value="total_includes_fiber">\u0412\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443</option><option value="available_excludes_fiber">\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438</option></select></label><label>\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433<input name="fiber_g" inputmode="decimal"></label><fieldset id="shop-allergens"><legend>\u041E\u0442\u043C\u0435\u0442\u044C\u0442\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438</legend></fieldset><label class="check"><input name="confirm" type="checkbox"> \u042F \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u043B(\u0430) \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043E\u0441\u043D\u043E\u0432\u0443, \u043C\u0430\u0441\u0441\u0443, \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</label><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0434\u043B\u044F \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0439 \u0435\u0434\u0438\u043D\u0438\u0446\u0435 (\u0433, \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0439)<input name="portion" inputmode="decimal"></label><button id="shop-portion" type="button">\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0434\u043B\u044F \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u0430</button><p id="shop-portion-result" role="status"></p><p>\u0413\u043B\u0438\u043A\u0435\u043C\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0438\u043D\u0434\u0435\u043A\u0441: \u043D\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445.</p><button id="shop-submit" type="submit">\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442</button></form><div id="shop-next" hidden><p id="shop-saved-name"></p><p>\u041C\u043E\u0436\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u0438\u043B\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0432 \u0441\u0432\u043E\u0451\u043C \u0431\u043B\u044E\u0434\u0435.</p><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439, \u0433<input id="shop-grams" inputmode="decimal"></label><button id="shop-pantry" type="button">\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E</button><button id="shop-own" type="button">\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</button><button id="shop-suggest" type="button" hidden>\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0439 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439</button></div></details>`;
+  const form = $3("shop-form"), status = $3("shop-status"), preview = $3("shop-preview"), next = $3("shop-next");
+  for (const [id, label] of allergens) {
+    const l2 = el2("label", "check", label), i = el2("input");
+    i.type = "checkbox";
+    i.value = id;
+    l2.prepend(i);
+    $3("shop-allergens").append(l2);
+  }
+  const current = (g, e) => g === generation && e === epoch();
+  function setReady(value) {
+    ready = value;
+    $3("shop-submit").disabled = !value || preparing;
+  }
+  function clearCandidate() {
+    pantryPending = null;
+    $3("shop-suggest").hidden = true;
+    onPantryReset();
+    ownHint?.remove();
+    ownHint = null;
+    source = null;
+    saved = null;
+    next.hidden = true;
+    $3("shop-saved-name").textContent = "";
+    $3("shop-grams").value = "";
+    $3("shop-candidate").replaceChildren();
+    $3("shop-portion-result").textContent = "";
+    for (const key of ["name", "state", "unit_basis", "basis_mass", "energy_kcal", "protein_g", "fat_g", "carb", "basis", "fiber_g", "portion"]) form.elements[key].value = "";
+    form.elements.confirm.checked = false;
+    for (const x of $3("shop-allergens").querySelectorAll("input")) x.checked = false;
+    setReady(false);
+  }
+  form.addEventListener("input", () => {
+    generation++;
+    if (saved) {
+      pantryPending = null;
+      $3("shop-suggest").hidden = true;
+      onPantryReset();
+      saved = null;
+      next.hidden = true;
+      $3("shop-saved-name").textContent = "";
+      ownHint?.remove();
+      ownHint = null;
+    }
+  });
+  $3("shop-manual").onclick = () => {
+    if (saved) clearCandidate();
+    setReady(true);
+    status.textContent = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0438\u0445 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435.";
+  };
+  async function select(file) {
+    const g = ++generation, e = epoch();
+    abort?.abort();
+    image2 = null;
+    clearCandidate();
+    preview.hidden = true;
+    $3("shop-read").disabled = true;
+    if (!file) return;
+    const data = await prepareImage(file);
+    if (!current(g, e)) return;
+    image2 = data;
+    preview.src = data;
+    preview.hidden = false;
+    $3("shop-read").disabled = false;
+    status.textContent = "\u0424\u043E\u0442\u043E \u0433\u043E\u0442\u043E\u0432\u043E. \u0414\u043B\u044F \u0447\u0442\u0435\u043D\u0438\u044F \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \u043A\u043D\u043E\u043F\u043A\u0443.";
+  }
+  for (const id of ["shop-camera", "shop-photo"]) $3(id).onchange = () => run2(() => select($3(id).files?.[0]));
+  function show(c2) {
+    clearCandidate();
+    source = c2?.provenance || null;
+    const host = $3("shop-candidate");
+    if (!c2) {
+      status.textContent = "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.";
+      return;
+    }
+    form.elements.confirm.checked = false;
+    for (const x of $3("shop-allergens").querySelectorAll("input")) x.checked = false;
+    if (c2.name) form.elements.name.value = c2.name;
+    $3("shop-barcode").value = typeof c2.barcode === "string" && /^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(c2.barcode) ? c2.barcode : "";
+    host.append(el2("h3", "", "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0434\u043B\u044F \u0441\u0432\u0435\u0440\u043A\u0438 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439"));
+    for (const line of [c2.name, c2.brand, c2.barcode ? "\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434: " + c2.barcode : null, "\u041E\u0441\u043D\u043E\u0432\u0430: " + ({ per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E", unknown: "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" }[c2.basis] || "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430"), ...c2.nutrients.map((x) => `${x.name}: ${x.value ?? "?"} ${x.unit ?? ""} (${x.column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`), c2.ingredients_text, c2.allergen_statement_text, ...c2.unresolved_fields, c2.reshoot_hint]) if (line) host.append(el2("p", "", line));
+    const columns = [...new Set(c2.nutrients.map((x) => x.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"))];
+    function applyColumn(column) {
+      setReady(true);
+      const f = form.elements;
+      for (const key of ["energy_kcal", "protein_g", "fat_g", "carb", "fiber_g"]) f[key].value = "";
+      f.unit_basis.value = columns.length === 1 && ["per100g", "per100ml", "perserving"].includes(c2.basis) ? c2.basis : "";
+      f.basis_mass.value = columns.length === 1 && c2.serving_mass != null && c2.serving_unit === "g" && c2.basis === "perserving" ? String(c2.serving_mass) : "";
+      f.basis.value = "";
+      const keys = { energy_kcal: [], protein_g: [], fat_g: [], carb: [], fiber_g: [] };
+      for (const r of c2.nutrients.filter((x) => (x.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430") === column)) {
+        const n = (r.name || "").toLowerCase().trim(), u2 = (r.unit || "").toLowerCase().trim();
+        let key = null;
+        if (/^(energy|energy kcal|энергия|энергетическая ценность)$/.test(n) && ["kcal", "\u043A\u043A\u0430\u043B"].includes(u2)) key = "energy_kcal";
+        else if (/^(protein|proteins|белки|белок)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "protein_g";
+        else if (/^(fat|fats|жиры|жир)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "fat_g";
+        else if (/^(carbohydrate|carbohydrates|углеводы)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "carb";
+        else if (/^(fiber|fibre|клетчатка|пищевые волокна)$/.test(n) && ["g", "\u0433"].includes(u2)) key = "fiber_g";
+        if (key && typeof r.value === "number" && Number.isFinite(r.value) && r.value >= 0) keys[key].push(r.value);
+      }
+      for (const [key, values2] of Object.entries(keys)) if (values2.length === 1) f[key].value = String(values2[0]);
+      status.textContent = "\u0427\u0438\u0441\u043B\u0430 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u044B \u0432 \u0438\u0441\u0445\u043E\u0434\u043D\u043E\u0439 \u043E\u0441\u043D\u043E\u0432\u0435. \u0421\u0432\u0435\u0440\u044C\u0442\u0435 \u043A\u0430\u0436\u0434\u044B\u0439 \u043F\u0443\u043D\u043A\u0442, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443 \u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435.";
+    }
+    if (columns.length === 1) applyColumn(columns[0]);
+    else if (columns.length > 1) {
+      host.append(el2("p", "", "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0434\u043D\u0443 \u043A\u043E\u043B\u043E\u043D\u043A\u0443 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u0434\u043B\u044F \u0444\u043E\u0440\u043C\u044B:"));
+      for (const column of columns) {
+        const b2 = el2("button", "secondary", "\u0418\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C: " + column);
+        b2.type = "button";
+        b2.onclick = () => applyColumn(column);
+        host.append(b2);
+      }
+    }
+    if (source) {
+      const p = el2("p", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: Open Food Facts, ODbL \xB7 "), a2 = el2("a", "", "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430");
+      a2.href = "https://world.openfoodfacts.org/product/" + c2.barcode;
+      a2.target = "_blank";
+      a2.rel = "noopener noreferrer";
+      p.append(a2);
+      host.append(p);
+    }
+    if (columns.length !== 1) status.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A; \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043D\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B.";
+  }
+  $3("shop-read").onclick = () => run2(async () => {
+    if (!image2) return;
+    const g = ++generation, e = epoch();
+    abort = new AbortController();
+    $3("shop-read").disabled = true;
+    status.textContent = "\u0427\u0438\u0442\u0430\u044E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443\u2026";
+    try {
+      const d2 = await call2("keto_label_extract", { request_id: crypto.randomUUID().replaceAll("-", ""), image_data_url: image2 }, { signal: abort.signal });
+      if (current(g, e)) show(d2.review_candidate);
+    } finally {
+      if (current(g, e)) $3("shop-read").disabled = false;
+    }
+  });
+  $3("shop-cancel").onclick = () => {
+    generation++;
+    abort?.abort();
+    abort = null;
+    $3("shop-read").disabled = !image2;
+    status.textContent = "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E. \u0417\u0430\u043F\u0440\u043E\u0441 \u043C\u043E\u0433 \u0431\u044B\u0442\u044C \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u0430\u043D; \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442\u0441\u044F. \u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435.";
+  };
+  $3("shop-barcode").oninput = () => {
+    generation++;
+    abort?.abort();
+    clearCandidate();
+  };
+  $3("shop-find").onclick = () => run2(async () => {
+    const barcode = $3("shop-barcode").value.trim(), g = ++generation, e = epoch();
+    clearCandidate();
+    status.textContent = "\u0418\u0449\u0443\u2026";
+    try {
+      const d2 = await api("/api/shop/barcode", "POST", { barcode });
+      if (current(g, e)) show(d2.review_candidate);
+    } catch (err) {
+      if (current(g, e)) status.textContent = "\u041F\u043E\u0438\u0441\u043A \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.";
+      throw err;
+    }
+  });
+  function number(v2, max) {
+    if (!v2.trim()) return null;
+    const x = v2.trim().replace(",", ".");
+    if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(x) || !Number.isFinite(Number(x)) || Number(x) > max) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0447\u0438\u0441\u043B\u043E.");
+    return Number(x);
+  }
+  $3("shop-portion").onclick = () => run2(async () => {
+    const f = form.elements, unit = f.unit_basis.value;
+    if (!["per100g", "per100ml", "perserving"].includes(unit)) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439.");
+    const amount = number(f.portion.value, 1e4);
+    if (amount === null || amount <= 0) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E.");
+    const factor = amount / (unit === "perserving" ? 1 : 100), parts = [];
+    for (const [key, label] of [["energy_kcal", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0431\u0435\u043B\u043A\u0438, \u0433"], ["fat_g", "\u0436\u0438\u0440\u044B, \u0433"], ["carb", "\u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433"], ["fiber_g", "\u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433"]]) {
+      const v2 = number(f[key].value, 1e4);
+      parts.push(label + ": " + (v2 === null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(v2 * factor)));
+    }
+    $3("shop-portion-result").textContent = parts.join(" \xB7 ") + "; \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u043A\u0430\u043A \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435.";
+  });
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    run2(async () => {
+      if (!ready) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043A\u043E\u043B\u043E\u043D\u043A\u0443 \u0438\u043B\u0438 \u0432\u0432\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.");
+      if (preparing || pending) throw Error("\u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0435 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u043E\u0435 \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u0435.");
+      const f = form.elements;
+      if (!f.confirm.checked || !f.name.value.trim() || !f.state.value) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B.");
+      const unit = f.unit_basis.value;
+      if (!["per100g", "per100ml", "perserving"].includes(unit)) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439.");
+      const mass = unit === "per100g" ? 100 : number(f.basis_mass.value, 1e4);
+      if (mass === null || mass <= 0) throw Error("\u0414\u043B\u044F 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445.");
+      const scale = (v2) => v2 === null ? null : v2 * 100 / mass;
+      const declared_label = { basis: unit, mass_g: mass, energy_kcal: number(f.energy_kcal.value, 1e4), protein_g: number(f.protein_g.value, 1e4), fat_g: number(f.fat_g.value, 1e4), carbohydrate_g: number(f.carb.value, 1e4), fiber_g: number(f.fiber_g.value, 1e4), carbohydrate_basis: f.basis.value };
+      const id = "U" + crypto.randomUUID().replaceAll("-", ""), carb = scale(number(f.carb.value, 1e4));
+      let basis = f.basis.value;
+      if (carb !== null && !["total_includes_fiber", "available_excludes_fiber", "unknown"].includes(basis)) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435, \u043A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0438\u043B\u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \xAB\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\xBB.");
+      if (carb === null && !basis) basis = "unknown";
+      declared_label.carbohydrate_basis = basis;
+      const values2 = { energy_kcal: scale(number(f.energy_kcal.value, 1e4)), protein_g: scale(number(f.protein_g.value, 1e4)), fat_g: scale(number(f.fat_g.value, 1e4)), carbohydrate_total_g: basis === "total_includes_fiber" ? carb : null, fiber_g: scale(number(f.fiber_g.value, 1e4)) };
+      const provider = source?.provider === "Open Food Facts" ? "open_food_facts" : "personal_label";
+      const provenance = { type: "shop_label", provider, barcode: provider === "open_food_facts" ? $3("shop-barcode").value.trim() : null, license: provider === "open_food_facts" ? "ODbL" : null };
+      const payload = { food_id: id, name_ru: f.name.value.trim(), state: f.state.value, allergens: [...$3("shop-allergens").querySelectorAll("input:checked")].map((x) => x.value), label_confirmed: true, source_ref: provider === "open_food_facts" ? source.url : "\u041B\u0438\u0447\u043D\u0430\u044F \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430", carb_basis: "total_includes_fiber", nutrient_status: Object.values(values2).some((x) => x === null) ? "partial" : "complete", provenance, recipe_eligible: false, declared_label, ...values2 };
+      if (carb !== null && basis !== "total_includes_fiber") payload.declared_carbohydrate = { value: carb, basis };
+      const submitted = { id, state: payload.state, name: payload.name_ru, generation };
+      preparing = true;
+      setReady(ready);
+      let d2;
+      try {
+        d2 = await call2("keto_propose_change", { event_type: "catalog.food.add", payload, expected_revision: getState().revision });
+      } finally {
+        preparing = false;
+        setReady(ready);
+      }
+      pending = { proposal: d2.proposal.id, ...submitted };
+      accept2(d2);
+      form.insertAdjacentElement("afterend", $3("proposals"));
+      $3("proposals").scrollIntoView({ block: "nearest" });
+    });
+  };
+  $3("shop-pantry").onclick = () => run2(async () => {
+    if (!saved || pantryBusy || pantryPending) return;
+    const grams = number($3("shop-grams").value, 3e4);
+    if (grams !== null && grams <= 0) throw Error("\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0434\u043E\u043B\u0436\u043D\u043E \u0431\u044B\u0442\u044C \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0443\u043B\u044F.");
+    const current2 = getState().kitchen?.pantry || [];
+    if (current2.some((x) => x.food_id === saved.id)) throw Error("\u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u0443\u0436\u0435 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439; \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0432 \u0440\u0430\u0437\u0434\u0435\u043B\u0435 \u043A\u0443\u0445\u043D\u0438.");
+    const selected = { id: saved.id, name: saved.name, generation };
+    const items = [...current2.map(({ food_id, state: state2, grams: grams2 }) => ({ food_id, state: state2, grams: grams2 })), { food_id: selected.id, state: saved.state, grams }];
+    pantryBusy = true;
+    $3("shop-pantry").disabled = true;
+    let d2;
+    try {
+      d2 = await call2("keto_kitchen", { action: "pantry", values: { items }, expected_revision: getState().revision });
+    } finally {
+      pantryBusy = false;
+      $3("shop-pantry").disabled = false;
+    }
+    if (selected.generation !== generation || saved?.id !== selected.id) return;
+    pantryPending = { proposal: d2.proposal.id, ...selected };
+    accept2(d2);
+    next.insertAdjacentElement("afterend", $3("proposals"));
+    $3("proposals").scrollIntoView({ block: "nearest" });
+  });
+  $3("shop-suggest").onclick = () => {
+    if (saved && !$3("shop-suggest").hidden) onPantryPreview(saved.name);
+  };
+  $3("shop-own").onclick = () => {
+    if (!saved) return;
+    const d2 = $3("own-dish-root").querySelector("details");
+    if (!d2) return;
+    ownHint?.remove();
+    ownHint = el2("p", "notice", "\u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \xAB" + saved.name + "\xBB \u0447\u0435\u0440\u0435\u0437 \u043F\u043E\u0438\u0441\u043A \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u0430 \u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443.");
+    d2.prepend(ownHint);
+    d2.open = true;
+    d2.scrollIntoView({ block: "start" });
+  };
+  return { afterApplied(d2) {
+    if (pantryPending && d2?.receipt?.id === pantryPending.proposal && d2.receipt.type === "kitchen.pantry") {
+      const p = pantryPending;
+      pantryPending = null;
+      if (p.generation === generation && saved?.id === p.id && d2.state?.kitchen?.pantry?.some((i) => i.food_id === p.id)) {
+        $3("shop-suggest").hidden = false;
+        status.textContent = "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0430. \u041C\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u0431\u043B\u044E\u0434.";
+      }
+    } else if (pantryPending && d2?.state?.pending && !d2.state.pending.some((p) => p.id === pantryPending.proposal)) {
+      pantryPending = null;
+    }
+    if (pending && d2?.receipt?.id === pending.proposal && d2.receipt.type === "catalog.food.add") {
+      const p = pending;
+      pending = null;
+      if (p.generation === generation) {
+        saved = p;
+        next.hidden = false;
+        $3("shop-saved-name").textContent = "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + p.name;
+        $3("shop-pantry").textContent = "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E: " + p.name;
+        status.textContent = "\u041B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D.";
+      }
+    } else if (pending && d2?.state?.pending && !d2.state.pending.some((p) => p.id === pending.proposal)) {
+      pending = null;
+    }
+  }, reset() {
+    generation++;
+    pantryPending = null;
+    pantryBusy = false;
+    $3("shop-suggest").hidden = true;
+    onPantryReset();
+    ownHint?.remove();
+    ownHint = null;
+    abort?.abort();
+    image2 = null;
+    pending = null;
+    saved = null;
+    source = null;
+    preparing = false;
+    setReady(true);
+    preview.removeAttribute("src");
+    preview.hidden = true;
+    $3("shop-read").disabled = true;
+    $3("shop-candidate").replaceChildren();
+    status.textContent = "";
+    $3("shop-portion-result").textContent = "";
+    next.hidden = true;
+    form.reset();
+    $3("shop-camera").value = "";
+    $3("shop-photo").value = "";
+    $3("shop-barcode").value = "";
+  } };
+}
+
+// cloudflare-saas/public/recipe-library.js
+function createRecipeLibrary({ call: call2, readFilters, render, clear = () => {
+}, status, more, epoch }) {
+  let token = 0, offset2 = 0, scope2 = null, retry = null;
+  const fingerprint = (x) => JSON.stringify(x);
+  function invalidate() {
+    token++;
+    retry = null;
+    more(false);
+  }
+  async function load(append = false) {
+    const filters = readFilters(), key = fingerprint(filters);
+    if (append && scope2 !== key) append = false;
+    const start2 = append ? offset2 : 0, serial = ++token, screen = epoch();
+    if (!append) {
+      clear();
+      scope2 = null;
+      offset2 = 0;
+    }
+    retry = { append, key };
+    status("\u0417\u0430\u0433\u0440\u0443\u0437\u043A\u0430\u2026");
+    more(false);
+    try {
+      const d2 = await call2({ ...filters, limit: 24, offset: start2 });
+      if (serial !== token || screen !== epoch() || fingerprint(readFilters()) !== key) return;
+      render(d2, append);
+      scope2 = key;
+      offset2 = start2 + d2.recipes.length;
+      retry = null;
+      status(`\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u043E ${offset2} \u0438\u0437 ${d2.total}. ${d2.note}`);
+      more(d2.has_more, false);
+    } catch (e) {
+      if (serial === token && screen === epoch() && fingerprint(readFilters()) === key) {
+        retry = { append, key };
+        status("\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442\u044B. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
+        more(true, true);
+      }
+      throw e;
+    }
+  }
+  function next() {
+    const key = fingerprint(readFilters());
+    return load(retry && retry.key === key ? retry.append : true);
+  }
+  return { load, next, invalidate };
+}
+
+// cloudflare-saas/public/own-dish.js
+function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, numberRu: numberRu2 }) {
+  const root = $3("own-dish-root");
+  root.innerHTML = `<details class="panel"><summary>\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</summary><form id="own-form"><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F<select name="category"><option value="main">\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E</option><option value="breakfast">\u0417\u0430\u0432\u0442\u0440\u0430\u043A</option><option value="side">\u0413\u0430\u0440\u043D\u0438\u0440</option><option value="component">\u041A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442</option></select></label><label>\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u043E \u0432\u0441\u0451\u043C \u0431\u043B\u044E\u0434\u0435<input name="servings" type="text" inputmode="decimal" value="1" required><span id="own-servings-error" role="alert"></span></label><label>\u0410\u043A\u0442\u0438\u0432\u043D\u043E\u0435 \u0432\u0440\u0435\u043C\u044F, \u043C\u0438\u043D\u0443\u0442<input name="minutes" type="number" min="1" max="360" value="15" required></label><label>\u041D\u0430\u0439\u0442\u0438 \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442<input name="search" type="search" autocomplete="off"></label><div id="own-results"></div><div id="own-rows"></div><label>\u0428\u0430\u0433\u0438<textarea name="steps" maxlength="5000" required></textarea></label><p id="own-form-error" role="alert"></p><button type="submit">\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button><button id="own-save" type="button" hidden>\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435</button></form><div id="own-preview" aria-live="polite"></div><div id="own-intake" hidden><label>\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E<select id="own-saved"></select></label><button id="own-detail" type="button">\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0441\u043E\u0441\u0442\u0430\u0432 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435</button><div id="own-detail-result" aria-live="polite"></div><label>\u0414\u0430\u0442\u0430 \u043F\u0440\u0438\u0451\u043C\u0430 \u043F\u0438\u0449\u0438<input id="own-date" type="date" required></label><label>\u0421\u043A\u043E\u043B\u044C\u043A\u043E \u0441\u044A\u0435\u043B\u0438<input id="own-fraction" type="text" inputmode="decimal" value="1" required></label><p id="own-intake-error" role="alert"></p><label>\u041E\u0442 \u0447\u0435\u0433\u043E<select id="own-basis"><option value="portion">\u043F\u043E\u0440\u0446\u0438\u0438</option><option value="batch">\u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430</option></select></label><button id="own-record" type="button">\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A</button></div></details>`;
+  const form = $3("own-form");
+  let rows = [], id = null, stamp = "", saved = null, searchEpoch = 0, results = [], resultPage = 0;
+  function decimal(value, label, min, max, near) {
+    const raw = String(value ?? "").trim();
+    let error = "";
+    if (!/^(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(raw)) error = "\u0423\u043A\u0430\u0436\u0438\u0442\u0435 " + label + " \u0447\u0438\u0441\u043B\u043E\u043C, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 1,5.";
+    const n = Number(raw.replace(",", "."));
+    if (!error && (!Number.isFinite(n) || n < min || n > max)) error = "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 " + label + ": \u0434\u043E\u043F\u0443\u0441\u0442\u0438\u043C\u043E \u043E\u0442 " + min + " \u0434\u043E " + max + ".";
+    if (near) near.textContent = error;
+    if (error) throw Error(error);
+    return n;
+  }
+  function localDate2() {
+    const d2 = /* @__PURE__ */ new Date();
+    return [d2.getFullYear(), String(d2.getMonth() + 1).padStart(2, "0"), String(d2.getDate()).padStart(2, "0")].join("-");
+  }
+  function reset() {
+    rows = [];
+    id = null;
+    stamp = "";
+    saved = null;
+    searchEpoch++;
+    form.reset();
+    $3("own-results").replaceChildren();
+    $3("own-rows").replaceChildren();
+    $3("own-preview").replaceChildren();
+    $3("own-detail-result").replaceChildren();
+    $3("own-form-error").textContent = "";
+    $3("own-intake-error").textContent = "";
+    $3("own-date").value = "";
+    $3("own-save").hidden = true;
+    $3("own-intake").hidden = true;
+  }
+  function payload() {
+    return { recipe_id: id || (id = "R" + crypto.randomUUID().replaceAll("-", "")), name_ru: form.elements.namedItem("name").value, category: form.elements.namedItem("category").value, base_servings: decimal(form.elements.namedItem("servings").value, "\u0447\u0438\u0441\u043B\u043E \u043F\u043E\u0440\u0446\u0438\u0439", 0.1, 30, $3("own-servings-error")), active_minutes: decimal(form.elements.namedItem("minutes").value, "\u0432\u0440\u0435\u043C\u044F", 1, 360), ingredients: rows.map((x) => ({ food_id: x.food_id, state: x.state, grams_edible: decimal(x.grams, "\u0433\u0440\u0430\u043C\u043C\u044B \u0434\u043B\u044F \xAB" + x.name_ru + "\xBB", 1e-3, 5e3, x.error) })), steps_ru: form.elements.namedItem("steps").value };
+  }
+  function changed() {
+    stamp = "";
+    $3("own-save").hidden = true;
+    if ($3("own-preview").children.length) $3("own-preview").replaceChildren(el2("p", "muted", "\u0421\u043E\u0441\u0442\u0430\u0432 \u0438\u0437\u043C\u0435\u043D\u0451\u043D \u2014 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0439\u0442\u0435."));
+  }
+  function draw() {
+    const box = $3("own-rows");
+    box.replaceChildren();
+    for (const row of rows) {
+      const line = el2("div", "inline-form");
+      line.append(el2("span", "", row.name_ru + " \xB7 " + foodState2(row.state)));
+      const gram = el2("input");
+      gram.type = "text";
+      gram.inputMode = "decimal";
+      gram.required = true;
+      gram.value = row.grams;
+      gram.setAttribute("aria-label", "\u0413\u0440\u0430\u043C\u043C\u044B \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u043E\u0439 \u0447\u0430\u0441\u0442\u0438: " + row.name_ru);
+      gram.oninput = () => {
+        row.grams = gram.value;
+        changed();
+      };
+      const del = el2("button", "secondary", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C");
+      del.type = "button";
+      del.onclick = () => {
+        rows = rows.filter((x) => x !== row);
+        draw();
+        changed();
+      };
+      const error = el2("span", "");
+      error.setAttribute("role", "alert");
+      row.error = error;
+      line.append(gram, del, error);
+      box.append(line);
+    }
+  }
+  function preview(box, p) {
+    const batch = p.whole_batch;
+    box.append(el2("h4", "", batch.name_ru + " \xB7 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E"), el2("p", "muted", "\u0420\u0430\u0441\u0447\u0451\u0442 \u0434\u043B\u044F \u0444\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438 \u043F\u0438\u0442\u0430\u043D\u0438\u044F; \u044D\u0442\u043E \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E."));
+    if (p.servings != null) box.append(el2("p", "", `\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u043E \u0432\u0441\u0451\u043C \u0431\u043B\u044E\u0434\u0435: ${numberRu2(p.servings)}`));
+    for (const i of batch.ingredients) box.append(el2("p", "", i.name_ru + " \u2014 " + numberRu2(i.grams_edible) + " \u0433 \xB7 " + foodState2(i.state)));
+    if (p.steps_ru) box.append(el2("p", "", "\u041F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435: " + p.steps_ru));
+    for (const [title, c2] of [["\u0412\u0441\u0451 \u0431\u043B\u044E\u0434\u043E", batch], ["\u041E\u0434\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044F", p.per_portion]]) {
+      const fields = [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043E\u043A", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"], ["net_carbohydrate_g", "\u0420\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0435 \u0447\u0438\u0441\u0442\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"]];
+      box.append(el2("p", "", title + ": " + fields.map(([k, n, u2]) => {
+        const value = c2.nutrition[k], known = c2.coverage[k]?.known_subtotal;
+        return n + " " + (value == null ? "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E" + (known == null ? "" : ` (\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u0447\u0430\u0441\u0442\u044C ${numberRu2(known, k === "energy_kcal" ? 0 : 1)} ${u2})`) : `${numberRu2(value, k === "energy_kcal" ? 0 : 1)} ${u2}`);
+      }).join(" \xB7 ")));
+    }
+    if (p.issues?.some((x) => x.startsWith("allergen:"))) box.append(el2("p", "notice", "\u0412 \u0441\u043E\u0441\u0442\u0430\u0432\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u0438\u0437 \u0432\u0430\u0448\u0435\u0433\u043E \u043F\u0440\u043E\u0444\u0438\u043B\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0434 \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u0435\u043C."));
+  }
+  function drawResults() {
+    const box = $3("own-results");
+    box.replaceChildren(el2("p", "muted", `\u041D\u0430\u0439\u0434\u0435\u043D\u043E: ${results.length}`));
+    for (const f of results.slice(resultPage * 8, resultPage * 8 + 8)) {
+      const b2 = el2("button", "secondary", f.name_ru + " \xB7 " + foodState2(f.state));
+      b2.type = "button";
+      b2.onclick = () => {
+        if (!rows.some((r) => r.food_id === f.food_id)) rows.push({ ...f, grams: "" });
+        draw();
+        changed();
+        box.replaceChildren();
+        form.elements.namedItem("search").value = "";
+        searchEpoch++;
+      };
+      box.append(b2);
+    }
+    for (const [label, delta, show] of [["\u041D\u0430\u0437\u0430\u0434", -1, resultPage > 0], ["\u0415\u0449\u0451", 1, (resultPage + 1) * 8 < results.length]]) if (show) {
+      const b2 = el2("button", "secondary", label);
+      b2.type = "button";
+      b2.onclick = () => {
+        resultPage += delta;
+        drawResults();
+      };
+      box.append(b2);
+    }
+  }
+  form.addEventListener("input", changed);
+  form.elements.namedItem("search").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") e.preventDefault();
+  });
+  form.elements.namedItem("search").addEventListener("input", () => {
+    const query = form.elements.namedItem("search").value.trim(), token = ++searchEpoch, screen = epoch();
+    if (!query) {
+      $3("own-results").replaceChildren();
+      return;
+    }
+    run2(async () => {
+      const d2 = await call2("keto_kitchen", { action: "foods", query });
+      if (token !== searchEpoch || screen !== epoch()) return;
+      results = d2.foods;
+      resultPage = 0;
+      drawResults();
+    });
+  });
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    run2(async () => {
+      let data;
+      try {
+        data = payload();
+        $3("own-form-error").textContent = "";
+      } catch (e2) {
+        $3("own-form-error").textContent = e2.message;
+        return;
+      }
+      const key = JSON.stringify(data), screen = epoch();
+      const d2 = await call2("keto_kitchen", { action: "own_dish_calculate", values: data });
+      if (screen !== epoch()) return;
+      try {
+        if (key !== JSON.stringify(payload())) return;
+      } catch {
+        return;
+      }
+      stamp = key;
+      $3("own-preview").replaceChildren();
+      preview($3("own-preview"), d2.preview);
+      $3("own-save").hidden = false;
+    });
+  };
+  $3("own-save").onclick = () => run2(async () => {
+    const data = payload();
+    if (JSON.stringify(data) !== stamp) throw Error("\u041F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0439\u0442\u0435 \u0438\u0437\u043C\u0435\u043D\u0451\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E.");
+    const d2 = await call2("keto_kitchen", { action: "own_dish_save", values: data, expected_revision: getState().revision });
+    accept2(d2);
+    form.insertAdjacentElement("afterend", $3("proposals"));
+    $3("proposals").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  $3("own-detail").onclick = () => run2(async () => {
+    const rid = $3("own-saved").value, screen = epoch();
+    const d2 = await call2("keto_kitchen", { action: "own_dish_detail", values: { recipe_id: rid } });
+    if (screen !== epoch() || rid !== $3("own-saved").value) return;
+    $3("own-detail-result").replaceChildren();
+    preview($3("own-detail-result"), d2.preview);
+  });
+  $3("own-saved").addEventListener("change", () => $3("own-detail-result").replaceChildren());
+  $3("own-record").onclick = () => run2(async () => {
+    let fraction;
+    try {
+      fraction = decimal($3("own-fraction").value, "\u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0433\u043E", 0.05, 6);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test($3("own-date").value)) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0434\u0430\u0442\u0443 \u043F\u0440\u0438\u0451\u043C\u0430 \u043F\u0438\u0449\u0438.");
+      $3("own-intake-error").textContent = "";
+    } catch (e) {
+      $3("own-intake-error").textContent = e.message;
+      return;
+    }
+    const d2 = await call2("keto_kitchen", { action: "own_dish_diary", values: { recipe_id: $3("own-saved").value || saved, fraction, basis: $3("own-basis").value, date: $3("own-date").value }, expected_revision: getState().revision });
+    accept2(d2);
+    $3("own-intake").insertAdjacentElement("afterend", $3("proposals"));
+    $3("proposals").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  function update(state2) {
+    const list = state2?.kitchen?.own_recipes || [];
+    const selected = $3("own-saved").value || saved;
+    $3("own-saved").replaceChildren(...list.map((r) => {
+      const o2 = el2("option", "", r.name_ru);
+      o2.value = r.recipe_id;
+      return o2;
+    }));
+    if (list.some((r) => r.recipe_id === selected)) $3("own-saved").value = selected;
+    $3("own-intake").hidden = !list.length;
+    if (!$3("own-date").value) $3("own-date").value = localDate2();
+  }
+  function savedReceipt(data) {
+    saved = data.recipe_id;
+    $3("own-saved").value = saved;
+    if ((() => {
+      try {
+        return JSON.stringify(data) === JSON.stringify(payload());
+      } catch {
+        return false;
+      }
+    })()) {
+      form.reset();
+      rows = [];
+      id = null;
+      stamp = "";
+      draw();
+      $3("own-preview").replaceChildren();
+      $3("own-save").hidden = true;
+    } else {
+      id = null;
+      stamp = "";
+      $3("own-save").hidden = true;
+    }
+    $3("own-intake").hidden = false;
+  }
+  return { reset, preview, savedReceipt, update };
+}
+
 // cloudflare-saas/public/developer-ui.js
 var labels = { draft: "\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E \xB7 \u043E\u0436\u0438\u0434\u0430\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F", generating: "\u0413\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F \u043F\u0430\u0442\u0447\u0430", generated: "\u041F\u0430\u0442\u0447 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D \xB7 \u0435\u0449\u0451 \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D", testing: "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u0442\u0441\u044F \u0432 \u0438\u0437\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u043C \u0440\u0430\u043D\u043D\u0435\u0440\u0435", tested: "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \xB7 \u043D\u0435 \u043E\u043F\u0443\u0431\u043B\u0438\u043A\u043E\u0432\u0430\u043D\u043E", failed: "\u041E\u0448\u0438\u0431\u043A\u0430 \xB7 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u043F\u043E\u0432\u0442\u043E\u0440\u0430 \u043D\u0435\u0442", cancelled: "\u041E\u0442\u043C\u0435\u043D\u0435\u043D\u043E", expired: "\u0421\u0440\u043E\u043A \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F \u0438\u0441\u0442\u0451\u043A" };
 function setupDeveloper({ $: $3, el: el2, api, preview, epoch, notify: notify2, setView: setView2, isOwner, hasAttachment }) {
@@ -189,9 +1043,13 @@ function mountDeveloperExtension(root) {
 
 // cloudflare-saas/public/kitchen-ui.js
 var kitchenModes = [["pantry_only", "\u0422\u043E\u043B\u044C\u043A\u043E \u043C\u043E\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", "\u0411\u0435\u0437 \u0441\u043A\u0440\u044B\u0442\u044B\u0445 \u043C\u0430\u0441\u043B\u0430, \u0441\u043E\u043B\u0438 \u0438 \u043F\u043E\u043A\u0443\u043F\u043E\u043A"], ["pantry_plus", "\u041C\u043E\u0436\u043D\u043E \u0434\u043E\u043A\u0443\u043F\u0438\u0442\u044C", "\u0414\u043E \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E \u0447\u0438\u0441\u043B\u0430 \u043D\u0435\u0434\u043E\u0441\u0442\u0430\u044E\u0449\u0438\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432"], ["inspiration", "\u041D\u0443\u0436\u043D\u044B \u0438\u0434\u0435\u0438", "\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043D\u0435 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u0430"]];
-var kitchenActionLabels = { pantry: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E", remember: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", forget: "\u0417\u0430\u0431\u044B\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", save: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", favorite: "\u0412 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", rate: "\u041E\u0446\u0435\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", diary: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0434\u043E\u043B\u044E \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", accept_day: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C" };
+var kitchenActionLabels = { own_dish_save: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E", own_dish_diary: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", source_import: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442", pantry: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E", remember: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", forget: "\u0417\u0430\u0431\u044B\u0442\u044C \u043F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", save: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", favorite: "\u0412 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", rate: "\u041E\u0446\u0435\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", diary: "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0434\u043E\u043B\u044E \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", accept_day: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C" };
+function sourceImportPreview(el2, food, original, allergens, foodState2) {
+  const labels2 = food.allergens.map((id) => allergens.find((row) => row[0] === id)?.[1] || "\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D (" + String(id) + ")");
+  return [el2("p", "", food.name_ru + " \xB7 " + foodState2(food.state)), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: " + original + " \xB7 USDA; \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B: " + (labels2.length ? labels2.join(", ") : "\u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E: \u043D\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u044B")), el2("p", "muted", "\u041F\u043E\u0441\u043B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F \u043D\u0430\u0439\u0434\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435, \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u043C\u0430\u0441\u0441\u0443. \u0415\u0433\u043E \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0434\u043B\u044F \u0440\u0430\u0441\u0447\u0451\u0442\u0430 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430. \u0414\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0445 \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432 \u0438 \u043C\u0435\u043D\u044E \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438 \u0435\u0449\u0451 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E.")];
+}
 function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, notify: notify2, setView: setView2, epoch }) {
-  let pantry = [], foods = [], result = null, busy2 = false, localEpoch = 0, dirty = false;
+  let pantry = [], foods = [], result = null, busy2 = false, parsing = false, parseNumber = 0, localEpoch = 0, dirty = false;
   const host = $3("kitchen-studio");
   if (!host) return { render() {
   }, load: async () => {
@@ -230,52 +1088,175 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   const picker = el2("div", "kitchen-picker"), product = el2("input"), datalist = el2("datalist");
   product.id = "kitchen-product";
   product.setAttribute("list", "kitchen-food-list");
-  product.placeholder = "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430";
+  product.placeholder = "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430";
   product.autocomplete = "off";
   product.dataset.testid = "kitchen-food-input";
   datalist.id = "kitchen-food-list";
   const productLabel = el2("label", "", "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0438\u0437 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430");
   productLabel.htmlFor = product.id;
+  const trustedList = el2("div", "kitchen-food-results");
+  trustedList.setAttribute("aria-label", "\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430 \u0438 \u043B\u0438\u0447\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B");
+  const sourceResults = el2("div", "kitchen-food-results"), review = el2("div", "panel");
+  sourceResults.setAttribute("aria-label", "\u0417\u0430\u043F\u0438\u0441\u0438 USDA \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438");
+  review.hidden = true;
+  let sourceCursor = null, sourceQuery = "", sourceToken = 0;
   const chips = el2("div", "kitchen-chips");
   chips.dataset.testid = "pantry-chips";
   const status = el2("p", "muted");
   status.setAttribute("role", "status");
   status.dataset.testid = "kitchen-status";
+  let searchNumber = 0, selectedFood = null, trustedStart = 0;
+  function invalidateSource() {
+    sourceToken++;
+    sourceCursor = null;
+    sourceQuery = "";
+    sourceResults.replaceChildren();
+    review.hidden = true;
+  }
+  function renderTrusted() {
+    trustedList.hidden = false;
+    trustedList.replaceChildren();
+    const page = foods.slice(trustedStart, trustedStart + 8);
+    trustedList.append(el2("p", "muted", `\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B: ${foods.length ? trustedStart + 1 : 0}\u2013${trustedStart + page.length} \u0438\u0437 ${foods.length}`));
+    for (const f of page) trustedList.append(button(f.name_ru + " \xB7 " + (states[f.state] || f.state) + " \xB7 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A / \u043B\u0438\u0447\u043D\u044B\u0439", async () => {
+      searchNumber++;
+      clearTimeout(product.timer);
+      invalidateSource();
+      selectedFood = f;
+      product.value = f.name_ru + " \xB7 " + (states[f.state] || f.state);
+      trustedList.hidden = true;
+      status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + f.name_ru + ". \u041D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C\xBB.";
+    }));
+    if (trustedStart > 0) trustedList.append(button("\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+      trustedStart = Math.max(0, trustedStart - 8);
+      renderTrusted();
+    }));
+    if (trustedStart + 8 < foods.length) trustedList.append(button("\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+      trustedStart += 8;
+      renderTrusted();
+    }));
+  }
   function foodOptions() {
     datalist.replaceChildren(...foods.map((f) => {
       const o2 = el2("option");
-      o2.value = f.food_id + " \xB7 " + f.name_ru + " \xB7 " + (states[f.state] || f.state);
+      o2.value = f.name_ru + " \xB7 " + (states[f.state] || f.state);
       return o2;
     }));
+    trustedStart = 0;
+    renderTrusted();
   }
-  let searchNumber = 0;
   product.oninput = () => {
+    invalidateSource();
     const token = ++searchNumber;
     clearTimeout(product.timer);
+    selectedFood = foods.find((f) => product.value === f.name_ru + " \xB7 " + (states[f.state] || f.state)) || null;
+    if (selectedFood) {
+      trustedList.hidden = true;
+      status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + selectedFood.name_ru;
+      return;
+    }
     product.timer = setTimeout(() => run2(async () => {
       const e = epoch(), d2 = await call2("keto_kitchen", { action: "foods", query: product.value.slice(0, 200) });
       if (token !== searchNumber || e !== epoch()) return;
       foods = d2.foods;
       foodOptions();
+      status.textContent = `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${d2.total ?? foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.`;
     }), 250);
   };
   function addFood(food) {
     if (pantry.some((i) => i.food_id === food.food_id)) return;
-    pantry.push({ food_id: food.food_id, state: food.state, grams: null, name_ru: food.name_ru });
+    pantry.push({ food_id: food.food_id, state: food.state, grams: food.grams ?? null, name_ru: food.name_ru });
     dirty = true;
     renderChips();
   }
   const add = button("\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C", async () => {
-    const code = product.value.split(" \xB7 ")[0];
-    const food = foods.find((f) => f.food_id === code);
+    const food = selectedFood || foods.find((f) => product.value === f.name_ru + " \xB7 " + (states[f.state] || f.state));
     if (!food) {
-      status.textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C. \u0414\u043B\u044F \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0433\u043E \u0441\u043F\u0438\u0441\u043A\u0430 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \xAB\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\xBB. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u043C\u0443 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0443 \u043D\u0443\u0436\u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430.";
+      status.textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438\u0437 \u0441\u043F\u0438\u0441\u043A\u0430. \u0414\u043B\u044F \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0433\u043E \u0441\u043F\u0438\u0441\u043A\u0430 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \xAB\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\xBB. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u043C\u0443 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0443 \u043D\u0443\u0436\u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430.";
       return;
     }
     addFood(food);
     product.value = "";
+    selectedFood = null;
   });
-  picker.append(productLabel, product, datalist, add);
+  picker.onkeydown = (e) => {
+    if (e.key === "Enter" && e.target.tagName !== "BUTTON") e.preventDefault();
+  };
+  picker.append(productLabel, product, datalist, trustedList, add);
+  const sourceSearch = button("\u0418\u0441\u043A\u0430\u0442\u044C \u0432 USDA", async () => {
+    invalidateSource();
+    sourceQuery = product.value.trim();
+    await loadSource(false);
+  });
+  async function loadSource(more) {
+    const e = epoch(), token = ++sourceToken, q2 = sourceQuery, cursor = more ? sourceCursor : null;
+    const d2 = await call2("keto_kitchen", { action: "source_search", query: q2, values: { cursor, limit: 20 } });
+    if (e !== epoch() || token !== sourceToken || q2 !== sourceQuery || q2 !== product.value.trim()) return;
+    if (!more) sourceResults.replaceChildren();
+    sourceResults.querySelector("[data-source-more]")?.remove();
+    sourceResults.append(el2("p", "muted", `USDA: \u043D\u0430\u0439\u0434\u0435\u043D\u043E ${d2.total}. \u0417\u0430\u043F\u0438\u0441\u0438 \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438.`));
+    for (const candidate of d2.candidates) {
+      if (candidate.already_imported) {
+        sourceResults.append(el2("p", "muted", (candidate.name_ru_unofficial || candidate.name_en) + " \xB7 \u0443\u0436\u0435 \u0432 \u043B\u0438\u0447\u043D\u044B\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430\u0445"));
+        continue;
+      }
+      sourceResults.append(button((candidate.name_ru_unofficial || candidate.name_en) + " \xB7 USDA \xB7 " + (candidate.category_ru || ""), async () => {
+        const ee2 = epoch(), tt = ++sourceToken;
+        const detail = await call2("keto_kitchen", { action: "source_detail", values: { candidate_id: candidate.candidate_id } });
+        if (ee2 !== epoch() || tt !== sourceToken) return;
+        showSource(detail.candidate);
+      }));
+    }
+    sourceCursor = d2.next_cursor;
+    if (sourceCursor) {
+      const b2 = button("\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451", () => loadSource(true));
+      b2.dataset.sourceMore = "true";
+      sourceResults.append(b2);
+    }
+  }
+  function showSource(c2) {
+    review.hidden = false;
+    review.replaceChildren(el2("h3", "", "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0437\u0430\u043F\u0438\u0441\u0438 USDA"), el2("p", "", c2.name_en), el2("p", "muted", c2.name_ru_unofficial ? "\u041D\u0435\u043E\u0444\u0438\u0446\u0438\u0430\u043B\u044C\u043D\u044B\u0439 \u043F\u0435\u0440\u0435\u0432\u043E\u0434: " + c2.name_ru_unofficial : "\u041F\u0435\u0440\u0435\u0432\u043E\u0434 \u043D\u0435 \u043F\u0440\u0435\u0434\u043E\u0441\u0442\u0430\u0432\u043B\u0435\u043D"), el2("p", "muted", "USDA FoodData Central \xB7 SR Legacy \xB7 CC0. \u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u0432 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0435 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u044B. \u0413\u043B\u0438\u043A\u0435\u043C\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0438\u043D\u0434\u0435\u043A\u0441 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u0435\u043D. \u041F\u043E\u0441\u043B\u0435 \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u044F \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u043C\u043E\u0436\u043D\u043E \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u0432 \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u0438 \u0443\u043A\u0430\u0437\u0430\u0442\u044C \u043C\u0430\u0441\u0441\u0443. \u0415\u0433\u043E \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0434\u043B\u044F \u0440\u0430\u0441\u0447\u0451\u0442\u0430 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430. \u0414\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0445 \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432 \u0438 \u043C\u0435\u043D\u044E \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438 \u0435\u0449\u0451 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E."));
+    const a2 = el2("a", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A USDA");
+    a2.href = c2.source_url;
+    a2.target = "_blank";
+    a2.rel = "noopener noreferrer";
+    review.append(a2);
+    for (const [key, label] of [["energy_kcal", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0431\u0435\u043B\u043E\u043A, \u0433"], ["fat_g", "\u0436\u0438\u0440\u044B, \u0433"], ["carbohydrate_total_g", "\u043E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433"], ["fiber_g", "\u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433"]]) review.append(el2("p", "", label + " \u043D\u0430 100 \u0433: " + number(c2[key])));
+    const nameLabel = el2("label", "", "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043B\u0438\u0447\u043D\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430"), name2 = el2("input");
+    name2.value = c2.name_ru_unofficial || c2.name_en;
+    name2.maxLength = 200;
+    nameLabel.append(name2);
+    const stateLabel = el2("label", "", "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430"), state2 = el2("select");
+    for (const [v2, t] of [["", "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435"], ...Object.entries(states).filter(([v3]) => v3 !== "frozen")]) {
+      const o2 = el2("option", "", t);
+      o2.value = v2;
+      state2.append(o2);
+    }
+    stateLabel.append(state2);
+    const allergy = el2("fieldset");
+    allergy.append(el2("legend", "", "\u041E\u0442\u043C\u0435\u0442\u044C\u0442\u0435 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438"));
+    const checks = [];
+    for (const [v2, t] of [["egg", "\u042F\u0439\u0446\u0430"], ["milk", "\u041C\u043E\u043B\u043E\u043A\u043E"], ["fish", "\u0420\u044B\u0431\u0430"], ["crustacean_shellfish", "\u0420\u0430\u043A\u043E\u043E\u0431\u0440\u0430\u0437\u043D\u044B\u0435"], ["mollusc", "\u041C\u043E\u043B\u043B\u044E\u0441\u043A\u0438"], ["tree_nut", "\u041E\u0440\u0435\u0445\u0438"], ["peanut", "\u0410\u0440\u0430\u0445\u0438\u0441"], ["soy", "\u0421\u043E\u044F"], ["wheat", "\u041F\u0448\u0435\u043D\u0438\u0446\u0430"], ["gluten", "\u0413\u043B\u044E\u0442\u0435\u043D"], ["sesame", "\u041A\u0443\u043D\u0436\u0443\u0442"], ["celery", "\u0421\u0435\u043B\u044C\u0434\u0435\u0440\u0435\u0439"], ["coconut", "\u041A\u043E\u043A\u043E\u0441"], ["mustard", "\u0413\u043E\u0440\u0447\u0438\u0446\u0430"], ["lupin", "\u041B\u044E\u043F\u0438\u043D"], ["sulfite", "\u0421\u0443\u043B\u044C\u0444\u0438\u0442\u044B"]]) {
+      const label = el2("label", "check", t), check = el2("input");
+      check.type = "checkbox";
+      check.value = v2;
+      label.prepend(check);
+      allergy.append(label);
+      checks.push(check);
+    }
+    const confirmLabel = el2("label", "check", "\u042F \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u043B(\u0430) \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0441\u043F\u0438\u0441\u043E\u043A \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u043E\u0432, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u043D\u044B\u0445"), confirmed = el2("input");
+    confirmed.type = "checkbox";
+    confirmLabel.prepend(confirmed);
+    review.append(nameLabel, stateLabel, allergy, confirmLabel, button("\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043B\u0438\u0447\u043D\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", async () => {
+      if (!confirmed.checked || !state2.value || !name2.value.trim()) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B.");
+      await act("source_import", null, { candidate_id: c2.candidate_id, release_hash: c2.release_hash, name_ru: name2.value.trim(), state: state2.value, allergens: checks.filter((x) => x.checked).map((x) => x.value), source_review_confirmed: true });
+    }));
+    review.setAttribute("tabindex", "-1");
+    review.focus?.({ preventScroll: true });
+    review.scrollIntoView?.({ block: "nearest" });
+  }
+  picker.append(sourceSearch, sourceResults, review);
   form.append(picker);
   const free = el2("textarea");
   free.id = "kitchen-free";
@@ -287,40 +1268,62 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   freeLabel.htmlFor = free.id;
   const questions = el2("div", "kitchen-questions");
   questions.dataset.testid = "product-questions";
-  form.append(freeLabel, free, button("\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
-    const e = epoch(), d2 = await call2("keto_kitchen", { action: "parse", query: free.value });
-    if (e !== epoch()) return;
-    questions.replaceChildren();
-    for (const i of d2.pantry) {
-      let f = foods.find((f2) => f2.food_id === i.food_id) || i;
-      addFood({ ...f, ...i });
-      const item = pantry.find((x) => x.food_id === i.food_id);
-      item.grams = i.grams;
+  const parseButton = button("\u0420\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
+    if (parsing) return;
+    const query = free.value.trim();
+    if (!query) {
+      status.textContent = "\u041D\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0434\u043B\u044F \u0440\u0430\u0437\u0431\u043E\u0440\u0430.";
+      return;
     }
-    renderChips();
-    for (const q2 of d2.questions) {
-      const row = el2("div", "notice");
-      row.append(el2("p", "", q2.text));
-      for (const f of q2.choices) row.append(button(f.name_ru + " \xB7 " + (states[f.state] || f.state), async () => {
-        addFood(f);
-        row.remove();
-      }));
-      row.append(button("\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u044D\u0442\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", async () => row.remove()));
-      questions.append(row);
+    const e = epoch(), token = ++parseNumber;
+    parsing = true;
+    parseButton.disabled = true;
+    status.textContent = "\u0420\u0430\u0437\u0431\u0438\u0440\u0430\u044E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\u2026";
+    try {
+      const d2 = await call2("keto_kitchen", { action: "parse", query: /^(?:есть|у меня есть|продукты|из продуктов)(?:\s|:|$)/iu.test(query) ? query : "\u0415\u0441\u0442\u044C " + query });
+      if (e !== epoch() || token !== parseNumber || free.value.trim() !== query) {
+        status.textContent = "\u0422\u0435\u043A\u0441\u0442 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u0420\u0430\u0437\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0431\u043D\u043E\u0432\u043B\u0451\u043D\u043D\u044B\u0439 \u0441\u043F\u0438\u0441\u043E\u043A.";
+        return;
+      }
+      questions.replaceChildren();
+      for (const i of d2.pantry) {
+        const existing = pantry.find((x) => x.food_id === i.food_id);
+        if (!existing) addFood({ ...i, name_ru: d2.food_names?.[i.food_id] || i.name_ru });
+      }
+      renderChips();
+      for (const q2 of d2.questions) {
+        const row = el2("div", "notice");
+        row.append(el2("p", "", q2.text));
+        for (const f of q2.choices) row.append(button(f.name_ru + " \xB7 " + (states[f.state] || f.state), async () => {
+          addFood(f);
+          row.remove();
+        }));
+        row.append(button("\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0431\u0435\u0437 \u044D\u0442\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", async () => row.remove()));
+        questions.append(row);
+      }
+      status.textContent = `\u041D\u0430\u0439\u0434\u0435\u043D\u043E: ${d2.pantry.length}; \u0443\u0442\u043E\u0447\u043D\u0435\u043D\u0438\u0439: ${d2.questions.length}. \u0420\u0430\u043D\u0435\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u044B\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u0430 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B.`;
+    } catch (err) {
+      status.textContent = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0440\u0430\u0437\u043E\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B: " + err.message;
+    } finally {
+      if (token === parseNumber) {
+        parsing = false;
+        parseButton.disabled = false;
+      }
     }
-  }), questions, chips);
+  });
+  form.append(freeLabel, free, parseButton, questions, chips);
   function renderChips() {
     chips.replaceChildren();
     for (const item of pantry) {
       const chip = el2("div", "kitchen-chip");
       chip.dataset.foodId = item.food_id;
-      chip.append(el2("strong", "", item.name_ru || item.food_id), el2("span", "muted", (states[item.state] || item.state) + " \xB7 " + item.food_id));
+      chip.append(el2("strong", "", item.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442"), el2("span", "muted", states[item.state] || "\u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043E"));
       const label = el2("label", "", "\u0417\u0430\u043F\u0430\u0441, \u0433 (\u043D\u0435\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E)"), input = el2("input");
       input.type = "text";
       input.inputMode = "decimal";
       input.value = item.grams ?? "";
-      input.setAttribute("aria-label", (item.name_ru || item.food_id) + ": \u0433\u0440\u0430\u043C\u043C\u044B");
-      input.onchange = () => {
+      input.setAttribute("aria-label", (item.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442") + ": \u0433\u0440\u0430\u043C\u043C\u044B");
+      input.oninput = () => {
         item.grams = input.value === "" ? null : input.value;
         dirty = true;
       };
@@ -355,7 +1358,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       const step = id === "time" ? 5 : 1, wrap2 = el2("div", "number-control");
       for (const [symbol, delta] of [["\u2212", -1], ["+", 1]]) {
         const b2 = button(symbol, async () => {
-          input.value = String(Math.max(min, Math.min(max, decimal(input.value, min, max) + delta * step)));
+          input.value = String(Math.max(min, Math.min(max, (input.value.trim() === "" ? Number(value) : decimal(input.value, min, max)) + delta * step)));
           input.dispatchEvent(new Event("change", { bubbles: true }));
         });
         b2.setAttribute("aria-label", (delta < 0 ? "\u0423\u043C\u0435\u043D\u044C\u0448\u0438\u0442\u044C " : "\u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0442\u044C ") + label);
@@ -393,28 +1396,28 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     if (equipment.value === "multicooker" && Number(time.value) < 25) time.value = "25";
   };
   equipment.onchange();
-  const cuisine = field("cuisine", "\u0421\u0442\u0438\u043B\u044C \u043A\u0443\u0445\u043D\u0438", "text", "\u0414\u043E\u043C\u0430\u0448\u043D\u044F\u044F \u043A\u0443\u0445\u043D\u044F \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438");
-  cuisine.maxLength = 100;
   const avoid = el2("input");
   avoid.id = "kitchen-avoid";
   avoid.placeholder = "\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0441\u044B\u0440";
   avoid.maxLength = 200;
-  const avoidLabel = el2("label", "", "\u0412\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u0431\u0435\u0437 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430 (\u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043D\u0438\u0436\u0435)");
+  const avoidLabel = el2("label", "", "\u0412\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u0431\u0435\u0437 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430 (\u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435)");
   avoidLabel.htmlFor = avoid.id;
   const avoidList = el2("datalist");
   avoidList.id = "kitchen-avoid-list";
-  let avoidFoods = [];
+  let avoidFoods = [], selectedAvoid = null, avoidSearchNumber = 0;
   avoid.setAttribute("list", avoidList.id);
   avoid.oninput = () => {
     clearTimeout(avoid.timer);
-    const value = avoid.value;
+    const value = avoid.value, token = ++avoidSearchNumber;
+    selectedAvoid = avoidFoods.find((f) => value === f.name_ru + " \xB7 " + (states[f.state] || f.state)) || null;
+    if (selectedAvoid) return;
     avoid.timer = setTimeout(() => run2(async () => {
       const e = epoch(), d2 = await call2("keto_kitchen", { action: "foods", query: value.slice(0, 200) });
-      if (e !== epoch() || value !== avoid.value) return;
+      if (e !== epoch() || token !== avoidSearchNumber || value !== avoid.value) return;
       avoidFoods = d2.foods;
       avoidList.replaceChildren(...avoidFoods.map((f) => {
         const o2 = el2("option");
-        o2.value = f.food_id + " \xB7 " + f.name_ru;
+        o2.value = f.name_ru + " \xB7 " + (states[f.state] || f.state);
         return o2;
       }));
     }), 250);
@@ -428,7 +1431,11 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   form.append(generate, status);
   const results = el2("div");
   results.dataset.testid = "kitchen-results";
-  host.replaceChildren(form, results);
+  const savedPreview = el2("section", "panel");
+  savedPreview.hidden = true;
+  savedPreview.dataset.testid = "confirmed-pantry-preview";
+  let savedToken = 0;
+  host.replaceChildren(savedPreview, form, results);
   const cleanPantry = () => pantry.map(({ food_id, state: state2, grams }) => ({ food_id, state: state2, grams: grams === null || grams === "" ? null : decimal(grams, 0.1, 3e4) }));
   async function act(action, rid, values2 = {}) {
     const state2 = getState();
@@ -450,17 +1457,18 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     run2(async () => {
       busy2 = true;
       generate.disabled = true;
-      if (questions.children.length) {
+      if (parsing || questions.children.length) {
         busy2 = false;
         generate.disabled = false;
-        throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438\u043B\u0438 \u044F\u0432\u043D\u043E \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435 \u0431\u0435\u0437 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0445.");
+        throw Error(parsing ? "\u0414\u043E\u0436\u0434\u0438\u0442\u0435\u0441\u044C \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0438\u044F \u0440\u0430\u0437\u0431\u043E\u0440\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432." : "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438\u043B\u0438 \u044F\u0432\u043D\u043E \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435 \u0431\u0435\u0437 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0445.");
       }
       const e2 = epoch(), token = ++localEpoch;
       status.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u044E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438 \u0441\u043F\u043E\u0441\u043E\u0431\u044B \u0433\u043E\u0442\u043E\u0432\u043A\u0438\u2026";
       try {
-        const fid = avoid.value.split(" \xB7 ")[0];
-        if (avoid.value && !avoidFoods.some((f) => f.food_id === fid)) throw Error("\u0414\u043B\u044F \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0433\u043E \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u044B\u0439 \u043A\u043E\u0434 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430.");
-        const spec = { mode: new FormData(form).get("mode"), meal: meal.value, servings: decimal(servings.value, 1, 6), time_budget: decimal(time.value, 5, 120), equipment: equipment.value, cuisine: cuisine.value, max_missing_items: decimal(missing.value, 0, 5), pantry: cleanPantry(), avoid: fid ? [fid] : [] };
+        const selected = selectedAvoid || avoidFoods.find((f) => avoid.value === f.name_ru + " \xB7 " + (states[f.state] || f.state));
+        if (avoid.value && !selected) throw Error("\u0414\u043B\u044F \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.");
+        const fid = selected?.food_id;
+        const spec = { mode: new FormData(form).get("mode"), meal: meal.value, servings: decimal(servings.value, 1, 6), time_budget: decimal(time.value, 5, 120), equipment: equipment.value, max_missing_items: decimal(missing.value, 0, 5), pantry: cleanPantry(), avoid: fid ? [fid] : [] };
         const d2 = await call2("keto_kitchen", { action: "generate", spec, thread_id: getState().active_thread || "main", expected_revision: getState().revision, request_id: crypto.randomUUID().replaceAll("-", "") });
         if (e2 !== epoch() || token !== localEpoch) return;
         accept2(d2);
@@ -476,7 +1484,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   };
   function listItems(items) {
     const list = el2("ul", "ingredient-list");
-    for (const i of items) list.append(el2("li", "", i.name_ru + " \xB7 " + number(i.grams_edible) + " \u0433 \xB7 " + (states[i.state] || i.state)));
+    for (const i of items) list.append(el2("li", "", i.name_ru + " \xB7 " + (i.stock_quantity_unknown ? "\u043D\u0443\u0436\u043D\u043E " + number(i.required_grams) + " \u0433; \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043F\u0430\u0441" : number(i.grams_edible) + " \u0433") + " \xB7 " + (states[i.state] || i.state)));
     return list;
   }
   function card(r) {
@@ -503,7 +1511,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     steps.append(el2("summary", "", "\u041F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435"));
     for (const step of String(r.steps_ru).split("\n")) steps.append(el2("p", "", step));
     c2.append(steps);
-    c2.append(el2("h4", "", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u2014 \u0442\u043E\u043B\u044C\u043A\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0430\u044E\u0449\u0435\u0435"), r.missing?.length ? listItems(r.missing) : el2("p", "muted", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u043D\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043F\u043E \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u043C\u0443 \u0437\u0430\u043F\u0430\u0441\u0443. \u041D\u0435\u0443\u043A\u0430\u0437\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C."));
+    c2.append(el2("h4", "", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u0438 \u0437\u0430\u043F\u0430\u0441 \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438"), r.missing?.length ? listItems(r.missing) : el2("p", "muted", "\u0414\u043E\u043A\u0443\u043F\u043A\u0430 \u043D\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043F\u043E \u0443\u043A\u0430\u0437\u0430\u043D\u043D\u043E\u043C\u0443 \u0437\u0430\u043F\u0430\u0441\u0443. \u041D\u0435\u0443\u043A\u0430\u0437\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C."));
     const source = el2("details");
     source.append(el2("summary", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0438 \u0438 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F"));
     source.append(el2("p", "muted", r.quantity_note || "\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043D\u0435 \u0440\u0430\u0432\u043D\u044B \u043D\u0443\u043B\u044E."));
@@ -534,15 +1542,16 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     c2.append(actions);
     return c2;
   }
-  function show(data) {
-    result = data;
-    results.replaceChildren();
-    if (data.fallback_reason) results.append(el2("p", "notice", "Azure-\u0434\u0438\u0437\u0430\u0439\u043D \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0438\u043B\u0438 \u043E\u0442\u043A\u043B\u043E\u043D\u0451\u043D. \u042D\u0442\u043E \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u0438\u0437 \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C\u044B\u0445 \u0448\u0430\u0431\u043B\u043E\u043D\u043E\u0432."));
-    for (const q2 of data.questions || []) results.append(el2("p", "notice", q2));
+  function show(data, target = results) {
+    if (target === results) result = data;
+    target.replaceChildren();
+    if (data.fallback_reason) target.append(el2("p", "notice", "Azure-\u0434\u0438\u0437\u0430\u0439\u043D \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0438\u043B\u0438 \u043E\u0442\u043A\u043B\u043E\u043D\u0451\u043D. \u042D\u0442\u043E \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u0438\u0437 \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C\u044B\u0445 \u0448\u0430\u0431\u043B\u043E\u043D\u043E\u0432."));
+    for (const q2 of data.questions || []) target.append(el2("p", "notice", q2));
+    if (!(data.recipes || []).length) target.append(el2("p", "notice", "\u041F\u043E\u0434\u0445\u043E\u0434\u044F\u0449\u0438\u0445 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0445 \u0431\u043B\u044E\u0434 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0432 \u0441\u0432\u043E\u0451\u043C \u0431\u043B\u044E\u0434\u0435."));
     const grid = el2("div", "recipe-grid kitchen-grid");
     grid.append(...(data.recipes || []).map(card));
-    results.append(grid);
-    if (data.day) results.append(dayCard(data));
+    target.append(grid);
+    if (data.day) target.append(dayCard(data));
   }
   function dayCard(data) {
     const box = el2("div", "panel");
@@ -598,7 +1607,54 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       memory.append(row);
     }
   }
-  return { render() {
+  function cancelSavedPreview() {
+    savedToken++;
+    savedPreview.hidden = true;
+    savedPreview.replaceChildren();
+  }
+  function previewSavedPantry(name2) {
+    const state2 = getState(), stock = state2?.kitchen?.pantry;
+    if (!Array.isArray(stock)) throw Error("\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0430\u044F \u043A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430.");
+    const stamp = state2.revision, token = ++savedToken;
+    savedPreview.hidden = false;
+    savedPreview.replaceChildren();
+    savedPreview.append(el2("h2", "", "\u041F\u043E\u0434\u0431\u043E\u0440 \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0439 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439"), el2("p", "", `\u0414\u043E\u0431\u0430\u0432\u043B\u0435\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \xAB${name2}\xBB. \u041B\u0438\u0447\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0441 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u043F\u043E\u043A\u0430 \u043D\u0435 \u0434\u043E\u043F\u0443\u0449\u0435\u043D\u044B \u043A \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u043C \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438; \u0438\u0445 \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0432 \u0441\u0432\u043E\u0451\u043C \u0431\u043B\u044E\u0434\u0435.`), el2("p", "muted", dirty ? "\u0412\u0430\u0448 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043A\u0443\u0445\u043D\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435. \u041F\u043E\u0434\u0431\u043E\u0440 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0443\u044E \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E." : "\u041F\u043E\u0434\u0431\u043E\u0440 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u0443\u044E \u043A\u043B\u0430\u0434\u043E\u0432\u0443\u044E \u0438 \u0442\u0435\u043A\u0443\u0449\u0438\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u043D\u0438\u0436\u0435."));
+    const list = el2("ul");
+    for (const i of stock) list.append(el2("li", "", (i.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442") + " \xB7 " + (i.grams == null ? "\u043C\u0430\u0441\u0441\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430" : number(i.grams) + " \u0433")));
+    savedPreview.append(list);
+    const output = el2("div");
+    const start2 = button("\u041D\u0430\u0447\u0430\u0442\u044C \u043F\u043E\u0434\u0431\u043E\u0440 \u043F\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0439 \u043A\u043B\u0430\u0434\u043E\u0432\u043E\u0439", async () => {
+      if (busy2) return;
+      const now = getState();
+      if (now?.revision !== stamp) {
+        previewSavedPantry(name2);
+        throw Error("\u041A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u0438\u043B\u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0431\u043D\u043E\u0432\u043B\u0451\u043D\u043D\u044B\u0439 \u0441\u043F\u0438\u0441\u043E\u043A \u0438 \u043D\u0430\u0447\u043D\u0438\u0442\u0435 \u043F\u043E\u0434\u0431\u043E\u0440 \u0435\u0449\u0451 \u0440\u0430\u0437.");
+      }
+      const chosen = selectedAvoid || avoidFoods.find((f) => avoid.value === f.name_ru + " \xB7 " + (states[f.state] || f.state));
+      if (avoid.value && !chosen) throw Error("\u0414\u043B\u044F \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.");
+      const spec = { mode: "pantry_only", meal: meal.value, servings: decimal(servings.value, 1, 6), time_budget: decimal(time.value, 5, 120), equipment: equipment.value, max_missing_items: decimal(missing.value, 0, 5), pantry: now.kitchen.pantry.map(({ food_id, state: state3, grams }) => ({ food_id, state: state3, grams })), avoid: chosen ? [chosen.food_id] : [] };
+      const e = epoch();
+      busy2 = true;
+      start2.disabled = true;
+      generate.disabled = true;
+      output.replaceChildren(el2("p", "muted", "\u041F\u043E\u0434\u0431\u0438\u0440\u0430\u044E \u0431\u043B\u044E\u0434\u0430\u2026"));
+      try {
+        const d2 = await call2("keto_kitchen", { action: "generate", spec, thread_id: now.active_thread || "main", expected_revision: now.revision, request_id: crypto.randomUUID().replaceAll("-", "") });
+        if (e !== epoch() || token !== savedToken) return;
+        accept2(d2);
+        show(d2, output);
+      } finally {
+        if (e === epoch()) {
+          busy2 = false;
+          generate.disabled = false;
+          if (token === savedToken) start2.disabled = false;
+        }
+      }
+    });
+    savedPreview.append(start2, output);
+    savedPreview.scrollIntoView?.({ block: "nearest" });
+  }
+  return { previewSavedPantry, cancelSavedPreview, render() {
     const state2 = getState();
     if (!dirty) {
       pantry = (state2?.kitchen?.pantry || []).map((i) => ({ ...i }));
@@ -606,14 +1662,17 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     }
     renderMemory();
   }, async load() {
-    const e = epoch();
+    const e = epoch(), searchAtStart = searchNumber;
     try {
       const [d2, f] = await Promise.all([call2("keto_kitchen", { action: "status", thread_id: getState()?.active_thread || "main" }), call2("keto_kitchen", { action: "foods" })]);
       if (e !== epoch()) return;
-      foods = f.foods;
-      foodOptions();
-      if (d2.spec) {
-        for (const name2 of ["meal", "servings", "equipment", "cuisine"]) {
+      if (searchAtStart === searchNumber) {
+        foods = f.foods;
+        foodOptions();
+        status.textContent = `\u0412 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${f.total ?? foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.`;
+      }
+      if (d2.spec && !dirty) {
+        for (const name2 of ["meal", "servings", "equipment"]) {
           const node = form.elements.namedItem(name2);
           if (node) node.value = d2.spec[name2];
         }
@@ -621,7 +1680,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         missing.value = d2.spec.max_missing_items;
         form.elements.namedItem("mode").value = d2.spec.mode;
         equipmentHint.textContent = equipmentNotes[equipment.value] || "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u0438\u0431\u043E\u0440, \u043A\u043E\u0442\u043E\u0440\u044B\u043C \u0431\u0443\u0434\u0435\u0442\u0435 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C\u0441\u044F.";
-        pantry = d2.spec.pantry.map((i) => ({ ...i, name_ru: foods.find((f2) => f2.food_id === i.food_id)?.name_ru || getState().kitchen.pantry.find((f2) => f2.food_id === i.food_id)?.name_ru || i.food_id }));
+        pantry = d2.spec.pantry.map((i) => ({ ...i, name_ru: foods.find((f2) => f2.food_id === i.food_id)?.name_ru || getState().kitchen.pantry.find((f2) => f2.food_id === i.food_id)?.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442" }));
         renderChips();
       }
       if (d2.recipes) show(d2);
@@ -629,11 +1688,27 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       status.textContent = e2.message;
     }
   }, reset() {
+    cancelSavedPreview();
     pantry = [];
     result = null;
     dirty = false;
     busy2 = false;
+    parsing = false;
+    parseButton.disabled = false;
+    parseNumber++;
+    searchNumber++;
+    sourceToken++;
+    sourceResults.replaceChildren();
+    review.hidden = true;
+    avoidSearchNumber++;
+    selectedFood = null;
+    selectedAvoid = null;
+    avoidFoods = [];
+    avoid.value = "";
     localEpoch++;
+    servings.value = "1";
+    time.value = "20";
+    missing.value = "2";
     clearTimeout(product.timer);
     clearTimeout(avoid.timer);
     results.replaceChildren();
@@ -2620,8 +3695,8 @@ function createRouter({ location: location2, history: history2, listen, render, 
     if (location2.hash !== "#" + valid) history2.replaceState({ ketoRoute: valid, ketoDepth: depth }, "", "#" + valid);
     display(valid, "history");
   });
-  return { go, back, openDialog() {
-    history2.pushState({ ketoRoute: current, ketoDepth: depth + 1, ketoOrigin: origin, ketoDialog: "recipe" }, "", "#" + current);
+  return { go, back, openDialog(kind = "recipe") {
+    history2.pushState({ ketoRoute: current, ketoDepth: depth + 1, ketoOrigin: origin, ketoDialog: kind }, "", "#" + current);
     depth++;
   }, closeDialog() {
     if (history2.state?.ketoDialog) history2.back();
@@ -2924,272 +3999,6 @@ function setupGuidance({ $: $3, el: el2, getState, call: call2, accept: accept2,
     $3("saved-targets").replaceChildren();
     $3("energy-review").hidden = true;
     $3("apply-targets").hidden = true;
-  } };
-}
-
-// cloudflare-saas/public/media.js
-var RecorderController = class {
-  constructor({ mediaDevices, Recorder, onState, onAudio, clock = () => Date.now(), interval = (fn, ms) => globalThis.setInterval(fn, ms), clear = (id) => globalThis.clearInterval(id) }) {
-    Object.assign(this, { mediaDevices, Recorder, onState, onAudio, clock, interval, clear });
-    this.generation = 0;
-    this.mode = "idle";
-  }
-  emit(mode, message = "") {
-    this.mode = mode;
-    this.onState({ mode, message, seconds: Math.min(60, Math.floor((this.clock() - (this.started ?? this.clock())) / 1e3)) });
-  }
-  release() {
-    if (this.timer) this.clear(this.timer);
-    this.timer = null;
-    for (const track of this.stream?.getTracks() || []) {
-      track.onended = null;
-      track.stop();
-    }
-    this.stream = null;
-  }
-  async start() {
-    if (this.mode !== "idle") return;
-    const generation = ++this.generation;
-    this.emit("permission", "\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438.");
-    try {
-      if (!this.mediaDevices?.getUserMedia || !this.Recorder) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0434\u0438\u043A\u0442\u043E\u0432\u043A\u0443 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u044B \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442.");
-      const mime = ["audio/mp4", "audio/webm"].find((x) => this.Recorder.isTypeSupported(x));
-      if (!mime) throw Error("\u042D\u0442\u043E\u0442 \u0431\u0440\u0430\u0443\u0437\u0435\u0440 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u044C MP4/WebM. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u043A\u043B\u0430\u0432\u0438\u0430\u0442\u0443\u0440\u0443.");
-      const stream = await this.mediaDevices.getUserMedia({ audio: true });
-      if (generation !== this.generation) {
-        stream.getTracks().forEach((t) => t.stop());
-        return;
-      }
-      this.stream = stream;
-      for (const track of stream.getTracks()) track.onended = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u043D\u043E\u0432\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C.");
-      const recorder = new this.Recorder(stream, { mimeType: mime, audioBitsPerSecond: 64e3 });
-      this.recorder = recorder;
-      this.parts = [];
-      this.bytes = 0;
-      this.started = this.clock();
-      recorder.ondataavailable = (e) => {
-        if (generation !== this.generation) return;
-        if (e.data?.size) {
-          this.parts.push(e.data);
-          this.bytes += e.data.size;
-          if (this.bytes > 1e6) this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u043A\u043E\u0440\u043E\u0447\u0435.");
-        }
-      };
-      recorder.onerror = () => this.cancel("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043D\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
-      recorder.onstop = async () => {
-        this.release();
-        if (generation !== this.generation) return;
-        try {
-          const blob = new Blob(this.parts, { type: mime });
-          this.parts = [];
-          if (!blob.size) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u043F\u0443\u0441\u0442\u0430. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
-          if (blob.size > 1e6) throw Error("\u0417\u0430\u043F\u0438\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411.");
-          this.abort = new AbortController();
-          this.emit("recognizing", "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u044E\u2026 \u041C\u043E\u0436\u043D\u043E \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.");
-          const text = await this.onAudio(blob, mime, this.abort.signal);
-          if (generation !== this.generation) return;
-          this.emit("idle", "\u0422\u0435\u043A\u0441\u0442 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C\xBB.");
-        } catch (e) {
-          if (generation === this.generation) this.emit("idle", e.name === "AbortError" ? "\u0420\u0430\u0441\u043F\u043E\u0437\u043D\u0430\u0432\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E." : e.message);
-        } finally {
-          this.parts = [];
-        }
-      };
-      recorder.start(250);
-      this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
-      this.timer = this.interval(() => {
-        this.emit("recording", "\u0418\u0434\u0451\u0442 \u0437\u0430\u043F\u0438\u0441\u044C");
-        if (this.clock() - this.started >= 6e4) this.stop();
-      }, 250);
-    } catch (e) {
-      this.release();
-      if (generation === this.generation) this.emit("idle", e.name === "NotAllowedError" ? "\u041D\u0435\u0442 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u043D\u0430 \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0435\u0433\u043E \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0441\u0430\u0439\u0442\u0430 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0442\u0435\u043A\u0441\u0442." : e.message);
-    }
-  }
-  stop() {
-    if (this.mode === "recording" && this.recorder?.state === "recording") {
-      this.recorder.stop();
-      this.release();
-    }
-  }
-  cancel(message = "\u0417\u0430\u043F\u0438\u0441\u044C \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430.") {
-    this.generation++;
-    this.abort?.abort();
-    if (this.recorder?.state === "recording") this.recorder.stop();
-    this.release();
-    this.parts = [];
-    this.emit("idle", message);
-  }
-};
-async function blobBase64(blob) {
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let text = "";
-  for (const b2 of bytes) text += String.fromCharCode(b2);
-  return btoa(text);
-}
-async function prepareImage(file, { bitmap = globalThis.createImageBitmap, document: document2 = globalThis.document, URL: URL2 = globalThis.URL, Image = globalThis.Image } = {}) {
-  if (!file || !file.type?.startsWith("image/") || file.size > 12e6) throw Error("\u041D\u0443\u0436\u043D\u043E \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0434\u043E 12 \u041C\u0411.");
-  let source, url;
-  try {
-    if (bitmap) source = await bitmap(file);
-    else {
-      url = URL2.createObjectURL(file);
-      source = await new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = url;
-      });
-    }
-    const width = source.width || source.naturalWidth, height = source.height || source.naturalHeight;
-    if (!width || !height || width * height > 24e6) throw Error("\u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0435.");
-    const canvas = document2.createElement("canvas");
-    let scale = Math.min(1, 1024 / Math.max(width, height));
-    canvas.width = Math.max(1, Math.round(width * scale));
-    canvas.height = Math.max(1, Math.round(height * scale));
-    canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
-    const result = canvas.toDataURL("image/jpeg", 0.78);
-    if (result.length > 13e5) throw Error("\u041F\u043E\u0441\u043B\u0435 \u0441\u0436\u0430\u0442\u0438\u044F \u0444\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 1 \u041C\u0411. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043C\u0435\u043D\u044C\u0448\u0438\u0439 \u0441\u043D\u0438\u043C\u043E\u043A.");
-    return result;
-  } catch (e) {
-    throw Error(e.message?.includes("\u041C\u0411") ? e.message : "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u0444\u043E\u0442\u043E. \u0414\u043B\u044F HEIC \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u044D\u043A\u0441\u043F\u043E\u0440\u0442 \u0432 JPEG/PNG \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
-  } finally {
-    source?.close?.();
-    if (url) URL2.revokeObjectURL(url);
-  }
-}
-function setupChatImages({ root, $: $3, prepare = prepareImage, link, epoch, setImage, notify: notify2 }) {
-  let generation = 0;
-  const current = (g, e) => g === generation && e === epoch();
-  function closeLink() {
-    const d2 = $3("image-link-details");
-    if (typeof d2.close === "function") {
-      if (d2.open) d2.close();
-    } else d2.open = false;
-  }
-  function openLink() {
-    const d2 = $3("image-link-details");
-    if (typeof d2.showModal === "function") {
-      if (!d2.open) d2.showModal();
-    } else d2.open = true;
-    $3("image-link-url").focus();
-  }
-  function reset() {
-    generation++;
-    closeLink();
-    $3("image-link-load").disabled = false;
-    setImage(null);
-    $3("message").required = true;
-    $3("photo-preview").hidden = true;
-    $3("photo-preview-image").removeAttribute("src");
-    $3("photo").value = "";
-    $3("photo-status").textContent = "";
-    $3("image-link-url").value = "";
-    $3("image-drop-zone").classList.remove("dragging");
-  }
-  function display(value) {
-    setImage(value);
-    $3("message").required = false;
-    $3("photo-preview-image").src = value;
-    $3("photo-preview").hidden = false;
-    $3("photo-status").textContent = "\u0424\u043E\u0442\u043E \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E. \u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0441 \u0432\u0430\u0448\u0438\u043C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435\u043C.";
-  }
-  async function attach(file) {
-    const g = ++generation, e = epoch();
-    try {
-      const value = await prepare(file);
-      if (current(g, e)) display(value);
-    } catch (error) {
-      if (current(g, e)) notify2(error.message);
-    }
-  }
-  function first(files) {
-    const images = [...files].filter((f) => f.type?.startsWith("image/"));
-    if (images.length) {
-      if (images.length > 1) notify2("\u0417\u0430 \u043E\u0434\u043D\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u043E\u0434\u043D\u043E \u0444\u043E\u0442\u043E. \u0412\u044B\u0431\u0440\u0430\u043D\u043E \u043F\u0435\u0440\u0432\u043E\u0435.");
-      void attach(images[0]);
-      return true;
-    }
-    if (files.length) notify2("\u041D\u0443\u0436\u0435\u043D \u0444\u0430\u0439\u043B \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F. \u0421\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u043C\u043E\u0436\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0442\u0435\u043A\u0441\u0442\u043E\u043C \u0438\u043B\u0438 \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442\u043E\u043C.");
-    return false;
-  }
-  function offerUrl(value) {
-    const url = String(value || "").split("\n").find((x) => x.trim() && !x.startsWith("#"));
-    if (!url) return;
-    try {
-      if (new URL(url).protocol !== "https:") throw Error();
-      $3("image-link-url").value = url;
-      openLink();
-      notify2("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u0441\u044B\u043B\u043A\u0443 \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0444\u043E\u0442\u043E \u043F\u043E \u0441\u0441\u044B\u043B\u043A\u0435\xBB.");
-    } catch {
-      notify2("\u041D\u0443\u0436\u043D\u0430 \u043F\u0440\u044F\u043C\u0430\u044F \u043F\u0443\u0431\u043B\u0438\u0447\u043D\u0430\u044F HTTPS-\u0441\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435.");
-    }
-  }
-  $3("photo").onchange = (e) => first(e.target.files || []);
-  $3("photo-remove").onclick = reset;
-  root.addEventListener("paste", (e) => {
-    const files = [...e.clipboardData?.items || []].filter((x) => x.kind === "file" && x.type.startsWith("image/")).map((x) => x.getAsFile()).filter(Boolean);
-    if (!files.length) {
-      const text2 = (e.clipboardData?.getData("text/plain") || "").trim();
-      if (/^https:\/\/[^\s]+$/i.test(text2) && (/\.(?:png|jpe?g|webp|gif)(?:[?#]|$)/i.test(text2) || /^https:\/\/(?:images\.unsplash\.com|images\.pexels\.com|upload\.wikimedia\.org)\//i.test(text2))) offerUrl(text2);
-      return;
-    }
-    const text = e.clipboardData?.getData("text/plain");
-    if (!text) e.preventDefault();
-    first(files);
-  });
-  const zone = $3("image-drop-zone");
-  zone.onclick = () => $3("photo").click();
-  zone.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      $3("photo").click();
-    }
-  });
-  const relevant = (e) => [...e.dataTransfer?.types || []].some((t) => ["Files", "text/uri-list"].includes(t));
-  root.addEventListener("dragover", (e) => {
-    if (relevant(e)) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "copy";
-      zone.classList.add("dragging");
-    }
-  });
-  root.addEventListener("dragleave", (e) => {
-    if (!root.contains(e.relatedTarget)) zone.classList.remove("dragging");
-  });
-  root.addEventListener("drop", (e) => {
-    if (!relevant(e)) return;
-    e.preventDefault();
-    zone.classList.remove("dragging");
-    if (!first(e.dataTransfer.files || [])) offerUrl(e.dataTransfer.getData("text/uri-list"));
-  });
-  $3("image-link-open").onclick = openLink;
-  $3("image-link-close").onclick = () => {
-    generation++;
-    closeLink();
-    $3("image-link-load").disabled = false;
-  };
-  $3("image-link-details").addEventListener("cancel", () => {
-    generation++;
-    $3("image-link-load").disabled = false;
-  });
-  $3("image-link-load").onclick = async () => {
-    const g = ++generation, e = epoch(), url = $3("image-link-url").value;
-    $3("image-link-load").disabled = true;
-    try {
-      const value = await link(url);
-      if (current(g, e)) {
-        display(value);
-        closeLink();
-      }
-    } catch (error) {
-      if (current(g, e)) notify2(error.message);
-    } finally {
-      if (current(g, e)) $3("image-link-load").disabled = false;
-    }
-  };
-  return { reset, attach, offerUrl, invalidate() {
-    generation++;
   } };
 }
 
@@ -8543,13 +9352,13 @@ var questionPage = 0;
 var currentPlan = null;
 var currentPlanIsDraft = false;
 var uiLabels = { theme: "\u041E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", text_size: "\u0420\u0430\u0437\u043C\u0435\u0440 \u0442\u0435\u043A\u0441\u0442\u0430", density: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0438", simple_mode: "\u041F\u0440\u043E\u0441\u0442\u043E\u0439 \u0440\u0435\u0436\u0438\u043C", home: "\u041D\u0430\u0447\u0430\u043B\u044C\u043D\u044B\u0439 \u0440\u0430\u0437\u0434\u0435\u043B", show_nutrition: "\u041F\u0438\u0449\u0435\u0432\u043E\u0439 \u0441\u043E\u0441\u0442\u0430\u0432", energy_min_kcal: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F \u043E\u0442, \u043A\u043A\u0430\u043B", energy_max_kcal: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F \u0434\u043E, \u043A\u043A\u0430\u043B", protein_min_g: "\u0411\u0435\u043B\u043E\u043A \u043E\u0442, \u0433", protein_max_g: "\u0411\u0435\u043B\u043E\u043A \u0434\u043E, \u0433", carb_basis: "\u0421\u043F\u043E\u0441\u043E\u0431 \u043F\u043E\u0434\u0441\u0447\u0451\u0442\u0430 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", carb_max_g: "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u0434\u043E, \u0433", fiber_min_g: "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 \u043E\u0442, \u0433", saturated_fat_max_pct: "\u041D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u044B\u0435 \u0436\u0438\u0440\u044B \u0434\u043E, %", max_active_minutes: "\u041C\u0438\u043D\u0443\u0442 \u043D\u0430 \u0433\u043E\u0442\u043E\u0432\u043A\u0443", meals_per_day: "\u041F\u0440\u0438\u0451\u043C\u043E\u0432 \u043F\u0438\u0449\u0438", max_recipe_repeats_per_week: "\u041F\u043E\u0432\u0442\u043E\u0440\u043E\u0432 \u0431\u043B\u044E\u0434\u0430 \u0432 \u043D\u0435\u0434\u0435\u043B\u044E", show_calories: "\u041F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0442\u044C \u043A\u0430\u043B\u043E\u0440\u0438\u0438", note: "\u0417\u0430\u043F\u0438\u0441\u044C", date: "\u0414\u0430\u0442\u0430", timezone: "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441", display_name: "\u0418\u043C\u044F", goal: "\u0426\u0435\u043B\u044C", basis_note: "\u041E\u0441\u043D\u043E\u0432\u0430\u043D\u0438\u0435", source_ref: "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A" };
-var values = { normal: "\u043E\u0431\u044B\u0447\u043D\u044B\u0439", large: "\u043A\u0440\u0443\u043F\u043D\u044B\u0439", compact: "\u043A\u043E\u043C\u043F\u0430\u043A\u0442\u043D\u044B\u0435", comfortable: "\u043F\u0440\u043E\u0441\u0442\u043E\u0440\u043D\u044B\u0435", dark: "\u0442\u0451\u043C\u043D\u0430\u044F", light: "\u0441\u0432\u0435\u0442\u043B\u0430\u044F", "ivory-plum": "Tranquil Dawn", chat: "\u043E\u0431\u0449\u0435\u043D\u0438\u0435", today: "\u043C\u0435\u043D\u044E", recipes: "\u0440\u0435\u0446\u0435\u043F\u0442\u044B", diary: "\u0434\u043D\u0435\u0432\u043D\u0438\u043A" };
+var values = { normal: "\u043E\u0431\u044B\u0447\u043D\u044B\u0439", large: "\u043A\u0440\u0443\u043F\u043D\u044B\u0439", compact: "\u043A\u043E\u043C\u043F\u0430\u043A\u0442\u043D\u044B\u0435", comfortable: "\u043F\u0440\u043E\u0441\u0442\u043E\u0440\u043D\u044B\u0435", dark: "\u0442\u0451\u043C\u043D\u0430\u044F", light: "\u0441\u0432\u0435\u0442\u043B\u0430\u044F", "ivory-plum": "\u0441\u0432\u0435\u0442\u043B\u0430\u044F", chat: "\u043E\u0431\u0449\u0435\u043D\u0438\u0435", today: "\u043C\u0435\u043D\u044E", recipes: "\u0440\u0435\u0446\u0435\u043F\u0442\u044B", diary: "\u0434\u043D\u0435\u0432\u043D\u0438\u043A" };
 Object.assign(uiLabels, { age_years: "\u0412\u043E\u0437\u0440\u0430\u0441\u0442, \u043B\u0435\u0442", height_cm: "\u0420\u043E\u0441\u0442, \u0441\u043C", weight_kg: "\u0412\u0435\u0441, \u043A\u0433", equation_category: "\u041A\u043E\u044D\u0444\u0444\u0438\u0446\u0438\u0435\u043D\u0442 \u0443\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u044F", activity_factor: "\u041C\u043D\u043E\u0436\u0438\u0442\u0435\u043B\u044C \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u0438", activity_note: "\u0410\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u044C", measured_at: "\u0414\u0430\u0442\u0430 \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u044F", mode: "\u0420\u0435\u0436\u0438\u043C \u043F\u0438\u0442\u0430\u043D\u0438\u044F" });
 Object.assign(values, { female: "\u0436\u0435\u043D\u0441\u043A\u0438\u0439 \u043A\u043E\u044D\u0444\u0444\u0438\u0446\u0438\u0435\u043D\u0442", male: "\u043C\u0443\u0436\u0441\u043A\u043E\u0439 \u043A\u043E\u044D\u0444\u0444\u0438\u0446\u0438\u0435\u043D\u0442", not_selected: "\u043D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D", maintain: "\u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435 \u0432\u0435\u0441\u0430", loss: "\u043C\u044F\u0433\u043A\u043E\u0435 \u0441\u043D\u0438\u0436\u0435\u043D\u0438\u0435 \u0432\u0435\u0441\u0430", gain: "\u043D\u0430\u0431\u043E\u0440 \u0432\u0435\u0441\u0430 \u2014 \u0438\u043D\u0434\u0438\u0432\u0438\u0434\u0443\u0430\u043B\u044C\u043D\u044B\u0439 \u043F\u043B\u0430\u043D", starter: "\u043D\u0438\u0437\u043A\u043E\u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043D\u044B\u0439 \u0441\u0442\u0430\u0440\u0442: \u0434\u043E 100 \u0433 \u043E\u0431\u0449\u0438\u0445 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", keto: "\u043A\u0435\u0442\u043E-\u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439: \u0434\u043E 50 \u0433 \u043E\u0431\u0449\u0438\u0445 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432", total: "\u043E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", net_estimate: "\u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0435 net-\u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B" });
 var QUESTIONS = [["adult", "\u0412\u0430\u043C \u0443\u0436\u0435 \u0438\u0441\u043F\u043E\u043B\u043D\u0438\u043B\u043E\u0441\u044C 18 \u043B\u0435\u0442?"], ["pregnant", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0431\u0435\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0441\u0442\u044C?"], ["breastfeeding", "\u041A\u043E\u0440\u043C\u0438\u0442\u0435 \u0433\u0440\u0443\u0434\u044C\u044E?"], ["type1_diabetes", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0434\u0438\u0430\u0431\u0435\u0442 1 \u0442\u0438\u043F\u0430?"], ["sglt2", "\u041F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u0442\u0435 SGLT2-\u043F\u0440\u0435\u043F\u0430\u0440\u0430\u0442 \u2014 \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 \u0424\u043E\u0440\u0441\u0438\u0433\u0443 \u0438\u043B\u0438 \u0414\u0436\u0430\u0440\u0434\u0438\u043D\u0441?"], ["hypoglycemia_medication", "\u041F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u0442\u0435 \u0438\u043D\u0441\u0443\u043B\u0438\u043D \u0438\u043B\u0438 \u0434\u0440\u0443\u0433\u043E\u0439 \u043F\u0440\u0435\u043F\u0430\u0440\u0430\u0442, \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u043C\u043E\u0436\u0435\u0442 \u0432\u044B\u0437\u0432\u0430\u0442\u044C \u0433\u0438\u043F\u043E\u0433\u043B\u0438\u043A\u0435\u043C\u0438\u044E?"], ["kidney_disease", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0437\u0430\u0431\u043E\u043B\u0435\u0432\u0430\u043D\u0438\u0435 \u043F\u043E\u0447\u0435\u043A?"], ["liver_pancreas_gallbladder_disease", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0437\u0430\u0431\u043E\u043B\u0435\u0432\u0430\u043D\u0438\u0435 \u043F\u0435\u0447\u0435\u043D\u0438, \u043F\u043E\u0434\u0436\u0435\u043B\u0443\u0434\u043E\u0447\u043D\u043E\u0439 \u0436\u0435\u043B\u0435\u0437\u044B \u0438\u043B\u0438 \u0436\u0435\u043B\u0447\u043D\u043E\u0433\u043E \u043F\u0443\u0437\u044B\u0440\u044F?"], ["metabolic_contraindication", "\u0418\u0437\u0432\u0435\u0441\u0442\u043D\u044B \u043B\u0438 \u043D\u0430\u0440\u0443\u0448\u0435\u043D\u0438\u044F \u043E\u0431\u043C\u0435\u043D\u0430 \u0436\u0438\u0440\u043E\u0432 \u0438\u043B\u0438 \u0438\u043D\u044B\u0435 \u043F\u0440\u043E\u0442\u0438\u0432\u043E\u043F\u043E\u043A\u0430\u0437\u0430\u043D\u0438\u044F \u043A \u043A\u0435\u0442\u043E\u0433\u0435\u043D\u043D\u043E\u0439 \u0434\u0438\u0435\u0442\u0435?"], ["eating_disorder_risk", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0441\u0435\u0439\u0447\u0430\u0441 \u0438\u043B\u0438 \u0432 \u043F\u0440\u043E\u0448\u043B\u043E\u043C \u0440\u0430\u0441\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u043E \u043F\u0438\u0449\u0435\u0432\u043E\u0433\u043E \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u044F?"], ["other_clinical_restrictions", "\u0415\u0441\u0442\u044C \u043B\u0438 \u0434\u0440\u0443\u0433\u0438\u0435 \u043C\u0435\u0434\u0438\u0446\u0438\u043D\u0441\u043A\u0438\u0435 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u043F\u0438\u0442\u0430\u043D\u0438\u044F?"], ["medications_reviewed", "\u0412\u044B \u043F\u0435\u0440\u0435\u0447\u0438\u0441\u043B\u0438\u043B\u0438 \u0432\u0441\u0435 \u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u043C\u044B\u0435 \u043B\u0435\u043A\u0430\u0440\u0441\u0442\u0432\u0430 \u0438\u043B\u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u043B\u0438, \u0447\u0442\u043E \u0438\u0445 \u043D\u0435\u0442?"], ["allergies_reviewed", "\u0412\u044B \u0443\u043A\u0430\u0437\u0430\u043B\u0438 \u0432\u0441\u0435 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u043F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438?"]];
 var ALLERGENS = [["egg", "\u042F\u0439\u0446\u0430"], ["milk", "\u041C\u043E\u043B\u043E\u043A\u043E"], ["fish", "\u0420\u044B\u0431\u0430"], ["crustacean_shellfish", "\u0420\u0430\u043A\u043E\u043E\u0431\u0440\u0430\u0437\u043D\u044B\u0435"], ["tree_nut", "\u041E\u0440\u0435\u0445\u0438"], ["peanut", "\u0410\u0440\u0430\u0445\u0438\u0441"], ["soy", "\u0421\u043E\u044F"], ["wheat", "\u041F\u0448\u0435\u043D\u0438\u0446\u0430"], ["sesame", "\u041A\u0443\u043D\u0436\u0443\u0442"], ["celery", "\u0421\u0435\u043B\u044C\u0434\u0435\u0440\u0435\u0439"], ["coconut", "\u041A\u043E\u043A\u043E\u0441"], ["mollusc", "\u041C\u043E\u043B\u043B\u044E\u0441\u043A\u0438"], ["gluten", "\u0413\u043B\u044E\u0442\u0435\u043D"], ["mustard", "\u0413\u043E\u0440\u0447\u0438\u0446\u0430"], ["lupin", "\u041B\u044E\u043F\u0438\u043D"], ["sulfite", "\u0421\u0443\u043B\u044C\u0444\u0438\u0442\u044B"]];
 var foodStates = { raw: "\u0441\u044B\u0440\u043E\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442", ready_to_eat: "\u0433\u043E\u0442\u043E\u0432\u044B\u0439 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E", cooked_roasted: "\u0437\u0430\u043F\u0435\u0447\u0451\u043D\u043D\u044B\u0439", cooked_dry_heat: "\u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u044B\u0439 \u0441\u0443\u0445\u0438\u043C \u0436\u0430\u0440\u043E\u043C", canned_drained: "\u043A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439 \u0431\u0435\u0437 \u0436\u0438\u0434\u043A\u043E\u0441\u0442\u0438", ready_to_cook: "\u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u044B\u0439 \u043A \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044E", cooked_boiled: "\u0432\u0430\u0440\u0451\u043D\u044B\u0439", cooked: "\u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u044B\u0439", dry: "\u0441\u0443\u0445\u043E\u0439", canned: "\u043A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439", frozen: "\u0437\u0430\u043C\u043E\u0440\u043E\u0436\u0435\u043D\u043D\u044B\u0439" };
-var numberRu = (n) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(n);
+var numberRu = (n, precision = 3) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: precision }).format(n);
 var foodState = (x) => foodStates[x] || "\u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435: \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0432 \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430";
 function readable(message) {
   return String(message).replace(/(?:Сначала скрининг|План не разрешён):[^\n]*/g, "\u0414\u043B\u044F \u043C\u0435\u043D\u044E \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0435 \u0432\u043E\u043F\u0440\u043E\u0441\u044B \u0432 \u0440\u0430\u0437\u0434\u0435\u043B\u0435 \xAB\u0417\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E \u0438 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F\xBB \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u043D\u044B\u0435 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F.");
@@ -8633,10 +9442,18 @@ function renderTranquilSummary(next) {
   host.hidden = false;
 }
 function clearScreen() {
+  measurementEditing = null;
+  measurementOriginal = null;
+  measurementSavedDraft = null;
+  measurementSubmissions.clear();
+  portionFoods = [];
+  portionSearchVersion++;
+  portionCalcVersion++;
+  shop.reset();
+  ownDish.reset();
   screenEpoch++;
   renderTranquilSummary(null);
   developer.reset();
-  kitchen.reset();
   guided.reset();
   router.reset();
   busy = false;
@@ -8652,8 +9469,9 @@ function clearScreen() {
   screenDraft = {};
   questionPage = 0;
   document.querySelectorAll("form").forEach((form) => form.reset());
+  kitchen.reset();
   $2("toast").hidden = true;
-  for (const id of ["recipe-detail", "recipes", "history", "allergy-options", "screen-questions", "source-list", "admin-summary", "invite-link"]) $2(id).replaceChildren();
+  for (const id of ["recipe-detail", "recipes", "history", "allergy-options", "screen-questions", "source-list", "admin-summary", "invite-link", "measurement-list", "portion-result"]) $2(id).replaceChildren();
   for (const id of ["display-name", "goal", "timezone", "medications", "diary-note", "recipe-query", "photo"]) $2(id).value = "";
   if ($2("recipe-dialog").open) $2("recipe-dialog").close();
   $2("messages").replaceChildren();
@@ -8696,8 +9514,8 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
   document.body.dataset.view = next;
   document.querySelectorAll("[data-page]").forEach((p) => p.hidden = p.dataset.page !== next);
   document.querySelectorAll("[data-view]").forEach((b2) => {
-    b2.classList.toggle("active", b2.dataset.view === (["chat", "today", "diary"].includes(next) ? next : "more"));
-    b2.setAttribute("aria-current", b2.dataset.view === (["chat", "today", "diary"].includes(next) ? next : "more") ? "page" : "false");
+    b2.classList.toggle("active", b2.dataset.view === (next === "recipes" ? "today" : ["chat", "today", "diary"].includes(next) ? next : "more"));
+    b2.setAttribute("aria-current", b2.dataset.view === (next === "recipes" ? "today" : ["chat", "today", "diary"].includes(next) ? next : "more") ? "page" : "false");
   });
   if (next === "recipes" && reason !== "history") {
     run(loadRecipes);
@@ -8721,6 +9539,7 @@ function setState(next) {
   if (state && state.profile.owner_account_id !== next.profile.owner_account_id) clearScreen();
   if (!next.processing_consent || !next.profile.consent.storage || !next.profile.consent.health_data) clearScreen();
   state = next;
+  ownDish.update(state);
   developer.identity();
   renderState();
 }
@@ -8731,6 +9550,7 @@ function accept(d2) {
   if (d2?.shopping) renderShopping(d2.shopping);
   if (d2?.message) notify(d2.message);
   guided.afterApplied(d2);
+  shop.afterApplied(d2);
   if (d2?.receipt?.type === "profile.update" && router.current === "setup-restrictions") fillOnboard();
   return d2;
 }
@@ -8752,6 +9572,7 @@ function renderState() {
   guided.render(router.current);
   renderProposals();
   renderDiary();
+  renderMeasurements();
   renderHistory();
   if (state.chat.length) {
     $2("messages").replaceChildren(...state.chat.map((x) => el("div", "bubble " + x.role, x.text)));
@@ -8788,19 +9609,34 @@ function renderProposals() {
     const card = el("div", "proposal");
     card.setAttribute("role", "region");
     card.setAttribute("aria-label", "\u0418\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F");
-    card.append(el("span", "eyebrow", "\u041D\u0410 \u041F\u0420\u041E\u0412\u0415\u0420\u041A\u0423"), el("h3", "", { "ui": "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", "configuration": "\u041F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0438 \u0440\u0435\u0436\u0438\u043C", "profile.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0442\u0432\u0435\u0442\u044B", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "plan.accept": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E", "catalog.recipe.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442", "guidance.setup": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0438 \u0432\u044B\u0431\u043E\u0440", "guidance.targets": "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "targets.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0443\u0447\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "feature.request": "\u041F\u043E\u0436\u0435\u043B\u0430\u043D\u0438\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0443", "ui.rollback": "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0432\u0438\u0434" }[p.type] || kitchenActionLabels[p.type.replace("kitchen.", "")] || "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435"));
+    card.append(el("span", "eyebrow", "\u041D\u0410 \u041F\u0420\u041E\u0412\u0415\u0420\u041A\u0423"), el("h3", "", { "ui": "\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435", "configuration": "\u041F\u043E\u0434\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043E\u0444\u043E\u0440\u043C\u043B\u0435\u043D\u0438\u0435 \u0438 \u0440\u0435\u0436\u0438\u043C", "profile.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0442\u0432\u0435\u0442\u044B", "measurement.add": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "measurement.update": "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "measurement.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "plan.accept": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E \u043C\u0435\u043D\u044E", "catalog.recipe.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442", "catalog.food.add": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442", "guidance.setup": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0438 \u0432\u044B\u0431\u043E\u0440", "guidance.targets": "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u043F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "targets.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0443\u0447\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B", "feature.request": "\u041F\u043E\u0436\u0435\u043B\u0430\u043D\u0438\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0443", "ui.rollback": "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0432\u0438\u0434" }[p.type] || kitchenActionLabels[p.type.replace("kitchen.", "")] || "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435"));
+    if (p.type === "kitchen.pantry" && Array.isArray(p.preview?.items)) {
+      const retained = new Set(p.payload.items.map((i) => i.food_id));
+      const removed = (state.kitchen?.pantry || []).filter((i) => !retained.has(i.food_id));
+      card.append(el("p", "", `\u041D\u043E\u0432\u0430\u044F \u043A\u043B\u0430\u0434\u043E\u0432\u0430\u044F \u0437\u0430\u043C\u0435\u043D\u0438\u0442 \u0442\u0435\u043A\u0443\u0449\u0443\u044E. \u0423\u0434\u0430\u043B\u044F\u0435\u0442\u0441\u044F \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${removed.length}` + (removed.length ? " \u2014 " + removed.map((i) => i.name_ru || "\u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E").join(", ") : "")));
+    }
     const dl = el("dl");
-    const pairs = p.type === "plan.accept" ? [["\u0414\u043D\u0435\u0439", p.payload.days?.length], ["\u0421\u0442\u0430\u0442\u0443\u0441", "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0439 \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"]] : p.type === "guidance.targets" ? flatten(p.payload.candidate) : flatten(p.payload);
+    const shopFood = p.type === "catalog.food.add" && p.payload?.provenance?.type === "shop_label";
+    const isKitchen = p.type.startsWith("kitchen.");
+    const pairs = p.type.startsWith("measurement.") ? measurementPreview(p) : shopFood ? [] : p.type === "kitchen.pantry" ? [["\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", p.preview?.items || []]] : isKitchen ? ["kitchen.diary", "kitchen.own_dish_diary"].includes(p.type) ? [...p.payload.date ? [["\u0414\u0430\u0442\u0430", formatDate(p.payload.date)]] : [], ["\u0421\u043A\u043E\u043B\u044C\u043A\u043E", `${numberRu(p.payload.fraction)} ${p.payload.basis === "batch" ? "\u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430" : "\u043F\u043E\u0440\u0446\u0438\u0438"}`]] : p.type === "kitchen.remember" ? [["\u041F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435", p.payload.text]] : p.type === "kitchen.forget" ? [["\u0417\u0430\u0431\u044B\u0442\u044C", state.kitchen?.preferences?.find((f) => f.id === p.payload.fact_id)?.text || "\u041F\u0440\u0435\u0434\u043F\u043E\u0447\u0442\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E"]] : p.type === "kitchen.accept_day" ? [["\u0411\u043B\u044E\u0434\u0430 \u0434\u043D\u044F", (p.preview?.day_items || []).join(", ")]] : p.type === "kitchen.rate" ? [["\u041E\u0446\u0435\u043D\u043A\u0430", p.payload.rating + " \u0438\u0437 5"]] : [] : p.type === "plan.accept" ? [["\u0414\u043D\u0435\u0439", p.payload.days?.length], ["\u0421\u0442\u0430\u0442\u0443\u0441", "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0439 \u0440\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0439 \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"]] : p.type === "guidance.targets" ? flatten(p.payload.candidate) : flatten(p.payload);
     for (const [key, val] of pairs.slice(0, 22)) {
       const leaf = key.split(".").at(-1);
       const label = uiLabels[leaf] || QUESTIONS.find((x) => x[0] === leaf)?.[1] || { allergies: "\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", medications: "\u041B\u0435\u043A\u0430\u0440\u0441\u0442\u0432\u0430", screening: "\u0412\u043E\u043F\u0440\u043E\u0441\u044B \u0430\u043D\u043A\u0435\u0442\u044B" }[leaf] || leaf;
-      dl.append(el("dt", "", label), el("dd", "", Array.isArray(val) ? val.map((x) => typeof x === "object" ? x.name || x.recipe_id || (x.food_id ? x.food_id + " \xB7 " + numberRu(x.grams_edible) + " \u0433 \xB7 " + foodState(x.state) : "\u0437\u0430\u043F\u0438\u0441\u044C") : ALLERGENS.find((a2) => a2[0] === x)?.[1] || human(x)).join(", ") : human(val)));
+      dl.append(el("dt", "", label), el("dd", "", Array.isArray(val) ? val.map((x) => typeof x === "object" ? x.name_ru ? x.name_ru + " \xB7 " + foodState(x.state) + " \xB7 " + (x.grams == null ? "\u043C\u0430\u0441\u0441\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430" : numberRu(x.grams) + " \u0433") : x.name || "\u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E" : ALLERGENS.find((a2) => a2[0] === x)?.[1] || human(x)).join(", ") : human(val)));
     }
     card.append(dl);
-    if (p.preview) {
+    if (shopFood) {
+      const f = p.payload, l2 = f.declared_label || {}, basis = { per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E" }[l2.basis] || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430", v2 = (x) => x == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : numberRu(x, 2), al = (f.allergens || []).map((id) => ALLERGENS.find((a2) => a2[0] === id)?.[1] || "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E");
+      card.append(el("p", "", f.name_ru + " \xB7 " + foodState(f.state)), el("p", "", "\u0410\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B: " + (al.length ? al.join(", ") : "\u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E: \u043D\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u044B")), el("p", "", "\u041E\u0441\u043D\u043E\u0432\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438: " + basis + (l2.basis === "per100g" ? "" : "; \u043C\u0430\u0441\u0441\u0430 " + v2(l2.mass_g) + " \u0433")), el("p", "", "\u041D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435: \u044D\u043D\u0435\u0440\u0433\u0438\u044F " + v2(l2.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043A\u0438 " + v2(l2.protein_g) + " \u0433 \xB7 \u0436\u0438\u0440\u044B " + v2(l2.fat_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + v2(l2.carbohydrate_g) + " \u0433 \xB7 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 " + v2(l2.fiber_g) + " \u0433"), el("p", "", "\u041E\u0441\u043D\u043E\u0432\u0430 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432: " + ({ total_includes_fiber: "\u0432\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443", available_excludes_fiber: "\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438", unknown: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430" }[l2.carbohydrate_basis] || "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430")), el("p", "", "\u041D\u0430 100 \u0433: \u044D\u043D\u0435\u0440\u0433\u0438\u044F " + v2(f.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043A\u0438 " + v2(f.protein_g) + " \u0433 \xB7 \u0436\u0438\u0440\u044B " + v2(f.fat_g) + " \u0433 \xB7 \u043E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + v2(f.carbohydrate_total_g) + " \u0433 \xB7 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430 " + v2(f.fiber_g) + " \u0433"), el("p", "muted", f.provenance.provider === "open_food_facts" ? "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: Open Food Facts \xB7 ODbL \xB7 " + f.source_ref : "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: \u043B\u0438\u0447\u043D\u0430\u044F \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430"));
+    }
+    if (p.type === "kitchen.source_import" && p.preview?.food) {
+      card.append(...sourceImportPreview(el, p.preview.food, p.preview.original_name, ALLERGENS, foodState));
+    }
+    if (p.type === "kitchen.own_dish_save" && p.preview?.whole_batch) ownDish.preview(card, p.preview);
+    if (p.preview && !p.preview.items && !p.preview.day_items && !p.preview.food && !p.preview.whole_batch) {
       card.append(el("h4", "", p.preview.name_ru + " \xB7 " + numberRu(p.preview.portions) + " \u043F\u043E\u0440\u0446\u0438\u0438"));
-      for (const i of p.preview.ingredients) card.append(el("p", "", i.name_ru + " \u2014 " + numberRu(i.grams_edible) + " \u0433 \xB7 " + foodState(i.state)));
-      card.append(el("p", "nutrition", "\u0420\u0430\u0441\u0447\u0451\u0442: " + numberRu(p.preview.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + numberRu(p.preview.nutrition.protein_g) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + numberRu(p.preview.nutrition.carbohydrate_total_g) + " \u0433"));
+      for (const i of p.preview.ingredients) card.append(el("p", "", i.name_ru + " \u2014 " + (i.stock_quantity_unknown ? "\u043D\u0443\u0436\u043D\u043E " + numberRu(i.required_grams) + " \u0433; \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043F\u0430\u0441" : numberRu(i.grams_edible) + " \u0433") + " \xB7 " + foodState(i.state)));
+      card.append(el("p", "nutrition", "\u0420\u0430\u0441\u0447\u0451\u0442: " + numberRu(p.preview.nutrition.energy_kcal, 0) + " \u043A\u043A\u0430\u043B \xB7 \u0431\u0435\u043B\u043E\u043A " + numberRu(p.preview.nutrition.protein_g, 1) + " \u0433 \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B " + numberRu(p.preview.nutrition.carbohydrate_total_g, 1) + " \u0433"));
     }
     if (p.type === "plan.accept") {
       const details = el("details"), summary = el("summary", "", "\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0431\u043B\u044E\u0434\u0430 \u0438 \u0433\u0440\u0430\u043C\u043C\u043E\u0432\u043A\u0438 \u043F\u0435\u0440\u0435\u0434 \u0432\u044B\u0431\u043E\u0440\u043E\u043C");
@@ -8810,26 +9646,36 @@ function renderProposals() {
         for (const meal of day.meals) {
           details.append(el("p", "", meal.name_ru));
           const ul = el("ul");
-          for (const i of meal.ingredients) ul.append(el("li", "", i.name_ru + " \u2014 " + numberRu(i.grams_edible) + " \u0433 \xB7 " + foodState(i.state)));
+          for (const i of meal.ingredients) ul.append(el("li", "", i.name_ru + " \u2014 " + (i.stock_quantity_unknown ? "\u043D\u0443\u0436\u043D\u043E " + numberRu(i.required_grams) + " \u0433; \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043F\u0430\u0441" : numberRu(i.grams_edible) + " \u0433") + " \xB7 " + foodState(i.state)));
           details.append(ul);
         }
       }
       card.append(details);
     }
-    const ok = el("button", "primary", "\u041F\u0440\u0438\u043C\u0435\u043D\u0438\u0442\u044C"), no = el("button", "secondary", "\u041E\u0442\u043C\u0435\u043D\u0430");
+    const cta = shopFood ? "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442" : { "kitchen.own_dish_save": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E", "kitchen.own_dish_diary": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", "kitchen.source_import": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442", "kitchen.pantry": `\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${p.payload.items?.length ?? 0}`, "kitchen.save": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442", "kitchen.diary": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", "measurement.add": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "measurement.update": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435", "measurement.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "diary.add": "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", "diary.delete": "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C", "kitchen.favorite": "\u0412 \u0438\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", "kitchen.rate": "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u043E\u0446\u0435\u043D\u043A\u0443", "kitchen.accept_day": "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C" }[p.type] || "\u041F\u0440\u0438\u043C\u0435\u043D\u0438\u0442\u044C";
+    const ok = el("button", "primary", cta), no = el("button", "secondary", "\u041E\u0442\u043C\u0435\u043D\u0430");
     ok.addEventListener("click", () => run(async () => {
       ok.disabled = true;
       try {
-        accept(await call("keto_apply_proposal", { proposal_id: p.id, expected_revision: state.revision, approved: true }));
+        const applied = await call("keto_apply_proposal", { proposal_id: p.id, expected_revision: state.revision, approved: true });
+        accept(applied);
+        if (applied.receipt?.id === p.id) {
+          if (p.type === "kitchen.own_dish_save") ownDish.savedReceipt(p.payload);
+          if (p.type === "measurement.add" || p.type === "measurement.update") finishMeasurementReceipt(p);
+          if (p.type === "diary.add" && $2("diary-note").value === p.payload.note && $2("diary-date").value === p.payload.date) $2("diary-note").value = "";
+          notify(p.type === "diary.add" || p.type === "kitchen.diary" ? "\u0417\u0430\u043F\u0438\u0441\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0430 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A\u0435." : "\u0418\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E.");
+        }
       } finally {
         ok.disabled = false;
       }
     }));
     no.addEventListener("click", () => run(async () => accept(await call("keto_apply_proposal", { proposal_id: p.id, expected_revision: state.revision, approved: false }))));
     card.append(ok, no);
-    if (p.expired || p.base_revision !== state.revision) {
+    const missingPantryPreview = p.type === "kitchen.pantry" && (!Array.isArray(p.preview?.items) || p.preview.items.length !== p.payload.items?.length);
+    const missingSubject = p.type === "kitchen.source_import" && !p.preview?.food || p.type === "kitchen.forget" && !state.kitchen?.preferences?.some((f) => f.id === p.payload.fact_id) || p.type === "kitchen.accept_day" && !p.preview?.day_items?.length;
+    if (p.expired || p.base_revision !== state.revision || missingPantryPreview || missingSubject) {
       ok.disabled = true;
-      card.append(el("p", "muted", p.expired ? "\u0421\u0440\u043E\u043A \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F \u0438\u0441\u0442\u0451\u043A. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0435\u0433\u043E \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0437\u0430\u043D\u043E\u0432\u043E." : "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0437\u0430\u043D\u043E\u0432\u043E."));
+      card.append(el("p", "muted", missingPantryPreview || missingSubject ? "\u0421\u043E\u0441\u0442\u0430\u0432 \u044D\u0442\u043E\u0433\u043E \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0435\u0433\u043E \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0437\u0430\u043D\u043E\u0432\u043E." : p.expired ? "\u0421\u0440\u043E\u043A \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F \u0438\u0441\u0442\u0451\u043A. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0435\u0433\u043E \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0437\u0430\u043D\u043E\u0432\u043E." : "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u044C\u0442\u0435 \u0437\u0430\u043D\u043E\u0432\u043E."));
     }
     $2("proposals").append(card);
   }
@@ -8846,7 +9692,7 @@ async function propose(type, payload) {
 }
 function recipeCard(r) {
   const b2 = el("button", "recipe-card");
-  b2.append(el("span", "tag", r.category === "breakfast" ? "\u041A \u0437\u0430\u0432\u0442\u0440\u0430\u043A\u0443" : "\u041D\u0430 \u0432\u0430\u0448\u0435\u0439 \u043A\u0443\u0445\u043D\u0435"), el("h3", "", r.name_ru));
+  b2.append(el("span", "tag", { breakfast: "\u0417\u0430\u0432\u0442\u0440\u0430\u043A", main: "\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E", side: "\u0413\u0430\u0440\u043D\u0438\u0440", component: "\u041A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442" }[r.category] || "\u0411\u043B\u044E\u0434\u043E"), el("h3", "", r.name_ru));
   const meta = el("div", "recipe-meta");
   meta.append(el("span", "", r.active_minutes + " \u043C\u0438\u043D"), el("span", "nutrition", Math.round(r.nutrition.energy_kcal) + " \u043A\u043A\u0430\u043B \xB7 \u0440\u0430\u0441\u0447\u0451\u0442"));
   if (r.fit_note) b2.append(el("p", "muted", r.fit_note));
@@ -8860,7 +9706,7 @@ function openRecipe(r) {
   const list = el("ul", "ingredient-list");
   for (const i of r.ingredients) {
     const li = el("li");
-    li.append(el("span", "", i.name_ru + " \xB7 " + foodState(i.state) + (i.food_id ? " \xB7 \u043A\u043E\u0434 " + i.food_id : "")), el("strong", "", numberRu(i.grams_edible) + " \u0433"));
+    li.append(el("span", "", i.name_ru + " \xB7 " + foodState(i.state)), el("strong", "", numberRu(i.grams_edible) + " \u0433"));
     list.append(li);
   }
   box.append(list);
@@ -8877,18 +9723,29 @@ function openRecipe(r) {
   $2("recipe-dialog").showModal();
   router.openDialog();
 }
+var recipeLibrary = createRecipeLibrary({ clear: () => $2("recipes").replaceChildren(), call: (args) => call("keto_recipes", args), readFilters: () => {
+  const args = { query: $2("recipe-query").value };
+  if ($2("recipe-category").value) args.category = $2("recipe-category").value;
+  if ($2("recipe-minutes").value) args.max_minutes = Number($2("recipe-minutes").value);
+  return args;
+}, epoch: () => screenEpoch, status: (t) => $2("recipe-note").textContent = t, more: (show, retry) => {
+  $2("recipe-more").hidden = !show;
+  $2("recipe-more").textContent = retry ? "\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0443" : "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0435\u0449\u0451";
+}, render: (d2, append) => {
+  const cards = d2.recipes.map((r) => r.draft_label ? kitchen.card(r) : recipeCard(r));
+  if (append) $2("recipes").append(...cards);
+  else $2("recipes").replaceChildren(...cards);
+  if (!d2.total) $2("recipes").append(el("div", "panel", "\u041D\u0435 \u043D\u0430\u0448\u043B\u043E\u0441\u044C \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u044F. \u0418\u0437\u043C\u0435\u043D\u0438\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u0438\u043B\u0438 \u0444\u0438\u043B\u044C\u0442\u0440\u044B."));
+} });
 async function loadRecipes() {
-  const d2 = await call("keto_recipes", { query: $2("recipe-query").value, limit: 24 });
-  $2("recipe-note").textContent = d2.note;
-  $2("recipes").replaceChildren(...d2.recipes.map((r) => r.draft_label ? kitchen.card(r) : recipeCard(r)));
-  if (!d2.recipes.length) $2("recipes").append(el("div", "panel", "\u041D\u0435 \u043D\u0430\u0448\u043B\u043E\u0441\u044C \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u044F. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430."));
+  return recipeLibrary.load(false);
 }
 function renderDiary() {
   $2("diary-entries").replaceChildren();
-  if (!state.diary.length) $2("diary-entries").append(el("div", "panel muted", "\u041F\u043E\u043A\u0430 \u043D\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u0435\u0439. \u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u043F\u0435\u0440\u0432\u0443\u044E \u0437\u0430\u043C\u0435\u0442\u043A\u0443 \u2014 \u0431\u0435\u0437 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0432\u0435\u0441\u0430 \u0438 \u043A\u0430\u043B\u043E\u0440\u0438\u0439."));
+  if (!state.diary.length) $2("diary-entries").append(el("div", "panel muted", "\u041F\u043E\u043A\u0430 \u043D\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u043E \u0435\u0434\u0435 \u0438 \u0441\u0430\u043C\u043E\u0447\u0443\u0432\u0441\u0442\u0432\u0438\u0438. \u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0437\u0430\u043C\u0435\u0442\u043A\u0443 \u2014 \u0431\u0435\u0437 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0432\u0435\u0441\u0430 \u0438 \u043A\u0430\u043B\u043E\u0440\u0438\u0439."));
   for (const e of [...state.diary].reverse()) {
     const card = el("article", "diary-entry");
-    card.append(el("time", "", formatDate(e.date)), el("p", "", e.note || "\u0417\u0430\u043F\u0438\u0441\u044C \u043E \u043F\u0438\u0442\u0430\u043D\u0438\u0438"));
+    card.append(el("time", "", formatDate(e.date)), el("p", "", e.recipe_id ? (state.kitchen?.diary_recipe_names?.[e.recipe_id] || "\u0411\u043B\u044E\u0434\u043E") + " \xB7 " + numberRu(e.portions) + " \u043F\u043E\u0440\u0446\u0438\u0438" : e.note || "\u0417\u0430\u043F\u0438\u0441\u044C \u043E \u043F\u0438\u0442\u0430\u043D\u0438\u0438"), ...e.recipe_id && e.note ? [el("p", "muted", e.note)] : []);
     const del = el("button", "text-btn", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C");
     del.addEventListener("click", () => run(() => propose("diary.delete", { entry_id: e.entry_id })));
     card.append(del);
@@ -8941,7 +9798,7 @@ function renderShopping(items) {
   const root = $2("menu-result"), box = el("div", "panel");
   box.append(el("h2", "", "\u0421\u043F\u0438\u0441\u043E\u043A \u043F\u043E\u043A\u0443\u043F\u043E\u043A"), el("p", "muted", "\u0423\u043A\u0430\u0437\u0430\u043D\u0430 \u043C\u0430\u0441\u0441\u0430 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u043E\u0439 \u0447\u0430\u0441\u0442\u0438; \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432."));
   const list = el("ul");
-  for (const i of items) list.append(el("li", "", i.name_ru + " \u2014 " + numberRu(i.grams_edible) + " \u0433 \xB7 " + foodState(i.state)));
+  for (const i of items) list.append(el("li", "", i.name_ru + " \u2014 " + (i.stock_quantity_unknown ? "\u043D\u0443\u0436\u043D\u043E " + numberRu(i.required_grams) + " \u0433; \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043F\u0430\u0441" : numberRu(i.grams_edible) + " \u0433") + " \xB7 " + foodState(i.state)));
   box.append(list);
   root.append(box);
 }
@@ -9089,8 +9946,17 @@ async function refresh() {
     if (d2.shopping) renderShopping(d2.shopping);
   }
 }
-$2("help").onclick = () => $2("help-dialog").showModal();
-$2("close-help").onclick = () => $2("help-dialog").close();
+$2("help").onclick = () => {
+  document.activeElement?.blur();
+  $2("help-dialog").showModal();
+  router.openDialog("help");
+  $2("close-help").focus();
+};
+$2("close-help").onclick = () => router.closeDialog();
+$2("help-dialog").addEventListener("cancel", (e) => {
+  e.preventDefault();
+  router.closeDialog();
+});
 $2("close-recipe").textContent = "\u041D\u0430\u0437\u0430\u0434 \u043A \u0441\u043F\u0438\u0441\u043A\u0443";
 $2("close-recipe").onclick = () => router.closeDialog();
 $2("recipe-dialog").addEventListener("cancel", (e) => {
@@ -9123,10 +9989,193 @@ $2("message").addEventListener("keydown", (e) => {
     if ($2("message").value.trim() || image) send($2("message").value);
   }
 });
+$2("recipe-query").addEventListener("input", () => recipeLibrary.invalidate());
 $2("recipe-search").addEventListener("submit", (e) => {
   e.preventDefault();
-  run(loadRecipes);
+  run(() => loadRecipes());
 });
+$2("recipe-more").addEventListener("click", () => run(() => recipeLibrary.next()));
+for (const id of ["recipe-category", "recipe-minutes"]) $2(id).addEventListener("change", () => run(() => loadRecipes()));
+var measurementEditing = null;
+var measurementOriginal = null;
+var measurementSavedDraft = null;
+var portionFoods = [];
+var portionSearchVersion = 0;
+var portionCalcVersion = 0;
+function glucoseUnitLabel(unit) {
+  return unit === "mg/dL" ? "\u043C\u0433/\u0434\u043B" : "\u043C\u043C\u043E\u043B\u044C/\u043B";
+}
+function measurementTimeLabel(m) {
+  try {
+    return new Intl.DateTimeFormat("ru-RU", { timeZone: m.timezone, year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(m.measured_at));
+  } catch {
+    return m.measured_at;
+  }
+}
+var measurementSubmissions = /* @__PURE__ */ new Map();
+var measurementFields = ["measurement-time", "measurement-glucose", "measurement-unit", "measurement-bhb", "measurement-context"];
+function measurementDraft() {
+  return { editing: measurementEditing, original: measurementOriginal, fields: measurementFields.map((id) => $2(id).value) };
+}
+function restoreMeasurementDraft(d2) {
+  measurementEditing = d2?.editing || null;
+  measurementOriginal = d2?.original || null;
+  if (d2) measurementFields.forEach((id, i) => $2(id).value = d2.fields[i]);
+  else $2("measurement-form").reset();
+  $2("measurement-cancel").hidden = !measurementEditing;
+  $2("measurement-zone").textContent = "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430: " + Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+function draftFingerprint() {
+  return JSON.stringify(measurementDraft());
+}
+function finishMeasurementReceipt(p) {
+  const fp = measurementSubmissions.get(p.id);
+  measurementSubmissions.delete(p.id);
+  if (fp !== void 0 && fp === draftFingerprint()) {
+    const saved = measurementSavedDraft;
+    measurementSavedDraft = null;
+    restoreMeasurementDraft(saved);
+  }
+}
+function measurementPreview(p) {
+  const m = p.type === "measurement.update" ? p.payload.session : p.type === "measurement.delete" ? (state.measurements || []).find((x) => x.measurement_id === p.payload.measurement_id) : p.payload;
+  if (!m) return [["\u0418\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435", "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E"]];
+  return [["\u0414\u0430\u0442\u0430 \u0438 \u0432\u0440\u0435\u043C\u044F", measurementTimeLabel(m)], ["\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441", m.timezone], ["\u0413\u043B\u044E\u043A\u043E\u0437\u0430", m.glucose ? numberRu(m.glucose.value) + " " + glucoseUnitLabel(m.glucose.unit) : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"], ["BHB \u043A\u0440\u043E\u0432\u0438", m.bhb ? numberRu(m.bhb.value) + " \u043C\u043C\u043E\u043B\u044C/\u043B" : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D"], ["\u041A\u043E\u043D\u0442\u0435\u043A\u0441\u0442", m.context || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D"]];
+}
+function readDecimal(id) {
+  const v2 = $2(id).value.trim();
+  if (!v2) return null;
+  if (!/^\d+(?:[.,]\d+)?$/.test(v2)) throw Error("\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0435\u043E\u0442\u0440\u0438\u0446\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435 \u0447\u0438\u0441\u043B\u043E.");
+  const n = Number(v2.replace(",", "."));
+  if (!Number.isFinite(n)) throw Error("\u041D\u0435\u0432\u0435\u0440\u043D\u043E\u0435 \u0447\u0438\u0441\u043B\u043E.");
+  return n;
+}
+function renderMeasurements() {
+  const box = $2("measurement-list");
+  box.replaceChildren();
+  for (const m of [...state.measurements || []].reverse()) {
+    const card = el("article", "diary-entry");
+    card.append(el("p", "", measurementTimeLabel(m) + " \xB7 " + m.timezone), el("p", "", `\u0413\u043B\u044E\u043A\u043E\u0437\u0430: ${m.glucose ? numberRu(m.glucose.value) + " " + glucoseUnitLabel(m.glucose.unit) : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"} \xB7 BHB \u043A\u0440\u043E\u0432\u0438: ${m.bhb ? numberRu(m.bhb.value) + " \u043C\u043C\u043E\u043B\u044C/\u043B" : "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D"}`), el("p", "", m.gki?.value == null ? m.gki?.reason : "GKI: " + numberRu(m.gki.value, 2)), ...m.context ? [el("p", "muted", m.context)] : []);
+    const edit = el("button", "", "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C"), del = el("button", "text-btn", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C");
+    edit.type = del.type = "button";
+    edit.onclick = () => {
+      if (measurementEditing) {
+        notify("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0435 \u0438\u043B\u0438 \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u0435 \u0442\u0435\u043A\u0443\u0449\u0435\u0435 \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435.");
+        return;
+      }
+      measurementSavedDraft = measurementDraft();
+      measurementEditing = m.measurement_id;
+      measurementOriginal = { measured_at: m.measured_at, timezone: m.timezone, display: m.measured_at.slice(0, 16) };
+      $2("measurement-time").value = measurementOriginal.display;
+      $2("measurement-glucose").value = m.glucose?.value ?? "";
+      $2("measurement-unit").value = m.glucose?.unit || "mmol/L";
+      $2("measurement-bhb").value = m.bhb?.value ?? "";
+      $2("measurement-context").value = m.context || "";
+      $2("measurement-zone").textContent = "\u0418\u0441\u0445\u043E\u0434\u043D\u044B\u0439 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441: " + m.timezone + ". \u0415\u0441\u043B\u0438 \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u0432\u0440\u0435\u043C\u044F, \u0431\u0443\u0434\u0435\u0442 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430.";
+      $2("measurement-cancel").hidden = false;
+    };
+    del.onclick = () => run(() => propose("measurement.delete", { measurement_id: m.measurement_id }));
+    card.append(edit, del);
+    box.append(card);
+  }
+}
+$2("measurement-zone").textContent = "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430: " + Intl.DateTimeFormat().resolvedOptions().timeZone;
+$2("measurement-cancel").onclick = () => {
+  const saved = measurementSavedDraft;
+  measurementSavedDraft = null;
+  restoreMeasurementDraft(saved);
+};
+$2("measurement-form").onsubmit = (e) => {
+  e.preventDefault();
+  run(async () => {
+    const raw = $2("measurement-time").value;
+    let m;
+    if (measurementOriginal && raw === measurementOriginal.display) {
+      m = { measured_at: measurementOriginal.measured_at, timezone: measurementOriginal.timezone };
+    } else {
+      const dt = new Date(raw);
+      if (!raw || !Number.isFinite(dt.getTime())) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0434\u0430\u0442\u0443 \u0438 \u0432\u0440\u0435\u043C\u044F.");
+      const local = [dt.getFullYear(), String(dt.getMonth() + 1).padStart(2, "0"), String(dt.getDate()).padStart(2, "0")].join("-") + "T" + [dt.getHours(), dt.getMinutes()].map((n) => String(n).padStart(2, "0")).join(":");
+      if (local !== raw) throw Error("\u042D\u0442\u043E \u043C\u0435\u0441\u0442\u043D\u043E\u0435 \u0432\u0440\u0435\u043C\u044F \u043D\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442 \u043F\u0440\u0438 \u043F\u0435\u0440\u0435\u0432\u043E\u0434\u0435 \u0447\u0430\u0441\u043E\u0432; \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0435 \u0432\u0440\u0435\u043C\u044F.");
+      const offset2 = -dt.getTimezoneOffset(), sign = offset2 >= 0 ? "+" : "-", pad = (n) => String(Math.abs(n)).padStart(2, "0");
+      m = { measured_at: raw + ":00" + sign + pad(Math.trunc(offset2 / 60)) + ":" + pad(offset2 % 60), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
+    }
+    const g = readDecimal("measurement-glucose"), b2 = readDecimal("measurement-bhb");
+    if (g !== null) m.glucose = { value: g, unit: $2("measurement-unit").value };
+    if (b2 !== null) m.bhb = { value: b2, unit: "mmol/L" };
+    if (g === null && b2 === null) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0445\u043E\u0442\u044F \u0431\u044B \u043E\u0434\u043D\u043E \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435.");
+    if ($2("measurement-context").value.trim()) m.context = $2("measurement-context").value.trim();
+    const fingerprint = draftFingerprint();
+    const r = await propose(measurementEditing ? "measurement.update" : "measurement.add", measurementEditing ? { measurement_id: measurementEditing, session: m } : m);
+    if (r?.proposal?.id) measurementSubmissions.set(r.proposal.id, fingerprint);
+  });
+};
+function clearPortionResult() {
+  portionCalcVersion++;
+  $2("portion-result").replaceChildren();
+}
+function clearPortionGI() {
+  $2("portion-gi").value = "";
+  $2("portion-source").value = "";
+  $2("portion-match").checked = false;
+}
+function portionFingerprint() {
+  const f = portionFoods.find((x) => x.food_id === $2("portion-food").value);
+  return JSON.stringify([f?.food_id, f?.state, $2("portion-grams").value, $2("portion-gi").value, $2("portion-source").value, $2("portion-match").checked]);
+}
+$2("portion-query").addEventListener("input", () => {
+  portionSearchVersion++;
+  clearPortionResult();
+});
+$2("portion-food").addEventListener("change", () => {
+  clearPortionGI();
+  clearPortionResult();
+});
+for (const id of ["portion-grams", "portion-gi", "portion-source", "portion-match"]) {
+  for (const event of ["input", "change"]) $2(id).addEventListener(event, clearPortionResult);
+}
+$2("portion-search").onsubmit = (e) => {
+  e.preventDefault();
+  const query = $2("portion-query").value, token = ++portionSearchVersion, epoch = screenEpoch;
+  clearPortionResult();
+  run(async () => {
+    const r = await call("keto_kitchen", { action: "foods", query, thread_id: state.active_thread || "main", values: {} });
+    if (token !== portionSearchVersion || epoch !== screenEpoch || query !== $2("portion-query").value) return;
+    portionFoods = r.foods || [];
+    const select = $2("portion-food");
+    select.replaceChildren();
+    for (const f of portionFoods) {
+      const option = el("option", "", f.name_ru + " \xB7 " + foodState(f.state));
+      option.value = f.food_id;
+      select.append(option);
+    }
+    clearPortionGI();
+    clearPortionResult();
+    if (!portionFoods.length) throw Error("\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u044B.");
+  });
+};
+$2("portion-form").onsubmit = (e) => {
+  e.preventDefault();
+  run(async () => {
+    const food = portionFoods.find((f) => f.food_id === $2("portion-food").value);
+    if (!food) throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442.");
+    const grams = readDecimal("portion-grams");
+    if (grams === null || grams <= 0) throw Error("\u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u043C\u0430\u0441\u0441\u0443 \u043F\u043E\u0440\u0446\u0438\u0438.");
+    const values2 = { food_id: food.food_id, grams };
+    const gi = readDecimal("portion-gi");
+    if (gi !== null) {
+      if (!$2("portion-match").checked || !$2("portion-source").value.trim()) throw Error("\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F \u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A \u0413\u0418.");
+      values2.gi = { value: gi, source: $2("portion-source").value.trim(), preparation: food.state, scale: "glucose_100" };
+    }
+    const fingerprint = portionFingerprint(), token = ++portionCalcVersion, epoch = screenEpoch;
+    $2("portion-result").replaceChildren();
+    const r = await call("keto_kitchen", { action: "food_portion", thread_id: state.active_thread || "main", values: values2 });
+    if (token !== portionCalcVersion || epoch !== screenEpoch || fingerprint !== portionFingerprint()) return;
+    const v2 = r.portion, n = v2.calculation.nutrition;
+    const out = $2("portion-result");
+    out.replaceChildren(el("p", "", r.food.name_ru + " \xB7 " + foodState(r.food.state) + " \xB7 " + numberRu(grams) + " \u0433"), el("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A \u0441\u043E\u0441\u0442\u0430\u0432\u0430: " + r.food.source_url + "; \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u043D\u0430 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u0438\u0437 \u043E\u0441\u043D\u043E\u0432\u044B \u043D\u0430 100 \u0433."), el("p", "", [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043A\u0438", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"]].map(([key, label, unit]) => label + ": " + (n[key] == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : numberRu(n[key], 2) + " " + unit)).join(" \xB7 ")), el("p", "", "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B: " + (v2.available_carbohydrate_g == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : numberRu(v2.available_carbohydrate_g, 2) + " \u0433")), el("p", "", v2.gi_status === "unknown" ? "\u0413\u0418: \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u0435\u043D." : `\u0413\u0418: ${numberRu(v2.gi)} (\u0432\u0440\u0443\u0447\u043D\u0443\u044E, \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D \u0432\u0430\u043C\u0438: ${values2.gi.source})`), el("p", "", v2.gl == null ? "\u0413\u041D: " + v2.gl_reason : "\u0413\u041D: " + numberRu(v2.gl, 2)));
+  });
+};
 $2("diary-form").addEventListener("submit", (e) => {
   e.preventDefault();
   run(() => propose("diary.add", { date: $2("diary-date").value, note: $2("diary-note").value, intake_status: "unquantified" }));
@@ -9465,6 +10514,20 @@ mountDeveloperExtension($2("chat-extras"));
 var guided = setupGuidance({ $: $2, el, getState: () => state, call, accept, notify, run, setView, epoch: () => screenEpoch });
 var router = createRouter({ location, history, listen: (name2, fn) => window.addEventListener(name2, fn), render: renderView, closeDialog: () => {
   if ($2("recipe-dialog").open) $2("recipe-dialog").close();
+  if ($2("help-dialog").open) {
+    $2("help-dialog").close();
+    $2("help").focus({ preventScroll: true });
+  }
 }, fallback: () => state?.guidance?.ready ? state.ui.home || "chat" : guided.resolve("setup") });
 var kitchen = setupKitchen({ $: $2, el, call, getState: () => state, accept, run, notify, setView, epoch: () => screenEpoch });
+var shop = setupShop({ $: $2, el, call, api: (path, method, body) => cfApi(path, { method, body }), getState: () => state, accept, run, epoch: () => screenEpoch, allergens: ALLERGENS, onPantryPreview: (name2) => kitchen.previewSavedPantry(name2), onPantryReset: () => kitchen.cancelSavedPreview() });
+$2("menu-shop").onclick = () => {
+  setView("recipes");
+  const panel = $2("shop-root").querySelector("details");
+  if (panel) {
+    panel.open = true;
+    panel.scrollIntoView({ block: "nearest" });
+  }
+};
+var ownDish = setupOwnDish({ $: $2, el, call, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu });
 run(start);

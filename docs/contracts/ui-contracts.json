@@ -3,30 +3,29 @@
     ":root": {
       "--accent": "var(--color-spruce-teal)",
       "--bg": "var(--color-canvas-warm-cream)",
-      "--color-canvas-warm-cream": "#FAF9F6",
+      "--color-canvas-warm-cream": "#F2F2F7",
       "--color-card-surface-white": "#FFFFFF",
       "--color-coral-alert": "#E06A4E",
-      "--color-deep-charcoal": "#1A2421",
+      "--color-deep-charcoal": "#1C1C1E",
       "--color-dusk-indigo": "#4F659C",
-      "--color-mint-glaze-surface": "#F0F7F5",
+      "--color-mint-glaze-surface": "#EAF2FF",
       "--color-muted-peach": "#F09E81",
-      "--color-slate-neutral": "#6C7A76",
-      "--color-spruce-teal": "#0E3B36",
+      "--color-slate-neutral": "#50545B",
+      "--color-spruce-teal": "#005FCC",
       "--color-verdant-mint": "#43A08A",
       "--container": "428px",
-      "--font-plus-jakarta-sans": "\"Plus Jakarta Sans\", Inter, \"SF Pro Display\", Urbanist, -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif",
+      "--font-plus-jakarta-sans": "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
       "--grid-gap": "12px",
-      "--hero-surface": "rgba(250,249,246,.96)",
       "--ink": "var(--color-deep-charcoal)",
       "--leading-body": "1.5",
-      "--line": "#D7E3DF",
+      "--line": "#D1D1D6",
       "--muted": "var(--color-slate-neutral)",
       "--on-accent": "#FFFFFF",
       "--paper": "var(--color-card-surface-white)",
-      "--pastel-lavender": "#EBEDF5",
-      "--pastel-peach": "#FBECE5",
-      "--pastel-sage": "#E6F0E8",
-      "--pastel-seafoam": "#E1F1EC",
+      "--pastel-lavender": "#F2F2F7",
+      "--pastel-peach": "#F2F2F7",
+      "--pastel-sage": "#EAF2FF",
+      "--pastel-seafoam": "#EAF2FF",
       "--plum": "var(--accent)",
       "--radius": "22px",
       "--radius-hero": "24px",
@@ -44,33 +43,32 @@
       "--spacing-36": "36px",
       "--spacing-4": "4px",
       "--spacing-8": "8px",
-      "--text-body": "15px",
+      "--text-body": "17px",
       "--text-body-lg": "17px",
       "--text-body-sm": "13px",
       "--text-caption": "11px",
       "--text-display": "28px",
       "--text-heading": "20px",
       "--text-heading-lg": "24px",
-      "--text-secondary": "#5E6F68",
+      "--text-secondary": "#50545B",
       "--text-subheading": "17px",
       "--warn": "#9A3E29"
     },
     "body.dark": {
-      "--accent": "#ACDCCD",
-      "--bg": "#142521",
-      "--hero-surface": "rgba(32,54,48,.97)",
-      "--ink": "#EFF5F1",
-      "--line": "#506C61",
-      "--muted": "#B5C9C0",
-      "--on-accent": "#142521",
-      "--paper": "#203630",
-      "--pastel-lavender": "#343E56",
-      "--pastel-peach": "#543C32",
-      "--pastel-sage": "#304A39",
-      "--pastel-seafoam": "#2A4B41",
-      "--soft": "#2A433A",
-      "--text-secondary": "#B5C9C0",
-      "--warn": "#FFC3B3"
+      "--accent": "#83B8FF",
+      "--bg": "#111318",
+      "--ink": "#F2F3F5",
+      "--line": "#606977",
+      "--muted": "#C3C7D0",
+      "--on-accent": "#101B2D",
+      "--paper": "#1C1E24",
+      "--pastel-lavender": "#30333B",
+      "--pastel-peach": "#30333B",
+      "--pastel-sage": "#263448",
+      "--pastel-seafoam": "#263448",
+      "--soft": "#263448",
+      "--text-secondary": "#C3C7D0",
+      "--warn": "#FFB4A8"
     },
     "body.light": {}
   },
@@ -96,12 +94,12 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "36f36fd4689df1963cb8a2a381606be0dc863418e884ef84ef0ec371c75d2d7c",
-    "cloudflare-saas/public/index.html": "a7791cd3b1d17a1800685053c598fcbb824b46d2bfbcee676783e4cdbe72ca13",
-    "cloudflare-saas/public/routes.js": "04c6882a4f13978182a2b8aa27d0556cb1cfbde8010fdacb9a5f6411145167e1",
-    "cloudflare-saas/src/compute.mjs": "f1f1ddf7344550ca0c64a08fc6fb17a440ad1dbd976da0a84136bf69f6ecb9a1",
-    "cloudflare-saas/src/worker.mjs": "65eee91340da63bf857aacdc6f9d82632c22bed49743fc52bcb7a6554f137d1e",
-    "service/app.py": "ef66602e8108ec640d0186bd9996339ec633e34091642dcaf35a961e29db6d0f"
+    "cloudflare-saas/public/app.css": "577bd2800526942d7ceda7ba9dccd34f83c20e1fb4a5e06fdd61877d37453312",
+    "cloudflare-saas/public/index.html": "a10cd5888ec9302ad2b40a7e9ff69e46a99fc797f766b1f57d35bd8ceea8c865",
+    "cloudflare-saas/public/routes.js": "c45eb01fdc79c9b9b3bd04541a6a383823bd6551a0dbbf2935dea23b66e10aae",
+    "cloudflare-saas/src/compute.mjs": "45a6b5e7aeb2685fd418771459b027c9c97b74dfe9b839869ee0dd0566496ae5",
+    "cloudflare-saas/src/worker.mjs": "4c51b2f885da22b0cefd06c83aac6d243e6232c6431c36d2764f0fcd069de07f",
+    "service/app.py": "082a85e340832638af141652aa7eb243dc447b107ca8bc17163e37665e9a684f"
   },
   "static_elements": [
     {
@@ -849,8 +847,16 @@
       "tag": "section"
     },
     {
+      "id": "shop-root",
+      "tag": "div"
+    },
+    {
       "data-testid": "kitchen-studio",
       "id": "kitchen-studio",
+      "tag": "div"
+    },
+    {
+      "id": "own-dish-root",
       "tag": "div"
     },
     {
@@ -866,12 +872,26 @@
       "tag": "input"
     },
     {
+      "id": "recipe-category",
+      "tag": "select"
+    },
+    {
+      "id": "recipe-minutes",
+      "tag": "input",
+      "type": "number"
+    },
+    {
       "id": "recipe-note",
       "tag": "p"
     },
     {
       "id": "recipes",
       "tag": "div"
+    },
+    {
+      "id": "recipe-more",
+      "tag": "button",
+      "type": "button"
     },
     {
       "data-page": "diary",
@@ -891,6 +911,81 @@
       "tag": "textarea"
     },
     {
+      "id": "measurement-form",
+      "tag": "form"
+    },
+    {
+      "id": "measurement-time",
+      "tag": "input",
+      "type": "datetime-local"
+    },
+    {
+      "id": "measurement-glucose",
+      "tag": "input"
+    },
+    {
+      "id": "measurement-unit",
+      "tag": "select"
+    },
+    {
+      "id": "measurement-bhb",
+      "tag": "input"
+    },
+    {
+      "id": "measurement-context",
+      "tag": "input"
+    },
+    {
+      "id": "measurement-zone",
+      "tag": "p"
+    },
+    {
+      "id": "measurement-cancel",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "measurement-list",
+      "tag": "div"
+    },
+    {
+      "id": "portion-search",
+      "tag": "form"
+    },
+    {
+      "id": "portion-query",
+      "tag": "input"
+    },
+    {
+      "id": "portion-form",
+      "tag": "form"
+    },
+    {
+      "id": "portion-food",
+      "tag": "select"
+    },
+    {
+      "id": "portion-grams",
+      "tag": "input"
+    },
+    {
+      "id": "portion-gi",
+      "tag": "input"
+    },
+    {
+      "id": "portion-source",
+      "tag": "input"
+    },
+    {
+      "id": "portion-match",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "portion-result",
+      "tag": "div"
+    },
+    {
       "id": "diary-entries",
       "tag": "div"
     },
@@ -900,29 +995,12 @@
     },
     {
       "data-view": "recipes",
+      "tag": "button"
+    },
+    {
+      "id": "menu-shop",
       "tag": "button",
       "type": "button"
-    },
-    {
-      "id": "dawn-overview",
-      "tag": "section"
-    },
-    {
-      "id": "dawn-overview-title",
-      "tag": "h2"
-    },
-    {
-      "id": "dawn-status-cards",
-      "tag": "div"
-    },
-    {
-      "aria-label": "Подготовка личного меню",
-      "id": "dawn-progress",
-      "tag": "div"
-    },
-    {
-      "data-view": "recipes",
-      "tag": "button"
     },
     {
       "data-view": "targets",
@@ -947,6 +1025,23 @@
     },
     {
       "id": "menu-result",
+      "tag": "div"
+    },
+    {
+      "id": "dawn-overview",
+      "tag": "section"
+    },
+    {
+      "id": "dawn-overview-title",
+      "tag": "h2"
+    },
+    {
+      "id": "dawn-status-cards",
+      "tag": "div"
+    },
+    {
+      "aria-label": "Подготовка личного меню",
+      "id": "dawn-progress",
       "tag": "div"
     },
     {

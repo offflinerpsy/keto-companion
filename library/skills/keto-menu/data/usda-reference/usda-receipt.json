@@ -1,0 +1,222 @@
+{
+  "source_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+  "release": "SR Legacy 2018-04; food publication_date 2019-04-01",
+  "archive_sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+  "archive_bytes": 6074592,
+  "food_count": 7793,
+  "distinct_ids": 7793,
+  "overlap_current_seed": 85,
+  "nutrient_nonnull_count": {
+    "energy_kcal": 7793,
+    "protein_g": 7793,
+    "fat_g": 7793,
+    "carbohydrate_total_g": 7793,
+    "fiber_g": 7231,
+    "saturated_fat_g": 7450,
+    "calcium_mg": 7708,
+    "iron_mg": 7713,
+    "magnesium_mg": 7421,
+    "potassium_mg": 7516,
+    "sodium_mg": 7709,
+    "vitamin_d_ug": 5185,
+    "folate_dfe_ug": 6482,
+    "vitamin_b12_ug": 7113,
+    "vitamin_c_mg": 7332
+  },
+  "nutrient_ids_and_units": {
+    "protein_g": {
+      "id": "1003",
+      "name": "Protein",
+      "unit": "G"
+    },
+    "fat_g": {
+      "id": "1004",
+      "name": "Total lipid (fat)",
+      "unit": "G"
+    },
+    "carbohydrate_total_g": {
+      "id": "1005",
+      "name": "Carbohydrate, by difference",
+      "unit": "G"
+    },
+    "energy_kcal": {
+      "id": "1008",
+      "name": "Energy",
+      "unit": "KCAL"
+    },
+    "fiber_g": {
+      "id": "1079",
+      "name": "Fiber, total dietary",
+      "unit": "G"
+    },
+    "calcium_mg": {
+      "id": "1087",
+      "name": "Calcium, Ca",
+      "unit": "MG"
+    },
+    "iron_mg": {
+      "id": "1089",
+      "name": "Iron, Fe",
+      "unit": "MG"
+    },
+    "magnesium_mg": {
+      "id": "1090",
+      "name": "Magnesium, Mg",
+      "unit": "MG"
+    },
+    "potassium_mg": {
+      "id": "1092",
+      "name": "Potassium, K",
+      "unit": "MG"
+    },
+    "sodium_mg": {
+      "id": "1093",
+      "name": "Sodium, Na",
+      "unit": "MG"
+    },
+    "vitamin_d_ug": {
+      "id": "1114",
+      "name": "Vitamin D (D2 + D3)",
+      "unit": "UG"
+    },
+    "vitamin_c_mg": {
+      "id": "1162",
+      "name": "Vitamin C, total ascorbic acid",
+      "unit": "MG"
+    },
+    "vitamin_b12_ug": {
+      "id": "1178",
+      "name": "Vitamin B-12",
+      "unit": "UG"
+    },
+    "folate_dfe_ug": {
+      "id": "1190",
+      "name": "Folate, DFE",
+      "unit": "UG"
+    },
+    "saturated_fat_g": {
+      "id": "1258",
+      "name": "Fatty acids, total saturated",
+      "unit": "G"
+    }
+  },
+  "duplicate_food_nutrient_pairs": 0,
+  "source_categories": {
+    "Baked Products": 517,
+    "Snacks": 176,
+    "Sweets": 358,
+    "Vegetables and Vegetable Products": 814,
+    "American Indian/Alaska Native Foods": 165,
+    "Restaurant Foods": 109,
+    "Beverages": 366,
+    "Fats and Oils": 216,
+    "Sausages and Luncheon Meats": 167,
+    "Dairy and Egg Products": 291,
+    "Baby Foods": 345,
+    "Poultry Products": 383,
+    "Pork Products": 336,
+    "Breakfast Cereals": 195,
+    "Legumes and Legume Products": 290,
+    "Finfish and Shellfish Products": 264,
+    "Fruits and Fruit Juices": 355,
+    "Cereal Grains and Pasta": 181,
+    "Nut and Seed Products": 137,
+    "Beef Products": 954,
+    "Meals, Entrees, and Side Dishes": 81,
+    "Fast Foods": 312,
+    "Spices and Herbs": 63,
+    "Soups, Sauces, and Gravies": 254,
+    "Lamb, Veal, and Game Products": 464
+  },
+  "normalized_bytes": 4990966,
+  "normalized_gzip_bytes": 461921,
+  "samples": [
+    {
+      "food_id": "F168462",
+      "fdc_id": 168462,
+      "name_en": "Spinach, raw",
+      "name_ru": null,
+      "state": null,
+      "group": null,
+      "source_category": "Vegetables and Vegetable Products",
+      "allergens": null,
+      "source_id": "S_USDA",
+      "source_type": "SR Legacy",
+      "publication_date": "2019-04-01",
+      "source_url": "https://fdc.nal.usda.gov/food-details/168462/nutrients",
+      "energy_kcal": 23.0,
+      "protein_g": 2.86,
+      "fat_g": 0.39,
+      "carbohydrate_total_g": 3.63,
+      "fiber_g": 2.2,
+      "saturated_fat_g": 0.063,
+      "calcium_mg": 99.0,
+      "iron_mg": 2.71,
+      "magnesium_mg": 79.0,
+      "potassium_mg": 558.0,
+      "sodium_mg": 79.0,
+      "vitamin_d_ug": 0.0,
+      "folate_dfe_ug": 194.0,
+      "vitamin_b12_ug": 0.0,
+      "vitamin_c_mg": 28.1
+    },
+    {
+      "food_id": "F170379",
+      "fdc_id": 170379,
+      "name_en": "Broccoli, raw",
+      "name_ru": null,
+      "state": null,
+      "group": null,
+      "source_category": "Vegetables and Vegetable Products",
+      "allergens": null,
+      "source_id": "S_USDA",
+      "source_type": "SR Legacy",
+      "publication_date": "2019-04-01",
+      "source_url": "https://fdc.nal.usda.gov/food-details/170379/nutrients",
+      "energy_kcal": 34.0,
+      "protein_g": 2.82,
+      "fat_g": 0.37,
+      "carbohydrate_total_g": 6.64,
+      "fiber_g": 2.6,
+      "saturated_fat_g": 0.114,
+      "calcium_mg": 47.0,
+      "iron_mg": 0.73,
+      "magnesium_mg": 21.0,
+      "potassium_mg": 316.0,
+      "sodium_mg": 33.0,
+      "vitamin_d_ug": 0.0,
+      "folate_dfe_ug": 63.0,
+      "vitamin_b12_ug": 0.0,
+      "vitamin_c_mg": 89.2
+    },
+    {
+      "food_id": "F171705",
+      "fdc_id": 171705,
+      "name_en": "Avocados, raw, all commercial varieties",
+      "name_ru": null,
+      "state": null,
+      "group": null,
+      "source_category": "Fruits and Fruit Juices",
+      "allergens": null,
+      "source_id": "S_USDA",
+      "source_type": "SR Legacy",
+      "publication_date": "2019-04-01",
+      "source_url": "https://fdc.nal.usda.gov/food-details/171705/nutrients",
+      "energy_kcal": 160.0,
+      "protein_g": 2.0,
+      "fat_g": 14.66,
+      "carbohydrate_total_g": 8.53,
+      "fiber_g": 6.7,
+      "saturated_fat_g": 2.126,
+      "calcium_mg": 12.0,
+      "iron_mg": 0.55,
+      "magnesium_mg": 29.0,
+      "potassium_mg": 485.0,
+      "sodium_mg": 7.0,
+      "vitamin_d_ug": 0.0,
+      "folate_dfe_ug": 81.0,
+      "vitamin_b12_ug": 0.0,
+      "vitamin_c_mg": 10.0
+    }
+  ]
+}

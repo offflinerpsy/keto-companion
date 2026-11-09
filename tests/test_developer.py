@@ -63,6 +63,9 @@ def test_snapshot_allowlist_and_deterministic_archive(tmp_path,monkeypatch):
     spec=importlib.util.spec_from_file_location('snapshot_builder',ROOT/'scripts/prepare_developer_snapshot.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
     for name in ['.private/key.json','qa/health.json','service/../.private/x.json','cloudflare-saas/node_modules/x.js','service/local.settings.json','deliverables/source.tar.gz','service/private.sqlite','cloudflare-saas/generated/x.mjs']:assert not m.permitted(name)
     assert m.permitted('service/domain.py')
+    assert m.permitted('library/skills/keto-menu/data/usda-reference/usda-sr-legacy-normalized.json.gz')
+    assert not m.permitted('library/skills/keto-menu/data/usda-reference/private-state.json.gz')
+    assert not m.permitted('service/health-export.json.gz')
     from types import SimpleNamespace
     inputs=[*ALLOWED,'service/domain.py','tests/test_developer.py']
     monkeypatch.setattr(m.subprocess,'run',lambda *a,**kw:SimpleNamespace(stdout=('\0'.join(inputs)+'\0').encode()))
