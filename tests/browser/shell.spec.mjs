@@ -55,5 +55,9 @@ test('closing a review keeps it pending and one explicit confirmation saves it',
  await page.locator('#proposals').getByRole('button',{name:'Добавить в дневник',exact:true}).click();
  await expect(page.locator('#proposal-dialog')).toBeHidden();await expect(page.locator('#pending-open')).toBeHidden();
  expect(requests.filter(x=>x.name==='keto_apply_proposal'&&x.args.approved)).toHaveLength(1);
- await page.locator('#nav [data-view=diary]').click();await expect(page.locator('#diary-entries')).toContainText('Синтетическая заметка');
+ await page.locator('#nav [data-view=diary]').click();
+ // The note has a fixed date; Today follows the profile timezone.
+ await page.locator('#diary-day').fill('2026-11-09');await page.locator('#diary-day').dispatchEvent('change');
+ await expect(page.locator('#diary-entries')).toContainText('Синтетическая заметка');
+ expect(requests.filter(x=>x.name==='keto_kitchen'&&x.args.action==='diary_history').at(-1)?.args.values.date).toBe('2026-11-09');
 });
