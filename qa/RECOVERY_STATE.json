@@ -2,36 +2,20 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T06:49:59.262555+00:00",
-  "active_task": {
-    "id": "AGR-305-LOGIN",
-    "linear_issue": "https://linear.app/agregator/issue/AGR-305",
-    "stage": "staging_technical_repair_active; owner_iPhone_reauthentication_pending",
-    "branch": "codex/fix-google-login-state",
-    "scope": "Repair existing owner Google login; broad audit deferred",
-    "accepted_local_checks": {
-      "python_baseline": "523 passed,1 macOS skip",
-      "node_current": "153 passed",
-      "focused_auth": "77 passed",
-      "independent_review": "no actionable findings"
-    },
-    "next_action": "Verify ordinary pinned runtime release, then owner retries Google sign-in on affected iPhone; do not terminate existing owner session.",
-    "browser_authority": "Explicit background Chrome permission granted2026-11-09; exact owner Google account verified",
-    "owner_login_verified": false,
-    "release_receipt": "docs/evidence/GOOGLE_LOGIN_RECOVERY_RECEIPT.json",
-    "accepted_native_build": "a5d04c7b-ba71-4828-9a30-ef66c11ac65c"
-  },
+  "updated_at": "2026-11-09T07:04:13.757925+00:00",
+  "active_task": null,
   "last_completed": {
-    "id": "CF-DEV-MEDIA-08",
-    "github_issue": 16,
-    "release_receipt": "docs/evidence/CF_DEV_MEDIA_08_RELEASE_RECEIPT.json",
-    "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
-    "build_uuid": "2185581c-26fd-49c0-b93c-df4dabc8c3e9",
+    "id": "AGR-305-LOGIN",
+    "linear_issue": "AGR-305",
+    "release_receipt": "docs/evidence/GOOGLE_LOGIN_RECOVERY_RECEIPT.json",
+    "source_commit": "37feca4e922d9c66304503316054f85e7b7b6654",
+    "build_uuid": "8dcf7355-feea-4c8f-b116-6247fdf5d1e3",
     "build_status": "success",
-    "developer_auto_publication": false,
-    "merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
-    "pull_request": 17,
-    "github_issue_state": "closed"
+    "runtime_image_rebuilt_in_final_verify": false,
+    "pull_request": 18,
+    "pull_request_state": "merged",
+    "owner_iPhone_login": "confirmed_by_owner",
+    "broader_audit": "deferred; not claimed complete"
   },
   "next_task": {
     "id": "OWNER-DEVELOPER-ACCEPTANCE",
@@ -60,5 +44,17 @@
     "Candidate tests are fixed narrow trusted stages; they are not full medical/security/clinical certification",
     "Existing Cloudflare credits and exact bills not verified; resource and request limits do not imply free usage"
   ],
-  "chat_infrastructure_failure_cause": "Not established; concrete release/renderer failures separately recorded and fixed."
+  "chat_infrastructure_failure_cause": "Not established; concrete release/renderer failures separately recorded and fixed.",
+  "previous_completed_release": {
+    "id": "CF-DEV-MEDIA-08",
+    "github_issue": 16,
+    "release_receipt": "docs/evidence/CF_DEV_MEDIA_08_RELEASE_RECEIPT.json",
+    "source_commit": "a0ef989212068a62753695f424a8dca3b9209071",
+    "build_uuid": "2185581c-26fd-49c0-b93c-df4dabc8c3e9",
+    "build_status": "success",
+    "developer_auto_publication": false,
+    "merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
+    "pull_request": 17,
+    "github_issue_state": "closed"
+  }
 }

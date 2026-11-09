@@ -1,10 +1,10 @@
 {
   "schema": "keto-google-login-recovery-v1",
   "task": "AGR-305-LOGIN",
-  "checked_at": "2026-11-09T06:49:59.262555+00:00",
+  "checked_at": "2026-11-09T07:04:13.757925+00:00",
   "implementation_commit": "5d854ea1bcd344a68a7140a52747638648b958c0",
   "pull_request": "https://github.com/offflinerpsy/keto-companion/pull/18",
-  "status": "staging_technical_repair_active; real_iPhone_reauthentication_pending",
+  "status": "completed_private_staging; owner_iPhone_login_confirmed",
   "target": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
   "firebase_project": "keto-companion-auth-261107",
   "oauth_callback_registered": true,
@@ -92,15 +92,65 @@
   },
   "ordinary_pipeline": {
     "rollout_flags_removed": true,
-    "pinned_runtime_verification": "pending",
-    "original_branch_restoration": "pending"
+    "original_branch_restored": "release/staging-0.3.0",
+    "full_source_CI_retained": true,
+    "pinned_runtime_verification": "passed; same image; no rebuild",
+    "authDomain_after_normal_deployment": "keto-companion-saas-staging.offflinerpsy.workers.dev"
   },
   "boundaries": {
     "azure_models_unchanged": true,
     "google_models_provisioned": false,
     "owner_health_values_inspected": false,
     "production_saas_deployed": false,
-    "real_iPhone_login_verified": false
+    "real_iPhone_login_verified": true,
+    "iPhone_evidence_kind": "owner report; no agent device control"
   },
-  "next_action": "Verify ordinary pinned release pipeline, then owner retries Google sign-in from application on affected iPhone."
+  "next_action": "No login-repair action remains. Preserve prior owner-only developer acceptance and await next requested change; broader audit was deferred.",
+  "normal_pinned_build": {
+    "build_uuid": "8dcf7355-feea-4c8f-b116-6247fdf5d1e3",
+    "status": "stopped",
+    "build_outcome": "success",
+    "branch": "release/staging-0.3.0",
+    "commit_hash": "37feca4e922d9c66304503316054f85e7b7b6654",
+    "created_on": "2026-11-09T06:53:49.653Z",
+    "stopped_on": "2026-11-09T06:57:29.520Z"
+  },
+  "normal_pinned_runtime_acceptance": {
+    "baseline": "180c3e10aeb9ef70df6513f40c6403cc149441770412023293cd7e64daea1831",
+    "image_digest": "sha256:397eadcb5820e93b8c541ed1669061166959f16d9c8873338db446bd329ff8c1",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "final_staging_deployment": {
+    "task": "CF-DEV-MEDIA-08",
+    "worker": "keto-companion-saas-staging",
+    "account": "0609100baf768271ea2811c9a9ee2b16",
+    "commit": "37feca4e922d9c66304503316054f85e7b7b6654",
+    "version_id": "be7aa06bae354b8d82b4eb049e3dd0e8",
+    "tag": "35d20e3e19a74997aa077809e9839e38",
+    "main_module_sha256": "de958bb3db167d59d738831137c9d464363f03a0af8a336807edc9db1aa8b31a",
+    "modules": 19,
+    "compute_configured": true,
+    "private_source": true
+  },
+  "owner_confirmation": {
+    "evidence_kind": "owner_submitted_message",
+    "reported_at_date": "2026-11-09",
+    "environment": "affected iPhone Chrome, per original report",
+    "message": "У меня получилось войти. Всё в порядке.",
+    "earlier_retry_error_reported": true,
+    "later_success_confirmed": true,
+    "additional_auth_code_changes_between_reports": false,
+    "exact_transient_failure_cause": "not established"
+  },
+  "browser_cleanup": {
+    "owned_temporary_tabs_closed": 2,
+    "owned_tabs_remaining": 0,
+    "CUA_kernel_reset_verified": true,
+    "owner_original_tabs_preserved": true
+  }
 }
