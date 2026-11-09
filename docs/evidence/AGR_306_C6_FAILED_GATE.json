@@ -1,0 +1,109 @@
+{
+  "schema": "agr306-c6-build-evidence-v1",
+  "scope": "Sanitized Cloudflare terminal build metadata and bounded logs; no source/cloud mutation",
+  "account_id": "0609100baf768271ea2811c9a9ee2b16",
+  "build_uuid": "360e307b-3df8-47b9-8611-7334e1e25bfd",
+  "commit": "4a74431165f054bf9d738b3188eb42d59a3153de",
+  "status": "stopped",
+  "outcome": "fail",
+  "created_utc": "2026-11-09T13:30:39.070Z",
+  "stopped_utc": "2026-11-09T13:36:17.125Z",
+  "logs": {
+    "cursor_followed": true,
+    "pages": 2,
+    "line_count": 589,
+    "truncated_final": false,
+    "scope": "filtered; raw logs not retained"
+  },
+  "gates": {
+    "full_gate_passed": false,
+    "passed": [
+      {
+        "name": "python_env",
+        "exit": 0
+      },
+      {
+        "name": "python_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "node_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "container_sdk",
+        "exit": 0
+      },
+      {
+        "name": "container_worker_build",
+        "exit": 0
+      },
+      {
+        "name": "runtime_fonts",
+        "exit": 0
+      },
+      {
+        "name": "all_python",
+        "exit": 0
+      },
+      {
+        "name": "all_node",
+        "exit": 0
+      },
+      {
+        "name": "legacy_ui",
+        "exit": 0
+      },
+      {
+        "name": "legacy_oauth_ui",
+        "exit": 0
+      },
+      {
+        "name": "contracts",
+        "exit": 0
+      },
+      {
+        "name": "specification",
+        "exit": 0
+      },
+      {
+        "name": "web_build",
+        "exit": 0
+      },
+      {
+        "name": "legacy_build",
+        "exit": 0
+      },
+      {
+        "name": "hygiene",
+        "exit": 0
+      }
+    ],
+    "started_not_passed": "generated_assets_match",
+    "failed_stage": "building",
+    "safe_diff_header": "diff --git a/service/static/app.bundle.js b/service/static/app.bundle.js",
+    "terminal_error": "Failed: error occurred while running build command",
+    "python_passed": 553,
+    "python_subtests_passed": 6,
+    "node_tests": 206,
+    "node_passed": 206,
+    "node_failed": 0,
+    "contracts_drift": []
+  },
+  "native_release": {
+    "started": false,
+    "rollout": null,
+    "image": null,
+    "runtime_probe": null,
+    "temporary_probe_cleanup": null
+  },
+  "worker_deploy": {
+    "started": false,
+    "receipt": null
+  },
+  "limits": [
+    "Build stopped during generated-assets comparison; root cause of bundle difference has not been established.",
+    "No native rollout, actual runtime probe or Worker deploy result can be inferred from this build.",
+    "No build retries, cancellation, cloud mutations, browser or provider calls by evidence reader."
+  ]
+}
