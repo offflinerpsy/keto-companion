@@ -1,0 +1,147 @@
+{
+  "schema": "keto-c14-final-release-v1",
+  "task": "AGR-306-C14",
+  "recorded_at": "2026-11-09T22:29:49.092840+00:00",
+  "result": "completed_technical_release",
+  "product_acceptance": "physical_spouse_iPhone_pending",
+  "environment": "existing_private_family_staging",
+  "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/",
+  "deployed_source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
+  "source_commit_note": "Later documentation/evidence and merge commits do not replace this deployed code identity.",
+  "native_build": "91c9326b-8fca-4200-883c-427e5b623adf",
+  "native_source_commit": "4a96d858549b02725d420c792d6c4281ecabce8b",
+  "native_receipt": "docs/evidence/AGR_306_C14_NATIVE_ACCEPTANCE.json",
+  "ordinary_build": {
+    "id": "72ee574c-cc97-4aa9-9932-11ffc1b2f32e",
+    "status": "stopped",
+    "outcome": "success",
+    "commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
+    "stopped": "2026-11-09T22:16:38.587Z",
+    "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+    "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+  },
+  "ordinary_receipt": "docs/evidence/AGR_306_C14_ORDINARY_ACCEPTANCE.json",
+  "source_gate": {
+    "passed": 16,
+    "failed": 0,
+    "python": 627,
+    "python_subtests": 6,
+    "node": 253,
+    "ops": 12
+  },
+  "runtime_pin": {
+    "baseline": "eb13ec9de519b4a82d368cd71f67749616df18dcdf1a9ad65387c7b04e8309eb",
+    "image_digest": "sha256:2a9b8e3b417d52a1c6216f682b5c2872a25f45034238a11f03f4fc5fa1e2085f",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "runtime_stages": [
+    {
+      "name": "syntax",
+      "exit_code": 0,
+      "passed_count": null
+    },
+    {
+      "name": "build",
+      "exit_code": 0,
+      "passed_count": null
+    },
+    {
+      "name": "product",
+      "exit_code": 0,
+      "passed_count": 14
+    },
+    {
+      "name": "python",
+      "exit_code": 0,
+      "passed_count": 17
+    }
+  ],
+  "cloudflare": {
+    "worker": "keto-companion-saas-staging",
+    "deployment_id": "d72a3dbf-88a9-4dde-bec0-8f709c0fe7e6",
+    "version_id": "47563a14-fb6d-41c2-af11-0be54e9a5003",
+    "percentage": 100,
+    "deployed_at": "2026-11-09T22:16:33.582564Z",
+    "main_module_sha256_from_build_receipt": "d8da69b8b2d19d054aa88c84d483f0083cfc61f723a48e1744e4dced719e7232",
+    "module_count": 20,
+    "raw_uploaded_worker_code_download_verified": false
+  },
+  "azure": {
+    "deployment_id": "4828b5ce-8243-4819-914b-aae05f7abc89",
+    "complete": true,
+    "status": 4,
+    "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
+    "runtime_code_sha256": "166e2a288d7f1ea6d068279163a069ef2374d6d274c7462b743b7e699c3cfe7c",
+    "archive_sha256": "58d23318fc88d80c768671da99f53eb6135b6a651c419cd0d59e4a6c9a562ec3",
+    "archive_members_verified_against_release_commit": 71,
+    "receipt": "docs/evidence/AGR_306_C14_AZURE_DEPLOYMENT.json",
+    "original_prepared_package": "docs/evidence/AGR_306_C14_SOURCE_PACKAGE.json",
+    "unchanged_archive_reused": true
+  },
+  "live_http": {
+    "passed": 25,
+    "failed": 0,
+    "checked_at": "2026-11-09T22:25:02.557443+00:00",
+    "receipt": "docs/evidence/AGR_306_C14_LIVE_HTTP.json",
+    "served_assets_match_release_commit": 6,
+    "scope": "Existing public status/assets and invalid-login/unauthenticated guards; no family identity, diary writes or paid model calls. Not a live signed compute transaction.",
+    "synthetic_cookie_cleanup_verified": true
+  },
+  "independent_readback": {
+    "receipt": "docs/evidence/AGR_306_C14_LIVE_READBACK.json",
+    "actual_application_version": 11,
+    "temporary_probes": 0,
+    "active_container_instances": 0,
+    "ordinary_trigger_restored": true,
+    "private_bindings_preserved": true
+  },
+  "browser": {
+    "passed": 31,
+    "failed": 0,
+    "real_http_sqlite_synthetic_member": 11,
+    "synthetic_mobile_shell": 20,
+    "receipt": "docs/evidence/AGR_306_C14_ACCEPTANCE.json",
+    "viewports": [
+      "440x956",
+      "390x844",
+      "375x812",
+      "956x440"
+    ],
+    "normal_large_200_percent_dark": true,
+    "physical_device": false,
+    "product_sources_unchanged_from_accepted_browser_candidate": true
+  },
+  "live_visual": {
+    "path": "docs/evidence/c14/live-help.jpg",
+    "sha256": "0e2c0201b13abb91bcf0a600e8adf282c9a45e97108e2b848690bd4b0ede8479",
+    "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/help",
+    "scope": "Public help page in cloud desktop Chromium; no authenticated product or physical device acceptance."
+  },
+  "independent_review": "Read-only reviewer confirmed receipts, pin, deployed source, six served asset hashes and limitations before final documentation commit.",
+  "preserved": [
+    "Existing Azure compute/models",
+    "Existing Google/Firebase identity and same-origin helper",
+    "Existing D1/R2 and personal-data isolation",
+    "Consent, allergies, explicit confirmation and revision/CAS",
+    "Honest nutrition basis, provenance and unknown values"
+  ],
+  "historical_failure_receipts": [
+    "docs/evidence/AGR_306_C14_NATIVE_FAILURE.json",
+    "docs/evidence/AGR_306_C14_RUNTIME_CORRECTION.json",
+    "docs/evidence/AGR_306_C14_RESULT_RU.md"
+  ],
+  "pending_cloud_builds": [],
+  "pending_azure_deployments": [],
+  "limitations": [
+    "Full C14 spouse acceptance on a physical iPhone 17 Pro Max has not been performed. Earlier partial C9 device results are historical, not C14 acceptance.",
+    "No new successful spouse sign-in or signed live Cloudflare -> Azure -> D1 C11/C12 food-intake transaction was performed; no family diary data was written for release verification.",
+    "Physical iPhone keyboard, camera barcode, label-photo capture and dictation were not revalidated for C14.",
+    "Synthetic browser cases, HTTP guards and screenshots do not establish clinical effectiveness or functional accessibility compliance."
+  ],
+  "next_single_task": "Physical spouse iPhone acceptance of the published daily journey; no new image build or source implementation is required by this receipt."
+}

@@ -1,0 +1,33 @@
+{
+  "task": "AGR-306-C14",
+  "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "58d23318fc88d80c768671da99f53eb6135b6a651c419cd0d59e4a6c9a562ec3",
+  "archive_bytes": 1532556,
+  "archive_members": 71,
+  "deployment": {
+    "complete": true,
+    "id": "4828b5ce-8243-4819-914b-aae05f7abc89",
+    "status": 4
+  },
+  "recorded_at": "2026-11-09T22:07:34.358266+00:00",
+  "verified_status": {
+    "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
+    "runtime_code_sha256": "166e2a288d7f1ea6d068279163a069ef2374d6d274c7462b743b7e699c3cfe7c",
+    "edge_signature": "Ed25519",
+    "authentication_required": true,
+    "medical_monitoring": false
+  },
+  "cache_control": "no-store",
+  "protected_baseline": "eb13ec9de519b4a82d368cd71f67749616df18dcdf1a9ad65387c7b04e8309eb",
+  "archive_members_verified_against_release_commit": true,
+  "original_package_receipt": "docs/evidence/AGR_306_C14_SOURCE_PACKAGE.json",
+  "unchanged_archive_reused": true,
+  "settings_changed_only": [
+    "KETO_SOURCE_COMMIT",
+    "KETO_EDGE_PUBLIC_JWK"
+  ],
+  "model_settings_preserved": true,
+  "personal_data_migration": false,
+  "new_account_or_resource": false
+}
