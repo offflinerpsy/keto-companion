@@ -1,6 +1,7 @@
 import {handleDeveloper,expireDeveloper} from './developer.mjs';
 import {handleImageLink} from './image-link.mjs';
 import {firebaseClaims} from './firebase-identity.mjs';
+import {FIREBASE_HELPER_HOST,firebaseHelperOrigin,handleFirebaseHelper} from './firebase-helper.mjs';
 import {beginDeletion,deletionStatus} from './deletion.mjs';
 import {handleTool,consentChange,bridgeCall,bridgeConfigured} from './compute.mjs';
 // Isolated invitation-only pilot. No clinical computation is enabled here.
@@ -16,8 +17,8 @@ const fail=(status,code)=>{throw new Fail(status,code)};
 const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff',...extra}});
 function firebasePublic(env){
  let c;try{c=JSON.parse(env.FIREBASE_PUBLIC_CONFIG_JSON)}catch{fail(503,'SETUP_REQUIRED')}
- if(!c||c.projectId!=='keto-companion-auth-261107'||c.authDomain!=='keto-companion-auth-261107.firebaseapp.com'||typeof c.apiKey!=='string'||!c.apiKey||typeof c.appId!=='string'||!c.appId)fail(503,'SETUP_REQUIRED');
- return {apiKey:c.apiKey,authDomain:c.authDomain,projectId:c.projectId,appId:c.appId,...(typeof c.messagingSenderId==='string'?{messagingSenderId:c.messagingSenderId}:{})};
+ if(!c||c.projectId!=='keto-companion-auth-261107'||c.authDomain!==FIREBASE_HELPER_HOST||typeof c.apiKey!=='string'||!c.apiKey||typeof c.appId!=='string'||!c.appId)fail(503,'SETUP_REQUIRED');
+ return {apiKey:c.apiKey,authDomain:firebaseHelperOrigin(env,fail)?.hostname||c.authDomain,projectId:c.projectId,appId:c.appId,...(typeof c.messagingSenderId==='string'?{messagingSenderId:c.messagingSenderId}:{})};
 }
 function config(env){
  if(!env.DB||!env.UPLOADS||!env.PUBLIC_ORIGIN||!env.SESSION_HMAC_KEY||env.SESSION_HMAC_KEY.length<32||env.OWNER_GOOGLE_EMAIL?.toLowerCase()!==OWNER)fail(503,'SETUP_REQUIRED');
@@ -109,6 +110,7 @@ async function handle(req,env){
  if(method==='GET'&&['/','/help','/privacy','/delete','/app.bundle.js','/style.css','/manifest.webmanifest','/icon.svg','/icon-180.png','/icon-192.png','/icon-512.png','/favicon.svg','/favicon.ico','/favicon-16.png','/favicon-32.png','/favicon-48.png','/tranquil-dawn.webp'].includes(path)){if(!env.ASSETS)fail(503,'SETUP_REQUIRED');const asset=({'/help':'/help.html','/privacy':'/privacy.html','/delete':'/delete.html'})[path];const r=await env.ASSETS.fetch(asset?new Request(new URL(asset,req.url),req):req);const h=new Headers(r.headers);h.set('Content-Security-Policy',"default-src 'self'; img-src 'self' data: blob:; script-src 'self' https://apis.google.com; style-src 'self'; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src 'self' https://keto-companion-auth-261107.firebaseapp.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");h.set('Cross-Origin-Opener-Policy','same-origin-allow-popups');h.set('Cache-Control',/^\/(favicon|icon[-.])/.test(path)?'public, max-age=3600':'no-store');h.set('Referrer-Policy','no-referrer');h.set('X-Content-Type-Options','nosniff');return new Response(r.body,{status:r.status,headers:h})}
  if(path==='/auth/config'&&method==='GET'){config(env);return json(env.AUTH_PROVIDER==='firebase_google'?{provider:'firebase_google',firebase:firebasePublic(env)}:{provider:'direct_google'})}
  config(env);
+ if(path.startsWith('/__/auth/'))return handleFirebaseHelper(req,env,{fail,readBounded});
  if(path==='/auth/firebase/start'&&method==='POST'&&env.AUTH_PROVIDER==='firebase_google')return firebaseStart(req,env);
  if(path==='/auth/firebase/complete'&&method==='POST'&&env.AUTH_PROVIDER==='firebase_google')return firebaseComplete(req,env);
  if(path==='/auth/google/start'&&method==='POST'&&env.AUTH_PROVIDER==='direct_google')return oauthStart(req,env);
