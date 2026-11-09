@@ -1,0 +1,19 @@
+/** Verify one already-deployed candidate; no deployment, rollout or approved pin change. */
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {pathToFileURL} from 'node:url';
+import {readPinnedApplication} from './runtime-app-pin.mjs';
+const EXPECTED={account:'0609100baf768271ea2811c9a9ee2b16',worker:'keto-companion-developer-runner',application_id:'a0328d47-d862-4cc2-be96-42e925e4e3ab',baseline:'0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8',image_digest:'sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008',worker_sha256:'ed7fdc52c3e02b2947128a633134b3face929fdade30c34c371c905b99b268c3',instance_type:'standard-1',max_instances:1};
+export async function validateCandidate({candidate,manifest,artifactHash,get}){
+ if(JSON.stringify(candidate)!==JSON.stringify(EXPECTED)||manifest.baseline!==EXPECTED.baseline||artifactHash!==EXPECTED.worker_sha256)throw Error('CANDIDATE_PIN_MISMATCH');
+ const settings=await get('/workers/scripts/'+candidate.worker+'/settings');if(!Array.isArray(settings?.bindings))throw Error('CANDIDATE_RUNNER_MISMATCH');const values=Object.fromEntries(settings.bindings.filter(x=>x.type==='plain_text').map(x=>[x.name,x.text]));if(values.DEVELOPER_BASELINE!==candidate.baseline||values.DEVELOPER_IMAGE_DIGEST!==candidate.image_digest||settings.bindings.some(x=>!['plain_text','durable_object_namespace'].includes(x.type)))throw Error('CANDIDATE_RUNNER_MISMATCH');
+ const {image}=await readPinnedApplication(get,candidate);const instances=await get('/containers/applications/'+candidate.application_id+'/instances-v2');if(!Array.isArray(instances)||instances.some(x=>!['inactive','stopped','failed'].includes(x?.status?.state)))throw Error('ACTIVE_JOB_NOT_INTERRUPTED');return {image};
+}
+async function main(){
+ if(process.env.KETO_EXISTING_CANDIDATE_VERIFY!=='1'||!process.env.CLOUDFLARE_API_TOKEN)throw Error('CANDIDATE_VERIFICATION_NOT_AUTHORIZED');const candidate=JSON.parse(readFileSync('ops/candidate-runtime.json','utf8')),manifest=JSON.parse(readFileSync('developer-runtime/build/manifest.json','utf8')),worker=readFileSync('developer-runtime/dist/worker.mjs');
+ async function get(path){const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+EXPECTED.account+path,{headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN},signal:AbortSignal.timeout(20000)});if(!r.ok||!/^application\/(?:[\w.+-]*\+)?json(?:\s*;|$)/i.test(r.headers.get('content-type')||''))throw Error('CANDIDATE_READ_FAILED_HTTP_'+r.status);let d;try{d=await r.json()}catch{throw Error('CANDIDATE_READ_INVALID_JSON')}if(d.success===false)throw Error('CANDIDATE_READ_FAILED_HTTP_'+r.status);return d.result}
+ const {image}=await validateCandidate({candidate,manifest,artifactHash:createHash('sha256').update(worker).digest('hex'),get});writeFileSync('developer-runtime/release.json',JSON.stringify({...candidate,image,accepted_network:'none'},null,2)+'\n');
+ const test=spawnSync('node',['ops/run_guarded_runtime_acceptance.mjs'],{stdio:'inherit',timeout:390000,env:process.env});if(test.error||test.status!==0)throw Error('CANDIDATE_RUNTIME_ACCEPTANCE_FAILED');const receipt=JSON.parse(readFileSync('docs/evidence/CF_DEV_CLOUD_RUNTIME_ACCEPTANCE.json','utf8'));if(receipt.status!=='passed'||receipt.baseline!==candidate.baseline||receipt.image_digest!==candidate.image_digest||receipt.temporary_probe_deleted!==true)throw Error('CANDIDATE_RUNTIME_RECEIPT_MISMATCH');console.log('KETO_EXISTING_CANDIDATE_ACCEPTED '+JSON.stringify({baseline:candidate.baseline,image_digest:candidate.image_digest,application_id:candidate.application_id,temporary_probe_deleted:true}));
+}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();

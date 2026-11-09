@@ -21,7 +21,7 @@ const release={account:pin.account,worker:pin.worker,baseline:pin.baseline,image
 writeFileSync('developer-runtime/release.json',JSON.stringify(release,null,2)+'\n');
 // This probe uses a fixed synthetic patch and never an owner/member data record.
 // It deletes its temporary, token-gated bridge in finally and emits no credentials.
-const test=spawnSync('node',['scripts/verify_developer_cloud_runtime.mjs'],{stdio:'inherit',timeout:390000,env:process.env});
+const test=spawnSync('node',['ops/run_guarded_runtime_acceptance.mjs'],{stdio:'inherit',timeout:390000,env:process.env});
 if(test.error||test.status!==0)throw Error('PINNED_RUNTIME_ACCEPTANCE_FAILED');
 const receipt=JSON.parse(readFileSync('docs/evidence/CF_DEV_CLOUD_RUNTIME_ACCEPTANCE.json','utf8'));
 if(receipt.status!=='passed'||receipt.baseline!==pin.baseline||receipt.image_digest!==pin.image_digest||receipt.temporary_probe_deleted!==true)throw Error('PINNED_RUNTIME_RECEIPT_MISMATCH');

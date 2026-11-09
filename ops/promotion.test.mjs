@@ -16,7 +16,7 @@ test('runtime pin matches exact current snapshot and has one-instance bound',()=
 test('operator helper never publishes app or replaces image before isolated acceptance',()=>{
  const source=readFileSync('ops/promote_existing_runtime.mjs','utf8');
  assert(source.includes('NEW_BASELINE_REQUIRES_REVIEWED_IMAGE_RELEASE'));
- assert(source.includes("spawnSync('node',['scripts/verify_developer_cloud_runtime.mjs']"));
+ assert(source.includes("spawnSync('node',['ops/run_guarded_runtime_acceptance.mjs']"));
  assert(source.includes('receipt.temporary_probe_deleted!==true'));
  assert(!source.includes('deploy_cloudflare_staging.mjs'));
  assert(!/method:\s*['"](?:POST|PUT|PATCH|DELETE)['"]/.test(source));
