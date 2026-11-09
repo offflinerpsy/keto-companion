@@ -2,10 +2,10 @@
   "account": "0609100baf768271ea2811c9a9ee2b16",
   "worker": "keto-companion-developer-runner",
   "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
-  "baseline": "04f4f0259f4449ebfb6f15b3b64445e73c5672b0fd241beb60094ace07a83920",
-  "image_digest": "sha256:c651d6a17093823ef3d902b3c959c4a420cc29dd2180caf0ea665253abcffb41",
+  "baseline": "66dd980b4f3dc9d90c37fe100d5ddf24f8c272b7cace6d6565a1b6e92854e759",
+  "image_digest": "sha256:95efda5830c8ed9bc2f32a5f13a9a06fe3fb2be5f239404f755e521553badf52",
   "instance_type": "standard-1",
   "max_instances": 1,
-  "acceptance_build": "59252eb7-2ebf-4c9b-9f80-dc0285d3ada7",
+  "acceptance_build": "924bc7d8-25c9-4c9c-82e5-2fdd0d4f1272",
   "scope": "Existing immutable runtime only; a different source baseline needs separately approved image release. No app personal data."
 }

@@ -339,6 +339,10 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     status.textContent = "\u0424\u043E\u0442\u043E \u0433\u043E\u0442\u043E\u0432\u043E. \u0414\u043B\u044F \u0447\u0442\u0435\u043D\u0438\u044F \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \u043A\u043D\u043E\u043F\u043A\u0443.";
   }
   for (const id of ["shop-camera", "shop-photo"]) $3(id).onchange = () => run2(() => select($3(id).files?.[0]));
+  function nutrientLine(x) {
+    const off = source?.provider === "Open Food Facts", name2 = off ? { Energy: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", Protein: "\u0411\u0435\u043B\u043A\u0438", Fat: "\u0416\u0438\u0440\u044B", Carbohydrates: "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B", Fiber: "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430" }[x.name] || x.name : x.name, unit = off ? { kcal: "\u043A\u043A\u0430\u043B", g: "\u0433", ml: "\u043C\u043B" }[x.unit] || x.unit : x.unit, column = off && x.column === "100 g/ml (provider; verify label)" ? "\u043D\u0430 100 \u0433 \u0438\u043B\u0438 100 \u043C\u043B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435" : x.column;
+    return `${name2}: ${x.value ?? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445"} ${unit ?? ""} (${column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`;
+  }
   function show(c2) {
     clearCandidate();
     source = c2?.provenance || null;
@@ -352,7 +356,7 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     if (c2.name) form.elements.name.value = c2.name;
     $3("shop-barcode").value = typeof c2.barcode === "string" && /^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(c2.barcode) ? c2.barcode : "";
     host.append(el2("h3", "", "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0434\u043B\u044F \u0441\u0432\u0435\u0440\u043A\u0438 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439"));
-    for (const line of [c2.name, c2.brand, c2.barcode ? "\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434: " + c2.barcode : null, "\u041E\u0441\u043D\u043E\u0432\u0430: " + ({ per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E", unknown: "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" }[c2.basis] || "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430"), ...c2.nutrients.map((x) => `${x.name}: ${x.value ?? "?"} ${x.unit ?? ""} (${x.column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`), c2.ingredients_text, c2.allergen_statement_text, ...c2.unresolved_fields.map(unresolvedLabel), c2.reshoot_hint]) if (line) host.append(el2("p", "", line));
+    for (const line of [c2.name, c2.brand, c2.barcode ? "\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434: " + c2.barcode : null, "\u041E\u0441\u043D\u043E\u0432\u0430: " + ({ per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E", unknown: "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" }[c2.basis] || "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430"), ...c2.nutrients.map(nutrientLine), c2.ingredients_text, c2.allergen_statement_text, ...c2.unresolved_fields.map(unresolvedLabel), c2.reshoot_hint]) if (line) host.append(el2("p", "", line));
     const columns = [...new Set(c2.nutrients.map((x) => x.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"))];
     function applyColumn(column) {
       setReady(true);
@@ -1614,6 +1618,16 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       memory.append(row);
     }
   }
+  function invalidatePageLookups() {
+    searchNumber++;
+    avoidSearchNumber++;
+    sourceToken++;
+    parseNumber++;
+    clearTimeout(product.timer);
+    clearTimeout(avoid.timer);
+    parsing = false;
+    parseButton.disabled = false;
+  }
   function cancelSavedPreview() {
     savedToken++;
     savedPreview.hidden = true;
@@ -1661,24 +1675,27 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     savedPreview.append(start2, output);
     savedPreview.scrollIntoView?.({ block: "nearest" });
   }
-  return { previewSavedPantry, cancelSavedPreview, render() {
+  return { previewSavedPantry, cancelSavedPreview, invalidatePageLookups, render() {
     const state2 = getState();
     if (!dirty) {
       pantry = (state2?.kitchen?.pantry || []).map((i) => ({ ...i }));
       renderChips();
     }
     renderMemory();
-  }, async load() {
-    const e = epoch(), searchAtStart = searchNumber;
+  }, async load(isCurrent = () => true) {
+    const e = epoch(), searchAtStart = searchNumber, draft = () => JSON.stringify([meal.value, servings.value, time.value, missing.value, equipment.value, avoid.value, free.value, product.value, ...Array.from(modes.children, (x) => Boolean(x.children[0]?.checked))]), draftAtStart = draft();
     try {
-      const [d2, f] = await Promise.all([call2("keto_kitchen", { action: "status", thread_id: getState()?.active_thread || "main" }), call2("keto_kitchen", { action: "foods" })]);
-      if (e !== epoch()) return;
+      const d2 = await call2("keto_kitchen", { action: "status", thread_id: getState()?.active_thread || "main" });
+      if (e !== epoch() || !isCurrent() || searchAtStart !== searchNumber) return false;
+      const f = await call2("keto_kitchen", { action: "foods" });
+      if (e !== epoch() || !isCurrent()) return false;
       if (searchAtStart === searchNumber) {
         foods = f.foods;
         foodOptions();
         status.textContent = `\u0412 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${f.total ?? foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.`;
       }
-      if (d2.spec && !dirty) {
+      const unchanged = !dirty && draft() === draftAtStart;
+      if (d2.spec && unchanged) {
         for (const name2 of ["meal", "servings", "equipment"]) {
           const node = form.elements.namedItem(name2);
           if (node) node.value = d2.spec[name2];
@@ -1690,9 +1707,11 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         pantry = d2.spec.pantry.map((i) => ({ ...i, name_ru: foods.find((f2) => f2.food_id === i.food_id)?.name_ru || getState().kitchen.pantry.find((f2) => f2.food_id === i.food_id)?.name_ru || "\u041F\u0440\u043E\u0434\u0443\u043A\u0442" }));
         renderChips();
       }
-      if (d2.recipes) show(d2);
-    } catch (e2) {
-      status.textContent = e2.message;
+      if (d2.recipes && unchanged) show(d2);
+      return true;
+    } catch (err) {
+      if (e === epoch() && isCurrent()) status.textContent = err.message;
+      return false;
     }
   }, reset() {
     cancelSavedPreview();
@@ -9349,6 +9368,24 @@ var el = (tag, cls, txt) => {
 };
 var uiConfirmation = null;
 var screenEpoch = 0;
+var recipeNavigation = 0;
+var recipesLoaded = false;
+var recipeLoadScheduledFor = null;
+var automaticRecipeLoad = Promise.resolve();
+var recipePageRequests = /* @__PURE__ */ new Set();
+function recipePageCall(...args) {
+  const pending = call(...args);
+  recipePageRequests.add(pending);
+  pending.then(() => recipePageRequests.delete(pending), () => recipePageRequests.delete(pending));
+  return pending;
+}
+async function settleRecipePageRequests(current) {
+  while (recipePageRequests.size) {
+    await Promise.allSettled([...recipePageRequests]);
+    if (!current()) return false;
+  }
+  return current();
+}
 var csrf = null;
 var state = null;
 var view = "chat";
@@ -9449,6 +9486,10 @@ function renderTranquilSummary(next) {
   host.hidden = false;
 }
 function clearScreen() {
+  recipeNavigation++;
+  recipesLoaded = false;
+  recipeLibrary.invalidate();
+  setRecipeReadLoading(false);
   measurementEditing = null;
   measurementOriginal = null;
   measurementSavedDraft = null;
@@ -9509,6 +9550,12 @@ function localDate() {
 function setView(next, options = {}) {
   router.go(guided.resolve(next), options);
 }
+function setRecipeReadLoading(loading) {
+  for (const id of ["kitchen-studio", "shop-root"]) $2(id).inert = loading;
+  const library = document.querySelector("[data-testid=recipe-library]");
+  if (library) library.inert = loading;
+  $2("kitchen-studio").setAttribute("aria-busy", String(loading));
+}
 function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) {
   if (next === "developer" && (!session || session.user.role !== "admin" || image || attachedSource || recipeSource)) {
     notify("\u0420\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u043A\u0430 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430 \u0432\u043B\u0430\u0434\u0435\u043B\u044C\u0446\u0443 \u0431\u0435\u0437 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u043B\u0451\u043D\u043D\u044B\u0445 \u0444\u043E\u0442\u043E \u0438\u043B\u0438 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u043E\u0432.");
@@ -9517,6 +9564,13 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
   }
   const route = next;
   next = next.startsWith("setup-") ? "setup" : next;
+  const previousView = view;
+  const navigation = previousView === next ? recipeNavigation : ++recipeNavigation;
+  if (previousView === "recipes" && next !== "recipes") {
+    recipeLibrary.invalidate();
+    kitchen.invalidatePageLookups();
+    setRecipeReadLoading(false);
+  }
   view = next;
   document.body.dataset.view = next;
   document.querySelectorAll("[data-page]").forEach((p) => p.hidden = p.dataset.page !== next);
@@ -9524,9 +9578,29 @@ function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) 
     b2.classList.toggle("active", b2.dataset.view === (next === "recipes" ? "today" : ["chat", "today", "diary"].includes(next) ? next : "more"));
     b2.setAttribute("aria-current", b2.dataset.view === (next === "recipes" ? "today" : ["chat", "today", "diary"].includes(next) ? next : "more") ? "page" : "false");
   });
-  if (next === "recipes" && reason !== "history") {
-    run(loadRecipes);
-    run(() => kitchen.load());
+  if (next === "recipes" && recipeLoadScheduledFor !== navigation && (reason !== "history" || !recipesLoaded)) {
+    recipeLoadScheduledFor = navigation;
+    setRecipeReadLoading(true);
+    const sessionEpoch = screenEpoch, current = () => navigation === recipeNavigation && sessionEpoch === screenEpoch && view === "recipes";
+    automaticRecipeLoad = automaticRecipeLoad.catch(() => {
+    }).then(async () => {
+      if (!current() || !await settleRecipePageRequests(current)) return;
+      let recipesOK = false;
+      try {
+        await loadRecipes();
+        recipesOK = true;
+      } catch (e) {
+        if (current()) notify(e.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0440\u0435\u0446\u0435\u043F\u0442\u044B.");
+      }
+      if (!current()) return;
+      const kitchenOK = await kitchen.load(current);
+      if (current() && recipesOK && kitchenOK) recipesLoaded = true;
+    }).finally(() => {
+      if (recipeLoadScheduledFor === navigation) {
+        recipeLoadScheduledFor = null;
+        if (current()) setRecipeReadLoading(false);
+      }
+    });
   }
   if (route === "setup-restrictions") fillOnboard();
   if (next === "settings") fillSettings();
@@ -9730,7 +9804,7 @@ function openRecipe(r) {
   $2("recipe-dialog").showModal();
   router.openDialog();
 }
-var recipeLibrary = createRecipeLibrary({ clear: () => $2("recipes").replaceChildren(), call: (args) => call("keto_recipes", args), readFilters: () => {
+var recipeLibrary = createRecipeLibrary({ clear: () => $2("recipes").replaceChildren(), call: (args) => recipePageCall("keto_recipes", args), readFilters: () => {
   const args = { query: $2("recipe-query").value };
   if ($2("recipe-category").value) args.category = $2("recipe-category").value;
   if ($2("recipe-minutes").value) args.max_minutes = Number($2("recipe-minutes").value);
@@ -10526,8 +10600,8 @@ var router = createRouter({ location, history, listen: (name2, fn) => window.add
     $2("help").focus({ preventScroll: true });
   }
 }, fallback: () => state?.guidance?.ready ? state.ui.home || "chat" : guided.resolve("setup") });
-var kitchen = setupKitchen({ $: $2, el, call, getState: () => state, accept, run, notify, setView, epoch: () => screenEpoch });
-var shop = setupShop({ $: $2, el, call, api: (path, method, body) => cfApi(path, { method, body }), getState: () => state, accept, run, epoch: () => screenEpoch, allergens: ALLERGENS, onPantryPreview: (name2) => kitchen.previewSavedPantry(name2), onPantryReset: () => kitchen.cancelSavedPreview() });
+var kitchen = setupKitchen({ $: $2, el, call: recipePageCall, getState: () => state, accept, run, notify, setView, epoch: () => screenEpoch });
+var shop = setupShop({ $: $2, el, call: recipePageCall, api: (path, method, body) => cfApi(path, { method, body }), getState: () => state, accept, run, epoch: () => screenEpoch, allergens: ALLERGENS, onPantryPreview: (name2) => kitchen.previewSavedPantry(name2), onPantryReset: () => kitchen.cancelSavedPreview() });
 $2("menu-shop").onclick = () => {
   setView("recipes");
   const panel = $2("shop-root").querySelector("details");
@@ -10536,5 +10610,5 @@ $2("menu-shop").onclick = () => {
     panel.scrollIntoView({ block: "nearest" });
   }
 };
-var ownDish = setupOwnDish({ $: $2, el, call, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu });
+var ownDish = setupOwnDish({ $: $2, el, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu });
 run(start);
