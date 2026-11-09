@@ -13,7 +13,7 @@ export function amountLabel(amount){return !amount?'Количество не у
 function entryClock(entry){if(entry?.time)return entry.time;return entry?.eaten_at?profileClock(entry.timezone,new Date(entry.eaten_at))?.time:null}
 export function nutritionNodes(el,calculation){
  const grid=el('dl','intake-nutrients'),nutrition=calculation?.nutrition||{},coverage=calculation?.coverage||{};
- for(const [key,label,unit] of NUTRIENTS){const value=nutrition[key],known=coverage[key]?.known_subtotal;grid.append(el('dt','',label),el('dd','',(value==null||coverage[key]?.complete===false)?(known==null?'нет данных':`учтено ${number(known,key==='energy_kcal'?0:1)} ${unit} · неполные данные`):`${number(value,key==='energy_kcal'?0:1)} ${unit}`))}
+ for(const [key,label,unit] of NUTRIENTS){const value=nutrition[key],known=coverage[key]?.known_subtotal;grid.append(el('dt','',label),el('dd','',(value==null||coverage[key]?.complete===false)?(known==null||known===0?'нет данных · неполные данные':`учтено ${number(known,key==='energy_kcal'?0:1)} ${unit} · неполные данные`):`${number(value,key==='energy_kcal'?0:1)} ${unit}`))}
  if(calculation?.available_carbohydrate_g!=null)grid.append(el('dt','','Доступные углеводы'),el('dd','',number(calculation.available_carbohydrate_g)+' г'));
  return [grid];
 }

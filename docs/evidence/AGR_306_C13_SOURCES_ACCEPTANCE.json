@@ -1,0 +1,58 @@
+{
+  "issue": "AGR-306",
+  "stage": "C13 all food sources and progressive grocery",
+  "status": "completed_local_acceptance",
+  "observed_at": "2026-11-09T20:57:03.463810+00:00",
+  "base_commit": "861a88bf533f65f1e7dec07999680712ee3f5371",
+  "checks": {
+    "root_node_focused": {
+      "passed": 42,
+      "failed": 0,
+      "scope": "own dish, shop UI, scanner and OFF lookup"
+    },
+    "browser_real_service": {
+      "passed": 11,
+      "failed": 0,
+      "seconds": 14.0,
+      "scope": "actual Service HTTP transport and SQLite, fixed synthetic membership; all C11/C12 regressions plus own dish, manual product and portion calculator"
+    },
+    "bundle": "existing web build passed",
+    "patch": "independently reviewed; git apply --check passed"
+  },
+  "behavior": [
+    "One shared amount/date/time/review editor for catalog and generated recipes, saved own dishes, confirmed products and calculator results",
+    "Own half-batch correctly maps to recipe servings and exact source snapshot; saving a recipe never records intake",
+    "Confirmed product entry uses saved receipt identity and explicit eaten grams, independent of pantry mass and editable label draft",
+    "Grocery reveals chooser, selected method, label review and saved continuation separately; live camera barcode and label photo remain separate with manual fallback",
+    "Allergen and optional portion details collapse; explicit package review and confirmation remain required",
+    "Unknown nutrient storage remains null; an incomplete zero subtotal is displayed as missing data, not as a zero nutrient",
+    "Short action copy removes prepare/proposal and duplicated product names from action buttons"
+  ],
+  "source_sha256": {
+    "cloudflare-saas/public/app.js": "5e91148ba5c04cdc4f94bd637ee08f1dae0971bbae78c47dab0928c5372ba2ae",
+    "cloudflare-saas/public/intake-ui.js": "f3218a139908aedbbb1691cda7e232c846df89dac5d6c91142c5be450f1c0706",
+    "cloudflare-saas/public/kitchen-ui.js": "844bfefb0439fbe1b3ec189cf539e06937b83d7dd85fb11025523cbd4b11f607",
+    "cloudflare-saas/public/own-dish.js": "840c24e7fc8dfdf6ea4344ab31e2332eaab135e0e44b28e969a58db1c26dd465",
+    "cloudflare-saas/public/shop-ui.js": "0b9e3616e297641f318263f0652b36ff5885623c41b645f9a42c1c1a51bd65a2",
+    "cloudflare-saas/tests/own-dish.test.mjs": "ae401905f0f37634c3c88bdeaeb11f37bbd847f84151c4e03e104ccd60127669",
+    "cloudflare-saas/tests/shop-ui.test.mjs": "6c921f02bc93bc31b3d8429476904279e1546841c550fe654700c25e85a88e81",
+    "service/kitchen.py": "f9b8bb45433d07e340eed7976fc5bbb89966e12d3af56bddba27f79f71f04142",
+    "tests/browser/intake.config.mjs": "cff00470f4b109fd5e5aec6a70743b51e667d329e733e61312b77d01c54da931",
+    "tests/browser/grocery-intake.spec.mjs": "9563719dd5377ec97ef86cc70e1eca4838d214e01bedbe5919d7a6718ff457f1"
+  },
+  "screenshots": {
+    "c13-shop-methods.png": "49260b1c04f274066331382c3316d773c93ffd599cfb1ed471911048fd2aa612",
+    "c13-shop-intake-review.png": "6420f9029cb83cc78bdcba64eea8030d18b76064a8217433dab2d7555c95456f",
+    "c13-own-dish-diary.png": "3b6560b133d4e10673440d74bab7f9ee99a33a115cbce6da9ed42e770ec70d03"
+  },
+  "review": "GPT-6 Astra ultra isolated UI candidate and independent browser coverage, root integrated and verified",
+  "earlier_runs": [
+    {
+      "browser_passed": 11,
+      "note": "Initial run retained; repeated only to verify missing-data display clarified after screenshot inspection."
+    }
+  ],
+  "release_status": "source checkpoint only; C14 contracts, assets, full gate and exact remote adoption remain",
+  "physical_iPhone_spouse_acceptance": "not claimed",
+  "next_stage": "C14 final gates and existing private-family release"
+}

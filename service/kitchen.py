@@ -731,7 +731,7 @@ class KitchenService:
         group={'spec':spec,'candidate_ids':ids,'selected_id':ids[0] if len(ids)==1 else None,'at':k.utc_now(),'generation_id':uuid.uuid4().hex};t['kitchen']=group;t['choices']=ids
         for other in d['topics'].values():
             if other.get('kitchen') and any(rid not in block['drafts'] for rid in other['kitchen']['candidate_ids']):other.pop('kitchen',None);other['choices']=[]
-        result={'recipes':[self.kitchen_card(d,rid,spec,group['generation_id']) for rid in ids],'spec':spec,'questions':[],'model_called':bool(audit.get('attempted')),'model_roles':[audit],'model_usage':{key:int(audit.get(key,0)) for key in ('input_tokens','output_tokens')},'fallback_reason':failure,'message':('Azure-дизайн недоступен или не прошёл проверку. Показаны проверяемые шаблоны.' if failure else 'Варианты рассчитаны. Проверьте состав и подтвердите отдельные сохранения.')}
+        result={'recipes':[self.kitchen_card(d,rid,spec,group['generation_id']) for rid in ids],'spec':spec,'questions':[],'model_called':bool(audit.get('attempted')),'model_roles':[audit],'model_usage':{key:int(audit.get(key,0)) for key in ('input_tokens','output_tokens')},'fallback_reason':failure,'message':('Показаны рецепты по готовым шаблонам. Проверьте состав перед приготовлением.' if failure else 'Блюда подобраны. Откройте рецепт и проверьте состав.')}
         if len(ids)<3:result['questions'].append('С этими ограничениями получилось меньше трёх разных блюд; бесконечное разнообразие не обещается.')
         if spec['meal']=='day':result['day']=self.kitchen_day(d,group)
         if not audit.get('attempted'):d['usage']['calls']-=1
