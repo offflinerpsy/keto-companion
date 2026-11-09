@@ -2,14 +2,14 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T19:58:04.453212+00:00",
+  "updated_at": "2026-11-09T20:09:26.655550+00:00",
   "active_task": {
     "id": "AGR-306",
-    "stage": "C10_shell_in_progress",
+    "stage": "C11_intake_in_progress",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/iphone-keto-overhaul",
     "base_commit": "d9e54d9d7e4bff24c364a3bcf472cc22f94280c5",
-    "next_action": "Complete and verify compact four-tab shell, scoped confirmation dialog, chat/route scroll preservation; then begin unified intake.",
+    "next_action": "Implement and verify common intake, immutable calculation, eating time, selected-day totals and full history through existing confirmation/CAS.",
     "owner_iPhone_test": "Deferred until next ready candidate after owner-requested audit; no foreground window requested",
     "previous_login": "accepted; preserve existing identity/runtime",
     "phase1_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/phase1-acceptance.json",
@@ -36,10 +36,11 @@
     "C9_native_acceptance": "docs/evidence/AGR_306_C9_NATIVE_ACCEPTANCE.json",
     "C9_release_device": "docs/evidence/AGR_306_C9_RELEASE_DEVICE.json",
     "reviewed_baseline": "e755bb5934cdb3ecbc8d0233dfdbae42c8b76729",
-    "implementation_writer": "root; one isolated Stage 1 candidate prepared by GPT-6 Astra ultra reviewer for root integration",
+    "implementation_writer": "root authoritative writer; one isolated GPT-6 Astra ultra C11 server candidate",
     "review_models": "GPT-6 Astra ultra only",
     "previous_recovery": "docs/evidence/AGR_306_C9_RECOVERY_BEFORE_C10.json",
-    "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md"
+    "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md",
+    "C10_receipt": "docs/evidence/AGR_306_C10_SHELL_ACCEPTANCE.json"
   },
   "last_completed": {
     "id": "AGR-305-LOGIN",
@@ -55,9 +56,9 @@
     "broader_audit": "deferred; not claimed complete"
   },
   "next_task": {
-    "id": "AGR-306-C11-INTAKE",
+    "id": "AGR-306-C12-CHAT",
     "status": "queued",
-    "action": "After C10 checks, implement common consumed-food editor and server snapshot/history through existing confirmation/CAS contracts."
+    "action": "After C11 acceptance, persist contextual actions on their assistant message and reuse the same intake editor."
   },
   "no_relaunch": {
     "recorded_local_jobs": [],

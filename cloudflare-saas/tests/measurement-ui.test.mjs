@@ -34,6 +34,6 @@ test('reversed searches and edited inputs cannot publish obsolete portion result
 });
 test('successful receipt reports success and retains later invalid draft',async()=>{
  const h=harness();h.$('measurement-time').value='2026-11-09T10:30';h.$('measurement-glucose').value='5';h.$('measurement-unit').value='mmol/L';h.$('measurement-form').onsubmit({preventDefault(){}});await h.flush();h.$('measurement-glucose').value='bad';
- const notices=[];h.ctx.ok=new E();h.ctx.p={id:'proposal_1',type:'measurement.add',payload:h.proposals[0][1]};h.ctx.state.revision=4;h.ctx.call=async()=>({receipt:{id:'proposal_1'}});h.ctx.accept=()=>{};h.ctx.notify=x=>notices.push(x);h.ctx.ownDish={savedReceipt(){}};
+ const notices=[];h.ctx.ok=new E();h.ctx.no=new E();h.ctx.proposalSubmissions=new Set();h.ctx.p={id:'proposal_1',type:'measurement.add',payload:h.proposals[0][1]};h.ctx.state.revision=4;h.ctx.call=async()=>({receipt:{id:'proposal_1'}});h.ctx.accept=()=>{};h.ctx.notify=x=>notices.push(x);h.ctx.ownDish={savedReceipt(){}};
  const src=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');const a=src.indexOf("ok.addEventListener('click',()=>run(async()=>{");const b=src.indexOf("no.addEventListener('click'",a);vm.runInContext(src.slice(a,b),h.ctx);h.ctx.ok.dispatch('click');await h.flush();assert.equal(h.$('measurement-glucose').value,'bad');assert.deepEqual(notices,['Изменение сохранено.']);
 });

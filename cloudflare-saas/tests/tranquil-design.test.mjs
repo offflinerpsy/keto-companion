@@ -1,3 +1,5 @@
+import {createScrollMemory,chatScrollPosition,createDialogController} from '../public/shell-ui.js';
+import {mainTab,MAIN_ROUTES} from '../public/routes.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -36,12 +38,12 @@ test('all baseline IDs, form boundaries, input names and validation contracts su
  for(const id of baselineIds)assert(ids.includes(id),id);
  const fieldKey=([tag,a])=>tag+':'+(a.id?'id='+a.id:'name='+a.name);
  const baselineKeys=new Set(baselineFields.map(fieldKey));
- assert.deepEqual(fieldContract(html).filter(f=>baselineKeys.has(fieldKey(f))),baselineFields);
+ const stable=fields=>fields.map(f=>JSON.stringify(f)).sort();assert.deepEqual(stable(fieldContract(html).filter(f=>baselineKeys.has(fieldKey(f)))),stable(baselineFields));
  for(const key of ['dev-approval','dev-exact','dev-preview','image-link-details','chat-confirmations','target-confirmations','setup-confirmations','holds','proposals'])assert(ids.includes(key));
 });
-test('five primary destinations and source route keys remain usable with icon controls',()=>{
- const nav=html.match(/<nav id="nav"[\s\S]*?<\/nav>/)[0];assert.deepEqual([...nav.matchAll(/data-view="([^"]+)"/g)].map(x=>x[1]),['today','recipes','products','diary','chat']);
- assert.deepEqual([...nav.matchAll(/<span>(Сегодня|Рецепты|Продукты|Дневник|Чат)<\/span>/g)].map(x=>x[1]),['Сегодня','Рецепты','Продукты','Дневник','Чат']);
+test('four primary destinations preserve the nested menu and source route keys',()=>{
+ const nav=html.match(/<nav id="nav"[\s\S]*?<\/nav>/)[0];assert.deepEqual([...nav.matchAll(/data-view="([^"]+)"/g)].map(x=>x[1]),['chat','diary','recipes','products']);
+ assert.deepEqual([...nav.matchAll(/<span>(Сегодня|Рецепты|Продукты|Дневник|Чат)<\/span>/g)].map(x=>x[1]),['Чат','Дневник','Рецепты','Продукты']);
  assert.match(html,/<button data-view="more"[^>]*aria-label="Профиль и настройки"/);
  for(const value of ['developer','sources','memory','recipes','targets','settings'])assert(html.includes('data-view="'+value+'"'));
  assert.match(app,/button\.onclick=\(\)=>setView\(item\.view\)/);
@@ -53,7 +55,7 @@ test('menu and login keep task content clear without decorative photo heroes',()
  assert.doesNotMatch(html,/class="dawn-hero/);
  const menuStart=html.indexOf('<section data-page="today"'),nextPage=html.indexOf('<section data-page="',menuStart+1);
  const menu=html.slice(menuStart,nextPage<0?html.length:nextPage);
- assert.match(menu,/<h1>Сегодня<\/h1>/);
+ assert.match(menu,/<h1>Моё меню<\/h1>/);
  assert.doesNotMatch(menu,/НЕ ЖЁСТКИЙ ГРАФИК|Начните с простого блюда/);
  const chat=html.slice(html.indexOf('<section data-page="chat"'),html.indexOf('<section data-page="setup"'));
  assert(!chat.includes('dawn-hero'));assert(!chat.includes('dawn-overview'));
@@ -62,17 +64,17 @@ test('menu and login keep task content clear without decorative photo heroes',()
 
 class Element{
  constructor(tag='div'){this.tag=tag;this.hidden=false;this.value='';this.dataset={};this.children=[];this.textContent='';this.open=false;this.classList={toggle(){}};this.attributes={};}
- addEventListener(name,fn){(this.listeners??={})[name]=fn} prepend(...nodes){this.children.unshift(...nodes)} dispatchEvent(){} focus(){} querySelector(){return null} setAttribute(k,v){this.attributes[k]=v} replaceChildren(...nodes){this.children=nodes;this.textContent=''} append(...nodes){this.children.push(...nodes)} reset(){} close(){this.open=false} scrollIntoView(){} querySelectorAll(){return []}
+ addEventListener(name,fn){(this.listeners??={})[name]=fn} prepend(...nodes){this.children.unshift(...nodes)} dispatchEvent(){} focus(){} querySelector(){return null} setAttribute(k,v){this.attributes[k]=v} replaceChildren(...nodes){this.children=nodes;this.textContent=''} append(...nodes){this.children.push(...nodes)} reset(){} showModal(){this.open=true} close(){this.open=false} scrollIntoView(){} querySelectorAll(){return []}
 }
 function harness(actualStateRender=false,realRecipeLoads=false){
  const nodes={},document={body:new Element(),getElementById(id){return nodes[id]??=new Element()},createElement:tag=>new Element(tag),querySelectorAll:()=>[],querySelector:()=>null};
-  const stubs={createRecipePageCalls:'createRecipePageCallsFixture',renderTodayPlan:'renderTodayPlanFixture',setupShop:'()=>({reset(){},afterApplied(){}})',createRecipeLibrary:'()=>({load:async()=>{},next:async()=>{},invalidate(){}})',setupOwnDish:'()=>({reset(){},update(){},savedReceipt(){}})',sourceImportPreview:'sourceImportPreviewFixture',setupDeveloper:'()=>({reset(){},identity(){},load(){}})',mountDeveloperExtension:'()=>{}',setupMobile:'()=>({reset(){},render(){},resetPhoto(){},setChatBusy(){}})',setupGuidance:'()=>({reset(){},render(){},afterApplied(){},resolve(x){return x}})',createRouter:'()=>({reset(){},go(x){globalThis.lastView=x},back(){}})',setupKitchen:'()=>({render(){},load:async()=>true,invalidatePageLookups(){},reset(){globalThis.kitchenReset?.()}})',kitchenActionLabels:'{}',firebaseLogin:'()=>{}'};
+  const stubs={createScrollMemory:'createScrollMemoryFixture',chatScrollPosition:'chatScrollPositionFixture',createDialogController:'createDialogControllerFixture',mainTab:'mainTabFixture',MAIN_ROUTES:'mainRoutesFixture',createRecipePageCalls:'createRecipePageCallsFixture',renderTodayPlan:'renderTodayPlanFixture',setupShop:'()=>({reset(){},afterApplied(){}})',createRecipeLibrary:'()=>({load:async()=>{},next:async()=>{},invalidate(){}})',setupOwnDish:'()=>({reset(){},update(){},savedReceipt(){}})',sourceImportPreview:'sourceImportPreviewFixture',setupDeveloper:'()=>({reset(){},identity(){},load(){}})',mountDeveloperExtension:'()=>{}',setupMobile:'()=>({reset(){},render(){},resetPhoto(){},setChatBusy(){},resizeComposer(){},changingTopic(){return false}})',setupGuidance:'()=>({reset(){},render(){},afterApplied(){},resolve(x){return x}})',createRouter:'()=>({reset(){},go(x){globalThis.lastView=x},back(){},openDialog(){},dismissDialog(){}})',setupKitchen:'()=>({render(){},load:async()=>true,invalidatePageLookups(){},reset(){globalThis.kitchenReset?.()}})',kitchenActionLabels:'{}',firebaseLogin:'()=>{}'};
  if(realRecipeLoads){stubs.setupKitchen='setupKitchenFixture';stubs.createRecipeLibrary='createRecipeLibraryFixture'}
  let source=app.replace(/^import \{([^}]+)\} from '[^']+';$/gm,(_,names)=>names.split(',').map(name=>'const '+name+'='+stubs[name]+';').join('')).replace('run(start);','');
  // Render only the changed overview; existing modules are exercised by their own focused tests.
  if(!actualStateRender)source+='\nrenderState=()=>renderTranquilSummary(state);';
  source+='\nglobalThis.api={tranquilSummary,setState,clearScreen,showLogin,call,accept,renderProposals,renderDiary,renderView,setSynthetic(value){state=value}};';
-  const context={createRecipePageCallsFixture:createRecipePageCalls,renderTodayPlanFixture:renderTodayPlan,sourceImportPreviewFixture:sourceImportPreview,setupKitchenFixture:setupKitchen,createRecipeLibraryFixture:createRecipeLibrary,document,window:{},history:{},location:{href:'https://synthetic.invalid/'},sessionStorage:{getItem(){return null}},URL,FormData,Blob,Response,crypto:webcrypto,Date,Intl,setTimeout,clearTimeout,console};vm.createContext(context);vm.runInContext(source,context);return{context,api:context.api,nodes};
+  const context={createScrollMemoryFixture:createScrollMemory,chatScrollPositionFixture:chatScrollPosition,createDialogControllerFixture:createDialogController,mainTabFixture:mainTab,mainRoutesFixture:MAIN_ROUTES,createRecipePageCallsFixture:createRecipePageCalls,renderTodayPlanFixture:renderTodayPlan,sourceImportPreviewFixture:sourceImportPreview,setupKitchenFixture:setupKitchen,createRecipeLibraryFixture:createRecipeLibrary,document,window:{},history:{},location:{href:'https://synthetic.invalid/'},sessionStorage:{getItem(){return null}},URL,FormData,Blob,Response,crypto:webcrypto,Date,Intl,setTimeout,clearTimeout,console};vm.createContext(context);vm.runInContext(source,context);return{context,api:context.api,nodes};
 }
 function accepted(){return {processing_consent:true,profile:{owner_account_id:'synthetic-a',profile_revision:5,consent:{storage:true,health_data:true},targets:{}},screening:{can_plan:true},holds:[],guidance:{targets_stale:false},kitchen:{pantry:[{grams:null}]},diary:[{intake_status:'unquantified'}],plans:[]}}
 const content=node=>[node.textContent,...node.children.map(content)].join(' ');
@@ -109,7 +111,7 @@ test('short-height chat and large text keep dedicated scrolling and compact icon
  assert.match(css,/body\.large \.dawn-status-grid\{grid-template-columns:repeat\(2/);
  assert.match(css,/max-height:650px/);assert.match(css,/\.composer textarea\{min-height:48px;height:48px/);
  const composer=html.slice(html.indexOf('<form id="chat-form"'),html.indexOf('<section data-page="setup"'));
- assert.match(composer,/<div class="composer-bottom">[\s\S]*id="image-link-open"[\s\S]*id="mic-button"[\s\S]*id="send"/);
+ assert.match(composer,/<div class="composer-bottom composer-row">[\s\S]*id="attachments-open"[\s\S]*id="message"[\s\S]*id="mic-button"[\s\S]*id="send"/);
  assert.doesNotMatch(css,/#(?:holds|proposals|chat-confirmations)\s*\{[^}]*display:none/);
 });
 
@@ -153,8 +155,8 @@ test('reset sequence clears forms before kitchen defaults, keeping body inputs b
  api.clearScreen();assert.deepEqual(events,['forms','kitchen']);assert.equal(field.value,'1');assert.equal(body.value,'');
 });
 test('recipes route marks recipes as active and exposes current page identity',()=>{
- const {api,context}=harness();const buttons=['today','recipes','products','diary','chat'].map(view=>{const b=new Element('button');b.dataset.view=view;b.classList={toggle(_,on){b.active=on}};return b});
- context.document.querySelectorAll=selector=>selector==='[data-view]'?buttons:[];api.renderView('recipes',{reason:'history'});const recipes=buttons[1],today=buttons[0];assert.equal(recipes.active,true);assert.equal(recipes.attributes['aria-current'],'page');assert.equal(today.active,false);assert.match(html,/<section data-page="recipes"[^>]*>[\s\S]*?<h1>Рецепты<\/h1>/);
+ const {api,context}=harness();const buttons=['chat','diary','recipes','products'].map(view=>{const b=new Element('button');b.dataset.view=view;b.classList={toggle(_,on){b.active=on}};return b});
+ context.document.querySelectorAll=selector=>selector==='#nav [data-view],.head-actions [data-view]'?buttons:[];api.renderView('recipes',{reason:'history'});const recipes=buttons.find(b=>b.dataset.view==='recipes'),today=buttons.find(b=>b.dataset.view==='chat');assert.equal(recipes.active,true);assert.equal(recipes.attributes['aria-current'],'page');assert.equal(today.active,false);assert.match(html,/<section data-page="recipes"[^>]*>[\s\S]*?<h1>Рецепты<\/h1>/);
 });
 
 test('shop proposal renders a typed Russian review instead of internal fields',()=>{
@@ -173,4 +175,11 @@ test('recipe reentry cancels debounced kitchen search and waits for an in-flight
  const req=[],pending=[];let active=0,max=0;context.fetch=async(url,opts)=>{active++;max=Math.max(max,active);if(active>1)throw Error('synthetic server lock collision');const args=JSON.parse(opts.body);req.push({url,args});return await new Promise(resolve=>pending.push(data=>{active--;resolve(new Response(JSON.stringify(data),{status:200,headers:{'Content-Type':'application/json'}}))}))};const flush=()=>new Promise(r=>setImmediate(r));const respond=async data=>{assert(pending.length,'pending fetch');pending.shift()(data);await flush()};const finishLoad=async()=>{await respond({recipes:[],total:0,note:'ok',has_more:false});await respond({});await respond({foods:[],total:0})};const walk=n=>[n,...n.children.flatMap(walk)];
  api.renderView('recipes',{reason:'user'});await flush();await finishLoad();const product=walk(nodes['kitchen-studio']).find(n=>n.id==='kitchen-product'),avoid=walk(nodes['recipe-kitchen-slot']).find(n=>n.id==='kitchen-avoid');product.value='сохранённый ввод';product.oninput();avoid.value='не люблю сыр';avoid.oninput();api.renderView('today',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(req.length,4);await new Promise(r=>setTimeout(r,300));assert.equal(req.length,4,'cancelled debounce must not issue foods');assert.equal(product.value,'сохранённый ввод');assert.equal(avoid.value,'не люблю сыр');await finishLoad();
  avoid.value='поиск в процессе';avoid.oninput();await new Promise(r=>setTimeout(r,300));assert.equal(req.length,7);assert.equal(req[6].args.action,'foods');api.renderView('today',{reason:'user'});api.renderView('recipes',{reason:'user'});await flush();assert.equal(req.length,7,'automatic read waits for in-flight lookup');await respond({foods:[{food_id:'stale',name_ru:'СТАРЫЙ',state:'raw'}],total:1});assert.equal(req.length,8);assert.match(req[7].url,/keto_recipes/);assert(!walk(nodes['kitchen-studio']).some(n=>n.textContent.includes('СТАРЫЙ')));assert.equal(avoid.value,'поиск в процессе');await finishLoad();assert.equal(max,1);assert.equal(req.length,10);
+});
+
+
+test('Products loads stock serially without an unnecessary recipe catalogue request',async()=>{
+ const {api,context}=harness(false,true),s=accepted();s.active_thread='main';s.kitchen={pantry:[],preferences:[],legacy_disliked:[],favorites_details:[]};s.profile.allergies=[];s.profile.settings={favorites:[],disliked_food_ids:[]};api.setSynthetic(s);
+ const requests=[];context.fetch=async(url,opts)=>{const args=JSON.parse(opts.body);requests.push({url,args});return new Response(JSON.stringify(args.action==='foods'?{foods:[],total:0}:{}),{status:200,headers:{'Content-Type':'application/json'}})};
+ api.renderView('products',{reason:'user'});await new Promise(r=>setImmediate(r));assert.deepEqual(requests.map(r=>r.args.action),['status','foods']);assert(!requests.some(r=>r.url.includes('keto_recipes')));
 });

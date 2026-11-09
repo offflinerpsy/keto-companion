@@ -1,0 +1,79 @@
+{
+  "issue": "AGR-306",
+  "stage": "C10 compact daily shell",
+  "status": "completed_local_acceptance",
+  "observed_at": "2026-11-09T20:09:26.655550+00:00",
+  "base_commit": "a3d3a7f6c325935fc298bd1395ccdee75de1c970",
+  "checks": {
+    "node_full": {
+      "passed": 251,
+      "failed": 0,
+      "command": "node --test cloudflare-saas/tests/*.test.mjs ops/*.test.mjs"
+    },
+    "browser": {
+      "passed": 20,
+      "failed": 0,
+      "engine": "Chromium 153.0.8010.0",
+      "viewports": [
+        [
+          440,
+          956
+        ],
+        [
+          390,
+          844
+        ],
+        [
+          375,
+          812
+        ],
+        [
+          956,
+          440
+        ]
+      ],
+      "ready_profile_normal_large_dark": true,
+      "actual_dom_focus_scroll_dialog_and_pending_checks": true,
+      "synthetic_API": true
+    },
+    "bundle": "existing web and legacy build passed",
+    "review": "GPT-6 Astra ultra isolated candidate reviewed and integrated by root"
+  },
+  "earlier_attempts": [
+    {
+      "result": "test runtime launch failed",
+      "reason": "ephemeral browser binary mode did not allow worker execution",
+      "resolved": "standard executable permission on test-only binary"
+    },
+    {
+      "result": "test runtime context reuse failed",
+      "reason": "serverless single-process Chromium flag",
+      "resolved": "removed that flag in isolated QA configuration"
+    },
+    {
+      "result": "14 passed; 1 obsolete selector failed",
+      "resolved": "assert approved root Recipes navigation instead of removed shortcut"
+    }
+  ],
+  "source_sha256": {
+    "cloudflare-saas/public/app.js": "70d578defb015580f6ad426e725bcc962184ce374f9576ccfa9b43904c4c3421",
+    "cloudflare-saas/public/app.css": "a74683ca6dfbfd699a39f45fa7dd4135727c595c282d5ab8a3d0fc15c6d579a6",
+    "cloudflare-saas/public/index.html": "678f86f5344d4018e67aa7b356c51463811b50694f55e932479c914883faebef",
+    "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
+    "cloudflare-saas/public/shell-ui.js": "ea6a7d425d89ab1e779dab5bce05c0821d715a87b92e9c0cb868f23e688f3545",
+    "cloudflare-saas/public/mobile-ui.js": "b32b3558ab62af3a203c56675db9b8feedc5fd4c7da409ec75af363baac6dbb2",
+    "cloudflare-saas/public/media.js": "37739bbbf2e90afe099778cb76f4441b0fda74a50beb92dc87f26a87ca98a175",
+    "cloudflare-saas/public/kitchen-ui.js": "644e62363dbead99b9a408f22be5f6b5783836afb41e2496540614ba4215a2b8",
+    "cloudflare-saas/public/shop-ui.js": "0627aaea37aca9a5f47abb3d52dc32404628d627666666e1ffca33550452b742",
+    "cloudflare-saas/public/own-dish.js": "39cbc36032f7fdeae95cae8c1ae2453ea4e3ce76452922945e9bc260703d8ddb",
+    "cloudflare-saas/public/setup-ui.js": "aab98ae6af42ff01c5c6f9eef8a9af597a852b72eaf41152d266ba6ca9c254aa"
+  },
+  "screenshots": {
+    "c10-ready-normal-light.png": "bcf7e0378d4fff3d3d0b54eae013ac7f4dad3b2d9ff92a9d2cda90f9412caa67",
+    "c10-ready-large-light.png": "eb901abac7345aee42e07f20dc4d9ebf331bf464948dcfbe9e22828da6eb3b38",
+    "c10-ready-large-dark.png": "e325afcbcd8b9b3c5e96d776bec9227911bd353afd0012025e8c9e0e81c72385"
+  },
+  "release_status": "not deployed; generated artifacts will be regenerated and committed once at C14",
+  "physical_iPhone_spouse_acceptance": "not claimed; prior partial evidence preserved",
+  "next_stage": "C11 common intake and full diary history"
+}

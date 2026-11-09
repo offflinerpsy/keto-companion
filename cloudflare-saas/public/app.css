@@ -247,3 +247,54 @@ body:not(:has(#app)) main{font-size:17px;line-height:1.5}
 #recipe-kitchen-slot,#own-dish-root>details>form{padding:12px 14px}
 [data-testid="recipe-library"]>.inline-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:end}
 [data-testid="recipe-library"]>.inline-form>label{margin:0;min-width:0}#recipe-note{font-size:.875em;line-height:1.4}
+
+/* Daily shell: four destinations, quiet lists and a compact input row. */
+:root{--radius:12px;--radius-hero:20px;--shadow-ambient:none;--text-caption:12px}
+h1{font-size:1.65em;line-height:1.25;font-weight:650}h2{font-size:1.4em;line-height:1.3;font-weight:650}h3{font-size:1.12em;font-weight:600}
+button,.secondary,.photo-button,summary{border-radius:12px;font-weight:600}
+.footnote,.field-help,.tag,.recipe-meta,.knowledge-card small{font-size:.85em;line-height:1.45;font-weight:400}
+.panel,.menu-day,.diary-entry,.source,.member,.recipe-card,.knowledge-card,.kitchen-chip{box-shadow:none;border-color:var(--line)}
+#content{padding:16px}.page-heading{margin-bottom:16px;align-items:center;flex-wrap:wrap}.page-heading h1{margin:.25em 0}
+.page-heading>button{flex:none}.page-heading p{margin-bottom:0}
+.top{padding:calc(env(safe-area-inset-top) + 6px) 16px 6px;background:var(--paper);border-bottom:1px solid var(--line)}
+.brand .mark{width:40px;height:40px;font-size:1.25em;border-radius:12px}.brand small{display:none}
+.head-actions{gap:4px}.head-actions #connection{display:none}.head-actions .pending-indicator{width:auto;min-width:48px;gap:3px;font-size:.8em;padding:8px}
+#nav{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:var(--paper);border-radius:0}
+#nav button{min-height:52px;font-size:.72em;line-height:1.2;padding:5px 3px;border-radius:10px}
+#nav button.active{font-weight:600}#nav svg{width:22px;height:22px}
+.topic-bar{padding:6px 12px;gap:6px;background:var(--bg)}.topic-bar select{width:auto;flex:1;min-height:48px;border-color:transparent;background:transparent;font-weight:500;padding:8px 10px}
+.topic-bar #topic-edit{background:transparent;border-color:transparent;min-height:48px}
+.chat-scroll{padding:12px 16px;scrollbar-gutter:stable}.messages{gap:12px}
+.bubble{border-radius:16px;max-width:94%;line-height:1.45}.bubble.assistant{box-shadow:none;border:1px solid var(--line)}
+.composer{padding:8px 12px;background:var(--paper);border-top:1px solid var(--line);gap:0}
+.composer .composer-row{display:grid;grid-template-columns:48px minmax(0,1fr) 48px 48px;gap:4px;align-items:end;margin:0}
+.composer-row #message{width:100%;height:48px;min-height:48px;max-height:128px;padding:10px 8px;border-radius:12px;line-height:1.4;resize:none;overflow-y:auto;margin:0}
+.composer-row #attachments-open,.composer-row #mic-button,.composer-row #send{width:48px;min-width:48px;min-height:48px;height:48px;padding:10px;display:flex;align-items:center;justify-content:center;margin:0}
+.composer-row #attachments-open,.composer-row #mic-button{border-color:transparent;background:transparent}
+#voice-controls{padding-top:6px}#voice-status,#photo-status{font-size:.82em;line-height:1.4;margin:4px 0;max-height:64px}
+.composer #photo-preview{padding:0 0 8px;max-height:80px}.composer #photo-preview img{width:56px;height:56px;border-radius:10px}
+#photo-status:empty,#voice-status:empty{display:none}
+#toast{font-size:.85em;line-height:1.4;max-height:5.5em;overflow:auto}
+.dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.dialog-heading h2{margin:0}.dialog-heading button{flex:none}
+dialog{padding:16px;max-height:calc(var(--viewport-height,100dvh) - 24px);width:min(640px,calc(100% - 24px));overscroll-behavior:contain}
+dialog::backdrop{background:rgba(0,0,0,.36)}
+#proposal-dialog .proposal{margin:0;border:0;padding:0;box-shadow:none}#proposal-dialog .proposal>h3{margin-top:0}
+#proposal-dialog .proposal dl{grid-template-columns:minmax(100px,1fr) minmax(0,1.5fr)}
+#proposal-dialog .proposal dd{overflow-wrap:anywhere}#proposal-context{font-size:.85em;margin:0 0 16px}
+#proposal-list{display:grid;gap:8px}.pending-item{text-align:left;width:100%;background:var(--paper)}
+#proposal-all{margin-top:12px;width:100%}.proposal button{min-height:48px}
+.attachment-options{display:grid;gap:10px}.attachment-options .photo-button,.attachment-options #image-link-open{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;margin:0;padding:12px;text-align:left}
+#attachments-dialog p{font-size:.85em;line-height:1.45}#attachments-dialog .image-drop-zone{margin:12px 0;min-height:48px;border:1px dashed var(--line);padding:10px}
+#topic-dialog #topic-new{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 16px}#topic-dialog>button{margin-bottom:8px}
+.more-list{gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper)}
+.more-list button,.more-list a{border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none;min-height:52px;padding:12px 14px;font-weight:500}
+.more-list>*:last-child{border-bottom:0}.more-list #refresh{display:flex;gap:12px;align-items:center}
+#developer-mode-controls{padding:16px 0}#developer-mode-controls label{flex-wrap:wrap}
+.kitchen-modes{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;padding:0}
+.kitchen-modes legend{padding:8px 12px;margin:0}.kitchen-mode{display:grid;grid-template-columns:24px minmax(0,1fr);gap:4px 10px;padding:10px 12px;margin:0;border:0;border-top:1px solid var(--line);border-radius:0;min-height:48px}
+.kitchen-mode strong{font-size:1em;font-weight:500}.kitchen-mode span{grid-column:2;font-size:.82em;line-height:1.35}
+.kitchen-chip{padding:12px}#recipe-kitchen-disclosure,#own-dish-root>details.panel{border:1px solid var(--line)}
+body.large .inline-form,body.large .kitchen-controls{align-items:stretch}body.large .dialog-heading{flex-wrap:wrap}
+@media(max-width:400px){.top{padding-inline:12px}.page-heading{flex-direction:row;align-items:center}.composer{padding-inline:8px}.composer .composer-row{gap:2px}#proposal-dialog .proposal dl{grid-template-columns:1fr;gap:4px}#proposal-dialog .proposal dd{margin-bottom:10px}}
+@media(max-height:650px){.top{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:4px}.topic-bar{padding-block:4px}.composer{padding-block:6px}.composer-row #message{min-height:48px;max-height:96px}#nav button{min-height:48px}}
+@media(min-width:850px){#nav{max-width:600px;border-radius:12px 12px 0 0}.composer{padding-inline:16px}.top{padding-inline:20px}}
