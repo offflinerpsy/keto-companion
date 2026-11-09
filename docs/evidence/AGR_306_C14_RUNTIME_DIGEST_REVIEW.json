@@ -1,0 +1,62 @@
+{
+  "task": "AGR-306 C14 runtime adoption evidence",
+  "base_commit": "861a88bf533f65f1e7dec07999680712ee3f5371",
+  "candidate_directory": "/workspace/scratch/bbdbdb895c38/keto-c14-digest-candidate",
+  "modified_files": [
+    "service/app.py",
+    "tests/test_runtime_code_digest.py"
+  ],
+  "authoritative_repository_modified": false,
+  "remote_mutations": false,
+  "patch_path": "/workspace/scratch/bbdbdb895c38/keto-c14-runtime-digest.patch",
+  "patch_sha256": "feed6ab5232432b56083486065fbc6c1937624e22fd3973b8f8b6c255904c922",
+  "original_app_sha256": "7e66d7411b18550917c2694814ed56081b92b7e0a4e11ffdd511b227127b30e7",
+  "fixed_source_paths": [
+    "function_app.py",
+    "library/skills/keto-companion/scripts/keto_core.py",
+    "service/__init__.py",
+    "service/app.py",
+    "service/brain.py",
+    "service/chat_actions.py",
+    "service/confirmation.py",
+    "service/developer.py",
+    "service/domain.py",
+    "service/edge_bridge.py",
+    "service/entra.py",
+    "service/food_source.py",
+    "service/intake.py",
+    "service/kitchen.py",
+    "service/label.py",
+    "service/mobile.py",
+    "service/mobile_exports.py",
+    "service/oauth_bridge.py",
+    "service/planning.py",
+    "service/portion_search.py",
+    "service/recipe_brain.py",
+    "service/speech.py",
+    "service/store.py"
+  ],
+  "digest_framing": "ASCII keto-runtime-code-v1 + LF; for each fixed relative POSIX path in ascending order: UTF-8 path + NUL + lowercase ASCII SHA-256(exact bytes) + LF; SHA-256 of whole framing",
+  "startup_behavior": "Compute once at start of create_app, before service construction; any missing or unreadable listed file propagates failure; no environment override or filesystem traversal",
+  "public_status": {
+    "added_field": "runtime_code_sha256",
+    "cache_control": "no-store",
+    "existing_fields_preserved": true,
+    "source_or_private_state_exposed": false
+  },
+  "tests": {
+    "command": "python -m pytest -q tests/test_runtime_code_digest.py tests/test_edge_bridge.py tests/test_edge_ed25519.py tests/test_service.py",
+    "passed": 121,
+    "seconds": 5.28,
+    "exit_code": 0,
+    "new_tests": 4,
+    "new_checks": [
+      "exact ZIP member bytes equal disk framing independent of ZIP member order/metadata",
+      "every listed file mutation changes digest; unrelated private-state file does not",
+      "missing intake source fails create_app",
+      "status caches per-startup digest despite later disk and env changes; next app sees new bytes; no-store; unchanged auth safety/status semantics; no personal record written"
+    ]
+  },
+  "release_boundary": "Candidate tests are local only. Final runtime digest must be calculated from the exact release ZIP and compared with serving Azure /status after completed deployment. This is not a live Cloudflare-to-Azure-to-D1 transaction or physical iPhone acceptance.",
+  "checked_at": "2026-11-09T20:54:51.863992+00:00"
+}

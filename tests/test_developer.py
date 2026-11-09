@@ -6,7 +6,7 @@ from PIL import Image
 from service.developer import ALLOWED,DeveloperDesigner,validate_context
 from service.brain import AzureBrain,BrainUnavailable
 from service.edge_bridge import EdgeBridge,BridgeError,PATH
-from service.app import TOOL_MAP,image_clean
+from service.app import TOOL_MAP,image_clean,RUNTIME_CODE_FILES,runtime_code_sha256
 from service.store import SQLiteStore
 from test_edge_bridge import signed,payload,KEY
 ROOT=Path(__file__).resolve().parents[1]
@@ -62,17 +62,27 @@ def test_runner_revalidates_hash_path_symlink_and_fixed_commands(tmp_path):
 def test_snapshot_allowlist_and_deterministic_archive(tmp_path,monkeypatch):
     spec=importlib.util.spec_from_file_location('snapshot_builder',ROOT/'scripts/prepare_developer_snapshot.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
     for name in ['.private/key.json','qa/health.json','service/../.private/x.json','cloudflare-saas/node_modules/x.js','service/local.settings.json','deliverables/source.tar.gz','service/private.sqlite','cloudflare-saas/generated/x.mjs']:assert not m.permitted(name)
-    assert m.permitted('service/domain.py')
+    assert all(m.permitted(name) for name in RUNTIME_CODE_FILES)
     assert m.permitted('library/skills/keto-menu/data/usda-reference/usda-sr-legacy-normalized.json.gz')
     assert not m.permitted('library/skills/keto-menu/data/usda-reference/private-state.json.gz')
     assert not m.permitted('service/health-export.json.gz')
     from types import SimpleNamespace
-    inputs=[*ALLOWED,'service/domain.py','tests/test_developer.py']
+    inputs=[*ALLOWED,*RUNTIME_CODE_FILES,'tests/test_developer.py']
     monkeypatch.setattr(m.subprocess,'run',lambda *a,**kw:SimpleNamespace(stdout=('\0'.join(inputs)+'\0').encode()))
     a=m.prepare(tmp_path/'a',tmp_path/'generated.mjs');b=m.prepare(tmp_path/'b',tmp_path/'generated.mjs');assert a==b
     import tarfile
+    manifest=json.loads((tmp_path/'a/manifest.json').read_text())
+    assert set(RUNTIME_CODE_FILES)<={row['path'] for row in manifest['files']}
+    installed=tmp_path/'installed'
     with tarfile.open(tmp_path/'a/source.tar.gz') as archive:
         names=archive.getnames();assert all(m.permitted(n) or n=='qa/firebase-public-config.json' for n in names);assert not any(x.issym() or x.islnk() for x in archive.getmembers())
+        assert set(RUNTIME_CODE_FILES)<=set(names)
+        # The protected runner imports app.py from this archive. Every startup
+        # digest input must survive packaging, including root function_app.py.
+        for relative in RUNTIME_CODE_FILES:
+            target=installed/relative;target.parent.mkdir(parents=True,exist_ok=True)
+            target.write_bytes(archive.extractfile(relative).read())
+    assert runtime_code_sha256(installed)==runtime_code_sha256(ROOT)
 
 @pytest.mark.parametrize('format,mime',[('WEBP','image/webp'),('GIF','image/gif')])
 def test_uploaded_webp_gif_decodes_to_single_jpeg_without_metadata(format,mime):

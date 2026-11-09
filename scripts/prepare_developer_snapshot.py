@@ -4,7 +4,7 @@ import argparse,gzip,hashlib,io,json,subprocess,tarfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 EDITABLE=('cloudflare-saas/public/app.css','cloudflare-saas/public/help.html','cloudflare-saas/public/developer-extension.js')
-ROOT_FILES={'requirements.txt','requirements-dev.txt','pytest.ini','pyproject.toml','setup.cfg','conftest.py'}
+ROOT_FILES={'function_app.py','requirements.txt','requirements-dev.txt','pytest.ini','pyproject.toml','setup.cfg','conftest.py'}
 PREFIXES=('service/','library/','tests/','scripts/','cloudflare-saas/','ui-sdk/','developer-runtime/')
 EXCLUDED={'node_modules','.git','.private','.venv','__pycache__','.pytest_cache','dist','generated','build','.cache'}
 GENERATED={'developer-runtime/release.json','cloudflare-saas/src/embedded-assets.mjs','cloudflare-saas/public/app.bundle.js','cloudflare-saas/public/style.css','cloudflare-saas/public/knowledge-data.js','service/static/app.bundle.js'}

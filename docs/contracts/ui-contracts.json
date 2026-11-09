@@ -1,58 +1,10 @@
 {
   "css_tokens": {
     ":root": {
-      "--accent": "var(--color-spruce-teal)",
-      "--bg": "var(--color-canvas-warm-cream)",
-      "--color-canvas-warm-cream": "#F2F2F7",
-      "--color-card-surface-white": "#FFFFFF",
-      "--color-coral-alert": "#E06A4E",
-      "--color-deep-charcoal": "#1C1C1E",
-      "--color-dusk-indigo": "#4F659C",
-      "--color-mint-glaze-surface": "#EAF2FF",
-      "--color-muted-peach": "#F09E81",
-      "--color-slate-neutral": "#50545B",
-      "--color-spruce-teal": "#005FCC",
-      "--color-verdant-mint": "#43A08A",
-      "--container": "428px",
-      "--font-plus-jakarta-sans": "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
-      "--grid-gap": "12px",
-      "--ink": "var(--color-deep-charcoal)",
-      "--leading-body": "1.5",
-      "--line": "#D1D1D6",
-      "--muted": "var(--color-slate-neutral)",
-      "--on-accent": "#FFFFFF",
-      "--paper": "var(--color-card-surface-white)",
-      "--pastel-lavender": "#F2F2F7",
-      "--pastel-peach": "#F2F2F7",
-      "--pastel-sage": "#EAF2FF",
-      "--pastel-seafoam": "#EAF2FF",
-      "--plum": "var(--accent)",
-      "--radius": "22px",
-      "--radius-hero": "24px",
-      "--radius-input": "12px",
-      "--radius-pill": "999px",
-      "--section-padding": "24px",
-      "--shadow-ambient": "0 8px 24px rgba(0,30,20,.04)",
-      "--soft": "var(--color-mint-glaze-surface)",
-      "--space-unit": "4px",
-      "--spacing-12": "12px",
-      "--spacing-16": "16px",
-      "--spacing-20": "20px",
-      "--spacing-24": "24px",
-      "--spacing-28": "28px",
-      "--spacing-36": "36px",
-      "--spacing-4": "4px",
-      "--spacing-8": "8px",
-      "--text-body": "17px",
-      "--text-body-lg": "17px",
-      "--text-body-sm": "13px",
-      "--text-caption": "11px",
-      "--text-display": "28px",
-      "--text-heading": "20px",
-      "--text-heading-lg": "24px",
-      "--text-secondary": "#50545B",
-      "--text-subheading": "17px",
-      "--warn": "#9A3E29"
+      "--radius": "12px",
+      "--radius-hero": "20px",
+      "--shadow-ambient": "none",
+      "--text-caption": "12px"
     },
     "body.dark": {
       "--accent": "#83B8FF",
@@ -95,12 +47,12 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "effca984b999b8d040acd282c9ef05b5ec8a064bb393678f43ddb6ff936f8df4",
-    "cloudflare-saas/public/index.html": "2dc8d309a839996a7f3502e5489ed4a9a2b4d8fa7ad48ca39aa64fc7a1573316",
-    "cloudflare-saas/public/routes.js": "b84ee9b7c856363916dd05f3aab44876f2b057e6394c08cfc8e06af92e45c247",
-    "cloudflare-saas/src/compute.mjs": "45a6b5e7aeb2685fd418771459b027c9c97b74dfe9b839869ee0dd0566496ae5",
+    "cloudflare-saas/public/app.css": "f1670f6ab4610ee4b97a616f5eaea740f45d8fa28e5e8fa330ee649dbc1fb410",
+    "cloudflare-saas/public/index.html": "a52f994831209c6c5ba6de569dc4e6af6089cff340c022fba9d2016d8382f917",
+    "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
+    "cloudflare-saas/src/compute.mjs": "50dbeb05fce25d51b1141d3c974fd9774976ce912da8f7d074f8c296041ea97d",
     "cloudflare-saas/src/worker.mjs": "091c18c3f990d3ad5eb93735a9e6f58c3144c22b042ab01cfd65f67b00d8f785",
-    "service/app.py": "082a85e340832638af141652aa7eb243dc447b107ca8bc17163e37665e9a684f"
+    "service/app.py": "0cc87143a60232a6d65687796c59a3ca46a51738b89c3d3cf6e7051e93fdd582"
   },
   "static_elements": [
     {
@@ -133,18 +85,18 @@
       "tag": "span"
     },
     {
+      "aria-label": "Ожидающие подтверждения",
+      "id": "pending-open",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "pending-count",
+      "tag": "span"
+    },
+    {
       "aria-label": "Профиль и настройки",
       "data-view": "more",
-      "tag": "button"
-    },
-    {
-      "aria-label": "Помощь",
-      "id": "help",
-      "tag": "button"
-    },
-    {
-      "aria-label": "Обновить данные",
-      "id": "refresh",
       "tag": "button"
     },
     {
@@ -198,7 +150,11 @@
       "tag": "nav"
     },
     {
-      "data-view": "today",
+      "data-view": "chat",
+      "tag": "button"
+    },
+    {
+      "data-view": "diary",
       "tag": "button"
     },
     {
@@ -207,14 +163,6 @@
     },
     {
       "data-view": "products",
-      "tag": "button"
-    },
-    {
-      "data-view": "diary",
-      "tag": "button"
-    },
-    {
-      "data-view": "chat",
       "tag": "button"
     },
     {
@@ -257,37 +205,13 @@
       "tag": "div"
     },
     {
-      "id": "proposals",
-      "tag": "div"
-    },
-    {
       "data-page": "chat",
       "tag": "section"
-    },
-    {
-      "id": "developer-mode-controls",
-      "tag": "div"
-    },
-    {
-      "id": "chat-mode",
-      "tag": "select"
-    },
-    {
-      "aria-label": "Рецепты",
-      "data-testid": "recipes-shortcut",
-      "data-view": "recipes",
-      "tag": "button",
-      "type": "button"
     },
     {
       "data-testid": "topic-picker",
       "id": "topic-picker",
       "tag": "select"
-    },
-    {
-      "aria-label": "Новая тема",
-      "id": "topic-new",
-      "tag": "button"
     },
     {
       "aria-label": "Изменить тему",
@@ -334,29 +258,19 @@
       "type": "button"
     },
     {
-      "aria-describedby": "composer-help",
-      "id": "message",
-      "tag": "textarea"
-    },
-    {
-      "id": "image-drop-zone",
-      "tag": "button",
-      "type": "button"
-    },
-    {
       "id": "photo-status",
       "tag": "p"
     },
     {
-      "id": "photo",
-      "tag": "input",
-      "type": "file"
-    },
-    {
-      "aria-label": "Фото по ссылке",
-      "id": "image-link-open",
+      "aria-label": "Прикрепить фото",
+      "id": "attachments-open",
       "tag": "button",
       "type": "button"
+    },
+    {
+      "aria-describedby": "composer-help",
+      "id": "message",
+      "tag": "textarea"
     },
     {
       "aria-label": "Начать диктовку",
@@ -366,6 +280,7 @@
       "type": "button"
     },
     {
+      "aria-label": "Отправить сообщение",
       "id": "send",
       "tag": "button",
       "type": "submit"
@@ -688,6 +603,24 @@
       "tag": "button"
     },
     {
+      "aria-label": "Помощь",
+      "id": "help",
+      "tag": "button"
+    },
+    {
+      "aria-label": "Обновить данные",
+      "id": "refresh",
+      "tag": "button"
+    },
+    {
+      "id": "developer-mode-controls",
+      "tag": "div"
+    },
+    {
+      "id": "chat-mode",
+      "tag": "select"
+    },
+    {
       "data-page": "reminders",
       "tag": "section"
     },
@@ -857,6 +790,11 @@
       "tag": "section"
     },
     {
+      "data-view": "today",
+      "tag": "button",
+      "type": "button"
+    },
+    {
       "data-testid": "recipe-library",
       "tag": "div"
     },
@@ -918,6 +856,73 @@
     {
       "data-page": "diary",
       "tag": "section"
+    },
+    {
+      "id": "diary-add",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "diary-day-controls",
+      "tag": "div"
+    },
+    {
+      "aria-label": "Предыдущий день",
+      "id": "diary-prev",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "diary-day",
+      "tag": "input",
+      "type": "date"
+    },
+    {
+      "aria-label": "Следующий день",
+      "id": "diary-next",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "diary-today",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "diary-all",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "diary-receipt",
+      "tag": "div"
+    },
+    {
+      "aria-label": "Итоги записей",
+      "id": "diary-summary",
+      "tag": "section"
+    },
+    {
+      "id": "diary-status",
+      "tag": "p"
+    },
+    {
+      "id": "diary-refresh",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "diary-entries",
+      "tag": "div"
+    },
+    {
+      "id": "diary-more",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "diary-note-details",
+      "tag": "details"
     },
     {
       "id": "diary-form",
@@ -1005,10 +1010,6 @@
     },
     {
       "id": "portion-result",
-      "tag": "div"
-    },
-    {
-      "id": "diary-entries",
       "tag": "div"
     },
     {
@@ -1263,12 +1264,77 @@
       "tag": "span"
     },
     {
+      "id": "proposal-dialog",
+      "tag": "dialog"
+    },
+    {
+      "id": "proposal-heading",
+      "tag": "h2"
+    },
+    {
+      "aria-label": "Закрыть проверку",
+      "id": "proposal-close",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "proposal-context",
+      "tag": "p"
+    },
+    {
+      "id": "proposal-list",
+      "tag": "div"
+    },
+    {
+      "id": "proposals",
+      "tag": "div"
+    },
+    {
+      "id": "proposal-all",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "attachments-dialog",
+      "tag": "dialog"
+    },
+    {
+      "id": "attachments-heading",
+      "tag": "h2"
+    },
+    {
+      "id": "attachments-close",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "photo",
+      "tag": "input",
+      "type": "file"
+    },
+    {
+      "aria-label": "Фото по ссылке",
+      "id": "image-link-open",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "image-drop-zone",
+      "tag": "button",
+      "type": "button"
+    },
+    {
       "id": "topic-dialog",
       "tag": "dialog"
     },
     {
       "id": "topic-heading",
       "tag": "h2"
+    },
+    {
+      "aria-label": "Новая тема",
+      "id": "topic-new",
+      "tag": "button"
     },
     {
       "id": "topic-title",
@@ -1328,6 +1394,115 @@
       "id": "sr-close",
       "tag": "button",
       "type": "button"
+    },
+    {
+      "id": "intake-dialog",
+      "tag": "dialog"
+    },
+    {
+      "id": "intake-title",
+      "tag": "h2"
+    },
+    {
+      "aria-label": "Закрыть запись",
+      "id": "intake-close",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "intake-name",
+      "tag": "p"
+    },
+    {
+      "id": "intake-choice",
+      "tag": "div"
+    },
+    {
+      "id": "intake-recipe",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "intake-product",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "intake-note-choice",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "intake-form",
+      "tag": "form"
+    },
+    {
+      "id": "intake-fields",
+      "tag": "fieldset"
+    },
+    {
+      "id": "intake-amount-row",
+      "tag": "div"
+    },
+    {
+      "id": "intake-amount",
+      "tag": "input"
+    },
+    {
+      "id": "intake-unit",
+      "tag": "select"
+    },
+    {
+      "id": "intake-amount-help",
+      "tag": "p"
+    },
+    {
+      "id": "intake-date",
+      "tag": "input",
+      "type": "date"
+    },
+    {
+      "id": "intake-time",
+      "tag": "input",
+      "type": "time"
+    },
+    {
+      "id": "intake-zone",
+      "tag": "p"
+    },
+    {
+      "id": "intake-now",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "intake-meal",
+      "tag": "select"
+    },
+    {
+      "id": "intake-note-options",
+      "tag": "details"
+    },
+    {
+      "id": "intake-note",
+      "tag": "textarea"
+    },
+    {
+      "id": "intake-time-detail",
+      "tag": "details"
+    },
+    {
+      "id": "intake-fold",
+      "tag": "select"
+    },
+    {
+      "id": "intake-status",
+      "tag": "p"
+    },
+    {
+      "id": "intake-review",
+      "tag": "button",
+      "type": "submit"
     },
     {
       "id": "recipe-dialog",

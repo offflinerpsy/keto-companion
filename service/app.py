@@ -13,6 +13,43 @@ from .brain import AzureBrain, BrainUnavailable
 from .domain import Service,VERSION,UI_ALLOWED,UI_DEFAULT,InputError,PermissionError,literal_guard,k
 
 HERE=Path(__file__).parent
+# Fixed source-only inventory. No settings, private state, filesystem walk or
+# environment override may stand in for the deployed bytes at app startup.
+RUNTIME_CODE_FILES=(
+    'function_app.py',
+    'library/skills/keto-companion/scripts/keto_core.py',
+    'service/__init__.py',
+    'service/app.py',
+    'service/brain.py',
+    'service/chat_actions.py',
+    'service/confirmation.py',
+    'service/developer.py',
+    'service/domain.py',
+    'service/edge_bridge.py',
+    'service/entra.py',
+    'service/food_source.py',
+    'service/intake.py',
+    'service/kitchen.py',
+    'service/label.py',
+    'service/mobile.py',
+    'service/mobile_exports.py',
+    'service/oauth_bridge.py',
+    'service/planning.py',
+    'service/portion_search.py',
+    'service/recipe_brain.py',
+    'service/speech.py',
+    'service/store.py',
+)
+
+def runtime_code_sha256(root=None):
+    """Versioned digest of exact installed Python bytes; missing files fail startup."""
+    root=HERE.resolve().parent if root is None else Path(root)
+    digest=hashlib.sha256(b'keto-runtime-code-v1\n')
+    for relative in RUNTIME_CODE_FILES:
+        file_digest=hashlib.sha256((root/relative).read_bytes()).hexdigest()
+        digest.update(relative.encode('utf-8')+b'\0'+file_digest.encode('ascii')+b'\n')
+    return digest.hexdigest()
+
 RESOURCE='ui://keto-companion/workspace-v020'
 S={'type':'string'};I={'type':'integer'};B={'type':'boolean'};O={'type':'object'}
 def schema(props=None,required=None):return {'type':'object','properties':props or {},'required':required or [],'additionalProperties':False}
@@ -122,6 +159,7 @@ def b64(raw):return base64.urlsafe_b64encode(raw).decode().rstrip('=')
 def unb64(v):return base64.urlsafe_b64decode(v+'='*(-len(v)%4))
 
 def create_app(service=None,auth_records=None,signing_key=None,public_url=None,testing=False,entra_verifier=None,oauth_key=None,edge_secret=None,edge_replay_store=None):
+    runtime_digest=runtime_code_sha256()
     svc=service or Service(from_env(),AzureBrain())
     records=auth_records if auth_records is not None else json.loads(os.getenv('KETO_AUTH_RECORDS','[]'))
     secret=signing_key or os.getenv('KETO_SESSION_SECRET','')
@@ -322,7 +360,7 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
     def protected_metadata():
         return {'resource':public_url+'/mcp','authorization_servers':([public_url] if bridge else ['https://login.microsoftonline.com/'+os.getenv('KETO_ENTRA_TENANT_ID','')+'/v2.0']),'scopes_supported':([SCOPE] if bridge else ['api://'+os.getenv('KETO_ENTRA_CLIENT_ID','')+'/user_impersonation']),'bearer_methods_supported':['header']}
     @app.get('/status')
-    def status():return {'service':'KETO Companion','version':VERSION,'transport':'HTTP + MCP','authentication_required':True,'medical_monitoring':False,'source_commit':os.getenv('KETO_SOURCE_COMMIT',''),'edge_signature':'Ed25519' if edge_public_value else ('HMAC' if edge_secret_value else 'disabled')}
+    def status():return JSONResponse({'service':'KETO Companion','version':VERSION,'transport':'HTTP + MCP','authentication_required':True,'medical_monitoring':False,'source_commit':os.getenv('KETO_SOURCE_COMMIT',''),'runtime_code_sha256':runtime_digest,'edge_signature':'Ed25519' if edge_public_value else ('HMAC' if edge_secret_value else 'disabled')},headers={'Cache-Control':'no-store'})
     @app.get('/')
     def home():return HTMLResponse((HERE/'static/index.html').read_text())
     @app.post('/api/login')

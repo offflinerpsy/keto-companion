@@ -2,14 +2,14 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T20:57:03.463810+00:00",
+  "updated_at": "2026-11-09T20:58:27.998373+00:00",
   "active_task": {
     "id": "AGR-306",
     "stage": "C14_final_gates_in_progress",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/iphone-keto-overhaul",
     "base_commit": "d9e54d9d7e4bff24c364a3bcf472cc22f94280c5",
-    "next_action": "Finalize runtime digest, deterministic source snapshot, contracts and generated assets; run full existing gate before cloud release.",
+    "next_action": "Run full source CI against committed C14 candidate and final shell regressions; recover existing Azure access before changing live runtime.",
     "owner_iPhone_test": "Deferred until next ready candidate after owner-requested audit; no foreground window requested",
     "previous_login": "accepted; preserve existing identity/runtime",
     "phase1_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/phase1-acceptance.json",
@@ -44,7 +44,15 @@
     "C11_receipt": "docs/evidence/AGR_306_C11_INTAKE_ACCEPTANCE.json",
     "current_delivery_release_status": "C10/C11/C12/C13 source acceptance complete; C14 remains",
     "C12_receipt": "docs/evidence/AGR_306_C12_CHAT_ACCEPTANCE.json",
-    "C13_receipt": "docs/evidence/AGR_306_C13_SOURCES_ACCEPTANCE.json"
+    "C13_receipt": "docs/evidence/AGR_306_C13_SOURCES_ACCEPTANCE.json",
+    "C13_source_commit": "02328d4283b7268a13c7f1bfd39bef68637c5982",
+    "C14_runbook": "docs/design/EXISTING_RELEASE_C14.md",
+    "release_access": {
+      "mac_direct": "system_info unavailable: MCP SSE429",
+      "originating_browser": "Browser requires originating browser context",
+      "cloudflare_connector": "read verified; original trigger commands retained",
+      "live_mutation_this_delivery": "none; no partial live deployment"
+    }
   },
   "last_completed": {
     "id": "AGR-305-LOGIN",

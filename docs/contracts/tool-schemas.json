@@ -9,7 +9,7 @@
   "notice": "The listed Azure schemas are not a promise that all tools are exposed through every client. Cloudflare applies its own session/CSRF/operation map; UI-only capabilities remain mandatory.",
   "schema": "keto-tool-inventory-v1",
   "source": "service/app.py",
-  "source_sha256": "082a85e340832638af141652aa7eb243dc447b107ca8bc17163e37665e9a684f",
+  "source_sha256": "0cc87143a60232a6d65687796c59a3ca46a51738b89c3d3cf6e7051e93fdd582",
   "tools": [
     {
       "_meta": {
@@ -841,6 +841,10 @@
               "source_search",
               "source_detail",
               "source_import",
+              "chat_action",
+              "intake_preview",
+              "intake",
+              "diary_history",
               "food_portion",
               "own_dish_calculate",
               "own_dish_detail",
