@@ -1,15 +1,15 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-09T22:29:49.092840+00:00",
+  "updated_at": "2026-11-09T23:09:18.502767+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "AGR-306",
     "status": "In Progress",
-    "stage": "C14_technical_release_complete_physical_acceptance_pending",
+    "stage": "C15_ui_accepted_cloud_release_pending",
     "spec_directory": "specs/001-iphone-keto-overhaul",
-    "source_branch": "codex/iphone-keto-overhaul",
+    "source_branch": "codex/keto-ui-polish-c15",
     "release_performed": true,
     "source_acceptance": "docs/evidence/AGR_306_C14_ACCEPTANCE.json",
     "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
@@ -17,7 +17,7 @@
     "implementation_paused": false,
     "audit_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/owner-pause-audit/AUDIT_RESULT.md",
     "audit_linear_comment": "03b56ead-fa9a-44af-a3d8-0b7495ce4d2b",
-    "next_action": "On the published C14 release, complete one physical spouse iPhone journey: choose food -> quantity/time -> confirm -> diary/day totals -> correction/repeat; check keyboard, camera/barcode/photo and dictation. No source rebuild, deployment or identity bypass.",
+    "next_action": "Release accepted UI through the existing Cloudflare image and promotion gates; retain C14 Azure compute.",
     "physical_iPhone_acceptance": "C14 full spouse flow NOT performed. Previous partial C9 device observations are historical only.",
     "C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_BUILD_EVIDENCE.json",
     "C8_independent_control": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
@@ -31,7 +31,8 @@
     "native_acceptance": "docs/evidence/AGR_306_C14_NATIVE_ACCEPTANCE.json",
     "ordinary_build": "72ee574c-cc97-4aa9-9932-11ffc1b2f32e",
     "implementation_completed": true,
-    "final_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json"
+    "final_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
+    "C15_acceptance": "docs/evidence/AGR_306_C15_UI_ACCEPTANCE.json"
   },
   "last_completed": "AGR-306-C14 technical release to existing private family staging; physical spouse acceptance remains separate.",
   "next_task": {

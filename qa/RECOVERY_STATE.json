@@ -3,8 +3,35 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/workspace/scratch/bbdbdb895c38/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T22:29:49.092840+00:00",
-  "active_task": null,
+  "updated_at": "2026-11-09T23:09:18.502767+00:00",
+  "active_task": {
+    "id": "AGR-306-C15-UI",
+    "status": "in_progress",
+    "stage": "ui_accepted_prepare_cloud_image",
+    "source_base": "892e06363f7d04dcf795f6f56d8d9fdb245dc7ce",
+    "branch": "codex/keto-ui-polish-c15",
+    "scope": "Typography, spacing, local SVG icons and form/detail layouts; existing private-family frontend release",
+    "implementation_writer": "root",
+    "reviewers": [
+      "resume_audit",
+      "ui_review",
+      "qa_review"
+    ],
+    "acceptance": [
+      "Synthetic rendered UI at 360/390/430/768/1440, dark and large text",
+      "Relevant navigation/intake/shop regressions",
+      "Exact-source Cloudflare gates and published asset readback"
+    ],
+    "known_causes": [
+      "Historical C14 reports superseded by successful final release receipt",
+      "Missing dynamic action-list gaps and inherited label direction",
+      "Repeated fallback field hints",
+      "Native date fields constrained to 152 px and unaligned field baselines"
+    ],
+    "baseline_evidence": "/workspace/scratch/7b30ca21ef3f/ui-baseline/report.json",
+    "source_baseline": "4a555cb91706137e3bd58972a5dc6870a4210f733129a252548ed98110bcf614",
+    "acceptance_receipt": "docs/evidence/AGR_306_C15_UI_ACCEPTANCE.json"
+  },
   "last_completed": {
     "id": "AGR-306-C14-RELEASE",
     "linear_issue": "AGR-306",
@@ -35,9 +62,9 @@
     "broader_audit": "deferred; not claimed complete"
   },
   "next_task": {
-    "id": "AGR-306-PHYSICAL-ACCEPTANCE",
-    "status": "awaiting_physical_owner_session",
-    "action": "On the published C14 release, complete one physical spouse iPhone journey: choose food -> quantity/time -> confirm -> diary/day totals -> correction/repeat; check keyboard, camera/barcode/photo and dictation. No source rebuild, deployment or identity bypass."
+    "id": "AGR-306-C15-CLOUD",
+    "status": "pending",
+    "action": "Upload frozen source candidate, accept one exact Cloudflare runtime image, then pin and ordinary frontend release; Azure remains unchanged."
   },
   "no_relaunch": {
     "recorded_local_jobs": [],
@@ -50,7 +77,7 @@
     "accepted_runtime_image": "sha256:2a9b8e3b417d52a1c6216f682b5c2872a25f45034238a11f03f4fc5fa1e2085f",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
     "new_runtime_image_required": "Only for actual protected runtime baseline changes; no build required for final documentation or physical acceptance.",
-    "implementation_writer": null
+    "implementation_writer": "root"
   },
   "owner_authorization": "Implementation, verification and release to the existing private family environment authorized. No Mac Codex desktop, new accounts or providers.",
   "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md",

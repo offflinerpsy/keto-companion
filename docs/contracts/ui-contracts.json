@@ -1,10 +1,58 @@
 {
   "css_tokens": {
     ":root": {
-      "--radius": "12px",
+      "--accent": "var(--color-spruce-teal)",
+      "--bg": "var(--color-canvas-warm-cream)",
+      "--color-canvas-warm-cream": "#F2F2F7",
+      "--color-card-surface-white": "#FFFFFF",
+      "--color-coral-alert": "#E06A4E",
+      "--color-deep-charcoal": "#1C1C1E",
+      "--color-dusk-indigo": "#4F659C",
+      "--color-mint-glaze-surface": "#EAF2FF",
+      "--color-muted-peach": "#F09E81",
+      "--color-slate-neutral": "#50545B",
+      "--color-spruce-teal": "#005FCC",
+      "--color-verdant-mint": "#43A08A",
+      "--container": "428px",
+      "--font-plus-jakarta-sans": "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+      "--grid-gap": "12px",
+      "--ink": "var(--color-deep-charcoal)",
+      "--leading-body": "1.5",
+      "--line": "#D1D1D6",
+      "--muted": "var(--color-slate-neutral)",
+      "--on-accent": "#FFFFFF",
+      "--paper": "var(--color-card-surface-white)",
+      "--pastel-lavender": "#F2F2F7",
+      "--pastel-peach": "#F2F2F7",
+      "--pastel-sage": "#EAF2FF",
+      "--pastel-seafoam": "#EAF2FF",
+      "--plum": "var(--accent)",
+      "--radius": "14px",
       "--radius-hero": "20px",
+      "--radius-input": "12px",
+      "--radius-pill": "999px",
+      "--section-padding": "24px",
       "--shadow-ambient": "none",
-      "--text-caption": "12px"
+      "--soft": "var(--color-mint-glaze-surface)",
+      "--space-unit": "4px",
+      "--spacing-12": "12px",
+      "--spacing-16": "16px",
+      "--spacing-20": "20px",
+      "--spacing-24": "24px",
+      "--spacing-28": "28px",
+      "--spacing-36": "36px",
+      "--spacing-4": "4px",
+      "--spacing-8": "8px",
+      "--text-body": "17px",
+      "--text-body-lg": "17px",
+      "--text-body-sm": "13px",
+      "--text-caption": "12px",
+      "--text-display": "28px",
+      "--text-heading": "20px",
+      "--text-heading-lg": "24px",
+      "--text-secondary": "#50545B",
+      "--text-subheading": "17px",
+      "--warn": "#9A3E29"
     },
     "body.dark": {
       "--accent": "#83B8FF",
@@ -47,8 +95,8 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "f1670f6ab4610ee4b97a616f5eaea740f45d8fa28e5e8fa330ee649dbc1fb410",
-    "cloudflare-saas/public/index.html": "074d1f96d57582322ddd5ca8986f11dae074db89bace2f0e901de2bd55c15a7b",
+    "cloudflare-saas/public/app.css": "dc369bbe33f2563de21e4600e6315eaf94533623b912e3a58db5bb4251a45d93",
+    "cloudflare-saas/public/index.html": "56d2dec8fd7b75931d5cb9baf3cfa7e3fac668660cafaff7440d3e5d134f2e20",
     "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
     "cloudflare-saas/src/compute.mjs": "50dbeb05fce25d51b1141d3c974fd9774976ce912da8f7d074f8c296041ea97d",
     "cloudflare-saas/src/worker.mjs": "091c18c3f990d3ad5eb93735a9e6f58c3144c22b042ab01cfd65f67b00d8f785",
@@ -76,6 +124,7 @@
       "tag": "header"
     },
     {
+      "aria-label": "Назад",
       "data-testid": "nav-back",
       "id": "nav-back",
       "tag": "button"
@@ -1303,6 +1352,7 @@
       "tag": "h2"
     },
     {
+      "aria-label": "Закрыть вложения",
       "id": "attachments-close",
       "tag": "button",
       "type": "button"
@@ -1332,6 +1382,11 @@
       "tag": "h2"
     },
     {
+      "aria-label": "Закрыть тему",
+      "id": "topic-close",
+      "tag": "button"
+    },
+    {
       "aria-label": "Новая тема",
       "id": "topic-new",
       "tag": "button"
@@ -1350,10 +1405,6 @@
     },
     {
       "id": "topic-delete",
-      "tag": "button"
-    },
-    {
-      "id": "topic-close",
       "tag": "button"
     },
     {
@@ -1505,8 +1556,15 @@
       "type": "submit"
     },
     {
+      "aria-label": "Рецепт",
       "id": "recipe-dialog",
       "tag": "dialog"
+    },
+    {
+      "aria-label": "Закрыть рецепт",
+      "id": "recipe-close-top",
+      "tag": "button",
+      "type": "button"
     },
     {
       "id": "recipe-detail",
