@@ -1,0 +1,106 @@
+{
+  "schema": "keto-google-login-recovery-v1",
+  "task": "AGR-305-LOGIN",
+  "checked_at": "2026-11-09T06:49:59.262555+00:00",
+  "implementation_commit": "5d854ea1bcd344a68a7140a52747638648b958c0",
+  "pull_request": "https://github.com/offflinerpsy/keto-companion/pull/18",
+  "status": "staging_technical_repair_active; real_iPhone_reauthentication_pending",
+  "target": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "firebase_project": "keto-companion-auth-261107",
+  "oauth_callback_registered": true,
+  "oauth_callback_probe": {
+    "status": 302,
+    "redirect_host": "keto-companion-saas-staging.offflinerpsy.workers.dev",
+    "redirect_path": "/__/auth/handler",
+    "oauth_error": "interaction_required",
+    "new_callback_accepted": true
+  },
+  "auth_provider": "firebase_google",
+  "authDomain": "keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "helper_mode": "same-origin",
+  "helper_http_checks": [
+    {
+      "path": "/__/auth/iframe",
+      "status": 200
+    },
+    {
+      "path": "/__/auth/iframe.js",
+      "status": 200
+    }
+  ],
+  "existing_bindings_preserved": 12,
+  "existing_bindings_changed": [],
+  "cloud_build": {
+    "build_uuid": "a5d04c7b-ba71-4828-9a30-ef66c11ac65c",
+    "status": "stopped",
+    "build_outcome": "success",
+    "branch": "codex/fix-google-login-state",
+    "commit_hash": "5d854ea1bcd344a68a7140a52747638648b958c0",
+    "created_on": "2026-11-09T06:34:23.877Z",
+    "stopped_on": "2026-11-09T06:42:02.016Z"
+  },
+  "full_cloud_ci": {
+    "checks_passed": 16,
+    "python_passed": 524,
+    "node_passed": 153,
+    "node_failed": 0
+  },
+  "runtime_acceptance": {
+    "task": "CF-DEV-MEDIA-08",
+    "baseline": "180c3e10aeb9ef70df6513f40c6403cc149441770412023293cd7e64daea1831",
+    "image_digest": "sha256:397eadcb5820e93b8c541ed1669061166959f16d9c8873338db446bd329ff8c1",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "network_policy": "Container class enableInternet=false; no egress exceptions",
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "private_credentials_transported_to_agent": false,
+    "publication_broker": false,
+    "runtime_user_flow_tested": false,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true
+  },
+  "existing_desktop_session": {
+    "workspace_visible": true,
+    "admin_members_entry_visible": true,
+    "fresh_login_exercised": false,
+    "existing_session_preserved": true
+  },
+  "ordinary_pipeline": {
+    "rollout_flags_removed": true,
+    "pinned_runtime_verification": "pending",
+    "original_branch_restoration": "pending"
+  },
+  "boundaries": {
+    "azure_models_unchanged": true,
+    "google_models_provisioned": false,
+    "owner_health_values_inspected": false,
+    "production_saas_deployed": false,
+    "real_iPhone_login_verified": false
+  },
+  "next_action": "Verify ordinary pinned release pipeline, then owner retries Google sign-in from application on affected iPhone."
+}

@@ -23,3 +23,7 @@ Tasks:
 Focused synthetic tests establish proxy/router behavior only. No credentials, real authorization URLs, state values or personal records belong in fixtures or evidence. Actual OAuth client redirect registration, deployed configuration, real owner login and physical-device success are pending until independently checked by the coordinator. Existing direct-Google configuration is not a fallback for this change.
 
 The new Worker module/tests and this specification alter protected source snapshot inputs. Regenerate the source snapshot, generated bundles and artifact inventory through existing tools; reconcile the new baseline with the trusted runtime image/pin before release. The candidate UI patch allowlist remains the same three files; this proxy cannot be changed through developer-mode generation. Root owns all generated artifacts and release operations.
+
+## Current release evidence
+
+The coordinator saved and independently reopened the existing Google OAuth client, verified that Google accepts the exact staging callback, and released the reviewed source through native Cloudflare CI and actual isolated Container acceptance. The same-origin mode is active; the prior twelve bindings are unchanged. The ordinary deployment helper preserves this activation. See the [release receipt](../evidence/GOOGLE_LOGIN_RECOVERY_RECEIPT.json). The existing desktop session exposes the administrator members entry; it was not logged out or used as proof of fresh iPhone reauthentication. Model inference remains in Azure. Final owner iPhone acceptance remains pending.
