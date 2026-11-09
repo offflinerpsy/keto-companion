@@ -2,14 +2,14 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T20:58:27.998373+00:00",
+  "updated_at": "2026-11-09T21:10:27.943027+00:00",
   "active_task": {
     "id": "AGR-306",
-    "stage": "C14_final_gates_in_progress",
+    "stage": "C14_blocked_existing_azure_connection",
     "spec_directory": "specs/001-iphone-keto-overhaul",
     "source_branch": "codex/iphone-keto-overhaul",
     "base_commit": "d9e54d9d7e4bff24c364a3bcf472cc22f94280c5",
-    "next_action": "Run full source CI against committed C14 candidate and final shell regressions; recover existing Azure access before changing live runtime.",
+    "next_action": "Restore existing Azure administration connection, then resume C14 exact native runtime acceptance → real accepted pin → exact Azure deployment/adoption digest → ordinary full promotion and live readback; use docs/design/EXISTING_RELEASE_C14.md",
     "owner_iPhone_test": "Deferred until next ready candidate after owner-requested audit; no foreground window requested",
     "previous_login": "accepted; preserve existing identity/runtime",
     "phase1_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/phase1-acceptance.json",
@@ -17,18 +17,18 @@
     "shop_receipt": "product-overhaul/verification/shop-acceptance.json",
     "FR009": "Source review accepted current-stock preview/explicit selection; actual browser acceptance pending",
     "source_acceptance": "docs/evidence/AGR_306_C7_OPS_SOURCE.json",
-    "native_build": "7ce93b5a-49f0-45ea-a0b8-a23c7b9abc75",
-    "source_commit": "2eed11d44e5b86a28f31d998b793789c6ce34e2d",
-    "runtime_image": "sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008",
-    "source_baseline": "0a27f170e0065c9f8c2bcbbee3921caec746539e4cf1c35dbde950c0b9d98ef8",
-    "runtime_acceptance": "actual C8 four-stage existing-image acceptance; root exact app/controls/probe absence verified",
+    "native_build": null,
+    "source_commit": "1f7040501fbae54662ad89c776020a7d880f3994",
+    "runtime_image": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+    "source_baseline": "97541c77d758419484d908aa3e6dc5fab86bb8368970b832d82eceb13a352015",
+    "runtime_acceptance": "Current source baseline NOT accepted in cloud; ops/approved-runtime.json retains previous actual accepted image.",
     "implementation_paused": false,
     "audit_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/owner-pause-audit/AUDIT_RESULT.md",
     "audit_linear_comment": "03b56ead-fa9a-44af-a3d8-0b7495ce4d2b",
     "physical_iPhone_acceptance": "PARTIAL: actual connected iPhone Chrome nav/library/datalist/help/steppers accepted; keyboard/camera/voice and scroll observation remain.",
     "C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_BUILD_EVIDENCE.json",
     "C8_independent_control": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
-    "technical_release_acceptance": "Native newimage and ordinary no-rebuild builds bothSUCCESS; exactapp8/runner/probeabsence/staging/ordinarycontrols verified.",
+    "technical_release_acceptance": "NOT RELEASED: current candidate passes local source/browser gates; existing Azure administration connection unavailable. No new C14 native build or live mutation.",
     "owner_continuation": "Owner approved 2026-11-09 product review and explicitly authorized implementation, testing and existing private-family release without intermediate questions.",
     "research_root": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/oss-regional",
     "resume_linear_comment": "46694022-f549-4dce-a8ee-e6d045d04a6c",
@@ -36,13 +36,13 @@
     "C9_native_acceptance": "docs/evidence/AGR_306_C9_NATIVE_ACCEPTANCE.json",
     "C9_release_device": "docs/evidence/AGR_306_C9_RELEASE_DEVICE.json",
     "reviewed_baseline": "e755bb5934cdb3ecbc8d0233dfdbae42c8b76729",
-    "implementation_writer": "root authoritative writer; isolated GPT-6 Astra ultra reviewers",
+    "implementation_writer": "root authoritative writer; isolated GPT-6 Astra ultra reviews complete",
     "review_models": "GPT-6 Astra ultra only",
     "previous_recovery": "docs/evidence/AGR_306_C9_RECOVERY_BEFORE_C10.json",
     "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md",
     "C10_receipt": "docs/evidence/AGR_306_C10_SHELL_ACCEPTANCE.json",
     "C11_receipt": "docs/evidence/AGR_306_C11_INTAKE_ACCEPTANCE.json",
-    "current_delivery_release_status": "C10/C11/C12/C13 source acceptance complete; C14 remains",
+    "current_delivery_release_status": "C10/C11/C12/C13 implemented; C14 local acceptance complete, remote acceptance/deployment blocked by existing connection",
     "C12_receipt": "docs/evidence/AGR_306_C12_CHAT_ACCEPTANCE.json",
     "C13_receipt": "docs/evidence/AGR_306_C13_SOURCES_ACCEPTANCE.json",
     "C13_source_commit": "02328d4283b7268a13c7f1bfd39bef68637c5982",
@@ -52,7 +52,13 @@
       "originating_browser": "Browser requires originating browser context",
       "cloudflare_connector": "read verified; original trigger commands retained",
       "live_mutation_this_delivery": "none; no partial live deployment"
-    }
+    },
+    "previous_technical_release_acceptance": "Native newimage and ordinary no-rebuild builds bothSUCCESS; exactapp8/runner/probeabsence/staging/ordinarycontrols verified.",
+    "historical_native_build": "7ce93b5a-49f0-45ea-a0b8-a23c7b9abc75",
+    "C14_receipt": "docs/evidence/AGR_306_C14_ACCEPTANCE.json",
+    "C14_package": "docs/evidence/AGR_306_C14_SOURCE_PACKAGE.json",
+    "historical_runtime_image": "sha256:7cbe106a4b051e36640d3d1e0a85d189ea575088816af385823571263dcc1008",
+    "accepted_runtime_baseline": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7"
   },
   "last_completed": {
     "id": "AGR-305-LOGIN",
@@ -69,8 +75,8 @@
   },
   "next_task": {
     "id": "AGR-306-C14-RELEASE",
-    "status": "active",
-    "action": "Existing native runtime acceptance, exact Azure ZIP/runtime digest and ordinary private-family promotion after full source gates."
+    "status": "blocked_connection",
+    "action": "Restore existing Azure administration connection, then resume C14 exact native runtime acceptance → real accepted pin → exact Azure deployment/adoption digest → ordinary full promotion and live readback; use docs/design/EXISTING_RELEASE_C14.md"
   },
   "no_relaunch": {
     "recorded_local_jobs": [],
@@ -105,5 +111,6 @@
     "merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
     "pull_request": 17,
     "github_issue_state": "closed"
-  }
+  },
+  "workspace_root": "/workspace/scratch/bbdbdb895c38/keto-companion"
 }
