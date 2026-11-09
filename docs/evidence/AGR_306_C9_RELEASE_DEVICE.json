@@ -1,0 +1,206 @@
+{
+  "issue": "AGR-306",
+  "stage": "C9 ordinary release and bounded physical-device check",
+  "source_commit": "715a2931edf7831abde8d7b5eed6536115caa677",
+  "ordinary_build": {
+    "id": "7ce93b5a-49f0-45ea-a0b8-a23c7b9abc75",
+    "status": "stopped",
+    "outcome": "success",
+    "full_ci": 16,
+    "python_pass": 554,
+    "python_subtests": 6,
+    "node_pass": 231,
+    "ops_pass": 12
+  },
+  "guarded_acceptance": {
+    "run_id": "46550734-718b-453c-94ca-bb13b37446b4",
+    "probe_name": "keto-developer-check-57d70bcbfb",
+    "job_id": "190be6e6-2f3b-4f7c-a5dd-f1e3eee4ebfc",
+    "upload": "delivered_unverified",
+    "readiness": "known_handler_shape",
+    "post": "delivered_unverified",
+    "post_count": 1,
+    "cleanup": "delivered_unverified",
+    "events": [
+      {
+        "method": "PUT",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "POST",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "GET",
+        "status": 404,
+        "type": "known_handler_shape"
+      },
+      {
+        "method": "POST",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "DELETE",
+        "status": 200,
+        "type": "json"
+      }
+    ],
+    "post_result": {
+      "status": "passed",
+      "baseline": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7",
+      "patch_hash": "0866f90c88df9925e568155adc0aed23d5071c9b2b55c7a02621d58cd8a8dad1",
+      "image_digest": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+      "exit_code": 0,
+      "stages": [
+        {
+          "name": "syntax",
+          "exit_code": 0,
+          "passed_count": null
+        },
+        {
+          "name": "build",
+          "exit_code": 0,
+          "passed_count": null
+        },
+        {
+          "name": "product",
+          "exit_code": 0,
+          "passed_count": 14
+        },
+        {
+          "name": "python",
+          "exit_code": 0,
+          "passed_count": 17
+        }
+      ]
+    },
+    "outcome": "verifier_passed"
+  },
+  "container_acceptance": {
+    "task": "CF-DEV-MEDIA-08",
+    "scope": "actual private Cloudflare Container through service RPC; one fixed synthetic UI patch, no family session or app data",
+    "baseline": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7",
+    "patch_hash": "0866f90c88df9925e568155adc0aed23d5071c9b2b55c7a02621d58cd8a8dad1",
+    "image_digest": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+    "status": "passed",
+    "exit_code": 0,
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "temporary_probe_deleted": true,
+    "no_credentials_returned": true,
+    "no_database_or_R2_binding": true,
+    "actual_owner_UI_tested": false
+  },
+  "pinned_runtime": {
+    "baseline": "8dd1ef56e1ad78f9635f17e88a1545a9dc4e4dc3b5b4abac1518e1cb3235f0f7",
+    "image_digest": "sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "independent": {
+    "controls": {
+      "branch": "release/staging-0.3.0",
+      "previews": false,
+      "build": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+      "deploy": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+    },
+    "app": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "version": 8,
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:64ecd64b8143845e6cdca98465c65807957a2f849987ba0520e3a87a9cc3e7a1",
+      "max": 1,
+      "scheduling": "default",
+      "env": 0,
+      "keys": 0
+    },
+    "staging": {
+      "id": "cbf9f376-0fc8-4107-8948-c520c4286522",
+      "source": "api",
+      "strategy": "percentage",
+      "author_email": "offflinerpsy@gmail.com",
+      "annotations": {
+        "workers/message": "Automatic deployment on upload.",
+        "workers/triggered_by": "upload"
+      },
+      "versions": [
+        {
+          "version_id": "258c6c48-3af5-433d-995d-4060acc9ff6d",
+          "percentage": 100
+        }
+      ],
+      "created_on": "2026-11-09T18:26:45.039969Z"
+    },
+    "activeInstances": [],
+    "probe": "independently_verified_absent"
+  },
+  "device": {
+    "route": "owner connected iPhone, native iPhone Mirroring; real Chrome iOS exact staging URL",
+    "window": "owner explicitly granted up to10minutes; interaction ended about18:36UTC, CUA reset acknowledged",
+    "passed": [
+      "Actual page loads and recipe browsing works without completing personal health form",
+      "24 of72 recipe library count displayed",
+      "Five visible tab icons and strong selected state; Products/Recipes/Today navigations observed",
+      "Native datalist choice Avocado succeeds",
+      "Cooking radio aligned at heading; steppers1->2->1 and20->25->20 work without prior manual input",
+      "Help opens and explicit Close returns to app"
+    ],
+    "not_accepted": [
+      "Actual software keyboard typing: remote text/paste did not enter Cyrillic while native datalist was open; cause not established, no app failure claim",
+      "Camera/barcode/photo extraction and dictation on actual hardware require owner directly; Mirroring does not expose these devices",
+      "Real family food/dish/diary mutations not exercised; synthetic actual-domain flows were accepted separately"
+    ],
+    "observations": [
+      "Today opened at a lower scroll position after leaving cooking; attempted upward scrolling through Mirroring did not visibly move it. Navigation scroll experience remains an open UX observation, no new code cycle per owner wrap-up request.",
+      "Help body still uses older labels Menu/Conversation; explicit Close works."
+    ],
+    "data": "No family health/profile/catalog/pantry/diary saves or model submissions. Temporary stepper values restored.",
+    "screenshots": [
+      "IPHONE_RECIPES.jpg",
+      "IPHONE_HELP.jpg",
+      "IPHONE_COOKING.jpg",
+      "IPHONE_STEPPERS.jpg",
+      "IPHONE_TODAY.jpg",
+      "IPHONE_TODAY_TOP.jpg"
+    ],
+    "screenshot_note": "IPHONE_TODAY_TOP is a requested-top attempt, not proof of top position; actual pixels show lower page.",
+    "cleanup": "No task browser tabs/runtimes remain. Owner Mirroring window retained; disposable CUA kernel reset."
+  },
+  "acceptance": "technical release accepted; physical acceptance partial; AGR-306 remains In Progress; no further engineering admitted by latest owner wrap-up steering",
+  "next_action": "Owner directly checks typing, camera barcode/label and dictation on phone; report outcome in same issue. No new builds or features pending."
+}
