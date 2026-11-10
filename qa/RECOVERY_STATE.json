@@ -4,7 +4,23 @@
   "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "updated_at": "2026-11-10",
-  "active_task": null,
+  "active_task": {
+    "id": "AGR-306-C18-AUTH",
+    "linear_issue": "AGR-306",
+    "status": "in_progress",
+    "stage": "diagnose_then_source_acceptance",
+    "base_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
+    "writer": "root",
+    "scope": "Restore dependable Google sign-in and owner admin access; distinguish valid session from workspace boot failure; prevent duplicate and indefinitely pending sign-in attempts; bounded regression and real-user-flow verification",
+    "owner_feedback": "Google appears to sign in but returns to login CTA on iPhone 17 Pro Chrome; owner blocked from testing C17",
+    "acceptance": [
+      "Fresh sign-in reaches workspace or explicit recoverable phase-specific error; never turns compute error into anonymous state",
+      "Owner retains server-authorized admin role; member, suspended, pending and expired sessions remain correctly bounded",
+      "No duplicate popup/challenge, no stale session resurrection, no token/cookie logging",
+      "Reproduce confirmed defects before fix; automated auth lifecycle and real Worker regressions; existing exact-source private-family release"
+    ],
+    "observed_live": "Existing connected desktop owner session opens workspace and owner-only controls; fresh sign-in not yet verified"
+  },
   "last_completed": {
     "id": "AGR-306-C17-RELEASE",
     "linear_issue": "AGR-306",
@@ -40,9 +56,9 @@
     "product_acceptance": "physical_iPhone_17_Pro_pending"
   },
   "next_task": {
-    "id": "AGR-306-C17-PHYSICAL-ACCEPTANCE",
-    "status": "awaiting_physical_owner_session",
-    "action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes."
+    "id": "AGR-306-C18-RELEASE",
+    "status": "blocked_on_source_acceptance",
+    "action": "Release accepted auth correction through existing native and ordinary gates; verify published login and owner access."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -80,7 +96,7 @@
     "accepted_runtime_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
     "accepted_runtime_image": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
-    "new_runtime_image_required": false,
+    "new_runtime_image_required": true,
     "implementation_writer": "root",
     "temporary_trigger_commands": "ordinary commands restored and verified"
   },
@@ -99,6 +115,7 @@
     "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json"
   ],
   "limitations": [
+    "C18 user reports fresh sign-in blocker; C17 physical acceptance cannot proceed until repaired.",
     "C17 was not exercised on the physical iPhone 17 Pro (not Max); mobile Chromium/WebKit evidence is synthetic.",
     "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
     "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C17.",

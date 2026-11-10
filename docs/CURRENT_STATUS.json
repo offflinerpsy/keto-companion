@@ -7,34 +7,22 @@
   "active_task": {
     "id": "AGR-306",
     "status": "In Progress",
-    "stage": "C17_deployed_physical_iPhone_acceptance_pending",
-    "source_branch": "codex/keto-search-c17",
-    "candidate_commit": "966079b7e8c4d878fb0edc2b0a2ed9d02e706468",
-    "release_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "implementation_completed": true,
-    "release_performed": true,
-    "source_acceptance": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json",
-    "native_acceptance": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
-    "native_build": "ab053a65-d9c0-4066-8644-46f2a621d7b9",
-    "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
-    "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e",
-    "azure_acceptance": "docs/evidence/AGR_306_C17_AZURE_DEPLOYMENT.json",
-    "technical_release_acceptance": "Completed: exact-source 16-stage full CI, 12 ops, same-image runtime acceptance, exact Azure code adoption, 100% main deployment, six matching assets and 15 live read-only checks.",
-    "physical_iPhone_acceptance": "iPhone 17 Pro (not Max): pending; synthetic WebKit/Chromium evidence is separate.",
-    "next_action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes.",
-    "final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
+    "stage": "C18_auth_blocker_diagnosis_and_source",
+    "source_branch": "codex/keto-auth-c18",
+    "base_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
+    "implementation_completed": false,
+    "release_performed": false,
+    "next_action": "Diagnose fresh Google login and owner session; implement bounded auth recovery and regression proof before exact-source release."
   },
   "last_completed": "AGR-306-C17 meaningful food search, accessible reviewed reference and 108 recipes released to existing private family staging.",
   "next_task": {
-    "id": "AGR-306-C17-PHYSICAL-ACCEPTANCE",
-    "status": "awaiting_physical_owner_session",
-    "action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes."
+    "id": "AGR-306-C18-RELEASE",
+    "status": "blocked_on_source_acceptance"
   },
   "staging": {
     "deployed": true,
     "compute_connected": true,
-    "google_real_user_login_verified": true,
+    "google_real_user_login_verified": false,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
     "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
     "http_checks_passed": 15,
@@ -45,10 +33,10 @@
     "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
     "kitchen_deployed": true,
     "audit_fixes_deployed": true,
-    "family_release_acceptance": "C17 technically released; physical iPhone 17 Pro acceptance pending.",
+    "family_release_acceptance": "C17 technical release retained; C18 fresh sign-in blocker reported by owner.",
     "developer_preview_runner_connected": true,
     "design_applied": "C16 mobile forms/diary/confirmed memory/Animate UI preserved; C17 shared readable product picker, stable focus, visible wide reference and search result reveal.",
-    "google_real_user_login_evidence": "Owner confirmed the preceding same-origin login repair on iPhone; fresh C15 spouse login was not exercised.",
+    "google_real_user_login_evidence": "Historical owner confirmation retained in GOOGLE_LOGIN_RECOVERY_RECEIPT; current owner reports fresh login blocked. C18 revalidation in progress.",
     "worker_version_id": "28fd21df-78d8-40b0-91f4-56785dc9ad22",
     "current_C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
     "synthetic_e2e_scope": "14 C17 browser scenarios (7 per engine) on real local HTTP/SQLite, separate from retained C16 evidence; not a new signed family transaction.",
@@ -189,30 +177,14 @@
     "existing_desktop_admin_session_verified": true,
     "fresh_owner_login_verified": true,
     "fresh_owner_login_evidence_kind": "owner_submitted_message",
-    "normal_pinned_build": "8dcf7355-feea-4c8f-b116-6247fdf5d1e3"
+    "normal_pinned_build": "8dcf7355-feea-4c8f-b116-6247fdf5d1e3",
+    "current_status": "C18 user-reported fresh login regression; historical owner confirmation is not current validation."
   },
   "current_delivery": {
     "task": "AGR-306",
-    "implemented": [
-      "C10 shell",
-      "C11 intake/history",
-      "C12 contextual actions",
-      "C13 food sources",
-      "C15 UI details",
-      "C16 native forms, visible daily nutrition, confirmed memory and Animate UI motion",
-      "C17 word-aware food search, accessible reviewed USDA picker and 108 recipes"
-    ],
-    "stage": "completed_technical_release_physical_acceptance_pending",
-    "native_receipt": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
-    "local_browser_receipt": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json",
-    "runtime_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
-    "runtime_image": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+    "stage": "C18_auth_blocker_in_progress",
     "deployed_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
-    "report_ru": "docs/evidence/AGR_306_C17_SEARCH_RESULT_RU.md",
-    "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
-    "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e"
+    "previous_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
   },
   "historical_C15_evidence": {
     "python_tests": 627,
@@ -295,5 +267,49 @@
     "pull_request": 22,
     "source": "PR issue comments read on 2026-11-10; no completed GitHub review entries",
     "independent_subagent_review_and_ci": "completed separately; not represented as a successful GitHub bot review"
+  },
+  "historical_C17_delivery": {
+    "task": "AGR-306",
+    "implemented": [
+      "C10 shell",
+      "C11 intake/history",
+      "C12 contextual actions",
+      "C13 food sources",
+      "C15 UI details",
+      "C16 native forms, visible daily nutrition, confirmed memory and Animate UI motion",
+      "C17 word-aware food search, accessible reviewed USDA picker and 108 recipes"
+    ],
+    "stage": "completed_technical_release_physical_acceptance_pending",
+    "native_receipt": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
+    "local_browser_receipt": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json",
+    "runtime_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+    "runtime_image": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+    "deployed_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
+    "report_ru": "docs/evidence/AGR_306_C17_SEARCH_RESULT_RU.md",
+    "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
+    "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e"
+  },
+  "historical_C17_active_task": {
+    "id": "AGR-306",
+    "status": "In Progress",
+    "stage": "C17_deployed_physical_iPhone_acceptance_pending",
+    "source_branch": "codex/keto-search-c17",
+    "candidate_commit": "966079b7e8c4d878fb0edc2b0a2ed9d02e706468",
+    "release_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "implementation_completed": true,
+    "release_performed": true,
+    "source_acceptance": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json",
+    "native_acceptance": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
+    "native_build": "ab053a65-d9c0-4066-8644-46f2a621d7b9",
+    "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
+    "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e",
+    "azure_acceptance": "docs/evidence/AGR_306_C17_AZURE_DEPLOYMENT.json",
+    "technical_release_acceptance": "Completed: exact-source 16-stage full CI, 12 ops, same-image runtime acceptance, exact Azure code adoption, 100% main deployment, six matching assets and 15 live read-only checks.",
+    "physical_iPhone_acceptance": "iPhone 17 Pro (not Max): pending; synthetic WebKit/Chromium evidence is separate.",
+    "next_action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes.",
+    "final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
   }
 }

@@ -1,0 +1,26 @@
+{
+  "schema": "keto-c18-auth-negative-control-v1",
+  "source_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
+  "scope": "Exact prepatch start function in isolated VM; synthetic session and bootstrap dependencies, not a browser or physical device",
+  "positive_control": {
+    "session_retained": true,
+    "google_screen_shown": false,
+    "workspace_visible": true,
+    "message": ""
+  },
+  "failed_acceptance": {
+    "expected": "Retain verified active admin identity and offer workspace retry without Google",
+    "observed": {
+      "session_retained": false,
+      "google_screen_shown": true,
+      "workspace_visible": false,
+      "message": "synthetic workspace outage"
+    }
+  },
+  "live_prepatch": {
+    "existing_desktop_owner_session": "opened workspace",
+    "fresh_desktop_google": "actual UI logout, Google owner chooser, returned workspace, owner-only controls visible; no console errors",
+    "active_admin_sessions_before_fresh": 6,
+    "physical_iPhone_failure": "not reproduced; exact incident phase unknown"
+  }
+}
