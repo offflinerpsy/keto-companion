@@ -142,5 +142,9 @@
     "Fresh ordinary Google login on published C18 remains a release gate.",
     "No family diary/profile/consent test writes; invitation/deletion cases use isolated synthetic accounts.",
     "Full admin surface still depends on successful workspace boot; verified identity remains recoverable during outage."
-  ]
+  ],
+  "backend_scope": "Azure/Python compute; Cloudflare authentication Worker changed",
+  "azure_compute_changed": false,
+  "edge_auth_worker_changed": true,
+  "independent_evidence_review": "QA re-read both raw browser reports: matching SHA256, 24+14 expected, zero unexpected/flaky/skipped, empty errors; candidate commit changes only docs/state/screenshots."
 }

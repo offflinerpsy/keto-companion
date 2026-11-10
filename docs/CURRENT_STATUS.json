@@ -1,18 +1,18 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-10T16:20:29.369002+00:00",
+  "updated_at": "2026-11-10T16:32:56.061199+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "AGR-306",
     "status": "In Progress",
-    "stage": "C18_source_accepted_native_release_pending",
+    "stage": "C18_native_accepted_ordinary_pending",
     "source_branch": "codex/keto-auth-c18",
     "base_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
     "implementation_completed": true,
     "release_performed": false,
-    "next_action": "Native exact-source runtime acceptance, ordinary staging deploy, fresh Google owner login."
+    "next_action": "Ordinary exact-source staging deployment then fresh real Google owner login."
   },
   "last_completed": "AGR-306-C17 meaningful food search, accessible reviewed reference and 108 recipes released to existing private family staging.",
   "next_task": {

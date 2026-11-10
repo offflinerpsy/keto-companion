@@ -8,10 +8,21 @@
     "id": "AGR-306-C18-RELEASE",
     "linear_issue": "AGR-306",
     "status": "in_progress",
-    "stage": "native_acceptance_pending",
+    "stage": "ordinary_release_pending",
     "writer": "root via authorized isolated Mac checkout",
     "source_commit": "f53e12fffd86ed6ad67cd2d95448d6646e9baeac",
-    "scope": "Release accepted auth repair through existing native and ordinary Cloudflare gates; retain byte-identical C17 Azure; verify fresh real login and server admin controls."
+    "scope": "Release accepted auth repair through existing native and ordinary Cloudflare gates; retain byte-identical C17 Azure; verify fresh real login and server admin controls.",
+    "candidate_commit": "4734d850ca5008fd5a7d61d7c01f2bfd5ef83d5d",
+    "build_uuid": "b6ce09a1-446d-4b03-914a-d5bbf7f8329e",
+    "source_gate": {
+      "stages": 16,
+      "python": 655,
+      "python_subtests": 6,
+      "node": 296,
+      "status": "passed"
+    },
+    "native_build": "b6ce09a1-446d-4b03-914a-d5bbf7f8329e",
+    "native_status": "success"
   },
   "last_completed": {
     "id": "AGR-306-C17-RELEASE",
@@ -121,10 +132,10 @@
     "temporary_probes": [],
     "active_container_instances": [],
     "accepted_runtime_pin": "ops/approved-runtime.json",
-    "accepted_runtime_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
-    "accepted_runtime_image": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+    "accepted_runtime_baseline": "bf113ad3f95532f7a5d9e73f1063be68d6f8517cd0d8084ffcf4fd552f4a51f5",
+    "accepted_runtime_image": "sha256:2e7ca6e2448f156e5e0ba8d3d31f324c7bced900bf3774fbf061d847adce8345",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
-    "new_runtime_image_required": true,
+    "new_runtime_image_required": false,
     "implementation_writer": "root",
     "temporary_trigger_commands": "ordinary commands restored and verified"
   },
