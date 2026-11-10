@@ -1,0 +1,29 @@
+{
+  "schema": "keto-release-progress-v1",
+  "task": "AGR-306-C17-RELEASE",
+  "status": "in_progress",
+  "source_candidate": "966079b7e8c4d878fb0edc2b0a2ed9d02e706468",
+  "protected_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+  "native": {
+    "build_uuid": "ab053a65-d9c0-4066-8644-46f2a621d7b9",
+    "created_on": "2026-11-10T14:20:50.614Z",
+    "initial_status": "queued",
+    "build_command": "python scripts/cloudflare_ci.py && node --test ops/runtime-acceptance-http.test.mjs && node --test --test-name-pattern='^(operator promotion is disabled without explicit native release flag|operator helper never publishes app or replaces image before isolated acceptance|exact pinned application detail wins over stale collection and retains all guards)$' ops/promotion.test.mjs",
+    "deploy_command": "KETO_NATIVE_RUNNER_RELEASE=1 KETO_APPROVED_ROLLOUT=1 .venv/bin/python scripts/deploy_developer_native.py",
+    "source_gate": {
+      "status": "passed",
+      "stages": 16,
+      "seconds": 210.32
+    },
+    "current_stage": "completed",
+    "rollout_id": "11955d9b-33d9-4967-9623-1f464b230b32",
+    "candidate_image": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+    "image_accepted": true,
+    "status": "stopped",
+    "outcome": "success",
+    "acceptance_receipt": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
+    "ordinary_trigger_restored": true
+  },
+  "next_check": "Freeze R with actual accepted runtime pin; verify exact R ZIP and Azure adoption before ordinary deployment.",
+  "previous_live_source": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504"
+}
