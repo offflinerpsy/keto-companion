@@ -4,7 +4,7 @@
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "607f358a427d8b4005273cf37fe4a21ca2223cc4a85446da168f7005a3ad531c",
+      "sha256": "95a0b5be0897bf853873fdac770fd1147d2f32747ce8b76142fd716e46e46124",
       "bytes": 1546536,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
@@ -12,7 +12,7 @@
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "e62160e07d544b7549b7f470beca8f8d55ceaaf9a15e86b0005bdaca9c030c99",
+      "sha256": "941fd6ffc415b2bc2e94550bcc7d58dab717d620dd334038a13f537faf4cf08d",
       "bytes": 166951,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",

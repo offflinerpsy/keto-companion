@@ -1,7 +1,7 @@
 {
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
-  "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
+  "workspace_root": "/Users/alexyarosh/Projects/keto-companion-c18-qa",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "updated_at": "2026-11-10",
   "active_task": {
@@ -10,7 +10,7 @@
     "status": "in_progress",
     "stage": "browser_verification",
     "base_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
-    "writer": "root",
+    "writer": "root via authorized Mac isolated C18 checkout; cloud scratch unavailable",
     "scope": "Restore dependable Google sign-in and owner admin access; distinguish valid session from workspace boot failure; prevent duplicate and indefinitely pending sign-in attempts; bounded regression and real-user-flow verification",
     "owner_feedback": "Google appears to sign in but returns to login CTA on iPhone 17 Pro Chrome; owner blocked from testing C17",
     "acceptance": [
@@ -104,6 +104,15 @@
         "status": "completed_failed_fixture",
         "source_commit": "829daba464f156a86564617f4ad58d79c70552c8",
         "pid": 71321,
+        "exit_code": 1
+      },
+      {
+        "host": "authorized owner Mac isolated C18 QA worktree",
+        "pid": 72064,
+        "run": "c18-browser-3",
+        "completion_marker": "/Users/alexyarosh/Projects/keto-c18-artifacts/browser-3.exit.json",
+        "status": "completed_failed_fixture",
+        "source_commit": "0814fe9e7526566231a39da5c41cffcd829e4761",
         "exit_code": 1
       }
     ],

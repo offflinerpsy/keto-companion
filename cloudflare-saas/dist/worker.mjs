@@ -384,7 +384,7 @@ async function handleTool(req, env, h) {
 }
 
 // cloudflare-saas/generated/developer-snapshot.mjs
-var developerSnapshot = { "baseline": "a02cd025b1008ab0e182f4deb7eec651cf7dfdaeea1efe602579bac451b31b42", "sources": [{ "path": "cloudflare-saas/public/app.css", "sha256": "be9c5b27d3ad5d4422f37f527d13d131bfa31c7538499783342e7e3a15db0262", "content": `:root {
+var developerSnapshot = { "baseline": "bf113ad3f95532f7a5d9e73f1063be68d6f8517cd0d8084ffcf4fd552f4a51f5", "sources": [{ "path": "cloudflare-saas/public/app.css", "sha256": "be9c5b27d3ad5d4422f37f527d13d131bfa31c7538499783342e7e3a15db0262", "content": `:root {
   --color-canvas-warm-cream: #F2F2F7;
   --color-card-surface-white: #FFFFFF;
   --color-mint-glaze-surface: #EAF2FF;
