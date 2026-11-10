@@ -3,8 +3,30 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-10T12:01:43.033847+00:00",
-  "active_task": null,
+  "updated_at": "2026-11-10",
+  "active_task": {
+    "id": "AGR-306-C17-SEARCH",
+    "status": "in_progress",
+    "stage": "browser_verification",
+    "base_commit": "2e60f59fcc4d9388da8831f86e12c5a27db1976a",
+    "writer": "root",
+    "deliverable": "Meaningful Russian food/recipe matching, accessible wide food reference and varied verified-ingredient recipe expansion",
+    "acceptance": [
+      "сыр does not match raw meat or fish; word forms and multiword queries work",
+      "same query semantics in portion, own dish, pantry and USDA",
+      "wide reference accessible from selection with explicit review/import preserved",
+      "recipe ingredient/name search, filters and pagination correct; varied original recipes use actual catalog nutrition",
+      "targeted offline/browser checks then existing exact-source private-family release"
+    ],
+    "owner_feedback": "IMG_0996.png, IMG_0997.png, IMG_0998.png: cheese/raw substring collision, few cheeses and only nine egg recipes",
+    "source_checks": {
+      "python": "655 passed; 6 subtests",
+      "node": "266 passed before final Enter containment guard; rerun in progress",
+      "contracts_specification_hygiene": "passed",
+      "review": "26 backend probes passed; keyboard review correction applied"
+    },
+    "next_check": "Isolated Mac Chromium/WebKit real HTTP search/import/intake at 402 CSS px"
+  },
   "last_completed": {
     "id": "AGR-306-C16-RELEASE",
     "linear_issue": "AGR-306",
@@ -39,9 +61,9 @@
     "product_acceptance": "physical_spouse_iPhone_pending"
   },
   "next_task": {
-    "id": "AGR-306-PHYSICAL-ACCEPTANCE",
-    "status": "awaiting_physical_owner_session",
-    "action": "Owner refreshes published app and checks the food portion -> confirm -> visible diary/total -> edit/repeat flow on the actual iPhone 17 Pro; no speculative rebuild."
+    "id": "AGR-306-C17-RELEASE",
+    "status": "pending_source_acceptance",
+    "action": "Publish exact accepted C17 through existing pipeline after source/browser review."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -62,8 +84,8 @@
     "accepted_runtime_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
     "accepted_runtime_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
-    "new_runtime_image_required": "No. C16 complete; use the published app for physical acceptance.",
-    "implementation_writer": null,
+    "new_runtime_image_required": true,
+    "implementation_writer": "root",
     "temporary_trigger_commands": "ordinary commands restored and verified"
   },
   "owner_authorization": "Implementation, verification and release to the existing private family environment authorized. No Mac Codex desktop, new accounts or providers.",

@@ -21,6 +21,7 @@ from .chat_actions import chat_context,check_chat_context,hunger_request
 from .recipe_brain import RecipeDesigner, RecipeUnavailable, recipe_schema
 from .store import Conflict
 from . import food_source
+from . import food_search
 
 POLICY = json.loads((Path(__file__).parent/'data/kitchen_policy.json').read_text())
 ROOT = Path(__file__).resolve().parents[1]
@@ -686,8 +687,10 @@ class KitchenService:
             opts=values or {}
             if set(opts)-{'cursor','limit'}:raise ValueError('Неизвестные параметры поиска')
             result=food_source.search(query,opts.get('cursor'),opts.get('limit',20),self.base['foods'])
-            imported={f.get('provenance',{}).get('candidate_id') for f in d['core'].get('custom_foods',{}).values()}
-            for row in result['candidates']:row['already_imported']=row['candidate_id'] in imported
+            imported={f.get('provenance',{}).get('candidate_id'):f['food_id'] for f in d['core'].get('custom_foods',{}).values()}
+            for row in result['candidates']:
+                row['already_imported']=row['candidate_id'] in imported
+                if row['already_imported']:row['personal_food_id']=imported[row['candidate_id']]
             return result
         if action=='source_detail':
             opts=values or {}
@@ -695,8 +698,16 @@ class KitchenService:
             return {'candidate':food_source.candidate(opts['candidate_id'],self.base['foods']),'model_called':False}
         if action=='foods':
             parsed=parse_products(query,cat)
-            matches=[{'food_id':f['food_id'],'name_ru':f['name_ru'],'state':f['state'],'source_url':f['source_url']} for f in cat['foods'].values() if not query or query.casefold() in f['name_ru'].casefold() or query.split(' · ')[0].upper()==f['food_id'] or f['food_id'] in [i['food_id'] for i in parsed['pantry']] or (query.casefold().strip()=='сыр' and f.get('group')=='dairy' and re.search(r'сыр|моцарелл|фета|чеддер',f['name_ru'].casefold()))]
-            return {'foods':matches,'total':len(matches),'parsed':parsed,'model_called':False}
+            search=food_search.compile_query(query)
+            ranked=[]
+            for f in cat['foods'].values():
+                lookup=query.split(' · ')[0].strip()
+                exact_id=lookup==f['food_id'] or (f['food_id'].startswith('F') and lookup.upper()==f['food_id'])
+                score=1000 if exact_id else food_search.food_score(search,f)
+                if score is not None:ranked.append((score,f))
+            ranked.sort(key=lambda row:(-row[0],food_search.normalize(row[1]['name_ru']),row[1]['food_id']))
+            matches=[{key:f[key] for key in ('food_id','name_ru','state','source_url')} for _,f in ranked]
+            return {'foods':matches,'total':len(matches),'parsed':parsed,'search':food_search.search_info(search),'model_called':False}
         if not storage_consent(d) or not d['processing_consent']:raise ValueError('Сначала разрешите личное хранение и обработку; справочник доступен отдельно')
         if action=='diary_history':return self.diary_history(d,values,expected_revision)
         if action in ('intake_preview','intake'):

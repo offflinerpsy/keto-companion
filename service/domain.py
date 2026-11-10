@@ -8,6 +8,7 @@ from .store import Conflict
 from .brain import BrainUnavailable
 from .mobile import MobileService,mobile_init,compact_topics,topic
 from . import planning
+from . import food_search
 from .kitchen import KitchenService, init as kitchen_init, invalidate as kitchen_invalidate
 from .recipe_brain import RecipeDesigner
 from .intake import IntakeService
@@ -109,10 +110,12 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
         return {'message':'Активный профиль удалён. Для нового профиля потребуется новое согласие. Сроки удаления из резервных копий зависят от политики хранилища.','state':self.snapshot(new_document(subject,kind))}
     def catalog(self,subject,query='',limit=12,kind='personal',include_food_ids=None,exclude_food_ids=None,max_minutes=None,offset=0,category=None):
         d,_=self.load(subject,kind);cat=k.merge_personal_catalog(self.base,d['core']);p=d['core']['profile']
-        if include_food_ids is None and exclude_food_ids is None and query:
-            inferred=self.recipe_filters(query,{},d);include_food_ids=inferred['include_food_ids'];exclude_food_ids=inferred['exclude_food_ids'];max_minutes=max_minutes if max_minutes is not None else inferred['max_minutes']
-            if include_food_ids or exclude_food_ids:query=''
-        query=text(query,200).casefold();tokens=[x for x in re.split(r'\W+',query) if len(x)>2]
+        query=text(query,200)
+        timing=re.search(r'\b(\d{1,3})\s*(?:минут[уы]?|мин)\b',query,flags=re.I)
+        if timing:
+            if max_minutes is None:max_minutes=int(timing[1])
+            query=query[:timing.start()]+query[timing.end():]
+        search=food_search.compile_query(query,negatives=True)
         included=set(include_food_ids or []);excluded=set(exclude_food_ids or [])|set(p['settings'].get('disliked_food_ids',[]))
         if (included|excluded)-set(cat['foods']):raise InputError('Неизвестный продукт фильтра')
         if max_minutes is not None:max_minutes=k.integer(max_minutes,'max_minutes',1,180)
@@ -125,12 +128,12 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
             c=k.calculate_recipe(cat,r['recipe_id']);issues=k.check_recipe(p,c)
             ids={i['food_id'] for i in c['ingredients']}
             if issues or not included<=ids or ids&excluded or (max_minutes is not None and c['active_minutes']>max_minutes):continue
-            hay=(r['name_ru']+' '+' '.join(x['name_ru'] for x in c['ingredients'])).casefold()
-            score=sum(1 for t in tokens if t[:max(3,len(t)-2)] in hay)
-            if tokens and not score and not included:continue
+            ingredient_names=[str(cat['foods'][i['food_id']]['name_ru'])+' '+str(cat['foods'][i['food_id']].get('name_en','')) for i in c['ingredients']]
+            score=search.score(r['name_ru'],*ingredient_names,exclusion_fields=ingredient_names)
+            if score is None:continue
             candidates.append((score,c))
         candidates.sort(key=lambda x:(-x[0],x[1]['active_minutes'],x[1]['recipe_id']))
-        if not tokens and not included:
+        if not search.required and not included:
             groups={}
             for row in candidates:groups.setdefault((row[1]['category'],row[1]['protein_family']),[]).append(row)
             candidates=[]
@@ -139,7 +142,7 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
                     candidates.append(groups[key].pop(0))
                     if not groups[key]:del groups[key]
         total=len(candidates)
-        return {'recipes':[c for _,c in candidates[offset:offset+limit]],'total':total,'offset':offset,'has_more':offset+limit<total,'personalized':k.screen_profile(p)['can_plan'] and not d['holds'],
+        return {'recipes':[c for _,c in candidates[offset:offset+limit]],'total':total,'offset':offset,'has_more':offset+limit<total,'personalized':k.screen_profile(p)['can_plan'] and not d['holds'],'search':food_search.search_info(search),
           'note':'Справочные рецепты. Подбор не является медицинским назначением; состав рассчитан по ингредиентам.'}
     def _prepare(self,d,event_type,payload):
         diary_preview=None

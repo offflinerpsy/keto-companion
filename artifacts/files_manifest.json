@@ -4,32 +4,32 @@
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "f3b41e936eb1924d51539b2250d5352ff9d50f558392afedff36faa89d7aedf6",
-      "bytes": 1498640,
+      "sha256": "3a90e76654b973c68142dfc09dff7582ef2acf9c9cc0c946c5f68268b0004420",
+      "bytes": 1519359,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "7e82968e072b48edb5d96845122b2dff128f09bbf68ef4f995e4fc78da69088f",
-      "bytes": 176073,
+      "sha256": "02098bf91e1521111bd9753a388faf800fc6613863c932dd62a8d9a4d9545f4e",
+      "bytes": 177375,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/assets/index.html",
-      "sha256": "de1594774b5ee8756e343c95ab09ae4a680576ffa1a99f0dd8df6bb9ca4b6a63",
-      "bytes": 53452,
+      "sha256": "eb648120c26fdec7884087da450588bdc163607ed91935e86a108a15f2ffc987",
+      "bytes": 54385,
       "mime": "text/plain",
       "module_name": "assets/index.html",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "578b04d117c971fbc76642d42855408b7c5c3c0bf5ff1527b67361c78678c401",
-      "bytes": 750960,
+      "sha256": "7007255d653486690fee83925672a84604cdf743c4a17bddb298a24b3e96a22d",
+      "bytes": 766283,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"
@@ -44,8 +44,8 @@
     },
     {
       "path": "cloudflare-saas/dist/assets/style.css",
-      "sha256": "c586ed6cc9191258ca904a512c10d599b0ee7aa99c381f69bf5aaa14a49fd3b2",
-      "bytes": 86399,
+      "sha256": "61e717384bd64bc997c18fc927cdc5837d3eb299302af44fe4122b076d3f3d53",
+      "bytes": 87701,
       "mime": "text/plain",
       "module_name": "assets/style.css",
       "module_type": "text"

@@ -95,12 +95,12 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "c1c3e8eb2a64483d6db2e11e852b8250710497c029ef74a6e21493fcc5778784",
-    "cloudflare-saas/public/index.html": "de1594774b5ee8756e343c95ab09ae4a680576ffa1a99f0dd8df6bb9ca4b6a63",
+    "cloudflare-saas/public/app.css": "7dd4bcca22c904d3eb925769ad59a784f4d3bc6afa9f6d422c33a96d3b3908e4",
+    "cloudflare-saas/public/index.html": "eb648120c26fdec7884087da450588bdc163607ed91935e86a108a15f2ffc987",
     "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
     "cloudflare-saas/src/compute.mjs": "50dbeb05fce25d51b1141d3c974fd9774976ce912da8f7d074f8c296041ea97d",
     "cloudflare-saas/src/worker.mjs": "091c18c3f990d3ad5eb93735a9e6f58c3144c22b042ab01cfd65f67b00d8f785",
-    "service/app.py": "0cc87143a60232a6d65687796c59a3ca46a51738b89c3d3cf6e7051e93fdd582"
+    "service/app.py": "6b27c065f17dddd300e4b6dd41a725d233cea2c65327da3445c583cd7e012cc0"
   },
   "static_elements": [
     {
@@ -1043,7 +1043,12 @@
     },
     {
       "id": "portion-query",
-      "tag": "input"
+      "tag": "input",
+      "type": "search"
+    },
+    {
+      "id": "portion-results",
+      "tag": "div"
     },
     {
       "id": "portion-form",
@@ -1051,7 +1056,22 @@
     },
     {
       "id": "portion-food",
-      "tag": "select"
+      "tag": "input",
+      "type": "hidden"
+    },
+    {
+      "id": "portion-selected-name",
+      "tag": "strong"
+    },
+    {
+      "id": "portion-selected-state",
+      "tag": "span"
+    },
+    {
+      "aria-label": "Изменить продукт",
+      "id": "portion-change",
+      "tag": "button",
+      "type": "button"
     },
     {
       "id": "portion-grams",

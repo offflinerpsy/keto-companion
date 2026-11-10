@@ -22,7 +22,7 @@ def state(profile):
 
 def ev(kind,payload,eid='event_test_00001',confirmed=True):return {'event_id':eid,'type':kind,'payload':payload,'confirmed':confirmed,'created_at':'2026-11-07T01:00:00Z'}
 
-def test_catalog_counts(cat):assert len(cat['foods'])==85 and len(cat['recipes'])==72
+def test_catalog_counts(cat):assert len(cat['foods'])==85 and len(cat['recipes'])==108
 @pytest.mark.parametrize('rid',[f'B{i:02d}' for i in range(1,17)]+[f'M{i:02d}' for i in range(1,33)]+[f'G{i:02d}' for i in range(1,13)]+[f'S{i:02d}' for i in range(1,13)])
 def test_recipe_arithmetic(cat,rid):
  r=cat['recipes'][rid];c=k.calculate_recipe(cat,rid)

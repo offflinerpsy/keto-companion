@@ -1,3 +1,250 @@
+// cloudflare-saas/public/food-picker.js
+function createFoodPicker({ root, input, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, onSelect, allergens = [], debounce = 220 }) {
+  let version2 = 0, detailVersion = 0, timer = null, query = "", foods = [], page = 0, cursor = null, sourceBusy = false, pending = null;
+  const status = el2("p", "food-search-status"), hint = el2("div", "food-search-hint"), list = el2("div", "food-result-list"), source = el2("section", "food-reference"), sourceStatus = el2("p", "muted"), sourceRows = el2("div", "food-result-list"), review = el2("section", "food-source-review");
+  status.setAttribute("role", "status");
+  sourceStatus.setAttribute("role", "status");
+  list.setAttribute("aria-label", "\u041D\u0430\u0439\u0434\u0435\u043D\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B");
+  source.setAttribute("aria-label", "\u0411\u043E\u043B\u044C\u0448\u043E\u0439 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432");
+  review.hidden = source.hidden = true;
+  review.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && event.target?.tagName === "INPUT") event.preventDefault();
+  });
+  const button = (label, fn, cls = "secondary") => {
+    const b2 = el2("button", cls, label);
+    b2.type = "button";
+    b2.onclick = () => run2(fn);
+    return b2;
+  };
+  const more = button("\u0415\u0449\u0451 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438\u0437 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430", () => loadSource(true));
+  more.hidden = true;
+  more.setAttribute("data-icon", "plus");
+  source.append(el2("h3", "", "\u0411\u043E\u043B\u044C\u0448\u043E\u0439 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A"), el2("p", "field-help", "\u0421\u043E\u0441\u0442\u0430\u0432 USDA \u043D\u0430 100 \u0433. \u041F\u0435\u0440\u0435\u0434 \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435\u043C \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C."), sourceStatus, sourceRows, more);
+  root.append(status, hint, list, source, review);
+  const current = (stamp, screen, q2) => stamp === version2 && screen === epoch() && q2 === input.value.trim();
+  function invalidate() {
+    version2++;
+    detailVersion++;
+    clearTimeout(timer);
+    cursor = null;
+    sourceBusy = false;
+    review.hidden = true;
+    review.replaceChildren();
+    list.replaceChildren();
+    hint.replaceChildren();
+    sourceRows.replaceChildren();
+    source.hidden = true;
+    more.hidden = true;
+    status.textContent = "";
+  }
+  function select(food) {
+    invalidate();
+    onSelect(food);
+    input.value = food.name_ru;
+    status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + food.name_ru;
+  }
+  function option(name2, subtitle, fn) {
+    const b2 = button("", fn, "food-option");
+    b2.append(el2("strong", "", name2), el2("span", "muted", subtitle));
+    b2.setAttribute("aria-label", name2 + " \xB7 " + subtitle);
+    return b2;
+  }
+  function drawFoods() {
+    list.replaceChildren();
+    const start2 = page * 8;
+    for (const food of foods.slice(start2, start2 + 8)) list.append(option(food.name_ru, foodState2(food.state), () => select(food)));
+    const nav = el2("div", "food-result-pages");
+    if (page) nav.append(button("\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", () => {
+      page--;
+      drawFoods();
+    }));
+    if (start2 + 8 < foods.length) nav.append(button("\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", () => {
+      page++;
+      drawFoods();
+    }));
+    if (nav.children.length) list.append(nav);
+  }
+  async function search() {
+    invalidate();
+    query = input.value.trim();
+    if (!query) return;
+    const stamp = version2, screen = epoch(), q2 = query;
+    status.textContent = "\u0418\u0449\u0435\u043C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\u2026";
+    try {
+      const result = await call2("keto_kitchen", { action: "foods", query: q2 });
+      if (!current(stamp, screen, q2)) return;
+      foods = result.foods || [];
+      page = 0;
+      drawFoods();
+      status.textContent = foods.length ? `\u0412 \u0432\u0430\u0448\u0438\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430\u0445 \u0438 \u0431\u0430\u0437\u043E\u0432\u043E\u043C \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0435: ${foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442.` : "\u0412 \u0431\u0430\u0437\u043E\u0432\u043E\u043C \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0435 \u0438 \u0432\u0430\u0448\u0438\u0445 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430\u0445 \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u0439 \u043D\u0435\u0442.";
+      if (result.search?.label) hint.append(el2("span", "field-help", result.search.label));
+      for (const alternative of result.search?.alternatives || []) hint.append(button(alternative.label, () => {
+        input.value = alternative.query;
+        return search();
+      }, "text-btn"));
+      await loadSource(false);
+    } catch (error) {
+      if (current(stamp, screen, q2)) {
+        status.textContent = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.";
+        list.append(button("\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u043F\u043E\u0438\u0441\u043A", search));
+      }
+    }
+  }
+  async function loadSource(append) {
+    if (sourceBusy || !query || query !== input.value.trim() || append && !cursor) return;
+    const stamp = version2, screen = epoch(), q2 = query, next = append ? cursor : null;
+    sourceBusy = true;
+    source.hidden = false;
+    more.hidden = true;
+    sourceStatus.textContent = "\u0418\u0449\u0435\u043C \u0432 \u0431\u043E\u043B\u044C\u0448\u043E\u043C \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435\u2026";
+    try {
+      const result = await call2("keto_kitchen", { action: "source_search", query: q2, values: { cursor: next, limit: 8 } });
+      if (!current(stamp, screen, q2)) return;
+      if (!append) sourceRows.replaceChildren();
+      sourceStatus.textContent = result.total ? `\u0421\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u0439 \u0432 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435: ${result.total}` : "\u0412 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435 \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u0439 \u043D\u0435\u0442. \u0423\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u043F\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435.";
+      for (const candidate of result.candidates || []) {
+        let row;
+        row = option(candidate.name_ru_unofficial || candidate.name_en, candidate.already_imported ? "\u0423\u0436\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \xB7 \u0432\u044B\u0431\u0440\u0430\u0442\u044C" : "USDA \xB7 \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0441\u043E\u0441\u0442\u0430\u0432", async () => {
+          const detail = ++detailVersion, e = epoch(), v2 = version2;
+          try {
+            if (candidate.personal_food_id) {
+              const d3 = await call2("keto_kitchen", { action: "foods", query: candidate.personal_food_id });
+              if (detail !== detailVersion || e !== epoch() || v2 !== version2) return;
+              const food = d3.foods?.find((f) => f.food_id === candidate.personal_food_id);
+              if (food) select(food);
+              return;
+            }
+            const d2 = await call2("keto_kitchen", { action: "source_detail", values: { candidate_id: candidate.candidate_id } });
+            if (detail !== detailVersion || e !== epoch() || v2 !== version2) return;
+            showReview(d2.candidate, row, v2, e);
+          } catch (error) {
+            if (detail === detailVersion && e === epoch() && v2 === version2) {
+              sourceStatus.textContent = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u043E\u0441\u0442\u0430\u0432. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u0435\u0449\u0451 \u0440\u0430\u0437.";
+            }
+          }
+        });
+        sourceRows.append(row);
+      }
+      cursor = result.next_cursor;
+      more.hidden = !cursor;
+      more.textContent = "\u0415\u0449\u0451 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0438\u0437 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0430";
+    } catch (error) {
+      if (current(stamp, screen, q2)) {
+        sourceStatus.textContent = "\u0414\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A \u043D\u0435 \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u043B\u0441\u044F. \u0412\u044B\u0431\u0440\u0430\u043D\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D.";
+        more.hidden = false;
+        more.textContent = "\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u043F\u043E\u0438\u0441\u043A \u0432 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435";
+        more.onclick = () => run2(() => loadSource(Boolean(cursor)));
+      }
+    } finally {
+      if (stamp === version2) {
+        sourceBusy = false;
+      }
+    }
+  }
+  function showReview(candidate, origin, stamp, screen) {
+    const reviewVersion = detailVersion;
+    review.hidden = false;
+    review.replaceChildren(el2("h3", "", "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442"), el2("p", "", candidate.name_en));
+    const a2 = el2("a", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A USDA");
+    a2.href = candidate.source_url;
+    a2.target = "_blank";
+    a2.rel = "noopener noreferrer";
+    review.append(a2);
+    const nutrients = el2("dl", "intake-nutrients");
+    for (const [key, label, unit] of [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043A\u0438", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"]]) nutrients.append(el2("dt", "", label), el2("dd", "", candidate[key] == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(candidate[key]) + " " + unit));
+    review.append(el2("p", "field-help", "\u041D\u0430 100 \u0433. \u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C; \u0413\u0418 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u0435\u043D."), nutrients);
+    const field = (label, control) => {
+      const box = el2("label", "", label);
+      box.append(control);
+      review.append(box);
+      return control;
+    };
+    const name2 = field("\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", el2("input"));
+    name2.value = candidate.name_ru_unofficial || candidate.name_en;
+    name2.maxLength = 200;
+    const state2 = field("\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", el2("select"));
+    for (const [value, label] of [["", "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435"], ["ready_to_eat", "\u0413\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E"], ["raw", "\u0421\u044B\u0440\u043E\u0439"], ["cooked", "\u041F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u044B\u0439"], ["dry", "\u0421\u0443\u0445\u043E\u0439"], ["canned", "\u041A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439"], ["ready_to_cook", "\u0414\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F"]]) {
+      const o2 = el2("option", "", label);
+      o2.value = value;
+      state2.append(o2);
+    }
+    const allergy = el2("details", "food-source-allergens"), checks = [];
+    allergy.append(el2("summary", "", "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B"));
+    for (const [value, label] of allergens) {
+      const box = el2("label", "check", label), control = el2("input");
+      control.type = "checkbox";
+      control.value = value;
+      box.append(control);
+      allergy.append(box);
+      checks.push(control);
+    }
+    const checked = el2("input");
+    checked.type = "checkbox";
+    const confirm2 = el2("label", "check", "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u044B");
+    confirm2.append(checked);
+    const error = el2("p", "field-error");
+    error.setAttribute("role", "alert");
+    const save = button("\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435", async () => {
+      if (save.disabled || reviewVersion !== detailVersion || !current(stamp, screen, query)) return;
+      if (!name2.value.trim() || !state2.value || !checked.checked) {
+        error.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u043E\u0432.";
+        return;
+      }
+      save.disabled = true;
+      error.textContent = "";
+      try {
+        const result = await call2("keto_kitchen", { action: "source_import", values: { candidate_id: candidate.candidate_id, release_hash: candidate.release_hash, name_ru: name2.value.trim(), state: state2.value, allergens: checks.filter((x) => x.checked).map((x) => x.value), source_review_confirmed: true }, expected_revision: getState().revision });
+        if (reviewVersion !== detailVersion || !current(stamp, screen, query)) return;
+        if (result.proposal?.preview?.food) pending = { id: result.proposal.id, food: result.proposal.preview.food, stamp, screen };
+        accept2(result);
+      } catch (e) {
+        if (stamp === version2 && screen === epoch()) error.textContent = e.message;
+      } finally {
+        save.disabled = false;
+      }
+    }, "primary");
+    const cancel = button("\u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u043A \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0430\u043C", () => {
+      detailVersion++;
+      review.hidden = true;
+      review.replaceChildren();
+      origin.focus?.({ preventScroll: true });
+    });
+    review.append(allergy, confirm2, error, save, cancel);
+    review.setAttribute("tabindex", "-1");
+    review.focus?.({ preventScroll: true });
+    review.scrollIntoView?.({ block: "nearest" });
+  }
+  function afterApplied(data) {
+    if (!pending) return;
+    if (data?.receipt?.id === pending.id) {
+      const done = pending;
+      pending = null;
+      if (done.stamp === version2 && done.screen === epoch()) select(done.food);
+    } else if (data?.state?.pending && !data.state.pending.some((p) => p.id === pending.id)) pending = null;
+  }
+  function reset() {
+    invalidate();
+    pending = null;
+    foods = [];
+    query = "";
+    input.value = "";
+  }
+  input.addEventListener("input", () => {
+    invalidate();
+    const stamp = version2;
+    timer = setTimeout(() => {
+      if (stamp === version2) run2(search);
+    }, debounce);
+  });
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      run2(search);
+    }
+  });
+  return { search, reset, invalidate, afterApplied };
+}
+
 // cloudflare-saas/public/chat-actions.js
 var TYPES = /* @__PURE__ */ new Set(["navigate", "choose_meal_mode", "open_recipe", "open_intake", "review_proposal"]);
 var VIEWS = /* @__PURE__ */ new Set(["chat", "diary", "recipes", "products", "today", "setup", "targets", "knowledge", "memory", "reminders", "more"]);
@@ -1053,7 +1300,7 @@ function createRecipeLibrary({ call: call2, readFilters, render, clear = () => {
       scope2 = key;
       offset2 = start2 + d2.recipes.length;
       retry = null;
-      status(`\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u043E ${offset2} \u0438\u0437 ${d2.total}. ${d2.note}`);
+      status(`\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u043E ${offset2} \u0438\u0437 ${d2.total}`);
       more(d2.has_more, false);
     } catch (e) {
       if (serial === token && screen === epoch() && fingerprint(readFilters()) === key) {
@@ -1072,11 +1319,11 @@ function createRecipeLibrary({ call: call2, readFilters, render, clear = () => {
 }
 
 // cloudflare-saas/public/own-dish.js
-function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, numberRu: numberRu2, openIntake }) {
+function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, numberRu: numberRu2, openIntake, allergens = [] }) {
   const root = $3("own-dish-root");
   root.innerHTML = `<details class="panel"><summary data-icon="recipe">\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</summary><form id="own-form"><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F<select name="category"><option value="main">\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E</option><option value="breakfast">\u0417\u0430\u0432\u0442\u0440\u0430\u043A</option><option value="side">\u0413\u0430\u0440\u043D\u0438\u0440</option><option value="component">\u041A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442</option></select></label><label>\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u043E \u0432\u0441\u0451\u043C \u0431\u043B\u044E\u0434\u0435<input name="servings" type="text" inputmode="decimal" value="1" required><span id="own-servings-error" role="alert"></span></label><label>\u0410\u043A\u0442\u0438\u0432\u043D\u043E\u0435 \u0432\u0440\u0435\u043C\u044F, \u043C\u0438\u043D\u0443\u0442<input name="minutes" type="number" min="1" max="360" value="15" required></label><label>\u041D\u0430\u0439\u0442\u0438 \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442<input name="search" type="search" autocomplete="off"></label><div id="own-results"></div><div id="own-rows"></div><label>\u0428\u0430\u0433\u0438<textarea name="steps" maxlength="5000" required></textarea></label><p id="own-form-error" role="alert"></p><button type="submit">\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button><button id="own-save" type="button" hidden>\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button></form><div id="own-preview" aria-live="polite"></div><div id="own-intake" hidden><label>\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E<select id="own-saved"></select></label><button id="own-detail" type="button">\u0421\u043E\u0441\u0442\u0430\u0432 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435</button><div id="own-detail-result" aria-live="polite"></div><button id="own-record" class="primary" type="button">\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435</button></div></details>`;
   const form = $3("own-form");
-  let rows = [], id = null, stamp = "", saved = null, searchEpoch = 0, results = [], resultPage = 0;
+  let rows = [], id = null, stamp = "", saved = null, searchEpoch = 0;
   function decimal(value, label, min, max, near) {
     const raw = String(value ?? "").trim();
     let error = "";
@@ -1088,13 +1335,13 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     return n;
   }
   function reset() {
+    foodPicker.reset();
     rows = [];
     id = null;
     stamp = "";
     saved = null;
     searchEpoch++;
     form.reset();
-    $3("own-results").replaceChildren();
     $3("own-rows").replaceChildren();
     $3("own-preview").replaceChildren();
     $3("own-detail-result").replaceChildren();
@@ -1167,50 +1414,14 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     }
     if (p.issues?.some((x) => x.startsWith("allergen:"))) box.append(el2("p", "notice", "\u0412 \u0441\u043E\u0441\u0442\u0430\u0432\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u0438\u0437 \u0432\u0430\u0448\u0435\u0433\u043E \u043F\u0440\u043E\u0444\u0438\u043B\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0434 \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u0435\u043C."));
   }
-  function drawResults() {
-    const box = $3("own-results");
-    box.replaceChildren(el2("p", "muted", `\u041D\u0430\u0439\u0434\u0435\u043D\u043E: ${results.length}`));
-    for (const f of results.slice(resultPage * 8, resultPage * 8 + 8)) {
-      const b2 = el2("button", "secondary", f.name_ru + " \xB7 " + foodState2(f.state));
-      b2.type = "button";
-      b2.onclick = () => {
-        if (!rows.some((r) => r.food_id === f.food_id)) rows.push({ ...f, grams: "" });
-        draw();
-        changed();
-        box.replaceChildren();
-        form.elements.namedItem("search").value = "";
-        searchEpoch++;
-      };
-      box.append(b2);
+  const foodPicker = createFoodPicker({ root: $3("own-results"), input: form.elements.namedItem("search"), el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, allergens, onSelect: (food) => {
+    if (!rows.some((row) => row.food_id === food.food_id)) {
+      rows.push({ ...food, grams: "" });
+      draw();
+      changed();
     }
-    for (const [label, delta, show] of [["\u041D\u0430\u0437\u0430\u0434", -1, resultPage > 0], ["\u0415\u0449\u0451", 1, (resultPage + 1) * 8 < results.length]]) if (show) {
-      const b2 = el2("button", "secondary", label);
-      b2.type = "button";
-      b2.onclick = () => {
-        resultPage += delta;
-        drawResults();
-      };
-      box.append(b2);
-    }
-  }
+  } });
   form.addEventListener("input", changed);
-  form.elements.namedItem("search").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") e.preventDefault();
-  });
-  form.elements.namedItem("search").addEventListener("input", () => {
-    const query = form.elements.namedItem("search").value.trim(), token = ++searchEpoch, screen = epoch();
-    if (!query) {
-      $3("own-results").replaceChildren();
-      return;
-    }
-    run2(async () => {
-      const d2 = await call2("keto_kitchen", { action: "foods", query });
-      if (token !== searchEpoch || screen !== epoch()) return;
-      results = d2.foods;
-      resultPage = 0;
-      drawResults();
-    });
-  });
   form.onsubmit = (e) => {
     e.preventDefault();
     run2(async () => {
@@ -1277,6 +1488,7 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         return false;
       }
     })()) {
+      foodPicker.reset();
       form.reset();
       rows = [];
       id = null;
@@ -1298,7 +1510,7 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       changed();
     }
   }
-  return { reset, preview, savedReceipt, update, addConfirmedFood };
+  return { reset, preview, savedReceipt, update, addConfirmedFood, afterApplied: foodPicker.afterApplied };
 }
 
 // cloudflare-saas/public/developer-ui.js
@@ -1497,18 +1709,6 @@ function sourceImportPreview(el2, food, original, allergens, foodState2) {
   const labels2 = food.allergens.map((id) => allergens.find((row) => row[0] === id)?.[1] || "\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D (" + String(id) + ")");
   return [el2("p", "", food.name_ru + " \xB7 " + foodState2(food.state)), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: " + original + " \xB7 USDA; \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B: " + (labels2.length ? labels2.join(", ") : "\u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E: \u043D\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u044B")), el2("p", "muted", "\u041F\u043E\u0441\u043B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F \u043D\u0430\u0439\u0434\u0438\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435, \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0432 \u0437\u0430\u043F\u0430\u0441\u044B \u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u043C\u0430\u0441\u0441\u0443. \u0415\u0433\u043E \u043C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0434\u043B\u044F \u0440\u0430\u0441\u0447\u0451\u0442\u0430 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430. \u0414\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0445 \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432 \u0438 \u043C\u0435\u043D\u044E \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435 \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C \u0433\u043E\u0442\u043E\u0432\u043A\u0438 \u0435\u0449\u0451 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E.")];
 }
-function filterEverydayFoods(foods, query) {
-  const q2 = query.trim().toLocaleLowerCase("ru").replace(/ё/g, "\u0435").replace(/\s+/g, " ");
-  if (!q2) return foods;
-  const aliases = { "\u0441\u0432\u0435\u0436\u0438\u0439 \u043E\u0433\u0443\u0440\u0435\u0446": ["\u043E\u0433\u0443\u0440\u0435\u0446 \u0441 \u043A\u043E\u0436\u0443\u0440\u043E\u0439", "raw"], "\u0431\u0435\u043B\u043E\u043A\u043E\u0447\u0430\u043D\u043D\u0430\u044F \u043A\u0430\u043F\u0443\u0441\u0442\u0430": ["\u043A\u0430\u043F\u0443\u0441\u0442\u0430 \u0431\u0435\u043B\u043E\u043A\u043E\u0447\u0430\u043D\u043D\u0430\u044F", "raw"] };
-  const alias = aliases[q2];
-  return foods.filter((f) => {
-    const name2 = String(f.name_ru || "").toLocaleLowerCase("ru").replace(/ё/g, "\u0435");
-    if (alias) return name2 === alias[0] && f.state === alias[1];
-    if (q2 === "\u0441\u044B\u0440") return /(^|[^а-яё])сыр(?:$|[^а-яё]|н)/u.test(name2) || /моцарелл|фета|чеддер/u.test(name2);
-    return name2.includes(q2);
-  });
-}
 function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, notify: notify2, setView: setView2, epoch, openIntake }) {
   let pantry = [], foods = [], allFoods = [], result = null, busy2 = false, parsing = false, parseNumber = 0, localEpoch = 0, dirty = false, specDirty = false;
   const host = $3("kitchen-studio");
@@ -1620,6 +1820,17 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     trustedStart = 0;
     renderTrusted();
   }
+  async function searchTrusted(query, token, screen) {
+    try {
+      const result2 = await call2("keto_kitchen", { action: "foods", query });
+      if (token !== searchNumber || screen !== epoch() || query !== product.value.trim() || selectedFood) return;
+      foods = result2.foods || [];
+      foodOptions();
+      status.textContent = (result2.search?.label ? result2.search.label + ". " : "") + (foods.length ? `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.` : "\u0412 \u0431\u0430\u0437\u043E\u0432\u043E\u043C \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0435 \u0441\u043E\u0432\u043F\u0430\u0434\u0435\u043D\u0438\u0439 \u043D\u0435\u0442. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0431\u043E\u043B\u044C\u0448\u043E\u0439 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A \u043D\u0438\u0436\u0435.");
+    } catch (error) {
+      if (token === searchNumber && screen === epoch()) status.textContent = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043D\u0430\u0439\u0442\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0438\u0441\u043A.";
+    }
+  }
   product.oninput = () => {
     invalidateSource();
     searchNumber++;
@@ -1632,9 +1843,16 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       return;
     }
     browsing = false;
-    foods = filterEverydayFoods(allFoods, product.value);
+    foods = [];
     foodOptions();
-    status.textContent = foods.length ? product.value.trim() ? `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.` : "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u043F\u043E\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B." : "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438, \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u0438\u043B\u0438 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA.";
+    const query = product.value.trim();
+    if (!query) {
+      status.textContent = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u043F\u043E\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B.";
+      return;
+    }
+    const token = searchNumber, screen = epoch();
+    status.textContent = "\u0418\u0449\u0435\u043C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B\u2026";
+    product.timer = setTimeout(() => run2(() => searchTrusted(query, token, screen)), 220);
   };
   function addFood(food) {
     if (pantry.some((i) => i.food_id === food.food_id)) return;
@@ -1661,9 +1879,16 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   };
   const browse = button("\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", async () => {
     browsing = true;
-    foods = filterEverydayFoods(allFoods, product.value);
-    trustedStart = 0;
-    renderTrusted();
+    selectedFood = null;
+    add.disabled = true;
+    searchNumber++;
+    clearTimeout(product.timer);
+    if (product.value.trim()) await searchTrusted(product.value.trim(), searchNumber, epoch());
+    else {
+      foods = allFoods;
+      trustedStart = 0;
+      renderTrusted();
+    }
   });
   picker.append(productLabel, product, datalist, browse, trustedList, add);
   const sourceSearch = button("\u0418\u0441\u043A\u0430\u0442\u044C \u0432 USDA", async () => {
@@ -1739,8 +1964,8 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     review.focus?.({ preventScroll: true });
     review.scrollIntoView?.({ block: "nearest" });
   }
-  const sourceDetails = el2("details");
-  sourceDetails.append(el2("summary", "", "\u0414\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA"), sourceSearch, sourceResults, review);
+  const sourceDetails = el2("section", "food-reference");
+  sourceDetails.append(el2("h3", "", "\u0411\u043E\u043B\u044C\u0448\u043E\u0439 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432"), el2("p", "field-help", "\u0411\u043E\u043B\u044C\u0448\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u043E\u0432 USDA. \u041F\u0435\u0440\u0435\u0434 \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435\u043C \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432."), sourceSearch, sourceResults, review);
   picker.append(sourceDetails);
   stock.append(picker);
   const free = el2("textarea");
@@ -2175,9 +2400,13 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       const f = await call2("keto_kitchen", { action: "foods" });
       if (e !== epoch() || !isCurrent()) return false;
       allFoods = f.foods;
-      foods = filterEverydayFoods(allFoods, product.value);
-      foodOptions();
-      status.textContent = foods.length ? product.value.trim() ? `\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432: ${foods.length}. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435.` : "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u043F\u043E\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B." : "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438, \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u0438\u043B\u0438 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u043E\u0438\u0441\u043A USDA.";
+      if (searchNumber === searchAtStart) {
+        if (!product.value.trim() && !selectedFood) {
+          foods = allFoods;
+          foodOptions();
+          status.textContent = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u043F\u043E\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0441\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B.";
+        }
+      }
       const unchanged = !dirty && !specDirty && draft() === draftAtStart;
       if (d2.spec && unchanged) {
         for (const name2 of ["meal", "servings", "equipment"]) {
@@ -10910,6 +11139,9 @@ function clearScreen() {
   portionFoods = [];
   portionSearchVersion++;
   portionCalcVersion++;
+  portionPicker.reset();
+  $2("portion-form").hidden = true;
+  $2("portion-food").value = "";
   shop.reset();
   ownDish.reset();
   screenEpoch++;
@@ -11056,6 +11288,8 @@ function accept(d2) {
   if (d2?.message) notify(d2.message);
   guided.afterApplied(d2);
   shop.afterApplied(d2);
+  portionPicker.afterApplied(d2);
+  ownDish.afterApplied(d2);
   intake.afterApplied(d2);
   if (d2?.receipt?.type === "profile.update" && router.current === "setup-restrictions") fillOnboard();
   if (d2?.proposal && state?.processing_consent && state?.profile?.consent?.storage && state?.profile?.consent?.health_data) showProposal(d2.proposal.id);
@@ -11650,25 +11884,22 @@ $2("portion-food").addEventListener("change", () => {
 for (const id of ["portion-grams", "portion-gi", "portion-source", "portion-match"]) {
   for (const event of ["input", "change"]) $2(id).addEventListener(event, clearPortionResult);
 }
+var portionPicker = createFoodPicker({ root: $2("portion-results"), input: $2("portion-query"), el, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, allergens: ALLERGENS, onSelect: (food) => {
+  portionFoods = [food];
+  $2("portion-food").value = food.food_id;
+  $2("portion-selected-name").textContent = food.name_ru;
+  $2("portion-selected-state").textContent = foodState(food.state);
+  $2("portion-form").hidden = false;
+  clearPortionGI();
+  clearPortionResult();
+} });
 $2("portion-search").onsubmit = (e) => {
   e.preventDefault();
-  const query = $2("portion-query").value, token = ++portionSearchVersion, epoch = screenEpoch;
-  clearPortionResult();
-  run(async () => {
-    const r = await call("keto_kitchen", { action: "foods", query, thread_id: state.active_thread || "main", values: {} });
-    if (token !== portionSearchVersion || epoch !== screenEpoch || query !== $2("portion-query").value) return;
-    portionFoods = r.foods || [];
-    const select = $2("portion-food");
-    select.replaceChildren();
-    for (const f of portionFoods) {
-      const option = el("option", "", f.name_ru + " \xB7 " + foodState(f.state));
-      option.value = f.food_id;
-      select.append(option);
-    }
-    clearPortionGI();
-    clearPortionResult();
-    if (!portionFoods.length) throw Error("\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u044B.");
-  });
+  run(() => portionPicker.search());
+};
+$2("portion-change").onclick = () => {
+  $2("portion-query").focus();
+  $2("portion-query").select?.();
 };
 $2("portion-form").onsubmit = (e) => {
   e.preventDefault();
@@ -12056,5 +12287,5 @@ $2("menu-shop").onclick = () => {
     panel.scrollIntoView({ block: "nearest" });
   }
 };
-var ownDish = setupOwnDish({ $: $2, el, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu, openIntake: (source) => intake.open(source) });
+var ownDish = setupOwnDish({ $: $2, el, allergens: ALLERGENS, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu, openIntake: (source) => intake.open(source) });
 run(start);

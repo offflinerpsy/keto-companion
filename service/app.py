@@ -27,6 +27,7 @@ RUNTIME_CODE_FILES=(
     'service/domain.py',
     'service/edge_bridge.py',
     'service/entra.py',
+    'service/food_search.py',
     'service/food_source.py',
     'service/intake.py',
     'service/kitchen.py',
