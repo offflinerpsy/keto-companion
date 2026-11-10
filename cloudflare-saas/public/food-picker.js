@@ -12,7 +12,7 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
  source.append(el('h3','','Большой справочник'),el('p','field-help','Состав USDA на 100 г. Перед добавлением проверьте запись.'),sourceStatus,sourceRows,more);root.append(status,hint,list,source,review);
  const current=(stamp,screen,q)=>stamp===version&&screen===epoch()&&q===input.value.trim();
  function invalidate(){version++;detailVersion++;clearTimeout(timer);cursor=null;sourceBusy=false;review.hidden=true;review.replaceChildren();list.replaceChildren();hint.replaceChildren();sourceRows.replaceChildren();source.hidden=true;more.hidden=true;status.textContent='';}
- function select(food){invalidate();onSelect(food);input.value=food.name_ru;status.textContent='Выбран продукт: '+food.name_ru;}
+ function select(food){invalidate();onSelect(food);input.value=food.name_ru;status.textContent='Выбран продукт: '+food.name_ru;status.focus?.({preventScroll:true});}
  function option(name,subtitle,fn){const b=button('',fn,'food-option');b.append(el('strong','',name),el('span','muted',subtitle));b.setAttribute('aria-label',name+' · '+subtitle);return b;}
  function drawFoods(){
   list.replaceChildren();const start=page*8;
@@ -30,8 +30,8 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
    foods=result.foods||[];page=0;drawFoods();status.textContent=foods.length?`В ваших продуктах и базовом каталоге: ${foods.length}. Выберите продукт.`:'В базовом каталоге и ваших продуктах совпадений нет.';
    if(result.search?.label)hint.append(el('span','field-help',result.search.label));
    for(const alternative of result.search?.alternatives||[])hint.append(button(alternative.label,()=>{input.value=alternative.query;return search({reveal:true})},'text-btn'));
-   if(reveal){status.focus?.({preventScroll:true});root.scrollIntoView?.({block:'start',behavior:'instant'});}
    await loadSource(false);
+   if(reveal&&current(stamp,screen,q)&&(!root.getClientRects||root.getClientRects().length)){status.focus?.({preventScroll:true});root.scrollIntoView?.({block:'start',behavior:'instant'});}
   }catch(error){if(current(stamp,screen,q)){status.textContent='Не удалось загрузить продукты. Попробуйте снова.';list.append(button('Повторить поиск',()=>search({reveal:true})));}}
  }
  async function loadSource(append){
@@ -79,7 +79,7 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
    }catch(e){if(stamp===version&&screen===epoch())error.textContent=e.message;}
    finally{save.disabled=false;}
   },'primary');
-  const cancel=button('Вернуться к результатам',()=>{detailVersion++;review.hidden=true;review.replaceChildren();origin.focus?.({preventScroll:true});});
+  const cancel=button('Вернуться к результатам',()=>{detailVersion++;review.hidden=true;review.replaceChildren();origin.focus?.({preventScroll:true});origin.scrollIntoView?.({block:'nearest',inline:'nearest',behavior:'instant'});});
   review.append(allergy,confirm,error,save,cancel);review.setAttribute('tabindex','-1');review.focus?.({preventScroll:true});review.scrollIntoView?.({block:'nearest'});
  }
  function afterApplied(data){

@@ -43,6 +43,7 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
     onSelect(food);
     input.value = food.name_ru;
     status.textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + food.name_ru;
+    status.focus?.({ preventScroll: true });
   }
   function option(name2, subtitle, fn) {
     const b2 = button("", fn, "food-option");
@@ -83,11 +84,11 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
         input.value = alternative.query;
         return search({ reveal: true });
       }, "text-btn"));
-      if (reveal) {
+      await loadSource(false);
+      if (reveal && current(stamp, screen, q2) && (!root.getClientRects || root.getClientRects().length)) {
         status.focus?.({ preventScroll: true });
         root.scrollIntoView?.({ block: "start", behavior: "instant" });
       }
-      await loadSource(false);
     } catch (error) {
       if (current(stamp, screen, q2)) {
         status.textContent = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.";
@@ -213,6 +214,7 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
       review.hidden = true;
       review.replaceChildren();
       origin.focus?.({ preventScroll: true });
+      origin.scrollIntoView?.({ block: "nearest", inline: "nearest", behavior: "instant" });
     });
     review.append(allergy, confirm2, error, save, cancel);
     review.setAttribute("tabindex", "-1");

@@ -19,7 +19,8 @@ test('cheese search separates raw foods and a reviewed reference product stays s
  expect(found.foods.map(f=>f.food_id).sort()).toEqual(cheeseIds);await expect(page.locator(baseRows)).toHaveCount(5);
  await expect(page.locator(sourceRows)).toHaveCount(8);await expect(page.locator('#portion-results')).toContainText('Ищем сыр и его виды');
  await contained(page,'#portion-results');await page.screenshot({path:`qa/mobile-browser/c17-cheese-${info.project.name}.png`});
- await page.locator(baseRows).filter({hasText:'Сыр чеддер'}).click();await page.locator('#portion-grams').fill('75');
+ const gouda=await searchFood(page,'гауда');expect(gouda.foods).toHaveLength(0);await expect(page.locator(sourceRows).first()).toBeInViewport();await expect(page.locator('#portion-results > .food-search-status')).toBeFocused();await searchFood(page,'сыр');await expect(page.locator(baseRows)).toHaveCount(5);
+ await page.locator(baseRows).filter({hasText:'Сыр чеддер'}).click();await expect(page.locator('#portion-results > .food-search-status')).toBeFocused();await page.locator('#portion-grams').fill('75');
  await searchFood(page,'сыр');await expect(page.locator(sourceRows)).toHaveCount(8);
  await expect(page.locator('#portion-food')).toHaveValue('F173414');await expect(page.locator('#portion-grams')).toHaveValue('75');
  const next=responseFor(page,'keto_kitchen',a=>a.action==='source_search'&&a.values.cursor);
@@ -38,7 +39,7 @@ test('cheese search separates raw foods and a reviewed reference product stays s
  expect(food.recipe_eligible).toBe(false);expect(before.stored_diary).toHaveLength(0);expect((await tool(request,'keto_kitchen',{action:'foods',query:food.food_id})).foods).toHaveLength(0);
  await expect(page.locator('#portion-food')).toHaveValue('F173414');
  await page.locator('#proposals').getByRole('button',{name:'Добавить личный продукт',exact:true}).click();await expect(page.locator('#proposal-dialog')).toBeHidden();
- await expect(page.locator('#portion-food')).toHaveValue(food.food_id);await expect(page.locator('#portion-selected-name')).toHaveText(personalName);await expect(page.locator('#portion-grams')).toHaveValue('75');
+ await expect(page.locator('#portion-food')).toHaveValue(food.food_id);await expect(page.locator('#portion-selected-name')).toHaveText(personalName);await expect(page.locator('#portion-grams')).toHaveValue('75');await expect(page.locator('#portion-results > .food-search-status')).toBeFocused();
  expect((await tool(request,'keto_kitchen',{action:'foods',query:food.food_id})).foods.map(f=>f.food_id)).toEqual([food.food_id]);expect((await state(request)).stored_diary).toHaveLength(0);
  await page.locator('#portion-form').getByRole('button',{name:'Рассчитать порцию',exact:true}).click();await page.locator('#portion-result').getByRole('button',{name:'Записать съеденное',exact:true}).click();
  await expect(page.locator('#intake-amount')).toHaveValue('75');await page.locator('#intake-date').fill('2026-01-08');await page.locator('#intake-review').click();await expect(page.locator('#proposal-dialog')).toBeVisible();
