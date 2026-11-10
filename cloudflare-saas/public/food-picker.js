@@ -3,7 +3,7 @@
 export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,foodState,onSelect,allergens=[],debounce=220}){
  let version=0,detailVersion=0,timer=null,query='',foods=[],page=0,cursor=null,sourceBusy=false,pending=null;
  const status=el('p','food-search-status'),hint=el('div','food-search-hint'),list=el('div','food-result-list'),source=el('section','food-reference'),sourceStatus=el('p','muted'),sourceRows=el('div','food-result-list'),review=el('section','food-source-review');
- status.setAttribute('role','status');sourceStatus.setAttribute('role','status');list.setAttribute('aria-label','Найденные продукты');source.setAttribute('aria-label','Большой справочник продуктов');review.hidden=source.hidden=true;
+ status.setAttribute('role','status');status.setAttribute('tabindex','-1');sourceStatus.setAttribute('role','status');list.setAttribute('aria-label','Найденные продукты');source.setAttribute('aria-label','Большой справочник продуктов');review.hidden=source.hidden=true;
  // This section can live inside the own-dish form. An input's Enter key must
  // not implicitly submit that unrelated form; action buttons keep native keys.
  review.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target?.tagName==='INPUT')event.preventDefault();});
@@ -22,16 +22,17 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
   if(start+8<foods.length)nav.append(button('Следующие продукты',()=>{page++;drawFoods()}));
   if(nav.children.length)list.append(nav);
  }
- async function search(){
+ async function search({reveal=false}={}){
   invalidate();query=input.value.trim();if(!query)return;
   const stamp=version,screen=epoch(),q=query;status.textContent='Ищем продукты…';
   try{
    const result=await call('keto_kitchen',{action:'foods',query:q});if(!current(stamp,screen,q))return;
    foods=result.foods||[];page=0;drawFoods();status.textContent=foods.length?`В ваших продуктах и базовом каталоге: ${foods.length}. Выберите продукт.`:'В базовом каталоге и ваших продуктах совпадений нет.';
    if(result.search?.label)hint.append(el('span','field-help',result.search.label));
-   for(const alternative of result.search?.alternatives||[])hint.append(button(alternative.label,()=>{input.value=alternative.query;return search()},'text-btn'));
+   for(const alternative of result.search?.alternatives||[])hint.append(button(alternative.label,()=>{input.value=alternative.query;return search({reveal:true})},'text-btn'));
+   if(reveal){status.focus?.({preventScroll:true});root.scrollIntoView?.({block:'start',behavior:'instant'});}
    await loadSource(false);
-  }catch(error){if(current(stamp,screen,q)){status.textContent='Не удалось загрузить продукты. Попробуйте снова.';list.append(button('Повторить поиск',search));}}
+  }catch(error){if(current(stamp,screen,q)){status.textContent='Не удалось загрузить продукты. Попробуйте снова.';list.append(button('Повторить поиск',()=>search({reveal:true})));}}
  }
  async function loadSource(append){
   if(sourceBusy||!query||query!==input.value.trim()||(append&&!cursor))return;
@@ -88,6 +89,6 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
  }
  function reset(){invalidate();pending=null;foods=[];query='';input.value='';}
  input.addEventListener('input',()=>{invalidate();const stamp=version;timer=setTimeout(()=>{if(stamp===version)run(search)},debounce);});
- input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();run(search);}});
+ input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();run(()=>search({reveal:true}));}});
  return {search,reset,invalidate,afterApplied};
 }

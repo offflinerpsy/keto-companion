@@ -14,7 +14,7 @@ The original USDA reference contains 7,793 records, including the 85 prepared fo
 
 ## Selection and confirmation
 
-Portion and own-dish screens share `food-picker.js`. Prepared choices use readable button rows, eight per page; the broader reference is visible directly below. Search never automatically chooses the first result. Changing a query keeps the previously chosen product and grams until another choice is made.
+Portion and own-dish screens share `food-picker.js`. Prepared choices use readable button rows, eight per page; the broader reference is visible directly below. Search never automatically chooses the first result. Changing a query keeps the previously chosen product and grams until another choice is made. Explicit search moves focus to its result status and reveals the results; debounced typing preserves focus and scroll.
 
 A reference record opens its source, original name and known/unknown nutrients. State, allergens and explicit review must be supplied before preparing the existing `source_import` proposal. Only its matching confirmed receipt selects the new personal product. Import alone never writes intake. Existing account scope, release hash, CAS, deduplication and `recipe_eligible=false` boundaries remain unchanged.
 

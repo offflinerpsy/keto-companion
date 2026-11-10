@@ -4,15 +4,15 @@
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "3a90e76654b973c68142dfc09dff7582ef2acf9c9cc0c946c5f68268b0004420",
-      "bytes": 1519359,
+      "sha256": "7ec06ff7460ecbfafe076b99524076ec9162ef85ba1367cf70f8f7775f1cd206",
+      "bytes": 1519657,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "02098bf91e1521111bd9753a388faf800fc6613863c932dd62a8d9a4d9545f4e",
+      "sha256": "720c389230c7df573f1e0b95b0d0d55cdcd090c4b923a9b21c0adb320f4935fe",
       "bytes": 177375,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
@@ -28,8 +28,8 @@
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "7007255d653486690fee83925672a84604cdf743c4a17bddb298a24b3e96a22d",
-      "bytes": 766283,
+      "sha256": "11652bfd4ffff9af104867fa34939a213758fd2a52105fc0f259258993b52aa9",
+      "bytes": 766576,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"

@@ -28,6 +28,7 @@ test('prepared foods and broad reference are visible; choice is explicit and sur
  const f=fixture(args=>args.action==='foods'?{foods:args.query==='рыба'?[fish]:[cheese],search:{label:'Ищем сыр и его виды',alternatives:[{query:'сырые продукты',label:'Сырые продукты'}]}}:source());
  f.input.value='сыр';await f.picker.search();
  assert.equal(f.selected.length,0);assert(find(f.root,'Сыр чеддер · ready_to_eat'));assert(find(f.root,'Сыр гауда · USDA · проверить состав'));assert(find(f.root,'Сырые продукты'));
+ const status=f.root.children.find(n=>n.className==='food-search-status');assert.equal(status.focused,undefined);await f.picker.search({reveal:true});assert.equal(status.focused,true);
  await find(f.root,'Сыр чеддер · ready_to_eat').onclick();assert.deepEqual(f.selected,[cheese]);
  f.input.value='рыба';await f.picker.search();assert.deepEqual(f.selected,[cheese]);
  await find(f.root,'Минтай · raw').onclick();assert.deepEqual(f.selected,[cheese,fish]);

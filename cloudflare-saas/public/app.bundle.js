@@ -3,6 +3,7 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
   let version2 = 0, detailVersion = 0, timer = null, query = "", foods = [], page = 0, cursor = null, sourceBusy = false, pending = null;
   const status = el2("p", "food-search-status"), hint = el2("div", "food-search-hint"), list = el2("div", "food-result-list"), source = el2("section", "food-reference"), sourceStatus = el2("p", "muted"), sourceRows = el2("div", "food-result-list"), review = el2("section", "food-source-review");
   status.setAttribute("role", "status");
+  status.setAttribute("tabindex", "-1");
   sourceStatus.setAttribute("role", "status");
   list.setAttribute("aria-label", "\u041D\u0430\u0439\u0434\u0435\u043D\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B");
   source.setAttribute("aria-label", "\u0411\u043E\u043B\u044C\u0448\u043E\u0439 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432");
@@ -64,7 +65,7 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
     }));
     if (nav.children.length) list.append(nav);
   }
-  async function search() {
+  async function search({ reveal = false } = {}) {
     invalidate();
     query = input.value.trim();
     if (!query) return;
@@ -80,13 +81,17 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
       if (result.search?.label) hint.append(el2("span", "field-help", result.search.label));
       for (const alternative of result.search?.alternatives || []) hint.append(button(alternative.label, () => {
         input.value = alternative.query;
-        return search();
+        return search({ reveal: true });
       }, "text-btn"));
+      if (reveal) {
+        status.focus?.({ preventScroll: true });
+        root.scrollIntoView?.({ block: "start", behavior: "instant" });
+      }
       await loadSource(false);
     } catch (error) {
       if (current(stamp, screen, q2)) {
         status.textContent = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.";
-        list.append(button("\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u043F\u043E\u0438\u0441\u043A", search));
+        list.append(button("\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u043F\u043E\u0438\u0441\u043A", () => search({ reveal: true })));
       }
     }
   }
@@ -239,7 +244,7 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      run2(search);
+      run2(() => search({ reveal: true }));
     }
   });
   return { search, reset, invalidate, afterApplied };
@@ -11895,7 +11900,7 @@ var portionPicker = createFoodPicker({ root: $2("portion-results"), input: $2("p
 } });
 $2("portion-search").onsubmit = (e) => {
   e.preventDefault();
-  run(() => portionPicker.search());
+  run(() => portionPicker.search({ reveal: true }));
 };
 $2("portion-change").onclick = () => {
   $2("portion-query").focus();
