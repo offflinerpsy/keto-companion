@@ -5,27 +5,20 @@
   "source_version": "0.7.1-tranquil-dev-pilot",
   "updated_at": "2026-11-10",
   "active_task": {
-    "id": "AGR-306-C17-SEARCH",
+    "id": "AGR-306-C17-RELEASE",
     "status": "in_progress",
-    "stage": "browser_verification",
-    "base_commit": "2e60f59fcc4d9388da8831f86e12c5a27db1976a",
+    "stage": "native_acceptance_preparation",
     "writer": "root",
-    "deliverable": "Meaningful Russian food/recipe matching, accessible wide food reference and varied verified-ingredient recipe expansion",
+    "candidate_commit": "442e17a6dac9c1126d0f10d6a1fa37cf6c868c70",
+    "protected_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+    "deliverable": "Exact accepted C17 search and recipe source on existing private family Cloudflare/Azure staging",
     "acceptance": [
-      "сыр does not match raw meat or fish; word forms and multiword queries work",
-      "same query semantics in portion, own dish, pantry and USDA",
-      "wide reference accessible from selection with explicit review/import preserved",
-      "recipe ingredient/name search, filters and pagination correct; varied original recipes use actual catalog nutrition",
-      "targeted offline/browser checks then existing exact-source private-family release"
+      "Existing native full CI and isolated new image acceptance; no early pin change",
+      "Exact final release ZIP adopted by Azure with runtime-code SHA",
+      "Ordinary full pinned-runtime promotion and main Worker release",
+      "Binding/deployment readback, 15 public HTTP checks and six served asset hashes"
     ],
-    "owner_feedback": "IMG_0996.png, IMG_0997.png, IMG_0998.png: cheese/raw substring collision, few cheeses and only nine egg recipes",
-    "source_checks": {
-      "python": "655 passed; 6 subtests",
-      "node": "266 passed before final Enter containment guard; rerun in progress",
-      "contracts_specification_hygiene": "passed",
-      "review": "26 backend probes passed; keyboard review correction applied"
-    },
-    "next_check": "Isolated Mac Chromium/WebKit real HTTP search/import/intake at 402 CSS px"
+    "source_acceptance": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json"
   },
   "last_completed": {
     "id": "AGR-306-C16-RELEASE",
@@ -61,9 +54,9 @@
     "product_acceptance": "physical_spouse_iPhone_pending"
   },
   "next_task": {
-    "id": "AGR-306-C17-RELEASE",
-    "status": "pending_source_acceptance",
-    "action": "Publish exact accepted C17 through existing pipeline after source/browser review."
+    "id": "AGR-306-C17-PHYSICAL-ACCEPTANCE",
+    "status": "pending_technical_release",
+    "action": "Owner checks cheese, raw alternative, egg recipes and diary on existing signed-in iPhone 17 Pro."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -74,6 +67,15 @@
         "completion_marker": ".c16-qa-6.exit",
         "status": "completed",
         "exit_code": 0
+      },
+      {
+        "host": "authorized owner Mac isolated C17 QA worktree",
+        "pid": 55228,
+        "run": "c17-browser-4",
+        "completion_marker": ".c17-browser-4.exit.json",
+        "status": "completed",
+        "exit_code": 0,
+        "port_8898_released": true
       }
     ],
     "pending_cloud_builds": [],
@@ -110,28 +112,28 @@
     "Synthetic checks do not establish clinical effectiveness or complete accessibility compliance."
   ],
   "source_completed": {
-    "id": "AGR-306-C16-PRODUCT",
+    "id": "AGR-306-C17-SEARCH",
     "status": "completed",
     "stage": "source_accepted",
-    "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
-    "deliverable": "iPhone temporal-input/dialog containment, visible durable diary receipts, day nutrition map, confirmed assistant memory",
-    "acceptance": [
-      "402 CSS px mobile geometry and native picker semantics",
-      "saved intake immediately visible even if history refresh fails",
-      "account-scoped day navigation, unconfirmed timezone read fallback",
-      "actual full-day totals and current agreed targets with incomplete-data states",
-      "confirmed server memory used by deterministic answer and assistant context",
-      "existing native CI and private-family release, with exact Azure adoption if Python changes"
-    ],
-    "device": "iPhone 17 Pro (not Max), Chrome; owner screenshots 1206px wide",
+    "base_commit": "2e60f59fcc4d9388da8831f86e12c5a27db1976a",
     "writer": "root",
-    "evidence": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
-    "additional_owner_direction": "Animate UI reference adopted as pinned native/CSS dialog, disclosure and SVG success mark; preserve current architecture",
-    "completed_checks": {
-      "python": "639 passed; 6 subtests",
-      "node": "260 passed after final generated snapshot",
-      "browser": "22 passed in Chromium/WebKit; 0 failed/flaky/skipped",
-      "contracts_specification_hygiene": "passed"
-    }
+    "deliverable": "Meaningful Russian food/recipe matching, accessible wide food reference and varied verified-ingredient recipe expansion",
+    "acceptance": [
+      "сыр does not match raw meat or fish; word forms and multiword queries work",
+      "same query semantics in portion, own dish, pantry and USDA",
+      "wide reference accessible from selection with explicit review/import preserved",
+      "recipe ingredient/name search, filters and pagination correct; varied original recipes use actual catalog nutrition",
+      "targeted offline/browser checks then existing exact-source private-family release"
+    ],
+    "owner_feedback": "IMG_0996.png, IMG_0997.png, IMG_0998.png: cheese/raw substring collision, few cheeses and only nine egg recipes",
+    "source_checks": {
+      "python": "655 passed; 6 subtests",
+      "node": "266 passed on final source",
+      "browser": "14 passed Chromium/WebKit; no failed, flaky or skipped",
+      "contracts_specification_hygiene": "passed",
+      "review": "independent backend, UI, QA and package review; final blockers resolved"
+    },
+    "source_commit": "442e17a6dac9c1126d0f10d6a1fa37cf6c868c70",
+    "evidence": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json"
   }
 }
