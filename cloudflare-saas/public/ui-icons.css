@@ -61,3 +61,29 @@
 [data-icon="heart"]{--ui-icon:var(--ui-icon-heart)}
 [data-icon="download"]{--ui-icon:var(--ui-icon-download)}
 [data-icon="more"]{--ui-icon:var(--ui-icon-more)}
+
+[data-icon="check"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m5%2012%204%204L19%206%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="plate"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%2212%22%20r%3D%227%22%2F%3E%3Cpath%20d%3D%22M3%203v6m-2-6v4a2%202%200%200%200%204%200V3M3%209v12m18-18v18%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="energy"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m13%202-9%2012h7l-1%208L21%209h-8Z%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="protein"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M16%203c-5-2-7%203-8%206-1%202-5%203-5%207a5%205%200%200%200%208%204c2-2%201-4%204-6%204-2%208-9%201-11Z%22%2F%3E%3Cpath%20d%3D%22M13%206c-2%200-3%202-3%204%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="carbs"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2021%2019%203M8%2017c-5%200-6-3-5-5%203-1%206%201%205%205Zm4-5c-5%200-6-3-5-5%203-1%206%201%205%205Zm-1%201c1-4%204-5%207-4%200%203-2%206-7%204Zm4-5c1-4%204-5%207-4%200%203-2%206-7%204Z%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="fat"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203C10%207%205%2011%205%2015a7%207%200%200%200%2014%200c0-4-5-8-7-12Z%22%2F%3E%3Cpath%20d%3D%22M8%2015a4%204%200%200%200%204%204%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="fiber"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%203c-9%200-17%202-16%2010%201%208%2014%209%2016-10Z%22%2F%3E%3Cpath%20d%3D%22M3%2022%2016%208M9%2015v-5m0%205h5%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="sunrise"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2%2018h20M4%2022h16M7%2018a5%205%200%200%201%2010%200M12%202v8m-3-5%203-3%203%203M2%2012l3%202m14%200%203-2%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="sun"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M12%202v2m0%2016v2M2%2012h2m16%200h2M5%205l1.5%201.5m11%2011L19%2019M5%2019l1.5-1.5m11-11L19%205%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="moon"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2015A9%209%200%200%201%209%204%209%209%200%201%200%2020%2015Z%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="apple"]{--ui-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%208c-6-5-11%201-7%209%202%205%204%204%207%203%203%201%205%202%207-3%204-8-1-14-7-9Zm0%200c0-3%201-5%204-6M8%202c0%203%201%204%204%204%22%2F%3E%3C%2Fsvg%3E")}
+
+[data-icon="chat"]{--ui-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a9 9 0 0 1-13.5 8L3 21l1.5-4.5A9 9 0 1 1 21 11.5Z'/%3E%3C/svg%3E")}
+
+:root{--ui-select-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%23777780' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}

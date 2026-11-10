@@ -109,10 +109,15 @@ function setupChatActions({ el: el2, call: call2, getState, epoch, getContext = 
 
 // cloudflare-saas/public/recipe-page-calls.js
 function createRecipePageCalls({ call: call2, epoch }) {
-  let tail = Promise.resolve();
+  let tail = Promise.resolve(), session2 = epoch();
   const pending = /* @__PURE__ */ new Set();
   function invoke(...args) {
     const stamp = epoch();
+    if (stamp !== session2) {
+      session2 = stamp;
+      tail = Promise.resolve();
+      pending.clear();
+    }
     const result = tail.catch(() => {
     }).then(() => {
       if (stamp !== epoch()) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
@@ -2050,6 +2055,11 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     memory.replaceChildren(el2("h1", "", "\u0427\u0442\u043E \u044F \u043F\u043E\u043C\u043D\u044E"));
     if (!info) return;
     memory.append(el2("p", "muted", info.memory_limits));
+    const profile = state2.profile, baseline = profile.baseline || {}, identity = el2("article", "panel");
+    identity.append(el2("h2", "", profile.display_name || "\u0412\u0430\u0448 \u043F\u0440\u043E\u0444\u0438\u043B\u044C"));
+    for (const [label, value] of [["\u0426\u0435\u043B\u044C", profile.goal], ["\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441", profile.timezone], ["\u0420\u043E\u0441\u0442", baseline.height_cm == null ? null : baseline.height_cm + " \u0441\u043C"], ["\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0439 \u0432\u0435\u0441", baseline.weight_kg == null ? null : baseline.weight_kg + " \u043A\u0433" + (baseline.measured_at ? " \xB7 " + baseline.measured_at : "")]]) if (value) identity.append(el2("p", "", label + ": " + value));
+    identity.append(button("\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043F\u0440\u043E\u0444\u0438\u043B\u044C", async () => setView2("setup")));
+    memory.append(identity);
     for (const fact of info.preferences) {
       const row = el2("article", "panel");
       row.dataset.testid = "memory-fact";
@@ -2078,7 +2088,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       const d2 = await call2("keto_chat", { message: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438, \u043D\u0435 \u043B\u044E\u0431\u043B\u044E " + pref.value, request_id: crypto.randomUUID().replaceAll("-", ""), thread_id: state2.active_thread || "main" });
       accept2(d2);
     }));
-    for (const [title, value, view2] of [["\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", state2.profile.allergies.map((id) => ({ milk: "\u043C\u043E\u043B\u043E\u043A\u043E", egg: "\u044F\u0439\u0446\u0430", fish: "\u0440\u044B\u0431\u0430", wheat: "\u043F\u0448\u0435\u043D\u0438\u0446\u0430", gluten: "\u0433\u043B\u044E\u0442\u0435\u043D", soy: "\u0441\u043E\u044F", peanut: "\u0430\u0440\u0430\u0445\u0438\u0441", tree_nut: "\u043E\u0440\u0435\u0445\u0438", sesame: "\u043A\u0443\u043D\u0436\u0443\u0442" })[id] || "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u2014 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435").join(", ") || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B", "setup"], ["\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u0438\u0442\u0430\u043D\u0438\u044F", state2.profile.targets ? "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B" : "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D\u044B", "targets"], ["\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", state2.profile.settings.favorites.length + " \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", "recipes"], ["\u041C\u043E\u0438 \u0437\u0430\u043F\u0430\u0441\u044B", info.pantry.length + " \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "recipes"]]) {
+    for (const [title, value, view2] of [["\u041F\u0438\u0449\u0435\u0432\u044B\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0438\u0438", state2.profile.allergies.map((id) => ({ milk: "\u043C\u043E\u043B\u043E\u043A\u043E", egg: "\u044F\u0439\u0446\u0430", fish: "\u0440\u044B\u0431\u0430", wheat: "\u043F\u0448\u0435\u043D\u0438\u0446\u0430", gluten: "\u0433\u043B\u044E\u0442\u0435\u043D", soy: "\u0441\u043E\u044F", peanut: "\u0430\u0440\u0430\u0445\u0438\u0441", tree_nut: "\u043E\u0440\u0435\u0445\u0438", sesame: "\u043A\u0443\u043D\u0436\u0443\u0442" })[id] || "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u2014 \u0443\u0442\u043E\u0447\u043D\u0438\u0442\u0435").join(", ") || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B", "setup"], ["\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u0438\u0442\u0430\u043D\u0438\u044F", state2.guidance?.targets_stale ? "\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B, \u043D\u043E \u043D\u0443\u0436\u043D\u043E \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u043F\u043E\u0441\u043B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u043F\u0440\u043E\u0444\u0438\u043B\u044F" : state2.profile.targets?.status === "agreed" ? "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B" : "\u041D\u0435 \u0437\u0430\u0434\u0430\u043D\u044B", "targets"], ["\u0418\u0437\u0431\u0440\u0430\u043D\u043D\u043E\u0435", state2.profile.settings.favorites.length + " \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", "recipes"], ["\u041C\u043E\u0438 \u0437\u0430\u043F\u0430\u0441\u044B", info.pantry.length + " \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432", "recipes"]]) {
       const row = el2("article", "panel");
       row.append(el2("h3", "", title), el2("p", "", value), el2("p", "muted", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0439 \u043F\u0440\u043E\u0444\u0438\u043B\u044C; \u0434\u0430\u0442\u0430 \u043F\u0440\u0435\u0436\u043D\u0438\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u043C\u043E\u0436\u0435\u0442 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u043E\u0432\u0430\u0442\u044C."), button("\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C / \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C", async () => setView2(view2)));
       memory.append(row);
@@ -3299,12 +3309,12 @@ function scope(target, options, originalOptions) {
     removePips();
     var spread = generateSpread(pips2);
     var filter = pips2.filter;
-    var format = pips2.format || {
+    var format2 = pips2.format || {
       to: function(value) {
         return String(Math.round(value));
       }
     };
-    scope_Pips = scope_Target.appendChild(addMarking(spread, filter, format));
+    scope_Pips = scope_Target.appendChild(addMarking(spread, filter, format2));
     return scope_Pips;
   }
   function baseSize() {
@@ -4971,10 +4981,93 @@ function setupMobile({ $: $3, el: el2, call: call2, accept: accept2, getState, s
   }, resetPhoto, recording: () => recorder.mode !== "idle" };
 }
 
+// cloudflare-saas/public/diary-model.js
+var format = (n, digits = 1) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(n);
+var finite = (n) => typeof n === "number" && Number.isFinite(n);
+function nutritionOverview(summary, state2 = {}) {
+  const count = summary?.entry_count ?? 0;
+  const target = state2.profile?.targets, stale = Boolean(state2.guidance?.targets_stale);
+  const paused = Boolean(state2.holds?.length) || state2.screening?.can_plan === false;
+  const agreed = target?.status === "agreed", active = agreed && !stale && !paused;
+  const net = agreed && target.carb_basis === "net_estimate";
+  const specs = [
+    ["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B", "energy", active ? [target.energy_min_kcal, target.energy_max_kcal] : null],
+    ["protein_g", "\u0411\u0435\u043B\u043A\u0438", "\u0433", "protein", active ? [target.protein_min_g, target.protein_max_g] : null],
+    [net ? "net_carbohydrate_g" : "carbohydrate_total_g", net ? "Net-\u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B" : "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433", "carbs", active ? [null, target.carb_max_g] : null],
+    ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433", "fat", null],
+    ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433", "fiber", active ? [target.fiber_min_g, null] : null]
+  ];
+  const cards = specs.map(([key, label, unit, icon, range]) => {
+    const coverage = summary?.coverage?.[key], complete = count > 0 && coverage?.complete === true && finite(summary?.nutrition?.[key]);
+    const value = count > 0 ? complete ? summary.nutrition[key] : finite(coverage?.known_subtotal) ? coverage.known_subtotal : null : null;
+    const [low, high] = range || [], hasTarget = finite(low) || finite(high), denominator = finite(high) ? high : low;
+    const goal = hasTarget ? finite(low) && finite(high) ? `${format(low)}\u2013${format(high)} ${unit}` : finite(high) ? `\u0434\u043E ${format(high)} ${unit}` : `\u043E\u0442 ${format(low)} ${unit}` : "";
+    let status = !count ? "\u041D\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u0435\u0439" : !complete ? "\u041D\u0435\u043F\u043E\u043B\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435" : hasTarget ? finite(high) && value > high ? "\u0412\u044B\u0448\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u0430" : finite(low) && value < low ? "\u041F\u043E\u043A\u0430 \u043D\u0438\u0436\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u0430" : finite(low) && finite(high) ? "\u0412 \u0434\u0438\u0430\u043F\u0430\u0437\u043E\u043D\u0435" : "\u0412 \u043F\u0440\u0435\u0434\u0435\u043B\u0430\u0445 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u0430" : "\u041F\u043E \u0437\u0430\u043F\u0438\u0441\u044F\u043C";
+    const tone = !complete ? "unknown" : hasTarget && finite(high) && value > high ? "above" : hasTarget && (!finite(low) || value >= low) ? "within" : "neutral";
+    return {
+      key,
+      label,
+      unit,
+      icon,
+      value,
+      complete,
+      goal,
+      status,
+      tone,
+      text: value === null ? "\u2014" : `${complete ? "" : "\u0443\u0447\u0442\u0435\u043D\u043E "}${format(value, key === "energy_kcal" ? 0 : 1)} ${unit}`,
+      progress: complete && hasTarget && denominator > 0 ? Math.min(1, value / denominator) : null
+    };
+  });
+  return {
+    count,
+    agreed,
+    stale,
+    paused,
+    net,
+    cards,
+    incomplete: summary?.incomplete_entries || 0,
+    targetsNote: paused ? "\u0421\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u0435 \u0441 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u0430\u043C\u0438 \u043F\u0440\u0438\u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0432 \u043F\u0440\u043E\u0444\u0438\u043B\u0435." : stale ? "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043D\u0443\u0436\u043D\u043E \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u043F\u043E\u0441\u043B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0439 \u043F\u0440\u043E\u0444\u0438\u043B\u044F." : agreed ? "\u0421\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u0435 \u0441 \u0442\u0435\u043A\u0443\u0449\u0438\u043C\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u043C\u0438 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u0430\u043C\u0438." : "\u041B\u0438\u0447\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B \u043F\u043E\u043A\u0430 \u043D\u0435 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u044B."
+  };
+}
+function validDiaryDay(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value + "T12:00:00Z")) && (/* @__PURE__ */ new Date(value + "T12:00:00Z")).toISOString().slice(0, 10) === value;
+}
+function diaryNavigation(storage, account) {
+  const key = account ? "keto.diary.navigation.v1:" + encodeURIComponent(account) : null;
+  return {
+    read() {
+      try {
+        const value = key ? JSON.parse(storage.getItem(key) || "null") : null;
+        return validDiaryDay(value?.day) ? { day: value.day, allDates: value.allDates === true } : null;
+      } catch {
+        return null;
+      }
+    },
+    save(day, allDates) {
+      if (key && validDiaryDay(day)) try {
+        storage.setItem(key, JSON.stringify({ day, allDates: Boolean(allDates) }));
+      } catch {
+      }
+    },
+    clear() {
+      if (key) try {
+        storage.removeItem(key);
+      } catch {
+      }
+    }
+  };
+}
+
 // cloudflare-saas/public/intake-ui.js
 var MEALS = { breakfast: "\u0417\u0430\u0432\u0442\u0440\u0430\u043A", lunch: "\u041E\u0431\u0435\u0434", dinner: "\u0423\u0436\u0438\u043D", snack: "\u041F\u0435\u0440\u0435\u043A\u0443\u0441" };
 var NUTRIENTS = [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043A\u0438", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"]];
 var number = (n, digits = 1) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(n);
+function savedCheck(el2) {
+  const mark = el2("span", "saved-check");
+  mark.setAttribute("aria-hidden", "true");
+  mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path pathLength="1" d="m4 12 5 5L20 6"/></svg>';
+  return mark;
+}
 function profileClock(zone, now = /* @__PURE__ */ new Date()) {
   if (!zone) return null;
   try {
@@ -5037,10 +5130,41 @@ function intakeReviewNodes(el2, preview) {
   return nodes;
 }
 function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, notify: notify2, run: run2, openDialog, closeDialog, setView: setView2, epoch, isDiaryActive, propose: propose2 }) {
-  let selection = null, submitting = false, generation = 0, historyGeneration = 0, day = "", allDates = false, rows = [], historyRevision = null, loadedKey = null, loadingKey = null, loading = false, hasMore = false, receiptEntry = null;
+  let selection = null, submitting = false, generation = 0, historyGeneration = 0, day = "", allDates = false, rows = [], historyRevision = null, loadedKey = null, loadingKey = null, loading = false, hasMore = false, receiptEntry = null, summary = null, displayKey = null, navigation = null, navigationAccount = null, zoneProposal = null, nextOffset = 0, summaryContext = null;
   const form = $3("intake-form");
+  function deviceZone() {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
   function stateDay() {
-    return profileClock(getState()?.profile?.timezone)?.date || "";
+    return profileClock(getState()?.profile?.timezone)?.date || profileClock(deviceZone())?.date || (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+  }
+  function rememberNavigation() {
+    navigation?.save(day, allDates);
+  }
+  function ensureNavigation() {
+    const account = getState()?.profile?.owner_account_id;
+    if (account !== navigationAccount) {
+      navigationAccount = account;
+      let storage;
+      try {
+        storage = globalThis.sessionStorage;
+      } catch {
+      }
+      navigation = diaryNavigation(storage, account);
+      const saved = navigation.read();
+      day = saved?.day || stateDay();
+      allDates = saved?.allDates || false;
+    }
+  }
+  function zoneControls() {
+    const zone = selection?.entry?.timezone || getState()?.profile?.timezone, valid = Boolean(profileClock(zone));
+    $3("intake-zone").textContent = valid ? "\u0412\u0440\u0435\u043C\u044F \xB7 " + zone : "\u0414\u043B\u044F \u0437\u0430\u043F\u0438\u0441\u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441.";
+    $3("intake-zone-confirm").hidden = valid;
+    $3("intake-zone-name").textContent = deviceZone();
+    $3("intake-now").hidden = !valid;
+    $3("intake-time").disabled = !valid;
+    $3("intake-clear-time").hidden = !valid || !$3("intake-time").value;
+    return valid;
   }
   function validScope(token, stamp) {
     return token === generation && stamp === epoch();
@@ -5071,7 +5195,7 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
       $3("intake-amount-help").hidden = !hasAmount;
       $3("intake-amount").required = hasAmount;
       $3("intake-unit").replaceChildren();
-      for (const [value, label] of amount.unit === "g" ? [["g", "\u0413\u0440\u0430\u043C\u043C\u044B"]] : [["portion", "\u041F\u043E\u0440\u0446\u0438\u0438"], ["batch", "\u0414\u043E\u043B\u044F \u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430"]]) {
+      for (const [value, label] of amount.unit === "g" ? [["g", "\u0413\u0440\u0430\u043C\u043C\u044B"]] : [["portion", "\u041F\u043E\u0440\u0446\u0438\u0438"], ["batch", "\u0414\u043E\u043B\u044F \u0431\u043B\u044E\u0434\u0430"]]) {
         const o2 = el2("option", "", label);
         o2.value = value;
         $3("intake-unit").append(o2);
@@ -5080,7 +5204,7 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
       $3("intake-amount").value = String(amount.value);
       $3("intake-unit").disabled = amount.unit === "g";
       $3("intake-date").value = operation === "update" ? entry.date : day || stateDay();
-      $3("intake-time").value = operation === "update" ? entryClock(entry) || "" : "";
+      setTime(operation === "update" ? entryClock(entry) || "" : "");
       for (const option of Array.from($3("intake-meal").options || [])) if (option.dataset.legacy) option.remove();
       if (entry?.meal && !MEALS[entry.meal]) {
         const option = el2("option", "", entry.meal);
@@ -5091,8 +5215,7 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
       $3("intake-meal").value = entry?.meal ? MEALS[entry.meal] ? entry.meal : "legacy" : "";
       $3("intake-note").value = entry?.note || "";
       selection.initial = { date: $3("intake-date").value, time: $3("intake-time").value || null, meal: $3("intake-meal").value, note: $3("intake-note").value.trim() };
-      const zone = entry?.timezone || getState()?.profile?.timezone;
-      $3("intake-zone").textContent = zone ? "\u0412\u0440\u0435\u043C\u044F \u0435\u0434\u044B \xB7 " + zone : "\u0414\u043B\u044F \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u0435\u0434\u044B \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0432 \u043F\u0440\u043E\u0444\u0438\u043B\u0435.";
+      zoneControls();
       $3("intake-note-options").open = false;
       $3("intake-time-detail").open = false;
       $3("intake-fold").value = "";
@@ -5105,6 +5228,31 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
     $3("intake-amount-help").textContent = u2 === "batch" ? "1 \u2014 \u0432\u0441\u0451 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E; 0,5 \u2014 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430." : u2 === "portion" ? "1 \u2014 \u043E\u0434\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044F \u0440\u0435\u0446\u0435\u043F\u0442\u0430; 0,5 \u2014 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u043E\u0434\u043D\u043E\u0439 \u043F\u043E\u0440\u0446\u0438\u0438." : "\u041C\u0430\u0441\u0441\u0430 \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0433\u043E \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430. \u041C\u0438\u043B\u043B\u0438\u043B\u0438\u0442\u0440\u044B \u043D\u0435 \u043F\u0440\u0438\u0440\u0430\u0432\u043D\u0438\u0432\u0430\u044E\u0442\u0441\u044F \u043A \u0433\u0440\u0430\u043C\u043C\u0430\u043C.";
   }
   $3("intake-unit").onchange = updateAmountHelp;
+  function setTime(value) {
+    const input = $3("intake-time");
+    if (!value) {
+      input.type = "text";
+      input.value = "";
+      input.type = "time";
+    } else input.value = value;
+    $3("intake-clear-time").hidden = !value;
+  }
+  $3("intake-time").oninput = () => {
+    $3("intake-clear-time").hidden = !$3("intake-time").value;
+  };
+  $3("intake-clear-time").onclick = () => {
+    setTime("");
+    $3("intake-now").focus({ preventScroll: true });
+  };
+  $3("intake-zone-confirm").onclick = () => run2(async () => {
+    const zone = deviceZone();
+    if (!profileClock(zone)) {
+      showStatus("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0432 \u043F\u0440\u043E\u0444\u0438\u043B\u0435.");
+      return;
+    }
+    const result = await propose2("profile.update", { timezone: zone });
+    zoneProposal = result?.proposal?.id || null;
+  });
   $3("intake-now").onclick = () => {
     const clock = profileClock(selection?.entry?.timezone || getState()?.profile?.timezone);
     if (!clock) {
@@ -5113,6 +5261,7 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
     }
     $3("intake-date").value = clock.date;
     $3("intake-time").value = clock.time;
+    $3("intake-clear-time").hidden = false;
   };
   $3("intake-close").onclick = () => closeDialog();
   $3("intake-recipe").onclick = () => setView2("recipes");
@@ -5127,6 +5276,11 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
     e.preventDefault();
     if (submitting || !selection) return;
     run2(async () => {
+      if ((selection.operation || "add") === "add" && !profileClock(getState()?.profile?.timezone)) {
+        showStatus("\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \u0432\u044B\u0448\u0435. \u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0438 \u0434\u0430\u0442\u0430 \u043E\u0441\u0442\u0430\u043D\u0443\u0442\u0441\u044F \u0432 \u0444\u043E\u0440\u043C\u0435.");
+        $3("intake-zone-confirm").focus();
+        return;
+      }
       const values2 = { operation: selection.operation || "add" }, time = $3("intake-time").value || null;
       if (values2.operation !== "update" || $3("intake-date").value !== selection.initial?.date) values2.date = $3("intake-date").value;
       if (values2.operation !== "update" || time !== selection.initial?.time) values2.time = time;
@@ -5173,54 +5327,125 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
       }
     });
   };
-  function renderSummary(summary) {
+  function renderSummary(summary2) {
     const box = $3("diary-summary");
     box.replaceChildren();
     box.hidden = allDates;
-    if (allDates || !summary) return;
-    const count = summary.entry_count ?? summary.entries_count ?? summary.recorded_entries ?? (summary.known_entries || 0) + (summary.unquantified_entries || 0);
-    if (summary.empty === true || count === 0) {
-      box.append(el2("p", "muted", "\u041D\u0430 \u044D\u0442\u0443 \u0434\u0430\u0442\u0443 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442."));
-      return;
+    if (allDates || !summary2) return;
+    const overview = nutritionOverview(summary2, summaryContext || getState());
+    if (!overview.count) return;
+    const heading = el2("div", "diary-summary-heading");
+    heading.append(el2("h2", "", "\u041F\u0438\u0442\u0430\u043D\u0438\u0435 \u0437\u0430 \u0434\u0435\u043D\u044C"), el2("span", "muted", "\u041F\u043E \u0437\u0430\u043F\u0438\u0441\u044F\u043C"));
+    box.append(heading);
+    const grid = el2("div", "diary-macros");
+    for (const item of overview.cards) {
+      const card = el2("article", "diary-macro " + item.icon);
+      card.dataset.nutrient = item.key;
+      card.dataset.status = item.tone;
+      const title = el2("div", "macro-heading"), icon = el2("span", "macro-icon");
+      icon.dataset.icon = item.icon;
+      icon.setAttribute("aria-hidden", "true");
+      title.append(icon, el2("h3", "", item.label));
+      const value = el2("p", "macro-value", item.text), target = el2("p", "macro-target", item.goal ? item.goal : item.icon === "fat" ? "\u0411\u0435\u0437 \u0446\u0435\u043B\u0438" : overview.paused ? "\u0421\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u0435 \u043D\u0430 \u043F\u0430\u0443\u0437\u0435" : overview.stale ? "\u041D\u0443\u0436\u043D\u043E \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440" : "\u0426\u0435\u043B\u044C \u043D\u0435 \u0437\u0430\u0434\u0430\u043D\u0430");
+      card.append(title, value, target);
+      if (item.progress !== null) {
+        const meter = el2("progress", "macro-progress");
+        meter.max = 1;
+        meter.value = item.progress;
+        meter.setAttribute("aria-label", `${item.label}: ${item.text}; \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440 ${item.goal}`);
+        card.append(meter);
+      }
+      const status = el2("span", "macro-status sr-only", item.status);
+      card.setAttribute("aria-label", `${item.label}: ${item.text}. ${item.goal ? "\u0422\u0435\u043A\u0443\u0449\u0438\u0439 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440 " + item.goal + ". " : ""}${item.status}`);
+      card.append(status);
+      grid.append(card);
     }
-    box.append(el2("h2", "", "\u0418\u0442\u043E\u0433\u0438 \u0437\u0430\u043F\u0438\u0441\u0435\u0439"), ...nutritionNodes(el2, { nutrition: summary.nutrition, coverage: summary.coverage }));
-    const incomplete = summary.incomplete_entries ?? summary.unquantified_entries ?? 0;
-    box.append(el2("p", "muted", incomplete ? `\u0417\u0430\u043F\u0438\u0441\u0435\u0439 \u0441 \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u043C\u0438 \u0434\u0430\u043D\u043D\u044B\u043C\u0438: ${incomplete}. \u041F\u043E\u043A\u0430\u0437\u0430\u043D\u0430 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u0447\u0430\u0441\u0442\u044C \u0441\u043E\u0441\u0442\u0430\u0432\u0430.` : "\u0421\u0443\u043C\u043C\u0430 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u0437\u0430 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u0443\u044E \u0434\u0430\u0442\u0443."));
+    box.append(grid);
+    const note = el2("p", overview.incomplete ? "diary-summary-note" : "sr-only", overview.incomplete ? `\u041D\u0435\u043F\u043E\u043B\u043D\u044B\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439: ${overview.incomplete}. \u0423\u0447\u0442\u0435\u043D\u0430 \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u0447\u0430\u0441\u0442\u044C \u0441\u043E\u0441\u0442\u0430\u0432\u0430.` : "\u0418\u0442\u043E\u0433\u0438 \u0432\u0441\u0435\u0445 \u0437\u0430\u043F\u0438\u0441\u0435\u0439 \u0437\u0430 \u0434\u0435\u043D\u044C, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u0435\u0449\u0451 \u043D\u0435 \u043F\u043E\u043A\u0430\u0437\u0430\u043D\u043D\u044B\u0435.");
+    box.append(note);
+    if (overview.paused || overview.stale) box.append(el2("p", "diary-summary-note", overview.targetsNote));
+    const goals = el2("button", "text-btn diary-goals", overview.stale ? "\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" : overview.agreed ? "\u0422\u0435\u043A\u0443\u0449\u0438\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" : "\u041D\u0430\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B");
+    goals.type = "button";
+    goals.setAttribute("aria-label", goals.textContent);
+    goals.title = goals.textContent;
+    goals.textContent = "";
+    goals.classList.add("icon-only");
+    goals.dataset.icon = "plan";
+    goals.onclick = () => setView2(overview.agreed ? "targets" : "setup");
+    heading.append(goals);
   }
   function renderRows() {
     const box = $3("diary-entries");
     box.replaceChildren();
-    if (!rows.length && !loading) box.append(el2("p", "muted", allDates ? "\u0412 \u0434\u043D\u0435\u0432\u043D\u0438\u043A\u0435 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u0435\u0439." : "\u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0435\u0434\u0443 \u0438\u043B\u0438 \u0437\u0430\u043C\u0435\u0442\u043A\u0443 \u0437\u0430 \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C."));
-    for (const entry of rows) {
-      const card = el2("article", "diary-entry");
-      card.dataset.entryId = entry.entry_id;
-      const clock = entryClock(entry), meta = [allDates ? dayLabel(entry.date) : null, clock || "\u0412\u0440\u0435\u043C\u044F \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043E", MEALS[entry.meal]].filter(Boolean).join(" \xB7 ");
-      card.append(el2("p", "diary-entry-meta", meta), el2("h3", "", intakeName(entry)));
-      const amount = intakeAmount(entry);
-      if (amount) card.append(el2("p", "", amountLabel(amount)));
-      if (entry.note && entry.note !== intakeName(entry)) card.append(el2("p", "muted", entry.note));
-      const calc = entry.calculation || entry.nutrition_snapshot?.calculation;
-      if (calc?.nutrition) {
-        const n = calc.nutrition;
-        card.append(el2("p", "muted", `\u042D\u043D\u0435\u0440\u0433\u0438\u044F: ${n.energy_kcal == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : number(n.energy_kcal, 0) + " \u043A\u043A\u0430\u043B"} \xB7 \u0431\u0435\u043B\u043A\u0438: ${n.protein_g == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : number(n.protein_g) + " \u0433"} \xB7 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B: ${n.carbohydrate_total_g == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : number(n.carbohydrate_total_g) + " \u0433"}`));
+    $3("diary-discuss").hidden = allDates || !rows.length;
+    if (!rows.length && !loading && loadedKey === historyKey()) {
+      const empty = el2("div", "diary-empty"), icon = el2("span", "diary-empty-icon");
+      icon.dataset.icon = "plate";
+      icon.setAttribute("aria-hidden", "true");
+      empty.append(icon, el2("h2", "", allDates ? "\u0417\u0434\u0435\u0441\u044C \u0431\u0443\u0434\u0435\u0442 \u0432\u0430\u0448\u0430 \u0438\u0441\u0442\u043E\u0440\u0438\u044F" : "\u0427\u0442\u043E \u0431\u044B\u043B\u043E \u043D\u0430 \u0442\u0430\u0440\u0435\u043B\u043A\u0435?"), el2("p", "muted", allDates ? "\u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435 \u2014 \u043E\u043D\u043E \u043F\u043E\u044F\u0432\u0438\u0442\u0441\u044F \u0437\u0434\u0435\u0441\u044C \u0432\u043C\u0435\u0441\u0442\u0435 \u0441 \u0441\u043E\u0441\u0442\u0430\u0432\u043E\u043C \u0438 \u0432\u0440\u0435\u043C\u0435\u043D\u0435\u043C." : "\u0417\u0430 \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C \u043F\u043E\u043A\u0430 \u043D\u0435\u0442 \u0437\u0430\u043F\u0438\u0441\u0435\u0439. \u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0431\u043B\u044E\u0434\u043E \u0438\u043B\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u2014 \u0437\u0434\u0435\u0441\u044C \u043F\u043E\u044F\u0432\u044F\u0442\u0441\u044F \u0435\u0434\u0430 \u0438 \u0438\u0442\u043E\u0433\u0438 \u0434\u043D\u044F."));
+      const add = el2("button", "primary", "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0435\u0434\u0443");
+      add.dataset.icon = "plus";
+      add.onclick = () => open();
+      empty.append(add);
+      box.append(empty);
+    }
+    const visible = !allDates && receiptEntry?.date === day && receiptEntry.receiptRevision === historyRevision && !rows.some((entry) => entry.entry_id === receiptEntry.entry_id) ? [receiptEntry, ...rows] : rows;
+    const ordered = allDates ? visible : [...visible].sort((a2, b2) => (entryClock(a2) || "99:99").localeCompare(entryClock(b2) || "99:99"));
+    const groups = /* @__PURE__ */ new Map();
+    for (const entry of ordered) {
+      const key = [allDates ? entry.date : "", entry.meal || "other"].join("|");
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(entry);
+    }
+    for (const entries of groups.values()) {
+      const first = entries[0], group = el2("section", "diary-meal"), heading = el2("div", "diary-meal-heading"), icon = el2("span", "meal-icon");
+      icon.dataset.icon = { breakfast: "sunrise", lunch: "sun", dinner: "moon", snack: "apple" }[first.meal] || "plate";
+      icon.setAttribute("aria-hidden", "true");
+      heading.append(icon, el2("h2", "", [allDates ? dayLabel(first.date) : null, MEALS[first.meal] || first.meal || "\u0411\u0435\u0437 \u043F\u0440\u0438\u0451\u043C\u0430 \u043F\u0438\u0449\u0438"].filter(Boolean).join(" \xB7 ")));
+      group.append(heading);
+      for (const entry of entries) {
+        const card = el2("article", "diary-entry");
+        card.dataset.entryId = entry.entry_id;
+        if (entry.entry_id === receiptEntry?.entry_id) card.classList.add("just-saved");
+        const clock = entryClock(entry), meta = el2("p", "diary-entry-meta", clock || "\u0412\u0440\u0435\u043C\u044F \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043E");
+        meta.dataset.icon = "clock";
+        const title = el2("div", "diary-entry-title");
+        title.append(el2("h3", "", intakeName(entry)), meta);
+        card.append(title);
+        const amount = intakeAmount(entry);
+        if (amount) card.append(el2("p", "", amountLabel(amount)));
+        if (entry.note && entry.note !== intakeName(entry)) card.append(el2("p", "muted", entry.note));
+        const calc = entry.calculation || entry.nutrition_snapshot?.calculation;
+        if (calc?.nutrition) {
+          const nutrients = el2("div", "entry-nutrients");
+          for (const [key, label, unit] of NUTRIENTS.slice(0, 4)) {
+            const value = calc.nutrition[key], complete = value != null && calc.coverage?.[key]?.complete !== false;
+            nutrients.append(el2("span", "", `${key === "energy_kcal" ? "" : label + " "}${complete ? number(value, key === "energy_kcal" ? 0 : 1) + " " + unit : "\u2014"}`));
+          }
+          card.append(nutrients);
+        }
+        if (!entry.complete) card.append(el2("p", "entry-coverage", "\u0421\u043E\u0441\u0442\u0430\u0432 \u0438\u0437\u0432\u0435\u0441\u0442\u0435\u043D \u043D\u0435 \u043F\u043E\u043B\u043D\u043E\u0441\u0442\u044C\u044E"));
+        if (entry.legacy_estimate) card.append(el2("p", "muted", "\u0421\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u043D \u043F\u043E \u0442\u0435\u043A\u0443\u0449\u0435\u043C\u0443 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0443."));
+        const actions = el2("div", "diary-actions");
+        for (const [label, operation] of [["\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C", "update"], ["\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C", "repeat"]]) {
+          const b2 = el2("button", "text-btn", label);
+          b2.type = "button";
+          b2.onclick = () => open({ operation, entry, revision: historyRevision });
+          actions.append(b2);
+        }
+        const more = el2("details", "diary-entry-more"), toggle = el2("summary", "icon-only");
+        toggle.dataset.icon = "more";
+        toggle.setAttribute("aria-label", "\u0415\u0449\u0451: " + intakeName(entry));
+        more.append(toggle);
+        const del = el2("button", "text-btn danger-button", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C");
+        del.type = "button";
+        del.onclick = () => run2(() => propose2("diary.delete", { entry_id: entry.entry_id }, historyRevision));
+        more.append(del);
+        actions.append(more);
+        card.append(actions);
+        group.append(card);
       }
-      if (entry.legacy_estimate) card.append(el2("p", "muted", "\u0421\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u043D \u043F\u043E \u0442\u0435\u043A\u0443\u0449\u0435\u043C\u0443 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0443."));
-      const actions = el2("div", "diary-actions");
-      for (const [label, operation] of [["\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C", "update"], ["\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C", "repeat"]]) {
-        const b2 = el2("button", "text-btn", label);
-        b2.type = "button";
-        b2.onclick = () => open({ operation, entry, revision: historyRevision });
-        actions.append(b2);
-      }
-      const more = el2("details", "diary-entry-more");
-      more.append(el2("summary", "", "\u0415\u0449\u0451"));
-      const del = el2("button", "text-btn danger-button", "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u044C");
-      del.type = "button";
-      del.onclick = () => run2(() => propose2("diary.delete", { entry_id: entry.entry_id }, historyRevision));
-      more.append(del);
-      actions.append(more);
-      card.append(actions);
-      box.append(card);
+      box.append(group);
     }
     $3("diary-more").hidden = !hasMore;
     $3("diary-more").disabled = loading;
@@ -5228,11 +5453,7 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
   async function load(append = false) {
     if (!getState()?.profile?.consent?.storage || !getState()?.profile?.consent?.health_data) return;
     if (!day) day = stateDay();
-    if (!day && !allDates) {
-      $3("diary-status").textContent = "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0430\u0442\u0443 \u0438\u043B\u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0447\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0432 \u043F\u0440\u043E\u0444\u0438\u043B\u0435.";
-      return;
-    }
-    const token = ++historyGeneration, stamp = epoch(), key = historyKey(), current = () => token === historyGeneration && stamp === epoch(), values2 = { offset: append ? rows.length : 0, limit: 30 };
+    const token = ++historyGeneration, stamp = epoch(), key = historyKey(), current = () => token === historyGeneration && stamp === epoch(), values2 = { offset: append ? nextOffset : 0, limit: 30 };
     if (!allDates) values2.date = day;
     const args = { action: "diary_history", values: values2 };
     if (append) args.expected_revision = historyRevision;
@@ -5240,34 +5461,38 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
     loadingKey = key;
     $3("diary-status").textContent = "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u0437\u0430\u043F\u0438\u0441\u0438\u2026";
     $3("diary-more").disabled = true;
-    if (!append) {
+    if (!append && displayKey !== [day, allDates].join("|")) {
       rows = [];
       hasMore = false;
+      summary = null;
+      displayKey = [day, allDates].join("|");
       renderSummary(null);
       renderRows();
     }
     try {
       const result = await call2("keto_kitchen", args);
       if (!current()) return;
+      if (receiptEntry && result.revision < historyRevision) throw Error("\u0418\u0441\u0442\u043E\u0440\u0438\u044F \u0435\u0449\u0451 \u043E\u0431\u043D\u043E\u0432\u043B\u044F\u0435\u0442\u0441\u044F. \u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0430\u044F \u0437\u0430\u043F\u0438\u0441\u044C \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435.");
       $3("diary-refresh").hidden = true;
-      rows = append ? [...rows, ...result.entries] : result.entries;
+      rows = [...new Map((append ? [...rows, ...result.entries] : result.entries).map((entry) => [entry.entry_id, entry])).values()];
       historyRevision = result.revision;
       loadedKey = key;
       hasMore = result.has_more;
+      nextOffset = (result.offset || 0) + result.entries.length;
       loading = false;
-      renderSummary(result.summary);
+      summary = result.summary;
+      summaryContext = result.nutrition_context || (result.revision === getState()?.revision ? null : { profile: {} });
+      renderSummary(summary);
       renderRows();
-      $3("diary-status").textContent = allDates ? `\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u043E ${rows.length} \u0438\u0437 ${result.total}` : "";
+      $3("diary-status").textContent = allDates && rows.length ? `\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u043E ${rows.length} \u0438\u0437 ${result.total}` : "";
     } catch (error) {
       if (!current()) return;
       loading = false;
-      loadedKey = key;
-      $3("diary-status").textContent = error.message;
+      loadedKey = null;
+      hasMore = false;
+      $3("diary-status").textContent = (rows.length ? "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u0441\u0442\u043E\u0440\u0438\u044E. \u041F\u043E\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0436\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u043D\u044B\u0435 \u0437\u0430\u043F\u0438\u0441\u0438. " : "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0437\u0430\u043F\u0438\u0441\u0438. ") + error.message;
       renderRows();
-      if (append) {
-        hasMore = false;
-        $3("diary-more").hidden = true;
-      }
+      $3("diary-more").hidden = true;
       $3("diary-refresh").hidden = false;
     }
   }
@@ -5275,16 +5500,27 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
     return [day, allDates, getState()?.revision].join("|");
   }
   function render() {
+    ensureNavigation();
+    if (summaryContext && getState()?.revision > historyRevision) summaryContext = null;
     if (!day) day = stateDay();
     $3("diary-day").value = day;
+    $3("diary-day-label").textContent = dayLabel(day);
     $3("diary-all").textContent = allDates ? "\u041A \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u043C\u0443 \u0434\u043D\u044E" : "\u0412\u0441\u044F \u0438\u0441\u0442\u043E\u0440\u0438\u044F";
     $3("diary-day-controls").hidden = allDates;
+    $3("diary-zone-note").textContent = profileClock(getState()?.profile?.timezone) ? "" : "\u0414\u0430\u0442\u0430 \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u2014 \u043F\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430.";
+    if (displayKey === [day, allDates].join("|")) renderSummary(summary);
     if (isDiaryActive() && loadedKey !== historyKey() && (!loading || loadingKey !== historyKey())) run2(() => load());
   }
   function selectDate(next) {
+    if (!validDiaryDay(next)) {
+      render();
+      return;
+    }
     day = next;
     allDates = false;
     loadedKey = null;
+    rememberNavigation();
+    $3("diary-receipt").hidden = receiptEntry?.date !== day;
     render();
     if (!isDiaryActive()) setView2("diary");
   }
@@ -5299,6 +5535,8 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
   $3("diary-all").onclick = () => {
     allDates = !allDates;
     loadedKey = null;
+    rememberNavigation();
+    $3("diary-receipt").hidden = true;
     render();
   };
   $3("diary-more").onclick = () => run2(() => load(true));
@@ -5307,36 +5545,82 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
     run2(() => load());
   };
   $3("diary-add").onclick = () => open();
+  $3("diary-discuss").onclick = () => {
+    setView2("chat");
+    const input = $3("message");
+    input.value = (input.value.trim() ? input.value.trim() + "\n\n" : "") + `\u041E\u0431\u0441\u0443\u0434\u0438\u043C \u043C\u043E\u0439 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u0437\u0430 ${day}: \u0447\u0442\u043E \u0443\u0436\u0435 \u0441\u044A\u0435\u0434\u0435\u043D\u043E, \u043A\u0430\u043A \u044D\u0442\u043E \u0441\u043E\u043E\u0442\u043D\u043E\u0441\u0438\u0442\u0441\u044F \u0441 \u043C\u043E\u0438\u043C\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u043C\u0438 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u0430\u043C\u0438 \u0438 \u0447\u0442\u043E \u0443\u0447\u0435\u0441\u0442\u044C \u043F\u0440\u0438 \u0432\u044B\u0431\u043E\u0440\u0435 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0433\u043E \u043F\u0440\u0438\u0451\u043C\u0430 \u043F\u0438\u0449\u0438?`;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.focus();
+  };
   function afterApplied(result) {
+    if (zoneProposal && result?.state && !result.state.pending?.some((p) => p.id === zoneProposal)) {
+      zoneProposal = null;
+      if (selection) {
+        selection.revision = result.state.revision;
+        zoneControls();
+        if (selection.generation_id && result.receipt?.type === "profile.update") {
+          $3("intake-choice").hidden = false;
+          form.hidden = true;
+          $3("intake-name").textContent = "\u0427\u0430\u0441\u043E\u0432\u043E\u0439 \u043F\u043E\u044F\u0441 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D. \u041F\u043E\u0434\u0431\u043E\u0440 \u043E\u0431\u043D\u043E\u0432\u0438\u043B\u0441\u044F \u2014 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0431\u043B\u044E\u0434\u043E \u0437\u0430\u043D\u043E\u0432\u043E.";
+          selection = null;
+          openDialog("intake", "intake-recipe");
+        } else openDialog("intake", "intake-date");
+      }
+    }
     if (!result?.receipt) return;
+    summaryContext = null;
     loadedKey = null;
     if (result.receipt.type === "diary.delete") {
       $3("diary-receipt").hidden = true;
       receiptEntry = null;
+      historyGeneration++;
+      loading = false;
+      rows = rows.filter((entry) => entry.entry_id !== result.deleted_entry_id);
+      historyRevision = result.receipt.revision;
+      if (result.diary_summary?.date === day) summary = result.diary_summary;
+      else summary = null;
+      renderSummary(summary);
+      renderRows();
     }
     if (result.entry) {
-      receiptEntry = result.entry;
+      historyGeneration++;
+      loading = false;
+      receiptEntry = { ...result.entry, receiptRevision: result.receipt.revision };
       day = result.entry.date;
       allDates = false;
+      rememberNavigation();
+      rows = [result.entry, ...rows.filter((entry) => entry.date === day && entry.entry_id !== result.entry.entry_id)];
+      historyRevision = result.receipt.revision;
+      summary = result.diary_summary;
+      displayKey = [day, allDates].join("|");
+      hasMore = false;
+      renderSummary(summary);
+      renderRows();
       const box = $3("diary-receipt");
       box.hidden = false;
-      box.replaceChildren(el2("p", "", "\u0417\u0430\u043F\u0438\u0441\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0430"));
-      const edit = el2("button", "text-btn", "\u0418\u0441\u043F\u0440\u0430\u0432\u0438\u0442\u044C");
-      edit.type = "button";
-      edit.onclick = () => open({ operation: "update", entry: receiptEntry });
-      box.append(edit);
+      const text = el2("p", "receipt-heading");
+      text.append(savedCheck(el2), el2("span", "", "\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A\u0435 \xB7 " + dayLabel(day)));
+      box.replaceChildren(text, el2("p", "receipt-food", intakeName(result.entry) + " \xB7 " + amountLabel(intakeAmount(result.entry))));
       setView2("diary");
+      $3("content").scrollTop = 0;
     }
     render();
   }
   function reset() {
     generation++;
     historyGeneration++;
+    navigation?.clear();
+    navigation = null;
+    navigationAccount = null;
+    zoneProposal = null;
     selection = null;
     submitting = false;
     day = "";
     allDates = false;
     rows = [];
+    summary = null;
+    summaryContext = null;
+    displayKey = null;
     historyRevision = null;
     loadedKey = null;
     loadingKey = null;
@@ -5353,6 +5637,7 @@ function setupIntake({ $: $3, el: el2, call: call2, getState, accept: accept2, n
     $3("diary-status").textContent = "";
     $3("diary-day").value = "";
     $3("diary-more").hidden = true;
+    $3("diary-discuss").hidden = true;
     buttons();
   }
   return { open, render, afterApplied, reset, selectDate, reload: () => load(), get selectedDate() {
@@ -10491,7 +10776,7 @@ var recipeNavigation = 0;
 var recipesLoaded = false;
 var recipeLoadScheduledFor = null;
 var automaticRecipeLoad = Promise.resolve();
-var recipePageCalls = createRecipePageCalls({ call: (...args) => call(...args), epoch: () => screenEpoch });
+var recipePageCalls = createRecipePageCalls({ call: (...args) => transport(...args), epoch: () => screenEpoch });
 var recipePageCall = (...args) => recipePageCalls.invoke(...args);
 var settleRecipePageRequests = (current) => recipePageCalls.settle(current);
 var csrf = null;
@@ -10543,7 +10828,11 @@ async function run(fn) {
     return null;
   }
 }
-async function call(name2, args = {}, options = {}) {
+function call(name2, args = {}, options = {}) {
+  const revoke = name2 === "keto_consent" && args.confirmed === true && ["processing", "storage", "health"].some((key) => args[key] === false);
+  return options.urgent || revoke ? transport(name2, args, options) : recipePageCalls.invoke(name2, args, options);
+}
+async function transport(name2, args = {}, options = {}) {
   const epoch = screenEpoch;
   const r = await fetch("/api/tools/" + encodeURIComponent(name2), { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrf ?? "" }, body: JSON.stringify(args), signal: options.signal });
   const d2 = await r.json();
@@ -10595,6 +10884,7 @@ function renderTranquilSummary(next) {
   host.hidden = false;
 }
 function clearScreen() {
+  document.querySelectorAll(".catalog-saved-receipt").forEach((node) => node.remove());
   dialogs.reset();
   chatActions.reset();
   intake.reset();
@@ -10816,6 +11106,27 @@ function flatten(payload, prefix = "") {
   }
   return out;
 }
+function showFoodSaved(proposal) {
+  const food = ["catalog.food.add", "kitchen.source_import"].includes(proposal.type), recipe = ["catalog.recipe.add", "kitchen.save", "kitchen.own_dish_save"].includes(proposal.type);
+  if (!food && !recipe || !["recipes", "products"].includes(view)) return;
+  const data = food ? proposal.preview?.food || proposal.payload : proposal.payload, name2 = data.name_ru || proposal.preview?.name_ru || "\u0420\u0435\u0446\u0435\u043F\u0442";
+  const source = food ? { food_id: data.food_id, name_ru: name2, amount: { value: 100, unit: "g" } } : { recipe_id: data.recipe_id, name_ru: name2, amount: { value: 1, unit: "portion" } };
+  if (!source.food_id && !source.recipe_id) return;
+  const page = document.querySelector('[data-page="' + view + '"]');
+  page.querySelector(".catalog-saved-receipt")?.remove();
+  const receipt = el("section", "catalog-saved-receipt");
+  receipt.setAttribute("role", "status");
+  const title = el("h2", "", food ? "\u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D" : "\u0420\u0435\u0446\u0435\u043F\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D");
+  title.dataset.icon = "check";
+  receipt.append(title, el("p", "", name2), el("p", "muted", "\u0421\u044A\u0435\u0434\u0435\u043D\u043D\u0443\u044E \u043F\u043E\u0440\u0446\u0438\u044E \u043C\u043E\u0436\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A."));
+  const record = el("button", "primary", "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u043F\u043E\u0440\u0446\u0438\u044E");
+  record.dataset.icon = "plate";
+  record.type = "button";
+  record.onclick = () => intake.open(source);
+  receipt.append(record);
+  page.querySelector(".page-heading").after(receipt);
+  $2("content").scrollTop = 0;
+}
 function renderProposals() {
   const pending = state.pending || [];
   $2("pending-open").hidden = !pending.length;
@@ -10892,6 +11203,7 @@ function renderProposals() {
         const applied = await call("keto_apply_proposal", { proposal_id: p.id, expected_revision: state.revision, approved: true });
         accept(applied);
         if (applied.receipt?.id === p.id) {
+          if (["catalog.food.add", "catalog.recipe.add", "kitchen.source_import", "kitchen.save", "kitchen.own_dish_save"].includes(p.type)) showFoodSaved(p);
           if (p.type === "kitchen.own_dish_save") ownDish.savedReceipt(p.payload);
           if (p.type === "measurement.add" || p.type === "measurement.update") finishMeasurementReceipt(p);
           if (p.type === "diary.add" && $2("diary-note").value === p.payload.note && $2("diary-date").value === p.payload.date) $2("diary-note").value = "";
@@ -11078,7 +11390,7 @@ async function send(message) {
   if (busy) {
     if (!/(не могу дышать|задыхаюсь|теряю сознание|сильная боль в груди|непрекращающаяся рвота)/i.test(message)) return;
     try {
-      const d2 = await call("keto_chat", { message, request_id: crypto.randomUUID().replaceAll("-", ""), thread_id: state?.active_thread || "main" });
+      const d2 = await call("keto_chat", { message, request_id: crypto.randomUUID().replaceAll("-", ""), thread_id: state?.active_thread || "main" }, { urgent: true });
       $2("messages").append(el("div", "bubble assistant", d2.message));
       markSafetyHold(d2);
     } catch (e) {
@@ -11099,7 +11411,7 @@ async function send(message) {
     const args = { message, request_id: crypto.randomUUID().replaceAll("-", ""), thread_id: state?.active_thread || "main" };
     if (image) args.image_data_url = image;
     if (attachedSource) args.source_id = attachedSource;
-    const d2 = await call("keto_chat", args);
+    const d2 = await call("keto_chat", args, { urgent: /(не могу дышать|задыхаюсь|теряю сознание|сильная боль в груди|непрекращающаяся рвота)/i.test(message) });
     if (sendEpoch !== screenEpoch) return;
     const responseThread = d2.response_thread_id || args.thread_id, sameThread = (d2.state?.active_thread || state?.active_thread || "main") === responseThread;
     wait.remove();

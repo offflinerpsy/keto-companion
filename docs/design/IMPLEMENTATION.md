@@ -35,3 +35,7 @@ Focused tests cover selection and delayed replies, quantities, typed confirmatio
 ## C15 detail pass — 2026-11-09
 
 The owner requested refined spacing, typography, controls and icons after using C14. The current source uses 14 px cards, 12 px controls, medium-weight secondary labels, and a local 30-symbol SVG mask set in `cloudflare-saas/public/ui-icons.css`. Build concatenation preserves the existing single CSS asset. Mobile date/time fields stack, quantity fields align at their lower edge, own-dish results and ingredients have explicit gaps, and disclosures retain visible open/closed chevrons. The full review and acceptance boundaries are recorded in [C15 UI result](../evidence/AGR_306_C15_UI_RESULT_RU.md) and [C15 source acceptance](../evidence/AGR_306_C15_UI_ACCEPTANCE.json).
+
+## C16 diary and motion — 2026-11-10
+
+[C16 design decisions](C16_DIARY_AND_MOTION.md) cover the owner’s iPhone 17 Pro input overflow, visible saved meals, complete-day nutrition and confirmed assistant memory. Animate UI v2.4.3 supplies pinned motion tokens, a native disclosure recipe and the success Check path through its documented plain-markup adaptation. [Source acceptance](../evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json) records 22 Chromium/WebKit scenarios, 639 Python and 259 Node tests. Physical iPhone acceptance remains separate from synthetic browser evidence.

@@ -6,6 +6,7 @@ This test server is never imported by the Worker or included in the Azure packag
 """
 from __future__ import annotations
 import copy
+import asyncio
 import hashlib
 import json
 import sys
@@ -40,8 +41,10 @@ transport=create_app(service,[{'subject':SUBJECT,'sha256':hashlib.sha256(KEY.enc
 client=TestClient(transport)
 headers={'Authorization':'Bearer '+KEY}
 app=FastAPI(docs_url=None,redoc_url=None,openapi_url=None)
+controls={'history_delay_ms':0,'history_fail':False,'single_request':False,'active':False,'rejected':0}
 
-def reset(count=0):
+def reset(count=0,timezone=True,same_day=False):
+    controls.update(history_delay_ms=0,history_fail=False,single_request=False,active=False,rejected=0)
     service.brain.calls=0
     old,version=service.store.read(SUBJECT)
     if old is not None:service.store.delete(SUBJECT,version)
@@ -50,6 +53,7 @@ def reset(count=0):
     fixture=json.loads((ROOT/'qa/setup-fixtures.json').read_text())['ready']
     profile=copy.deepcopy(fixture['profile'])
     profile.update(subject_id=SUBJECT,owner_account_id=SUBJECT,subject_kind='personal')
+    if not timezone:profile['timezone']=None
     document['core']['profile']=profile
     document['guidance_choices']=copy.deepcopy(fixture['guidance']['choices'])
     document['targets_provenance']={'source':'manual','label':'synthetic only'}
@@ -57,6 +61,7 @@ def reset(count=0):
     document['revision']+=1
     for index in range(count):
         payload={'date':f'2026-10-{index%25+1:02d}','recipe_id':'B01','portions':.5,'intake_status':'confirmed','note':f'Синтетическая запись {index+1}'}
+        if same_day:payload.update(date='2026-01-03',time='20:00',timezone='Europe/Minsk',meal='dinner')
         document['core']=k.apply_event(document['core'],{'event_id':f'synthetic_seed_{index}','type':'diary.add','payload':payload,'confirmed':True},
                                        document['core']['state_revision'],SUBJECT,service.kitchen_catalog(document))
     service.save(SUBJECT,document,version)
@@ -73,18 +78,37 @@ def session():return {'user':{'role':'member','status':'active','email':'synthet
 async def invoke(name:str,request:Request):
     if request.headers.get('x-csrf-token')!=CSRF:raise HTTPException(403,'Synthetic CSRF required')
     args=await request.json()
-    # Same capability boundary as the edge adapter; no direct Service.apply shortcut.
-    if name in UI_CONFIRM_TOOLS:
-        opened=client.post('/api/tools/keto_open',json={},headers=headers)
-        opened.raise_for_status();args['ui_confirmation']=opened.json()['_ui_confirmation']
-    response=client.post('/api/tools/'+name,json=args,headers=headers)
-    return JSONResponse(response.json(),status_code=response.status_code)
+    if controls['single_request'] and controls['active']:
+        controls['rejected']+=1
+        return JSONResponse({'error':'BUSY_OR_CONSENT_OR_LIMIT'},status_code=409)
+    controls['active']=True
+    try:
+        if name=='keto_kitchen' and args.get('action')=='diary_history':
+            if controls['history_delay_ms']:await asyncio.sleep(controls['history_delay_ms']/1000)
+            if controls['history_fail']:return JSONResponse({'error':'COMPUTE_UNAVAILABLE'},status_code=503)
+        # Same capability boundary as the edge adapter; no direct Service.apply shortcut.
+        if name in UI_CONFIRM_TOOLS:
+            opened=client.post('/api/tools/keto_open',json={},headers=headers)
+            opened.raise_for_status();args['ui_confirmation']=opened.json()['_ui_confirmation']
+        response=client.post('/api/tools/'+name,json=args,headers=headers)
+        return JSONResponse(response.json(),status_code=response.status_code)
+    finally:controls['active']=False
 
 @app.post('/__test__/reset')
 async def reset_fixture(request:Request):
     value=await request.json();count=value.get('entries',0)
-    if type(count)is not int or count not in (0,75):raise HTTPException(400,'Fixture count')
-    reset(count);return {'synthetic_only':True}
+    if type(count)is not int or count not in (0,31,75) or type(value.get('same_day',False))is not bool:raise HTTPException(400,'Fixture count')
+    reset(count,timezone=value.get('timezone',True),same_day=value.get('same_day',False));return {'synthetic_only':True}
+
+@app.post('/__test__/controls')
+async def update_controls(request:Request):
+    values=await request.json()
+    if set(values)-{'history_delay_ms','history_fail','single_request'}:raise HTTPException(400,'Fixture control')
+    if 'history_delay_ms' in values and not 0<=values['history_delay_ms']<=3000:raise HTTPException(400,'Fixture delay')
+    controls.update(values);return {'synthetic_only':True}
+
+@app.get('/__test__/controls')
+def get_controls():return controls
 
 @app.get('/__test__/state')
 def state():return dict(service.opened(SUBJECT),stored_diary=service.load(SUBJECT)[0]['core']['diary'],intent_calls=service.brain.calls)

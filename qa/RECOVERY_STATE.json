@@ -1,10 +1,19 @@
 {
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
-  "workspace_root": "/workspace/scratch/bbdbdb895c38/keto-companion",
+  "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T23:38:04.556934+00:00",
-  "active_task": null,
+  "updated_at": "2026-11-10T11:18:21.752712+00:00",
+  "active_task": {
+    "id": "AGR-306-C16-RELEASE",
+    "status": "in_progress",
+    "stage": "freeze_source_commit",
+    "source_acceptance": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
+    "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
+    "protected_baseline": "faf6015908ea556c76d7f6103e21d85606c8d394f833874854138366cf5cf96a",
+    "writer": "root",
+    "deliverable": "Exact accepted runtime and Azure source adopted in existing private-family staging; readback evidence"
+  },
   "last_completed": {
     "id": "AGR-306-C15-UI",
     "linear_issue": "AGR-306",
@@ -39,11 +48,20 @@
   },
   "next_task": {
     "id": "AGR-306-PHYSICAL-ACCEPTANCE",
-    "status": "awaiting_physical_owner_session",
-    "action": "On published C15: food -> quantity/time -> confirm -> diary totals -> correction/repeat; check physical keyboard, camera/barcode/photo and dictation. No new source build or identity bypass."
+    "status": "after_technical_release",
+    "action": "Owner checks the published C16 journey on actual iPhone 17 Pro; no identity bypass or speculative rebuild."
   },
   "no_relaunch": {
-    "recorded_local_jobs": [],
+    "recorded_local_jobs": [
+      {
+        "host": "authorized owner Mac isolated QA worktree",
+        "pid": 35361,
+        "run": "c16-qa-6",
+        "completion_marker": ".c16-qa-6.exit",
+        "status": "completed",
+        "exit_code": 0
+      }
+    ],
     "pending_cloud_builds": [],
     "pending_azure_operation": null,
     "temporary_probes": [],
@@ -52,8 +70,8 @@
     "accepted_runtime_baseline": "4a555cb91706137e3bd58972a5dc6870a4210f733129a252548ed98110bcf614",
     "accepted_runtime_image": "sha256:059d675cda4a8f89d0fda2d842940e1df2f2a479de8a83a18cc71c03217075c2",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
-    "new_runtime_image_required": "No: C15 release accepted. Documentation and physical acceptance do not require rebuild.",
-    "implementation_writer": null
+    "new_runtime_image_required": "Yes after C16 source is frozen; do not start until acceptance.",
+    "implementation_writer": "root"
   },
   "owner_authorization": "Implementation, verification and release to the existing private family environment authorized. No Mac Codex desktop, new accounts or providers.",
   "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md",
@@ -68,9 +86,34 @@
     "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json"
   ],
   "limitations": [
-    "C15 has not been accepted on the spouse physical iPhone 17 Pro Max.",
+    "C15 has not been accepted on the spouse physical iPhone 17 Pro.",
     "No fresh spouse sign-in or signed live food-intake transaction was performed; family diary and profile data were not changed for verification.",
     "Physical iPhone keyboard, camera/barcode/photo and dictation were not revalidated for C15.",
     "Synthetic browser, HTTP and runtime checks do not establish clinical effectiveness or full accessibility compliance."
-  ]
+  ],
+  "source_completed": {
+    "id": "AGR-306-C16-PRODUCT",
+    "status": "completed",
+    "stage": "source_accepted",
+    "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
+    "deliverable": "iPhone temporal-input/dialog containment, visible durable diary receipts, day nutrition map, confirmed assistant memory",
+    "acceptance": [
+      "402 CSS px mobile geometry and native picker semantics",
+      "saved intake immediately visible even if history refresh fails",
+      "account-scoped day navigation, unconfirmed timezone read fallback",
+      "actual full-day totals and current agreed targets with incomplete-data states",
+      "confirmed server memory used by deterministic answer and assistant context",
+      "existing native CI and private-family release, with exact Azure adoption if Python changes"
+    ],
+    "device": "iPhone 17 Pro (not Max), Chrome; owner screenshots 1206px wide",
+    "writer": "root",
+    "evidence": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
+    "additional_owner_direction": "Animate UI reference adopted as pinned native/CSS dialog, disclosure and SVG success mark; preserve current architecture",
+    "completed_checks": {
+      "python": "639 passed; 6 subtests",
+      "node": "259 passed",
+      "browser": "22 passed in Chromium/WebKit; 0 failed/flaky/skipped",
+      "contracts_specification_hygiene": "passed"
+    }
+  }
 }

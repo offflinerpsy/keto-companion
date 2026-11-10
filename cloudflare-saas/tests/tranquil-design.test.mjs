@@ -103,7 +103,7 @@ test('account change, consent revocation and clearScreen remove old overview; la
  const {api,nodes,context}=harness(),first=accepted();first.diary=Array.from({length:7},()=>({intake_status:'unquantified'}));api.setState(first);assert.equal(nodes['dawn-overview'].hidden,false);assert(content(nodes['dawn-status-cards']).includes('7'));
  const next=accepted();next.profile.owner_account_id='synthetic-b';next.diary=[];api.setState(next);assert(!content(nodes['dawn-status-cards']).includes('7'));
  const button=nodes['dawn-status-cards'].children[3].children.at(-1);button.onclick();assert.equal(context.lastView,'diary');
- let finish;context.fetch=()=>new Promise(resolve=>finish=resolve);const late=api.call('keto_open').then(api.accept);api.clearScreen();assert.equal(nodes['dawn-overview'].hidden,true);assert.equal(content(nodes['dawn-status-cards']).trim(),'');
+ let finish;context.fetch=()=>new Promise(resolve=>finish=resolve);const late=api.call('keto_open').then(api.accept);await new Promise(resolve=>setImmediate(resolve));api.clearScreen();assert.equal(nodes['dawn-overview'].hidden,true);assert.equal(content(nodes['dawn-status-cards']).trim(),'');
  finish(new Response(JSON.stringify({state:first})));await assert.rejects(late,/Сеанс изменился/);assert.equal(nodes['dawn-overview'].hidden,true);
  next.profile.consent.health_data=false;api.setState(next);assert.equal(nodes['dawn-overview'].hidden,true);assert.equal(nodes['dawn-progress'].children.length,0);
  assert.doesNotMatch(app,/localStorage/);

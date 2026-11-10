@@ -33,7 +33,7 @@ test('recipe, amount, eating time, review and persistence form one complete path
  await expect(page.locator('#diary-entries')).toContainText('Омлет со шпинатом и авокадо');
  await page.screenshot({path:'qa/mobile-browser/c11-day-saved.png'});
  await page.reload();await expect(page.locator('[data-page=diary]')).toBeVisible();
- await page.locator('#diary-day').fill('2026-01-03');await page.locator('#diary-day').dispatchEvent('change');
+ await expect(page.locator('#diary-day')).toHaveValue('2026-01-03');
  await expect(page.locator('#diary-entries')).toContainText('0,5 порции');expect((await stored(request))[0]).toEqual(before[0]);
 });
 
@@ -43,7 +43,8 @@ test('cancel does not log; edit keeps identity; repeat creates a new reviewed re
  await expect(page.locator('#proposal-dialog')).toBeHidden();expect(await stored(request)).toHaveLength(0);
  await recipe(page);await prepare(page);await apply(page);const first=(await stored(request))[0];
  await page.locator('#diary-entries').getByRole('button',{name:'Исправить',exact:true}).click();
- await page.locator('#intake-amount').fill('0.25');await page.locator('#intake-time').fill('');await page.locator('#intake-meal').selectOption('');
+ await page.locator('#intake-amount').fill('0.25');await page.locator('#intake-clear-time').click();await page.locator('#intake-meal').selectOption('');
+ await expect(page.locator('#intake-time')).toHaveValue('');expect(await page.locator('#intake-form').evaluate(form=>Array.from(form.elements).filter(x=>x.willValidate&&!x.validity.valid).map(x=>({id:x.id,value:x.value,badInput:x.validity.badInput,message:x.validationMessage})))).toEqual([]);
  await page.locator('#intake-review').click();await expect(page.locator('#proposal-dialog')).toBeVisible();await apply(page,'Сохранить исправление');
  const edited=(await stored(request))[0];expect(edited.entry_id).toBe(first.entry_id);expect(edited.recorded_at).toBe(first.recorded_at);expect(edited.portions).toBe(.25);expect(edited.time).toBeNull();expect(edited.meal||'').toBe('');
  await page.locator('#diary-entries').getByRole('button',{name:'Повторить',exact:true}).click();await expect(page.locator('#intake-time')).toHaveValue('');
@@ -57,7 +58,7 @@ test('history beyond sixty stays reachable, and stale pagination is explicitly r
  await expect(page.locator('#diary-entries .diary-entry')).toHaveCount(30);await page.locator('#diary-more').click();await expect(page.locator('#diary-entries .diary-entry')).toHaveCount(60);
  await page.locator('#diary-more').click();await expect(page.locator('#diary-entries .diary-entry')).toHaveCount(75);
  const old=page.locator(`[data-entry-id="${initial[0].entry_id}"]`);await old.getByRole('button',{name:'Исправить',exact:true}).click();await expect(page.locator('#intake-date')).toHaveValue('2026-10-01');await page.locator('#intake-close').click();
- await page.reload();await page.locator('#diary-all').click();await expect(page.locator('#diary-entries .diary-entry')).toHaveCount(30);
+ await page.reload();await expect(page.locator('#diary-entries .diary-entry')).toHaveCount(30);
  await request.post('/__test__/concurrent-note');await page.locator('#diary-more').click();
  await expect(page.locator('#diary-refresh')).toBeVisible();await expect(page.locator('#diary-entries .diary-entry')).toHaveCount(30);
  await page.locator('#diary-refresh').click();await expect(page.locator('#diary-status')).toContainText('из 76');

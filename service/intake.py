@@ -1,7 +1,7 @@
 """Shared intake adapters over the existing proposal, CAS and diary event paths."""
 import copy, uuid
 from .store import Conflict
-from .kitchen import core, init
+from .kitchen import core, init, confirmed_profile_memory
 from .mobile import topic
 
 
@@ -109,6 +109,9 @@ class IntakeService:
             if not rows:raise ValueError('Запись не найдена в вашем дневнике')
         if day is not None:rows=[e for e in rows if e.get('date')==day]
         rows=sorted(rows,key=lambda e:(e['date'],e.get('time') or '',e['entry_id']),reverse=True)
+        memory=confirmed_profile_memory(d)
+        nutrition_context={'profile':{'targets':memory.get('targets')},'guidance':{'targets_stale':memory['targets_stale']},'screening':{'can_plan':not memory['planning_paused']}}
         return {'entries':[self.diary_row(e,cat) for e in rows[offset:offset+limit]],'total':len(rows),'offset':offset,
                 'has_more':offset+limit<len(rows),'revision':d['revision'],
+                'nutrition_context':nutrition_context,
                 'summary':k.diary_summary(d['core']['diary'],cat,day) if day is not None else None,'model_called':False}

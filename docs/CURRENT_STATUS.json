@@ -1,23 +1,23 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-09T23:38:04.556934+00:00",
+  "updated_at": "2026-11-10T11:18:21.752712+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "AGR-306",
     "status": "In Progress",
-    "stage": "C15_deployed_physical_spouse_acceptance_pending",
+    "stage": "C16_source_accepted_release_in_progress",
     "spec_directory": "specs/001-iphone-keto-overhaul",
-    "source_branch": "codex/keto-ui-polish-c15",
+    "source_branch": "codex/keto-diary-c16",
     "release_performed": true,
-    "source_acceptance": "docs/evidence/AGR_306_C15_UI_ACCEPTANCE.json",
+    "source_acceptance": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
     "source_commit": "ad5f4b63479e226ca080ae22f3102d4d34c9e3fb",
     "native_build": "c1ed4836-1b42-49d6-a29b-3990949135a0",
     "implementation_paused": false,
     "audit_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/owner-pause-audit/AUDIT_RESULT.md",
     "audit_linear_comment": "03b56ead-fa9a-44af-a3d8-0b7495ce4d2b",
-    "next_action": "Owner opens the published application and accepts one spouse physical iPhone journey; no rebuild required.",
+    "next_action": "Release frozen C16 through exact native runtime, Azure ZIP and ordinary promotion; do not add features.",
     "physical_iPhone_acceptance": "C15 full spouse physical iPhone flow pending; synthetic acceptance is separate.",
     "C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_BUILD_EVIDENCE.json",
     "C8_independent_control": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
@@ -42,8 +42,8 @@
   "last_completed": "AGR-306-C15 UI details and technical release to existing private family staging.",
   "next_task": {
     "id": "AGR-306-PHYSICAL-ACCEPTANCE",
-    "status": "awaiting_physical_owner_session",
-    "action": "On published C15: food -> quantity/time -> confirm -> diary totals -> correction/repeat; check physical keyboard, camera/barcode/photo and dictation. No new source build or identity bypass."
+    "status": "after_C16_technical_release",
+    "action": "Check the completed C16 journey on actual iPhone 17 Pro."
   },
   "staging": {
     "deployed": true,
@@ -100,7 +100,7 @@
     "current_final_receipt": "docs/evidence/AGR_306_C15_RELEASE_RECEIPT.json"
   },
   "not_verified": [
-    "C15 has not been accepted on the spouse physical iPhone 17 Pro Max.",
+    "C15 has not been accepted on the spouse physical iPhone 17 Pro.",
     "No fresh spouse sign-in or signed live food-intake transaction was performed; family diary and profile data were not changed for verification.",
     "Physical iPhone keyboard, camera/barcode/photo and dictation were not revalidated for C15.",
     "Synthetic browser, HTTP and runtime checks do not establish clinical effectiveness or full accessibility compliance.",

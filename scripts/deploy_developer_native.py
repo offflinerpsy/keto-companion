@@ -10,6 +10,34 @@ ACCOUNT='0609100baf768271ea2811c9a9ee2b16'
 NAME='keto-companion-developer-runner'
 NODE='node:26.3.1-bookworm-slim@sha256:9898bb74f4ee319780e87819df703b3633113bc3422f151fd11155cf974a2749'
 PYTHON='python:3.12.12-slim-bookworm@sha256:593bd06efe90efa80dc4eee3948be7c0fde4134606dd40d8dd8dbcade98e669c'
+def acceptance_diagnostic(output):
+    """Expose the last structured probe state, never arbitrary subprocess output."""
+    for line in reversed(output.splitlines()):
+        if not line.startswith('KETO_ACCEPTANCE_HTTP ') or len(line)>30000:continue
+        try:state=json.loads(line.removeprefix('KETO_ACCEPTANCE_HTTP '))
+        except (ValueError,TypeError):continue
+        if not isinstance(state,dict):continue
+        result={}
+        enums={
+            'upload':{'not_delivered','possibly_delivered','delivered_unverified'},
+            'readiness':{'network_failure','invalid','refused_or_mismatch','known_handler_shape'},
+            'post':{'not_delivered','possibly_delivered','delivered_unverified'},
+            'cleanup':{'not_attempted','possibly_delivered','delivered_unverified','failed','response_unverified'},
+            'outcome':{'verifier_passed','verifier_failed'},
+        }
+        for key,allowed in enums.items():
+            value=state.get(key)
+            result[key]=value if isinstance(value,str) and value in allowed else None
+        for key in ('run_id','job_id'):
+            value=state.get(key)
+            if isinstance(value,str) and re.fullmatch(r'[a-f0-9-]{36}',value):result[key]=value
+        name=state.get('probe_name')
+        if isinstance(name,str) and re.fullmatch(r'keto-developer-check-[a-f0-9]{10}',name):result['probe_name']=name
+        result['post_count']=state.get('post_count') if type(state.get('post_count')) is int and 0<=state['post_count']<=1 else None
+        result['events']=[{'method':e.get('method') if e.get('method') in ('GET','POST','PUT','DELETE') else 'other','status':e.get('status') if type(e.get('status')) is int and 0<=e['status']<=599 else 0,'type':e.get('type') if e.get('type') in ('json','non_json','invalid_json','invalid','empty','mismatch','known_handler_shape','network_failure') else 'other'} for e in state.get('events',[])[-12:] if isinstance(e,dict)] if isinstance(state.get('events'),list) else []
+        return result
+    return {'outcome':'diagnostic_unavailable'}
+
 def run(stage,args,timeout=120,input=None,env=None):
     print('KETO_NATIVE_RUNNER '+stage,flush=True)
     result=subprocess.run(args,cwd=ROOT,input=input,capture_output=True,text=True,timeout=timeout,env=env)
@@ -24,9 +52,9 @@ def run(stage,args,timeout=120,input=None,env=None):
             diagnostic=re.sub(r'(?i)(token|password|authorization|secret)([=: ]+)[^\s]+',r'\1\2[redacted]',diagnostic)
             print('KETO_SAFE_STAGE_DIAGNOSTIC '+stage+' '+diagnostic,flush=True)
         elif stage=='cloud_container_acceptance':
-            # Fixed synthetic probe only. Emit its bounded diagnostic, never CI auth values.
-            lines=[line[:2500] for line in (result.stdout+'\n'+result.stderr).splitlines() if line.startswith(('Error:','SyntaxError:','TypeError:'))]
-            print('KETO_CONTAINER_ACCEPTANCE_DIAGNOSTIC '+json.dumps(lines),flush=True)
+            # The verifier catches exceptions. Preserve its HTTP state so an uncertain
+            # POST is investigated by job ID instead of blindly rebuilding an image.
+            print('KETO_CONTAINER_ACCEPTANCE_DIAGNOSTIC '+json.dumps(acceptance_diagnostic(result.stdout+'\n'+result.stderr)),flush=True)
         elif stage=='official_registry_push':
             output=(result.stdout+'\n'+result.stderr).lower()
             reason='authorization_or_permission' if any(x in output for x in ['unauthorized','permission','forbidden','authentication','403','401']) else 'registry_transport_or_cli'

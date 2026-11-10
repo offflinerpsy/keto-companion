@@ -210,6 +210,8 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
             extra={}
             if entry:
                 cat=self.kitchen_catalog(d);extra={'entry':self.diary_row(entry,cat),'entry_id':entry['entry_id'],'diary_summary':k.diary_summary(d['core']['diary'],cat,entry['date'])}
+            elif receipt.get('type')=='diary.delete' and receipt.get('entry_id') and receipt.get('date'):
+                extra={'deleted_entry_id':receipt['entry_id'],'diary_summary':k.diary_summary(d['core']['diary'],self.kitchen_catalog(d),receipt['date'])}
             return {'message':'Это действие уже обработано; повтор не создан.','receipt':receipt,'state':self.snapshot(d),**extra}
         p=d['pending'].get(proposal_id)
         if not p:raise InputError('Предложение отсутствует')
@@ -257,9 +259,13 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
             cat=self.kitchen_catalog(d);result_entry=self.diary_row(changed[0],cat)
             receipt['entry_id']=changed[0]['entry_id'];receipt['date']=changed[0]['date']
             diary_summary=k.diary_summary(d['core']['diary'],cat,changed[0]['date'])
+        deleted_entry=before_diary.get(p['payload'].get('entry_id')) if p['type']=='diary.delete' else None
+        if deleted_entry:
+            receipt.update(entry_id=deleted_entry['entry_id'],date=deleted_entry['date'])
+            diary_summary=k.diary_summary(d['core']['diary'],self.kitchen_catalog(d),deleted_entry['date'])
         d['receipts'][proposal_id]=receipt
         d['receipts']=dict(list(d['receipts'].items())[-120:]);self.save(subject,d,v)
-        return {'message':'Изменение сохранено.' if p['type']!='feature.request' else 'Пожелание записано для разработчика. Функция ещё не реализована.','receipt':receipt,'state':self.snapshot(d),**({'entry':result_entry,'entry_id':result_entry['entry_id'],'diary_summary':diary_summary} if result_entry else {})}
+        return {'message':'Изменение сохранено.' if p['type']!='feature.request' else 'Пожелание записано для разработчика. Функция ещё не реализована.','receipt':receipt,'state':self.snapshot(d),**({'entry':result_entry,'entry_id':result_entry['entry_id'],'diary_summary':diary_summary} if result_entry else {}),**({'deleted_entry_id':deleted_entry['entry_id'],'diary_summary':diary_summary} if deleted_entry else {})}
     def _validate_on_apply(self,d,p):
         clone=copy.deepcopy(d);clone['pending']={};fresh=self._prepare(clone,p['type'],p['payload'])
         if p.get('preview_hash') and fresh.get('preview_hash')!=p['preview_hash']:raise Conflict('Расчёт изменился. Проверьте новое предложение перед сохранением.')

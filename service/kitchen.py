@@ -12,7 +12,7 @@ import os
 import re
 import time
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from jsonschema import Draft202012Validator
@@ -310,6 +310,58 @@ def daily_summary(d,cat,day=None):
     day=day or datetime.now(ZoneInfo(zone)).date().isoformat()
     return k.diary_summary(d['core']['diary'],cat,day)
 
+def confirmed_profile_memory(d):
+    """A small view of persisted facts, shared by local answers and model context."""
+    from . import planning
+    profile=d['core']['profile'];status=planning.status(d,core())
+    memory={key:copy.deepcopy(profile[key]) for key in ('display_name','timezone','goal') if profile.get(key)}
+    memory['baseline']={key:copy.deepcopy(profile['baseline'][key]) for key in ('age_years','height_cm','weight_kg','activity_note','measured_at') if profile.get('baseline',{}).get(key) is not None}
+    memory['choices']={key:value for key,value in d.get('guidance_choices',{}).items() if key in ('goal','mode')}
+    memory['allergies']=copy.deepcopy(profile.get('allergies',[]))
+    memory['allergies_reviewed']=profile.get('screening',{}).get('allergies_reviewed')
+    memory['targets_stale']=status['targets_stale']
+    memory['planning_paused']=bool(d.get('holds')) or not core().screen_profile(profile)['can_plan']
+    targets=profile.get('targets') or {}
+    if targets.get('status')=='agreed':
+        keys=('status','agreed_at','basis_note','energy_min_kcal','energy_max_kcal','protein_min_g','protein_max_g','carb_basis','carb_max_g','fiber_min_g','saturated_fat_max_pct')
+        memory['targets']={key:copy.deepcopy(targets[key]) for key in keys if key in targets}
+        memory['targets_provenance']={key:value for key,value in (status.get('provenance') or {}).items() if key in ('source','label','policy_version','applied_at')}
+    return memory
+
+def diary_query(message):
+    """Explicit consumption questions, not requests to calculate a dietary norm."""
+    msg=message.casefold()
+    if re.search(r'запиш|записать|добав|сохран|удал|исправ|сколько.*(?:нужн|надо|норм|следует|должн)|сколько.*съесть',msg):return False
+    return bool(re.search(r'подведи.*итог|итоги дня|итоги за сегодня|сводка.*дня|(?:что|сколько).*(?:съел|ела\b|ел\b)|сколько.*калор.*(?:сегодня|вчера|\d{4}-\d{2}-\d{2})',msg))
+
+def diary_context_day(d,message):
+    dates=re.findall(r'\b\d{4}-\d{2}-\d{2}\b',message)
+    if dates and re.search(r'дневник|съел|ела\b|ел\b|калор|итог|сводк',message,re.I):
+        try:return core().diary_date(dates[0]) or dates[0]
+        except ValueError:return None
+    zone=d['core']['profile'].get('timezone')
+    if not zone:return None
+    current=datetime.now(ZoneInfo(zone)).date()
+    offset=2 if re.search(r'\bпозавчера\b',message,re.I) else 1 if re.search(r'\bвчера\b',message,re.I) else 0
+    return (current-timedelta(days=offset)).isoformat()
+
+def diary_target_comparison(summary,memory):
+    targets=memory.get('targets')
+    if not targets or memory.get('targets_stale') or memory.get('planning_paused') or not summary.get('entry_count'):return {}
+    carbs='net_carbohydrate_g' if targets.get('carb_basis')=='net_estimate' else 'carbohydrate_total_g'
+    specs=[('energy_kcal','energy_min_kcal','energy_max_kcal'),('protein_g','protein_min_g','protein_max_g'),(carbs,None,'carb_max_g'),('fiber_g','fiber_min_g',None)]
+    result={}
+    for nutrient,lower,upper in specs:
+        low=targets.get(lower);high=targets.get(upper);coverage=summary.get('coverage',{}).get(nutrient,{})
+        value=(summary.get('nutrition') or {}).get(nutrient)
+        if value is None or coverage.get('complete') is not True:
+            result[nutrient]={'status':'incomplete','known_subtotal':coverage.get('known_subtotal')};continue
+        item={'value':value,'lower':low,'upper':high,'status':'above' if high is not None and value>high else 'below' if low is not None and value<low else 'within'}
+        if low is not None:item['to_lower']=round(max(0,low-value),2)
+        if high is not None:item['to_upper']=round(max(0,high-value),2)
+        result[nutrient]=item
+    return result
+
 class KitchenService:
     def kitchen_catalog(self,d):
         return core().merge_personal_catalog(self.base,d['core'])
@@ -388,7 +440,41 @@ class KitchenService:
         return [m for m in topic(d,tid)['messages'][-8:] if not changed or m.get('at','')>changed]
 
     def kitchen_context(self,d,message,tid):
-        return {'confirmed_kitchen':self.kitchen_snapshot(d),'own_historical_quotes':recall(d,message,tid),'retrieved_guidance':source_retrieval(message)}
+        kitchen=self.kitchen_snapshot(d);kitchen.pop('diary_recipe_names',None)
+        memory=confirmed_profile_memory(d)
+        return {'confirmed_kitchen':kitchen,'confirmed_profile':memory,'confirmed_diary':self.confirmed_diary_context(d,message,memory),'own_historical_quotes':recall(d,message,tid),'retrieved_guidance':source_retrieval(message)}
+
+    def confirmed_diary_context(self,d,message,memory=None):
+        memory=memory or confirmed_profile_memory(d);day=diary_context_day(d,message)
+        if day is None:return {'date':None,'entries':[],'note':'Дата не определена: укажите день или подтвердите часовой пояс. Фактическое потребление неизвестно.'}
+        cat=self.kitchen_catalog(d);summary=daily_summary(d,cat,day)
+        entries=sorted((entry for entry in d['core']['diary'] if entry.get('date')==day),key=lambda entry:entry.get('time') or '',reverse=True)
+        rows=[]
+        for entry in entries[:10]:
+            row=self.diary_row(entry,cat)
+            source_name=(entry.get('nutrition_snapshot') or {}).get('source',{}).get('name_ru') or cat['recipes'].get(entry.get('recipe_id'),{}).get('name_ru') or cat['foods'].get(entry.get('food_id'),{}).get('name_ru')
+            # Free-text diary notes are historical text, not canonical preferences.
+            row['name_ru']=source_name[:200] if source_name else 'Заметка без уточнённого состава'
+            rows.append({key:copy.deepcopy(row[key]) for key in ('name_ru','time','meal','amount','portions','grams','intake_status','legacy_estimate','complete') if key in row})
+        return {'date':day,'timezone':d['core']['profile'].get('timezone'),'summary':summary,'entries':rows,'entry_count':len(entries),'omitted_entries':max(0,len(entries)-len(rows)),
+                'comparison_basis':'current_confirmed_targets_not_historical','target_comparison':diary_target_comparison(summary,memory)}
+
+    def memory_reply(self,d):
+        memory=confirmed_profile_memory(d);parts=['В сохранённом профиле:']
+        parts.append('Имя: '+memory.get('display_name','пока не указано')+'.')
+        choices=memory['choices'];goal=memory.get('goal') or {'loss':'мягкое снижение веса','maintain':'поддержание веса','gain':'набор веса с индивидуальным планом'}.get(choices.get('goal'))
+        if goal:parts.append('Цель: '+goal+'.')
+        if choices.get('mode'):parts.append('Выбранный режим: '+{'starter':'низкоуглеводный старт','keto':'кето-ориентированный'}.get(choices['mode'],choices['mode'])+'.')
+        baseline=memory['baseline'];measurements=[]
+        for key,label,unit in [('age_years','возраст','лет'),('height_cm','рост','см'),('weight_kg','вес','кг')]:
+            if baseline.get(key) is not None:measurements.append(f'{label} {baseline[key]:g} {unit}')
+        if measurements:parts.append('Сохранённые исходные данные'+(' от '+str(baseline['measured_at']) if baseline.get('measured_at') else '')+': '+', '.join(measurements)+'.')
+        if memory.get('timezone'):parts.append('Часовой пояс: '+memory['timezone']+'.')
+        preferences=init(d)['preferences'];parts.append('Предпочтения: '+('; '.join(fact['text'] for fact in preferences) if preferences else 'новых подтверждённых предпочтений пока нет')+'.')
+        parts.append('Ориентиры сохранены, но устарели после изменения профиля.' if memory['targets_stale'] else 'Согласованные ориентиры питания сохранены.' if memory.get('targets') else 'Ориентиры питания пока не согласованы.')
+        parts.append('В дневнике записей: '+str(len(d['core']['diary']))+'. Для обсуждения дня использую его сохранённые записи и полноту состава.')
+        parts.append('Посмотреть и изменить сведения можно в «Что я помню». Неподтверждённые сообщения не считаю фактами.')
+        return '\n'.join(parts)
 
     def kitchen_validate_change(self,d,action,payload):
         k=core();cat=self.kitchen_catalog(d);block=init(d)
@@ -754,7 +840,7 @@ class KitchenService:
         from .domain import literal_guard, storage_consent, text
         message=text(message,6000);msg=message.casefold();d,v=self.load(subject,kind);tid=thread_id or 'main';t=topic(d,tid);block=init(d)
         if literal_guard(message) or re.search(r'беремен|диабет|инсулин|форсиг|джардинс|поч[екч]|лекарств|аллерги|сглт|sglt|рпп|кормлю',msg):return None
-        group=t.get('kitchen');explicit=bool(re.search(r'подведи.*итог|итоги дня|итоги за сегодня|сколько.*съел|сводка.*дня|без покупок|можно докупить|ничего нет|только из|из кладовой|сохрани рецепт|что ты обо мне помнишь|забудь.*предпочт|запомни.*не люблю|есть .*(?:ужин|завтрак|приготов|обед)',msg))
+        group=t.get('kitchen');explicit=diary_query(msg) or bool(re.search(r'без покупок|можно докупить|ничего нет|только из|из кладовой|сохрани рецепт|что ты обо мне помнишь|что ты знаешь обо мне|как меня зовут|забудь.*предпочт|запомни.*не люблю|есть .*(?:ужин|завтрак|приготов|обед)',msg))
         follow=bool(group and re.search(r'вариант|второй|первый|третий|запиши.*половин|сохрани|докупить|без сыра',msg))
         explicit=explicit or bool(re.search(r'приготов|сделай|испеки|хочу',msg) and any(re.search(pattern,msg) for pattern in POLICY['equipment_patterns'].values()))
         hungry=hunger_request(message) and not d['holds'] and core().screen_profile(d['core']['profile'])['status'] not in ('blocked','clinician_review')
@@ -777,17 +863,26 @@ class KitchenService:
         result=None;action=None;values={};rid=group.get('selected_id') if group else None
         if hungry:
             result={'message':'Как подберём блюдо?','meal_modes':True,'model_called':False}
-        elif re.search(r'подведи.*итог|итоги дня|итоги за сегодня|сколько.*съел|сводка.*дня',msg):
-            summary=daily_summary(d,self.kitchen_catalog(d));n=summary['nutrition']
-            if n:
-                fields=[('energy_kcal','ккал'),('protein_g','г белка'),('carbohydrate_total_g','г общих углеводов'),('fiber_g','г клетчатки')]
-                reply='По подтверждённым записям: '+', '.join(('нет данных' if n[key] is None else str(round(n[key],1)))+' '+label for key,label in fields)+'. '
-            else:reply='Сегодня пока нет записей с подтверждёнными граммовками. '
-            reply+=summary['note']
-            if summary['unquantified_entries']:reply+=' Ещё записей без полного количественного состава: '+str(summary['unquantified_entries'])+'.'
+        elif diary_query(msg):
+            context_day=self.confirmed_diary_context(d,msg);summary=context_day.get('summary')
+            if summary is None:reply=context_day['note']
+            elif summary['empty']:reply='За '+summary['date']+' пока нет записей. Это не означает, что ничего не съедено.'
+            else:
+                fields=[('energy_kcal','ккал'),('protein_g','г белка'),('fat_g','г жиров'),('carbohydrate_total_g','г общих углеводов'),('fiber_g','г клетчатки')]
+                values=[]
+                for key,label in fields:
+                    coverage=summary['coverage'][key];value=(summary['nutrition'] or {}).get(key)
+                    if coverage['complete'] and value is not None:values.append(f'{value:.1f} {label}')
+                    elif coverage.get('known_subtotal') is not None:values.append(f'известная часть: {coverage["known_subtotal"]:.1f} {label}')
+                    else:values.append(label+': нет данных')
+                reply='По записям за '+summary['date']+': '+', '.join(values)+'. '
+                foods=[row['name_ru']+(' · '+row['time'] if row.get('time') else '') for row in context_day['entries']]
+                if foods:reply+='Записано: '+'; '.join(foods)+'. '
+                if context_day['omitted_entries']:reply+='Остальные записи — в дневнике; итог включает весь день. '
+                reply+=summary['note']
             result={'message':reply,'daily_summary':summary,'open_view':'diary','model_called':False}
-        elif re.search(r'что ты обо мне помнишь',msg):
-            result={'message':'Помню только подтверждённые настройки: '+('; '.join(p['text'] for p in block['preferences']) or 'кухонных предпочтений пока нет')+'. Полный список можно проверить и изменить в «Что я помню».','open_view':'memory','model_called':False}
+        elif re.search(r'что ты (?:обо мне помнишь|знаешь обо мне)|как меня зовут',msg):
+            result={'message':self.memory_reply(d),'open_view':'memory','model_called':False}
         elif re.search(r'забудь.*предпочт',msg):
             if len(block['preferences'])==1:action='forget';values={'fact_id':block['preferences'][0]['id']}
             else:result={'message':'Выберите конкретное предпочтение в «Что я помню», чтобы удалить его после подтверждения.','open_view':'memory','model_called':False}
