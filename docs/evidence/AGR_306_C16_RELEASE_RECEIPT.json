@@ -1,0 +1,80 @@
+{
+  "schema": "keto-c16-release-receipt-v1",
+  "task": "AGR-306-C16-RELEASE",
+  "status": "completed_technical_private_family_release",
+  "recorded_at": "2026-11-10T12:01:43.033847+00:00",
+  "initial_ui_candidate": "2ec60e32bca79a2535c3a4b02b1718f23f0b1dd5",
+  "accepted_source_candidate": "9b577ea6013e311fa026f37f2d5b2b7de517765a",
+  "deployed_frontend_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+  "backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+  "backend_changed": true,
+  "source_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+  "source_archive_sha256": "0d7a7cdd83bb1523434eb0fab2f8305d3e8090c87c295aaa701f968d3b75c7a9",
+  "image_digest": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
+  "native_build": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
+  "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+  "prior_source_gate_failure": "86ba3306-509d-46df-94e0-1297ae6a34b6",
+  "prior_ordinary_rpc_failure": "aa205ca4-dd1e-47f7-97e5-2c43949026f1",
+  "same_R_same_image_ordinary_retry": true,
+  "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
+  "azure_runtime_code_sha256": "10cc7ad515b708c1745d795358c9dc4beda696750e3e78c5d4206d72ca67fac6",
+  "worker_version": "9ce80b6f-1e7a-4bdf-9cef-3d6ded459ef9",
+  "traffic_percent": 100,
+  "application_url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/",
+  "pull_request": 22,
+  "pull_request_url": "https://github.com/offflinerpsy/keto-companion/pull/22",
+  "checks": {
+    "python": 639,
+    "python_subtests": 6,
+    "node": 260,
+    "browser_scenarios": 22,
+    "browser_unique_scenarios": 11,
+    "browser_engines": [
+      "Chromium",
+      "WebKit"
+    ],
+    "mobile_widths": [
+      360,
+      390,
+      402,
+      430
+    ],
+    "ops": 12,
+    "full_source_stages": 16,
+    "actual_runtime_product": 14,
+    "actual_runtime_python": 17,
+    "live_http": 15,
+    "served_asset_hashes": 6
+  },
+  "ordinary_trigger_restored": true,
+  "temporary_probes": [],
+  "active_instances": [],
+  "family_records_written": false,
+  "evidence": {
+    "source": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
+    "asset_equivalence": "docs/evidence/AGR_306_C16_ASSET_EQUIVALENCE.json",
+    "source_failure": "docs/evidence/AGR_306_C16_NATIVE_FAILURE.json",
+    "runtime": "docs/evidence/AGR_306_C16_NATIVE_ACCEPTANCE.json",
+    "azure_package": "docs/evidence/AGR_306_C16_AZURE_PACKAGE.json",
+    "azure": "docs/evidence/AGR_306_C16_AZURE_DEPLOYMENT.json",
+    "ordinary_failure": "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json",
+    "ordinary": "docs/evidence/AGR_306_C16_ORDINARY_ACCEPTANCE.json",
+    "readback": "docs/evidence/AGR_306_C16_LIVE_READBACK.json",
+    "http": "docs/evidence/AGR_306_C16_LIVE_HTTP.json",
+    "report_ru": "docs/evidence/AGR_306_C16_UI_RESULT_RU.md"
+  },
+  "limitations": [
+    "C16 was not exercised on the physical iPhone 17 Pro (not Max); mobile WebKit/Chromium is synthetic browser evidence.",
+    "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
+    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C16.",
+    "Assistant tests establish confirmed context and deterministic answers, not the quality of a new live model response.",
+    "Synthetic checks do not establish clinical effectiveness or complete accessibility compliance.",
+    "GitHub Codex review could not run because its review usage limit was reached; independent subagent review and completed CI are separate evidence."
+  ],
+  "next_action": "Owner refreshes published app and checks the food portion -> confirm -> visible diary/total -> edit/repeat flow on the actual iPhone 17 Pro; no speculative rebuild.",
+  "external_github_review": {
+    "status": "not_completed_usage_limit",
+    "pull_request": 22,
+    "review_entries": 0
+  }
+}

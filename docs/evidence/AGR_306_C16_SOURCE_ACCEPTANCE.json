@@ -1,0 +1,172 @@
+{
+  "schema": "keto-source-acceptance-v1",
+  "task": "AGR-306-C16-PRODUCT",
+  "status": "passed",
+  "checked_at": "2026-11-10T11:31:03.736271+00:00",
+  "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
+  "source_branch": "codex/keto-diary-c16",
+  "protected_source_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+  "protected_source_files": 240,
+  "runtime_archive_sha256": "0d7a7cdd83bb1523434eb0fab2f8305d3e8090c87c295aaa701f968d3b75c7a9",
+  "owner_device": "iPhone 17 Pro, not Max; Chrome; supplied screenshots imply 402 CSS px at DPR3",
+  "checks": {
+    "python": {
+      "passed": 639,
+      "subtests": 6,
+      "skipped": 0,
+      "log_sha256": "5239c9c96cc937bc664fa9d19a1560c03421d1ea13dd4d450c68acff35741820"
+    },
+    "node": {
+      "passed": 260,
+      "failed": 0,
+      "skipped": 0,
+      "log_sha256": "d5c7618615e92e7365a7da094763bf4338752c49f8696a068e5463b9abfcc5ed"
+    },
+    "contracts": {
+      "passed": true,
+      "drift": []
+    },
+    "specification": {
+      "passed": true,
+      "documents": 25,
+      "local_links": 879
+    },
+    "repository": {
+      "passed": true,
+      "files": 594,
+      "artifacts": 27
+    },
+    "legacy_ui_and_oauth": "passed",
+    "web_and_legacy_build": "passed",
+    "diff_check": "passed"
+  },
+  "browser": {
+    "status": "passed",
+    "run": "c16-qa-6",
+    "host": "authorized owner Mac, isolated exact-base QA worktree",
+    "playwright": "1.58.2",
+    "engines": [
+      "Chromium 1208",
+      "WebKit 2248"
+    ],
+    "viewport": [
+      402,
+      681
+    ],
+    "screen": [
+      402,
+      874
+    ],
+    "device_scale_factor": 3,
+    "widths_checked": [
+      360,
+      390,
+      402,
+      430
+    ],
+    "short_height": 420,
+    "started_at": "2026-11-10T11:09:19.752Z",
+    "duration_ms": 219988.87,
+    "passed": 22,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "report_sha256": "ae6d00fb9910c8e1a6849349dc59592b06ea7ace5c39441685d96c332b1bf928",
+    "log_sha256": "e9e6374bec113a5dcb73d67147bc626f89c2f43f8f43a9bc97de85a98f8dbcfd",
+    "source_transfer_sha256": "c2f7845d22fd7c23979d25f95a8eeb7bafb5194a800beaa55058a73d1331a368",
+    "coverage": [
+      "durable receipt and full-day total survive failed history read and reload",
+      "saved intake outside page 1 remains visible; offset and dedup match all persisted entries",
+      "normal and reduced motion: bounded dialog at intermediate frames; final transform none; no horizontal scroll",
+      "expanded notes and DST selector reachable above sticky footer at 402x420",
+      "delete immediately reflected even if subsequent history fails",
+      "unconfirmed timezone read fallback; explicit timezone write preserves intake draft",
+      "single-account queue serializes concurrent read and confirm",
+      "native date/time containment, 16px text, clear-time native validation",
+      "complete actual HTTP/SQLite add-review-save, cancel, edit, repeat",
+      "75-entry history and stale revision refresh",
+      "legacy exact timestamp and absent historical snapshot preserved",
+      "chat draft preserved and no automatic chat send"
+    ]
+  },
+  "screenshots": [
+    {
+      "path": "docs/evidence/c16-chromium-402-day.png",
+      "bytes": 156791,
+      "sha256": "7c8fcb54603757c255ee2e84ccdaa346f6408efab95812d999914e69ddde3a81",
+      "visually_reviewed": true
+    },
+    {
+      "path": "docs/evidence/c16-webkit-402-intake.png",
+      "bytes": 173851,
+      "sha256": "ae145a212297413c9cd8f680a92ef0321fd74ec8cf95b150446e441f15e19129",
+      "visually_reviewed": true
+    }
+  ],
+  "failed_iterations": [
+    {
+      "run": 1,
+      "exit_code": 1,
+      "log_sha256": "13e40950682fc56ebeca3c85de8817d6c3b7e1e7d9f542dbf324c87538b1038b"
+    },
+    {
+      "run": 2,
+      "exit_code": 1,
+      "log_sha256": "88043ca06064a64423d6ef2f4584da880a505359921ef11129b1147fce5e31f4"
+    },
+    {
+      "run": 3,
+      "exit_code": 1,
+      "log_sha256": "176e9904dbb4c9bc220a6aacfcc4d2eb52da06f4753a64eab32a0b6aa44e9ec2"
+    },
+    {
+      "run": 4,
+      "exit_code": 1,
+      "log_sha256": "8e9738bab63c806f878f8b250a3679690de47028d4ca3876c120ad288cb6ad9c"
+    },
+    {
+      "run": 5,
+      "exit_code": 1,
+      "log_sha256": "b2dfb77b59adc3f6736a21bc63ec0e14eac93bf912be5d94e2cef807020c2e5d"
+    }
+  ],
+  "resolved_blockers": [
+    "Linux Chromium denied socket creation by environment; browser validation moved to authorized Mac after bounded diagnosis",
+    "WebKit optional empty time emitted native invalid with validity.valid=true; reset native segmented editor synchronously instead of disabling validation",
+    "durable saved food was hidden by timezone/history/read races; authoritative receipts and account queue retain visible state"
+  ],
+  "independent_reviews": [
+    "correctness/privacy",
+    "UI/motion semantics",
+    "QA coverage"
+  ],
+  "animate_ui": {
+    "version": "2.4.3",
+    "commit": "22a9236ae107328f8564edb7e3299375da3247af",
+    "route": "official plain markup/native CSS adaptation",
+    "components": [
+      "Dialog",
+      "native Accordion/Collapsible",
+      "Check success SVG",
+      "press feedback tokens"
+    ],
+    "dependencies_added": [],
+    "license": "MIT + Commons Clause License Condition; full notice retained"
+  },
+  "boundaries": [
+    "Synthetic real HTTP/SQLite accounts only; no family diary/profile mutations",
+    "No physical iPhone keyboard, browser chrome, camera, voice or real sign-in claim",
+    "No clinical or full accessibility certification",
+    "No cloud release performed by this source acceptance"
+  ],
+  "initial_protected_baseline": "faf6015908ea556c76d7f6103e21d85606c8d394f833874854138366cf5cf96a",
+  "source_gate_correction": {
+    "receipt": "docs/evidence/AGR_306_C16_NATIVE_FAILURE.json",
+    "asset_equivalence": "docs/evidence/AGR_306_C16_ASSET_EQUIVALENCE.json",
+    "python_targeted_passed": 24,
+    "editable_css_bytes": 56438,
+    "guard_limits_unchanged": true,
+    "browser_artifacts_byte_identical": true
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
+  "status": "queued",
+  "commit": "9b577ea6013e311fa026f37f2d5b2b7de517765a",
+  "created_on": "2026-11-10T11:31:42.596Z",
+  "build_command": "python scripts/cloudflare_ci.py && node --test ops/runtime-acceptance-http.test.mjs && node --test --test-name-pattern='^(operator promotion is disabled without explicit native release flag|operator helper never publishes app or replaces image before isolated acceptance|exact pinned application detail wins over stale collection and retains all guards)$' ops/promotion.test.mjs",
+  "deploy_command": "KETO_NATIVE_RUNNER_RELEASE=1 KETO_APPROVED_ROLLOUT=1 .venv/bin/python scripts/deploy_developer_native.py"
+}

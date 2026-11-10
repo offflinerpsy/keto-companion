@@ -1,11 +1,28 @@
 {
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
-  "workspace_root": "/workspace/scratch/bbdbdb895c38/keto-companion",
+  "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-09T23:38:04.556934+00:00",
+  "updated_at": "2026-11-10T12:01:43.033847+00:00",
   "active_task": null,
   "last_completed": {
+    "id": "AGR-306-C16-RELEASE",
+    "linear_issue": "AGR-306",
+    "status": "completed",
+    "scope": "technical_private_family_release",
+    "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "release_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
+    "report_ru": "docs/evidence/AGR_306_C16_UI_RESULT_RU.md",
+    "native_build": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
+    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+    "build_status": "success",
+    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
+    "worker_version": "9ce80b6f-1e7a-4bdf-9cef-3d6ded459ef9",
+    "pull_request": 22,
+    "product_acceptance": "physical_iPhone_17_Pro_pending"
+  },
+  "previous_completed": {
     "id": "AGR-306-C15-UI",
     "linear_issue": "AGR-306",
     "status": "completed",
@@ -21,39 +38,33 @@
     "pull_request": 21,
     "product_acceptance": "physical_spouse_iPhone_pending"
   },
-  "previous_completed": {
-    "id": "AGR-306-C14-RELEASE",
-    "linear_issue": "AGR-306",
-    "status": "completed",
-    "scope": "technical_private_family_release",
-    "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
-    "release_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
-    "report_ru": "docs/evidence/AGR_306_C14_RELEASE_RESULT_RU.md",
-    "native_build": "91c9326b-8fca-4200-883c-427e5b623adf",
-    "ordinary_build": "72ee574c-cc97-4aa9-9932-11ffc1b2f32e",
-    "build_status": "success",
-    "azure_deployment": "4828b5ce-8243-4819-914b-aae05f7abc89",
-    "worker_version": "47563a14-fb6d-41c2-af11-0be54e9a5003",
-    "pull_request": 20,
-    "product_acceptance": "physical_spouse_iPhone_pending"
-  },
   "next_task": {
     "id": "AGR-306-PHYSICAL-ACCEPTANCE",
     "status": "awaiting_physical_owner_session",
-    "action": "On published C15: food -> quantity/time -> confirm -> diary totals -> correction/repeat; check physical keyboard, camera/barcode/photo and dictation. No new source build or identity bypass."
+    "action": "Owner refreshes published app and checks the food portion -> confirm -> visible diary/total -> edit/repeat flow on the actual iPhone 17 Pro; no speculative rebuild."
   },
   "no_relaunch": {
-    "recorded_local_jobs": [],
+    "recorded_local_jobs": [
+      {
+        "host": "authorized owner Mac isolated QA worktree",
+        "pid": 35361,
+        "run": "c16-qa-6",
+        "completion_marker": ".c16-qa-6.exit",
+        "status": "completed",
+        "exit_code": 0
+      }
+    ],
     "pending_cloud_builds": [],
     "pending_azure_operation": null,
     "temporary_probes": [],
     "active_container_instances": [],
     "accepted_runtime_pin": "ops/approved-runtime.json",
-    "accepted_runtime_baseline": "4a555cb91706137e3bd58972a5dc6870a4210f733129a252548ed98110bcf614",
-    "accepted_runtime_image": "sha256:059d675cda4a8f89d0fda2d842940e1df2f2a479de8a83a18cc71c03217075c2",
+    "accepted_runtime_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+    "accepted_runtime_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
-    "new_runtime_image_required": "No: C15 release accepted. Documentation and physical acceptance do not require rebuild.",
-    "implementation_writer": null
+    "new_runtime_image_required": "No. C16 complete; use the published app for physical acceptance.",
+    "implementation_writer": null,
+    "temporary_trigger_commands": "ordinary commands restored and verified"
   },
   "owner_authorization": "Implementation, verification and release to the existing private family environment authorized. No Mac Codex desktop, new accounts or providers.",
   "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md",
@@ -65,12 +76,40 @@
     "docs/evidence/AGR_306_C9_RECOVERY_BEFORE_C10.json",
     "docs/evidence/AGR_306_C14_NATIVE_FAILURE.json",
     "docs/evidence/AGR_306_C14_RUNTIME_CORRECTION.json",
-    "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json"
+    "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json",
+    "docs/evidence/AGR_306_C16_NATIVE_FAILURE.json",
+    "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json"
   ],
   "limitations": [
-    "C15 has not been accepted on the spouse physical iPhone 17 Pro Max.",
-    "No fresh spouse sign-in or signed live food-intake transaction was performed; family diary and profile data were not changed for verification.",
-    "Physical iPhone keyboard, camera/barcode/photo and dictation were not revalidated for C15.",
-    "Synthetic browser, HTTP and runtime checks do not establish clinical effectiveness or full accessibility compliance."
-  ]
+    "C16 was not exercised on the physical iPhone 17 Pro (not Max); mobile WebKit/Chromium is synthetic browser evidence.",
+    "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
+    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C16.",
+    "Assistant tests establish confirmed context and deterministic answers, not the quality of a new live model response.",
+    "Synthetic checks do not establish clinical effectiveness or complete accessibility compliance."
+  ],
+  "source_completed": {
+    "id": "AGR-306-C16-PRODUCT",
+    "status": "completed",
+    "stage": "source_accepted",
+    "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
+    "deliverable": "iPhone temporal-input/dialog containment, visible durable diary receipts, day nutrition map, confirmed assistant memory",
+    "acceptance": [
+      "402 CSS px mobile geometry and native picker semantics",
+      "saved intake immediately visible even if history refresh fails",
+      "account-scoped day navigation, unconfirmed timezone read fallback",
+      "actual full-day totals and current agreed targets with incomplete-data states",
+      "confirmed server memory used by deterministic answer and assistant context",
+      "existing native CI and private-family release, with exact Azure adoption if Python changes"
+    ],
+    "device": "iPhone 17 Pro (not Max), Chrome; owner screenshots 1206px wide",
+    "writer": "root",
+    "evidence": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
+    "additional_owner_direction": "Animate UI reference adopted as pinned native/CSS dialog, disclosure and SVG success mark; preserve current architecture",
+    "completed_checks": {
+      "python": "639 passed; 6 subtests",
+      "node": "260 passed after final generated snapshot",
+      "browser": "22 passed in Chromium/WebKit; 0 failed/flaky/skipped",
+      "contracts_specification_hygiene": "passed"
+    }
+  }
 }

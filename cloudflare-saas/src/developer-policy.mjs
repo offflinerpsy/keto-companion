@@ -24,7 +24,7 @@ export function unifiedDiff(patch,snapshot){
 export const PREVIEW_CSP="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'";
 export function privatePreview(patch,snapshot){
  const file=path=>patch.files.find(x=>x.path===path)?.content??snapshot.preview?.[path]??snapshot.sources.find(x=>x.path===path)?.content??'';
- const css=file('cloudflare-saas/public/app.css').replace(/<\/style/gi,'<\\/style');
+ const css=['cloudflare-saas/public/app.css','cloudflare-saas/public/diary.css','cloudflare-saas/public/motion.css'].map(file).join('').replace(/<\/style/gi,'<\\/style');
  // Candidate HTML/JS run ONLY in an opaque sandbox. No real state or parent API.
  const js=file('cloudflare-saas/public/developer-extension.js').replace(/<\/script/gi,'<\\/script');
  const fixture='<main id="content"><h1>KETO · синтетический предпросмотр</h1><p>Нет личных данных. Ничего не опубликовано.</p><nav><button>Чат</button><button>Меню</button><button>Дневник</button><button>Ещё</button></nav><section class="panel"><h2>Пример рецепта</h2><p>Демонстрационная карточка без расчёта питания.</p></section><div class="bubble assistant">Как сделать интерфейс удобнее?</div><form class="composer"><textarea aria-label="Демонстрационный черновик"></textarea><button type="button">Отправить</button></form></main>';

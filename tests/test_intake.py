@@ -300,3 +300,24 @@ def test_clear_fields_and_generated_thread_ownership(svc):
     cleared=confirm(svc,request(svc,operation='update',entry_id=row['entry_id'],meal='',note='',time=None))['entry']
     assert cleared['meal']=='' and cleared['note']=='' and 'eaten_at' not in cleared and 'time_fold' not in cleared
     assert cleared['nutrition_snapshot']==row['nutrition_snapshot']
+
+
+def test_delete_receipt_has_authoritative_remaining_day_summary(svc):
+    first=confirm(svc,request(svc,**recipe(svc)))['entry'];confirm(svc,request(svc,**recipe(svc)))
+    document,_=svc.load(SUBJECT)
+    pending=svc.propose(SUBJECT,'diary.delete',{'entry_id':first['entry_id']},document['revision'])
+    result=confirm(svc,pending)
+    assert result['deleted_entry_id']==first['entry_id']==result['receipt']['entry_id']
+    assert result['receipt']['date']==DAY and result['diary_summary']['entry_count']==1
+    assert result['diary_summary']==history(svc,date=DAY)['summary']
+
+    replay=svc.apply(SUBJECT,pending['proposal']['id'],pending['state']['revision'],True)
+    assert replay['deleted_entry_id']==first['entry_id'] and replay['diary_summary']==result['diary_summary']
+
+
+def test_history_comparison_inputs_are_from_same_revision_as_diary(svc):
+    confirm(svc,request(svc,**recipe(svc)))
+    doc,version=svc.load(SUBJECT);doc['holds']=['clinician_review'];doc['revision']+=1;svc.save(SUBJECT,doc,version)
+    result=history(svc,date=DAY)
+    assert result['revision']==doc['revision'] and result['nutrition_context']['screening']['can_plan'] is False
+    assert result['nutrition_context']['profile']['targets']==doc['core']['profile']['targets']

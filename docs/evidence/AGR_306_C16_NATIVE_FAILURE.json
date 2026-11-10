@@ -1,0 +1,403 @@
+{
+  "schema": "keto-c16-native-failure-v1",
+  "status": "failed_source_gate_no_deploy",
+  "build": {
+    "id": "86ba3306-509d-46df-94e0-1297ae6a34b6",
+    "status": "stopped",
+    "outcome": "fail",
+    "commit": "2ec60e32bca79a2535c3a4b02b1718f23f0b1dd5",
+    "stopped": "2026-11-10T11:25:27.583Z"
+  },
+  "trigger_restored": true,
+  "lines": [
+    [
+      1794309863881,
+      "✔ deletion retries R2 failure, revokes sessions and deletes only owner prefix (33.090553ms)"
+    ],
+    [
+      1794309865073,
+      "✔ deletion waits for in-flight upload and removes it after cancellation (1192.054579ms)"
+    ],
+    [
+      1794309875732,
+      "✔ screening and agreed targets gate an actual synthetic menu and shopping calculation (10658.515523ms)"
+    ],
+    [
+      1794309875751,
+      "✔ urgent message bypasses missing bridge and daily quota (18.71583ms)"
+    ],
+    [
+      1794309879051,
+      "✔ source discussion is explicit, owner-scoped and keeps source untrusted (3300.561383ms)"
+    ],
+    [
+      1794309881396,
+      "✔ in-flight duplicate chat is rejected and charged once (2343.976947ms)"
+    ],
+    [
+      1794309882375,
+      "✔ unknown upstream effect is not replayed with same request ID (979.940425ms)"
+    ],
+    [
+      1794309883518,
+      "✔ maximum daily quota prevents model call but urgent response still works (1142.67669ms)"
+    ],
+    [
+      1794309885734,
+      "✔ urgent message invalidates an in-flight response and marks the current plan held (2215.367973ms)"
+    ],
+    [
+      1794309885757,
+      "✔ image upload fails closed with no sanitizer and preserves no object or reservation (22.895812ms)"
+    ],
+    [
+      1794309885776,
+      "✔ ambiguous unfinished upload keeps deletion pending (19.685255ms)"
+    ],
+    [
+      1794309885789,
+      "✔ browser cannot forge bridge source context (13.850959ms)"
+    ],
+    [
+      1794309896274,
+      "✔ source-backed personal recipe is previewed, allergen checked and saved only after approval (10482.514535ms)"
+    ],
+    [
+      1794309898176,
+      "✔ local safety response is not counted as a model call (1899.205982ms)"
+    ],
+    [
+      1794309898176,
+      "✔ health is public and incomplete Firebase configuration remains closed (3.357928ms)"
+    ],
+    [
+      1794309898993,
+      "✔ global and member compute limits reject model requests before bridge (817.845451ms)"
+    ],
+    [
+      1794309899007,
+      "✔ Firebase owner session uses verified Google subject; public config excludes other fields (14.201147ms)"
+    ],
+    [
+      1794309899014,
+      "✔ Firebase rejects issuer (6.748256ms)"
+    ],
+    [
+      1794309899021,
+      "✔ Firebase rejects audience (6.33244ms)"
+    ],
+    [
+      1794309899037,
+      "✔ Firebase rejects expiry (15.715485ms)"
+    ],
+    [
+      1794309899043,
+      "✔ Firebase rejects future iat (6.587952ms)"
+    ],
+    [
+      1794309899048,
+      "✔ Firebase rejects old auth_time (5.539202ms)"
+    ],
+    [
+      1794309899054,
+      "✔ Firebase rejects future auth_time (5.424921ms)"
+    ],
+    [
+      1794309899061,
+      "✔ Firebase rejects missing subject (6.981797ms)"
+    ],
+    [
+      1794309899068,
+      "✔ Firebase rejects unverified email (6.629463ms)"
+    ],
+    [
+      1794309899075,
+      "✔ Firebase rejects password provider (7.08214ms)"
+    ],
+    [
+      1794309899081,
+      "✔ Firebase rejects missing identity (6.36024ms)"
+    ],
+    [
+      1794309899087,
+      "✔ Firebase rejects multiple identities (5.678923ms)"
+    ],
+    [
+      1794309899091,
+      "✔ Firebase rejects unknown key (4.822704ms)"
+    ],
+    [
+      1794309899097,
+      "✔ Firebase rejects algorithm (4.889514ms)"
+    ],
+    [
+      1794309899116,
+      "✔ Firebase rejects incorrect signature, direct Google token, origin, wrong cookie, expired and replayed challenges (19.379624ms)"
+    ],
+    [
+      1794309899135,
+      "✔ Firebase invitations require matching email and retain existing direct identity (18.787348ms)"
+    ],
+    [
+      1794309899148,
+      "✔ Firebase challenge limit retains consumed attempts and trusts only CF IP (10.543808ms)"
+    ],
+    [
+      1794309899153,
+      "✔ Firebase global challenge cap and bounded token body (7.083868ms)"
+    ],
+    [
+      1794309899162,
+      "✔ Firebase certificate cache respects fixed endpoint and TTL (8.571645ms)"
+    ],
+    [
+      1794309899994,
+      "✔ transcription authenticates, reserves quota and stores neither audio nor transcript; replay is explicit (832.226134ms)"
+    ],
+    [
+      1794309900934,
+      "✔ transcription result is discarded if consent changes during recognition; rejected decode is not charged (940.00332ms)"
+    ],
+    [
+      1794309901929,
+      "✔ transcription quotas, consent, CSRF and provider error accounting fail closed (994.301573ms)"
+    ],
+    [
+      1794309906702,
+      "✔ topic deletion preserves profile, removes messages and invalidates cached old replies (4772.873181ms)"
+    ],
+    [
+      1794309907844,
+      "✔ expired session while transcribing discards private output (1141.045784ms)"
+    ],
+    [
+      1794309908913,
+      "✔ PDF bridge response does not replace existing private state or persist file bytes in jobs (1070.155914ms)"
+    ],
+    [
+      1794309913846,
+      "✔ guidance status is role-neutral, requires explicit baseline confirmation and never calls a paid model (4932.686378ms)"
+    ],
+    [
+      1794309917325,
+      "✔ Kitchen shares bridge state, own pantry confirmation and replay; admin cannot select another member (3477.553302ms)"
+    ],
+    [
+      1794309918236,
+      "✔ Kitchen paid generation reserves both quotas before call; replay, consent/session revocation and cap (907.177755ms)"
+    ],
+    [
+      1794309919174,
+      "✔ SPEC-AUDIT: calculate wording cannot bypass paid recipe reservation (942.741992ms)"
+    ],
+    [
+      1794309921164,
+      "✔ SPEC-AUDIT: verified no-model chat result refunds reserved quota (1988.623216ms)"
+    ],
+    [
+      1794309922064,
+      "✔ label extraction reserves quota, replays candidate, rejects mismatch and does not store image (901.391127ms)"
+    ],
+    [
+      1794309923023,
+      "✔ label pending, caps, consent/session changes and uncertain failure never redispatch (959.274082ms)"
+    ],
+    [
+      1794309925405,
+      "✔ invalid image rejected before Azure refunds proven no-model reservation (2381.28634ms)"
+    ],
+    [
+      1794309926238,
+      "✔ intake bridge errors return fixed actionable text and release the private-state lock (836.140586ms)"
+    ],
+    [
+      1794309926260,
+      "ℹ tests 259"
+    ],
+    [
+      1794309926260,
+      "ℹ suites 0"
+    ],
+    [
+      1794309926260,
+      "ℹ pass 257"
+    ],
+    [
+      1794309926260,
+      "ℹ fail 2"
+    ],
+    [
+      1794309926260,
+      "ℹ cancelled 0"
+    ],
+    [
+      1794309926260,
+      "ℹ skipped 0"
+    ],
+    [
+      1794309926260,
+      "ℹ todo 0"
+    ],
+    [
+      1794309926261,
+      "ℹ duration_ms 78281.834836"
+    ],
+    [
+      1794309926261,
+      ""
+    ],
+    [
+      1794309926261,
+      "✖ failing tests:"
+    ],
+    [
+      1794309926262,
+      ""
+    ],
+    [
+      1794309926262,
+      "test at cloudflare-saas/tests/developer.test.mjs:16:1"
+    ],
+    [
+      1794309926262,
+      "✖ complete synthetic generation/test/private export bound to same owner session (16.377409ms)"
+    ],
+    [
+      1794309926262,
+      "  AssertionError [ERR_ASSERTION]: {\"error\":\"DEVELOPER_GENERATION_OR_TEST_FAILED\"}"
+    ],
+    [
+      1794309926262,
+      "  "
+    ],
+    [
+      1794309926262,
+      "  422 !== 200"
+    ],
+    [
+      1794309926262,
+      "  "
+    ],
+    [
+      1794309926262,
+      "      at TestContext.<anonymous> (file:///opt/buildhome/repo/cloudflare-saas/tests/developer.test.mjs:16:205)"
+    ],
+    [
+      1794309926262,
+      "      at async Test.run (node:internal/test_runner/test:1389:7)"
+    ],
+    [
+      1794309926262,
+      "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {"
+    ],
+    [
+      1794309926262,
+      "    generatedMessage: false,"
+    ],
+    [
+      1794309926262,
+      "    code: 'ERR_ASSERTION',"
+    ],
+    [
+      1794309926262,
+      "    actual: 422,"
+    ],
+    [
+      1794309926263,
+      "    expected: 200,"
+    ],
+    [
+      1794309926263,
+      "    operator: 'strictEqual',"
+    ],
+    [
+      1794309926263,
+      "    diff: 'simple'"
+    ],
+    [
+      1794309926263,
+      "  }"
+    ],
+    [
+      1794309926263,
+      ""
+    ],
+    [
+      1794309926263,
+      "test at cloudflare-saas/tests/developer.test.mjs:18:1"
+    ],
+    [
+      1794309926263,
+      "✖ quota reserved before call, mismatched test hash/stage cannot pass, patch tampering fails (11.142164ms)"
+    ],
+    [
+      1794309926263,
+      "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+    ],
+    [
+      1794309926263,
+      "  "
+    ],
+    [
+      1794309926263,
+      "  422 !== 200"
+    ],
+    [
+      1794309926263,
+      "  "
+    ],
+    [
+      1794309926263,
+      "      at TestContext.<anonymous> (file:///opt/buildhome/repo/cloudflare-saas/tests/developer.test.mjs:18:253)"
+    ],
+    [
+      1794309926263,
+      "      at async Test.run (node:internal/test_runner/test:1389:7)"
+    ],
+    [
+      1794309926264,
+      "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {"
+    ],
+    [
+      1794309926264,
+      "    generatedMessage: true,"
+    ],
+    [
+      1794309926264,
+      "    code: 'ERR_ASSERTION',"
+    ],
+    [
+      1794309926264,
+      "    actual: 422,"
+    ],
+    [
+      1794309926264,
+      "    expected: 200,"
+    ],
+    [
+      1794309926264,
+      "    operator: 'strictEqual',"
+    ],
+    [
+      1794309926264,
+      "    diff: 'simple'"
+    ],
+    [
+      1794309926264,
+      "  }"
+    ],
+    [
+      1794309926292,
+      "Failed: error occurred while running build command"
+    ]
+  ],
+  "diagnosis": {
+    "code": "PATCH_TOO_LARGE",
+    "snapshot_css_bytes": 62616,
+    "synthetic_patch_bytes": 62633,
+    "unchanged_policy_limit": 60000,
+    "source_of_error": "New snapshot made app.css larger than the existing full-file developer patch limit. Local Node run preceded final snapshot generation and tested a stale embedded source.",
+    "cloud_changes": "No deployment/image/rollout phase reached; trigger restored.",
+    "correction": "Split trusted CSS into source modules while preserving the exact served stylesheet; retain 60000-byte guard; assert snapshot freshness and actual editable full-file patches."
+  }
+}

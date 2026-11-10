@@ -1,0 +1,31 @@
+{
+  "baseline_source": "2ec60e32bca79a2535c3a4b02b1718f23f0b1dd5",
+  "browser_run": "c16-qa-6",
+  "reason": "Source-only CSS split; exact served browser assets unchanged",
+  "files": [
+    {
+      "path": "cloudflare-saas/public/style.css",
+      "identical": true,
+      "sha256": "c586ed6cc9191258ca904a512c10d599b0ee7aa99c381f69bf5aaa14a49fd3b2",
+      "bytes": 86399
+    },
+    {
+      "path": "cloudflare-saas/public/app.bundle.js",
+      "identical": true,
+      "sha256": "578b04d117c971fbc76642d42855408b7c5c3c0bf5ff1527b67361c78678c401",
+      "bytes": 750960
+    },
+    {
+      "path": "cloudflare-saas/public/index.html",
+      "identical": true,
+      "sha256": "de1594774b5ee8756e343c95ab09ae4a680576ffa1a99f0dd8df6bb9ca4b6a63",
+      "bytes": 53452
+    },
+    {
+      "path": "service/static/app.bundle.js",
+      "identical": true,
+      "sha256": "88e40133e7737b257c565bb13c9b09f880e3e23f4cd021e478145eb4dac05d9a",
+      "bytes": 915758
+    }
+  ]
+}

@@ -95,8 +95,8 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "dc369bbe33f2563de21e4600e6315eaf94533623b912e3a58db5bb4251a45d93",
-    "cloudflare-saas/public/index.html": "56d2dec8fd7b75931d5cb9baf3cfa7e3fac668660cafaff7440d3e5d134f2e20",
+    "cloudflare-saas/public/app.css": "c1c3e8eb2a64483d6db2e11e852b8250710497c029ef74a6e21493fcc5778784",
+    "cloudflare-saas/public/index.html": "de1594774b5ee8756e343c95ab09ae4a680576ffa1a99f0dd8df6bb9ca4b6a63",
     "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
     "cloudflare-saas/src/compute.mjs": "50dbeb05fce25d51b1141d3c974fd9774976ce912da8f7d074f8c296041ea97d",
     "cloudflare-saas/src/worker.mjs": "091c18c3f990d3ad5eb93735a9e6f58c3144c22b042ab01cfd65f67b00d8f785",
@@ -922,6 +922,10 @@
       "type": "button"
     },
     {
+      "id": "diary-day-label",
+      "tag": "span"
+    },
+    {
       "id": "diary-day",
       "tag": "input",
       "type": "date"
@@ -941,6 +945,10 @@
       "id": "diary-all",
       "tag": "button",
       "type": "button"
+    },
+    {
+      "id": "diary-zone-note",
+      "tag": "p"
     },
     {
       "id": "diary-receipt",
@@ -966,6 +974,11 @@
     },
     {
       "id": "diary-more",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "diary-discuss",
       "tag": "button",
       "type": "button"
     },
@@ -1518,6 +1531,12 @@
       "type": "time"
     },
     {
+      "aria-label": "Не указывать время",
+      "id": "intake-clear-time",
+      "tag": "button",
+      "type": "button"
+    },
+    {
       "id": "intake-zone",
       "tag": "p"
     },
@@ -1525,6 +1544,15 @@
       "id": "intake-now",
       "tag": "button",
       "type": "button"
+    },
+    {
+      "id": "intake-zone-confirm",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "intake-zone-name",
+      "tag": "small"
     },
     {
       "id": "intake-meal",
