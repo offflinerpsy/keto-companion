@@ -1,11 +1,29 @@
 {
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
-  "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
+  "workspace_root": "/Users/alexyarosh/Projects/keto-companion-c18-qa",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-10",
+  "updated_at": "2026-11-10T16:49:29.981Z",
   "active_task": null,
   "last_completed": {
+    "id": "AGR-306-C18-RELEASE",
+    "linear_issue": "AGR-306",
+    "status": "completed",
+    "scope": "existing private family auth repair release",
+    "source_commit": "577432672abbcde12c400ea5de4462aa97cf6166",
+    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "release_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json",
+    "report_ru": "docs/evidence/AGR_306_C18_AUTH_RESULT_RU.md",
+    "native_build": "b6ce09a1-446d-4b03-914a-d5bbf7f8329e",
+    "ordinary_build": "23188e7c-5b70-4392-84df-b05c59449f23",
+    "build_status": "success",
+    "worker_version": "397db31a-255f-408c-b2e1-9fb61fe2fec1",
+    "pull_request": 24,
+    "real_google_login_verified": true,
+    "admin_access_verified": true,
+    "product_acceptance": "physical_iPhone_17_Pro_pending; real_desktop_google_verified"
+  },
+  "previous_completed": {
     "id": "AGR-306-C17-RELEASE",
     "linear_issue": "AGR-306",
     "status": "completed",
@@ -22,27 +40,10 @@
     "pull_request": 23,
     "product_acceptance": "physical_iPhone_17_Pro_pending"
   },
-  "previous_completed": {
-    "id": "AGR-306-C16-RELEASE",
-    "linear_issue": "AGR-306",
-    "status": "completed",
-    "scope": "technical_private_family_release",
-    "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "release_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
-    "report_ru": "docs/evidence/AGR_306_C16_UI_RESULT_RU.md",
-    "native_build": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
-    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
-    "build_status": "success",
-    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
-    "worker_version": "9ce80b6f-1e7a-4bdf-9cef-3d6ded459ef9",
-    "pull_request": 22,
-    "product_acceptance": "physical_iPhone_17_Pro_pending"
-  },
   "next_task": {
-    "id": "AGR-306-C17-PHYSICAL-ACCEPTANCE",
-    "status": "awaiting_physical_owner_session",
-    "action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes."
+    "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
+    "status": "awaiting_device_observation",
+    "action": "Technical release complete; physical iPhone feedback is separate. Do not restart completed builds or tests without a new concrete failure."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -70,6 +71,42 @@
         "completion_marker": "C17 QA .c17-release-artifacts/azure.exit",
         "status": "completed",
         "exit_code": 0
+      },
+      {
+        "host": "authorized owner Mac isolated C18 QA worktree",
+        "pid": 71042,
+        "run": "c18-browser-1",
+        "completion_marker": "/Users/alexyarosh/Projects/keto-c18-artifacts/browser-1.exit.json",
+        "status": "completed_failed_fixture",
+        "source_commit": "8b2bdab735ce7c8427ee95e6d31d32c4816dc985",
+        "exit_code": 1
+      },
+      {
+        "host": "authorized owner Mac isolated C18 QA worktree",
+        "run": "c18-browser-2",
+        "completion_marker": "/Users/alexyarosh/Projects/keto-c18-artifacts/browser-2.exit.json",
+        "status": "completed_failed_fixture",
+        "source_commit": "829daba464f156a86564617f4ad58d79c70552c8",
+        "pid": 71321,
+        "exit_code": 1
+      },
+      {
+        "host": "authorized owner Mac isolated C18 QA worktree",
+        "pid": 72064,
+        "run": "c18-browser-3",
+        "completion_marker": "/Users/alexyarosh/Projects/keto-c18-artifacts/browser-3.exit.json",
+        "status": "completed_failed_fixture",
+        "source_commit": "0814fe9e7526566231a39da5c41cffcd829e4761",
+        "exit_code": 1
+      },
+      {
+        "host": "authorized owner Mac isolated C18 QA worktree",
+        "pid": 72866,
+        "run": "c18-browser-4",
+        "completion_marker": "/Users/alexyarosh/Projects/keto-c18-artifacts/browser-4.exit.json",
+        "status": "completed",
+        "source_commit": "f53e12fffd86ed6ad67cd2d95448d6646e9baeac",
+        "exit_code": 0
       }
     ],
     "pending_cloud_builds": [],
@@ -77,8 +114,8 @@
     "temporary_probes": [],
     "active_container_instances": [],
     "accepted_runtime_pin": "ops/approved-runtime.json",
-    "accepted_runtime_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
-    "accepted_runtime_image": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+    "accepted_runtime_baseline": "bf113ad3f95532f7a5d9e73f1063be68d6f8517cd0d8084ffcf4fd552f4a51f5",
+    "accepted_runtime_image": "sha256:2e7ca6e2448f156e5e0ba8d3d31f324c7bced900bf3774fbf061d847adce8345",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
     "new_runtime_image_required": false,
     "implementation_writer": "root",
@@ -99,14 +136,23 @@
     "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json"
   ],
   "limitations": [
-    "C17 was not exercised on the physical iPhone 17 Pro (not Max); mobile Chromium/WebKit evidence is synthetic.",
-    "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
-    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C17.",
-    "New recipes use calculated existing ingredient nutrition; they have not been kitchen tested or clinically validated.",
-    "The wide reference is pinned historical USDA data, includes English names and cheese-containing derivatives, and is not a complete live branded-food catalogue.",
-    "Existing confirmed assistant memory and safety/consent rules were preserved; C17 does not claim a new live model quality evaluation."
+    "The physical iPhone17Pro Chrome failure was not reproduced; real Google login was verified in connected desktop Chrome and synthetic mobile cases in Chromium/WebKit.",
+    "No family diary/profile/consent test writes. Actual login updates ordinary session and last-active metadata.",
+    "Full member administration is available after workspace load; during compute outage the verified identity and retry action remain visible.",
+    "No new live family signed food-write, device keyboard, camera, microphone or clinical acceptance is claimed."
   ],
   "source_completed": {
+    "id": "AGR-306-C18-AUTH",
+    "status": "completed",
+    "source_commit": "f53e12fffd86ed6ad67cd2d95448d6646e9baeac",
+    "checks": {
+      "python": 655,
+      "node": 296,
+      "browser": 38
+    },
+    "evidence": "docs/evidence/AGR_306_C18_SOURCE_ACCEPTANCE.json"
+  },
+  "previous_source_completed": {
     "id": "AGR-306-C17-SEARCH",
     "status": "completed",
     "stage": "source_accepted",

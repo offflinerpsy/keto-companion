@@ -374,7 +374,7 @@ function createRecipePageCalls({ call: call2, epoch }) {
     }
     const result = tail.catch(() => {
     }).then(() => {
-      if (stamp !== epoch()) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
+      if (stamp !== epoch()) throw Object.assign(Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D."), { code: "STALE_SESSION" });
       if (args[2]?.signal?.aborted) throw Object.assign(Error("\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E."), { name: "AbortError" });
       return call2(...args);
     });
@@ -742,7 +742,7 @@ function createScanner({ video, load = loadScanner, getMedia = (constraints) => 
 }, schedule = (fn, ms) => setTimeout(fn, ms), cancelTimer = (id) => clearTimeout(id), onState = () => {
 }, onCode = () => {
 } }) {
-  let token = 0, stream = null, active = false, timer = null, flight = Promise.resolve();
+  let token = 0, stream = null, active = false, timer = null, flight2 = Promise.resolve();
   function stop() {
     token++;
     active = false;
@@ -783,13 +783,13 @@ function createScanner({ video, load = loadScanner, getMedia = (constraints) => 
       onState("scanning");
       async function scan() {
         try {
-          await flight.catch(() => {
+          await flight2.catch(() => {
           });
           if (id !== token || !active) return;
           const src = capture(preview);
           if (src) {
             const work = Promise.resolve().then(() => lib.decodeSingle({ src, numOfWorkers: 0, locate: true, decoder: { readers: ["ean_reader", "ean_8_reader", "upc_reader"] } }));
-            flight = work;
+            flight2 = work;
             const result = await work;
             if (id !== token || !active) return;
             const code = result?.codeResult?.code;
@@ -10890,40 +10890,342 @@ var ce = getExperimentalSetting("authIdTokenMaxAge") || 300;
   })(r)), registerVersion(oe, ae, "esm2020");
 })("Browser");
 
-// cloudflare-saas/public/firebase-flow.js
-async function firebaseFlow(sdk, config, invite, request) {
-  let auth2;
+// cloudflare-saas/public/auth-session.js
+var AuthError = class extends Error {
+  constructor(code, { status = 0, ambiguous = false } = {}) {
+    super(code);
+    this.name = "AuthError";
+    this.code = code;
+    this.status = status;
+    this.ambiguous = ambiguous;
+  }
+};
+function transientStorage(readStorage) {
+  const memory = /* @__PURE__ */ new Map();
+  return {
+    getItem(key) {
+      if (memory.has(key)) return memory.get(key);
+      try {
+        const value = readStorage().getItem(key);
+        if (value !== null) {
+          memory.set(key, value);
+          return value;
+        }
+      } catch {
+      }
+      return null;
+    },
+    setItem(key, value) {
+      memory.set(key, String(value));
+      try {
+        readStorage().setItem(key, String(value));
+      } catch {
+      }
+    },
+    removeItem(key) {
+      memory.set(key, null);
+      try {
+        readStorage().removeItem(key);
+      } catch {
+      }
+    }
+  };
+}
+function bounded(operation, { signal, timeoutMs = 15e3 } = {}) {
+  const controller = new AbortController();
+  let timer, rejectPending;
+  const stopped = new Promise((_, reject) => {
+    rejectPending = reject;
+  });
+  const abort = () => {
+    controller.abort();
+    rejectPending(new AuthError("CANCELLED"));
+  };
+  if (signal?.aborted) {
+    controller.abort();
+    return Promise.reject(new AuthError("CANCELLED"));
+  }
+  signal?.addEventListener("abort", abort, { once: true });
+  timer = setTimeout(() => {
+    controller.abort();
+    rejectPending(new AuthError("NETWORK_TIMEOUT"));
+  }, timeoutMs);
+  let task;
   try {
-    const app = sdk.getApps().length ? sdk.getApps()[0] : sdk.initializeApp(config);
-    auth2 = sdk.getAuthInstance(app);
-    const provider = new sdk.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-    const challenge = request("/auth/firebase/start", { invite });
-    const popup = sdk.signInWithPopup(auth2, provider);
-    const [challengeResult, popupResult] = await Promise.allSettled([challenge, popup]);
-    if (popupResult.status === "rejected") throw popupResult.reason;
-    if (challengeResult.status === "rejected") throw challengeResult.reason;
-    const transaction = challengeResult.value, result = popupResult.value;
-    const token = await result.user.getIdToken();
-    await request("/auth/firebase/complete", { transaction: transaction.transaction, token });
-  } catch (e) {
-    if (e?.code === "auth/popup-closed-by-user" || e?.code === "auth/cancelled-popup-request") throw Error("\u0412\u0445\u043E\u0434 \u043E\u0442\u043C\u0435\u043D\u0451\u043D. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.");
-    if (e?.code === "auth/popup-blocked") throw Error("\u0411\u0440\u0430\u0443\u0437\u0435\u0440 \u0437\u0430\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u043B \u043E\u043A\u043D\u043E \u0432\u0445\u043E\u0434\u0430. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0432\u0441\u043F\u043B\u044B\u0432\u0430\u044E\u0449\u0438\u0435 \u043E\u043A\u043D\u0430 \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.");
-    throw e;
+    task = operation(controller.signal);
+  } catch (error) {
+    task = Promise.reject(error);
+  }
+  return Promise.race([task, stopped]).finally(() => {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", abort);
+    controller.abort();
+  });
+}
+async function authJson(fetcher, path, { method = "GET", body, signal, csrf: csrf2 } = {}) {
+  let response;
+  try {
+    response = await fetcher(path, { method, credentials: "same-origin", cache: "no-store", signal, headers: { ...body !== void 0 ? { "Content-Type": "application/json" } : {}, ...csrf2 && method !== "GET" ? { "X-CSRF-Token": csrf2 } : {} }, body: body === void 0 ? void 0 : JSON.stringify(body) });
+  } catch {
+    throw new AuthError(signal?.aborted ? "CANCELLED" : "NETWORK_ERROR");
+  }
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new AuthError("INVALID_RESPONSE", { status: response.status });
+  }
+  if (!response.ok) throw new AuthError(typeof data?.error === "string" && /^[A-Z][A-Z0-9_]{0,63}$/.test(data.error) ? data.error : "REQUEST_FAILED", { status: response.status });
+  return data;
+}
+var messages = {
+  NETWORK_ERROR: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0432\u044F\u0437\u0430\u0442\u044C\u0441\u044F \u0441 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435\u043C. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435.",
+  NETWORK_TIMEOUT: "\u041E\u0442\u0432\u0435\u0442 \u043D\u0435 \u043F\u0440\u0438\u0448\u0451\u043B \u0432\u043E\u0432\u0440\u0435\u043C\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  INVALID_RESPONSE: "\u041F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0432\u0435\u0440\u043D\u0443\u043B\u043E \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u0439 \u043E\u0442\u0432\u0435\u0442. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443.",
+  SETUP_REQUIRED: "\u0412\u0445\u043E\u0434 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u043F\u043E\u0437\u0436\u0435.",
+  LOGIN_UNAVAILABLE: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043D\u0430\u0447\u0430\u0442\u044C \u0432\u0445\u043E\u0434. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u043F\u044B\u0442\u043A\u0443.",
+  LOGIN_BUSY: "\u0421\u043B\u0438\u0448\u043A\u043E\u043C \u043C\u043D\u043E\u0433\u043E \u043F\u043E\u043F\u044B\u0442\u043E\u043A \u0432\u0445\u043E\u0434\u0430. \u041F\u043E\u0434\u043E\u0436\u0434\u0438\u0442\u0435 \u043D\u0435\u043C\u043D\u043E\u0433\u043E \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  INVALID_CHALLENGE: "\u041F\u043E\u043F\u044B\u0442\u043A\u0430 \u0432\u0445\u043E\u0434\u0430 \u0443\u0441\u0442\u0430\u0440\u0435\u043B\u0430. \u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u0432\u0445\u043E\u0434 \u0435\u0449\u0451 \u0440\u0430\u0437.",
+  SESSION_LIMIT: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u043E\u0437\u0434\u0430\u0442\u044C \u0441\u0435\u0430\u043D\u0441: \u0434\u043E\u0441\u0442\u0438\u0433\u043D\u0443\u0442 \u043B\u0438\u043C\u0438\u0442 \u0432\u0445\u043E\u0434\u043E\u0432. \u0412\u044B\u0439\u0434\u0438\u0442\u0435 \u0438\u0437 KETO \u043D\u0430 \u0434\u0440\u0443\u0433\u043E\u043C \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  SIGN_IN_BLOCKED: "\u0414\u043E\u0441\u0442\u0443\u043F \u044D\u0442\u043E\u0433\u043E \u0430\u043A\u043A\u0430\u0443\u043D\u0442\u0430 \u043F\u0440\u0438\u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0439 \u0430\u043A\u043A\u0430\u0443\u043D\u0442.",
+  INVITATION_REQUIRED: "\u0414\u043B\u044F \u044D\u0442\u043E\u0439 \u043F\u043E\u0447\u0442\u044B \u043D\u0443\u0436\u043D\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0449\u0435\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0451\u043D\u043D\u044B\u0439 \u0430\u043A\u043A\u0430\u0443\u043D\u0442 \u0438\u043B\u0438 \u043E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0441\u0441\u044B\u043B\u043A\u0443 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u044F.",
+  INVITE_NOT_AVAILABLE: "\u041F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u043D\u043E\u0432\u0443\u044E \u0441\u0441\u044B\u043B\u043A\u0443 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u044F.",
+  SESSION_NOT_SAVED: "Google \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u043B \u0432\u0445\u043E\u0434, \u043D\u043E \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0438\u043B\u043E \u0441\u0435\u0430\u043D\u0441. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 cookie \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0441\u0430\u0439\u0442\u0430 \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.",
+  SIGN_IN: "\u0421\u0435\u0430\u043D\u0441 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D. \u0412\u043E\u0439\u0434\u0438\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.",
+  "auth/popup-closed-by-user": "\u0412\u0445\u043E\u0434 \u043E\u0442\u043C\u0435\u043D\u0451\u043D. \u041C\u043E\u0436\u043D\u043E \u043F\u043E\u043F\u0440\u043E\u0431\u043E\u0432\u0430\u0442\u044C \u0435\u0449\u0451 \u0440\u0430\u0437.",
+  "auth/cancelled-popup-request": "\u0412\u0445\u043E\u0434 \u043E\u0442\u043C\u0435\u043D\u0451\u043D. \u041C\u043E\u0436\u043D\u043E \u043F\u043E\u043F\u0440\u043E\u0431\u043E\u0432\u0430\u0442\u044C \u0435\u0449\u0451 \u0440\u0430\u0437.",
+  "auth/popup-blocked": "\u0411\u0440\u0430\u0443\u0437\u0435\u0440 \u0437\u0430\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u043B \u043E\u043A\u043D\u043E Google. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0432\u0441\u043F\u043B\u044B\u0432\u0430\u044E\u0449\u0438\u0435 \u043E\u043A\u043D\u0430 \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0441\u0430\u0439\u0442\u0430 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  "auth/network-request-failed": "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0432\u044F\u0437\u0430\u0442\u044C\u0441\u044F \u0441 Google. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  "auth/unauthorized-domain": "Google-\u0432\u0445\u043E\u0434 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0430\u0434\u0440\u0435\u0441\u0430 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F.",
+  "auth/operation-not-supported-in-this-environment": "\u0411\u0440\u0430\u0443\u0437\u0435\u0440 \u043D\u0435 \u0441\u043C\u043E\u0433 \u043E\u0442\u043A\u0440\u044B\u0442\u044C Google-\u0432\u0445\u043E\u0434. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 KETO \u0432 \u043E\u0431\u044B\u0447\u043D\u043E\u0439 \u0432\u043A\u043B\u0430\u0434\u043A\u0435 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0430."
+};
+function authMessage(error) {
+  return messages[error?.code] || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0432\u0445\u043E\u0434. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u043F\u044B\u0442\u043A\u0443.";
+}
+function authDiagnostic(phase, error) {
+  const code = Object.hasOwn(messages, error?.code) ? error.code : { COMPUTE_UNAVAILABLE: true, BRIDGE_NOT_CONFIGURED: true, BUSY_OR_CONSENT_OR_LIMIT: true, REQUEST_PENDING: true, STATE_CHANGED: true, CSRF: true }[error?.code] ? "SERVICE_UNAVAILABLE" : "REQUEST_FAILED";
+  return [phase, code, ...Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? [error.status] : []].join(" \xB7 ");
+}
+function createAuthSession({ api, authenticate, loadWorkspace, openWorkspace, identityChanged, view: view2, timeoutMs = 15e3, workspaceTimeoutMs = 3e4 }) {
+  let generation = 0, operation = null, identity = null, config = null, configError = null, configFlight = null, loginFlight = null, phase = "checking", lastError = null;
+  const emit = (next, error = null) => {
+    phase = next;
+    lastError = error;
+    view2({ phase, identity, config, error });
+  };
+  const current = (job) => job.id === generation && !job.controller.signal.aborted;
+  const begin = () => {
+    operation?.controller.abort();
+    const job = { id: ++generation, controller: new AbortController() };
+    operation = job;
+    return job;
+  };
+  const drop = () => {
+    identity = null;
+    identityChanged(null);
+  };
+  function configuration() {
+    if (config) return Promise.resolve(config);
+    if (configFlight) return configFlight;
+    configFlight = bounded((signal) => api("/auth/config", { signal }), { timeoutMs }).then((value) => {
+      if (!["firebase_google", "direct_google"].includes(value?.provider)) throw new AuthError("SETUP_REQUIRED");
+      config = value;
+      configError = null;
+      return config;
+    }).catch((error) => {
+      configError = error;
+      return null;
+    }).finally(() => {
+      configFlight = null;
+      if (phase === "signed-out") emit(phase, lastError || configError);
+    });
+    return configFlight;
+  }
+  async function workspace(job) {
+    emit("loading");
+    try {
+      const data = await bounded((signal) => loadWorkspace(signal), { signal: job.controller.signal, timeoutMs: workspaceTimeoutMs });
+      if (!current(job)) return;
+      if (!data?.state) throw new AuthError("INVALID_RESPONSE");
+      openWorkspace(data);
+      if (current(job)) emit("ready");
+    } catch (error) {
+      if (!current(job)) return;
+      if (error.status === 401 && error.code === "SIGN_IN") {
+        drop();
+        emit("signed-out", error);
+        configuration();
+      } else emit("workspace-error", error);
+    }
+  }
+  async function restore(job, { afterLogin = false, loginError = null } = {}) {
+    emit("checking");
+    try {
+      const value = await bounded((signal) => api("/api/session", { signal }), { signal: job.controller.signal, timeoutMs });
+      if (!current(job)) return;
+      if (!value?.csrf || !["active", "pending"].includes(value.user?.status) || !["admin", "member"].includes(value.user?.role)) throw new AuthError("INVALID_RESPONSE");
+      identity = value;
+      identityChanged(value);
+      if (value.user.status === "pending") {
+        emit("pending");
+        return;
+      }
+      await workspace(job);
+    } catch (error) {
+      if (!current(job)) return;
+      if (error.status === 401 && error.code === "SIGN_IN") {
+        drop();
+        emit("signed-out", afterLogin ? loginError || new AuthError("SESSION_NOT_SAVED") : null);
+        configuration();
+      } else emit("session-error", error);
+    }
+  }
+  function start2() {
+    const job = begin();
+    configuration();
+    return restore(job);
+  }
+  function retry() {
+    if (["checking", "loading", "signing-in", "finishing", "signing-out", "claiming"].includes(phase)) return Promise.resolve();
+    const job = begin();
+    configuration();
+    return restore(job);
+  }
+  function login(invite = "") {
+    if (loginFlight) return loginFlight;
+    if (phase !== "signed-out" || !config) return Promise.resolve();
+    const job = begin();
+    emit("signing-in");
+    let task;
+    try {
+      task = authenticate(config, invite, { signal: job.controller.signal, onPhase: (next) => {
+        if (current(job)) emit(next);
+      } });
+    } catch (error) {
+      task = Promise.reject(error);
+    }
+    loginFlight = (async () => {
+      try {
+        const result = await task;
+        if (!current(job) || result?.redirect) return;
+        await restore(job, { afterLogin: true });
+      } catch (error) {
+        if (!current(job)) return;
+        if (error.ambiguous) await restore(job, { afterLogin: true, loginError: error });
+        else emit("signed-out", error);
+      }
+    })().finally(() => {
+      loginFlight = null;
+    });
+    return loginFlight;
+  }
+  async function logout() {
+    if (phase === "signing-out") return;
+    const job = begin();
+    emit("signing-out");
+    try {
+      await bounded((signal) => api("/api/logout", { method: "POST", body: {}, signal }), { signal: job.controller.signal, timeoutMs });
+      if (!current(job)) return;
+      drop();
+      emit("signed-out");
+      configuration();
+    } catch (error) {
+      if (!current(job)) return;
+      if (error.status === 401 && error.code === "SIGN_IN") {
+        drop();
+        emit("signed-out");
+        configuration();
+      } else emit("logout-error", error);
+    }
+  }
+  async function claim(token) {
+    if (phase !== "pending") return;
+    const job = begin();
+    emit("claiming");
+    try {
+      await bounded((signal) => api("/api/invites/claim", { method: "POST", body: { token }, signal }), { signal: job.controller.signal, timeoutMs });
+      if (current(job)) await restore(job);
+    } catch (error) {
+      if (!current(job)) return;
+      if (error.status === 401 && error.code === "SIGN_IN") {
+        drop();
+        emit("signed-out", error);
+        configuration();
+      } else if (!error.status || error.status >= 500 || error.code === "INVALID_RESPONSE") {
+        await restore(job);
+        if (current(job) && phase === "pending") emit("pending", error);
+      } else emit("pending", error);
+    }
+  }
+  function signedOut(error = null) {
+    begin();
+    drop();
+    emit("signed-out", error);
+    configuration();
+  }
+  function expired() {
+    signedOut(new AuthError("SIGN_IN"));
+  }
+  return { start: start2, retry, login, logout, claim, expired, signedOut, get phase() {
+    return phase;
+  }, get identity() {
+    return identity;
+  } };
+}
+
+// cloudflare-saas/public/firebase-flow.js
+async function firebaseFlow(sdk, config, invite, request, { signal, timeoutMs = 12e4, requestTimeoutMs = 15e3, onPhase = () => {
+}, isCurrent = () => true } = {}) {
+  let auth2, finished = false, exchanging = false;
+  try {
+    return await bounded(async (attempt2) => {
+      const app = sdk.getApps().length ? sdk.getApps()[0] : sdk.initializeApp(config);
+      auth2 = sdk.getAuthInstance(app);
+      const provider = new sdk.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      const challenge = bounded((child) => request("/auth/firebase/start", { invite }, { signal: child }), { signal: attempt2, timeoutMs: requestTimeoutMs });
+      const popup = sdk.signInWithPopup(auth2, provider);
+      Promise.resolve(popup).then(() => {
+        if (finished && isCurrent()) sdk.signOut(auth2).catch(() => {
+        });
+      }, () => {
+      });
+      const [transaction, result] = await Promise.all([challenge, popup]);
+      if (attempt2.aborted) throw new AuthError("CANCELLED");
+      const token = await result.user.getIdToken();
+      if (attempt2.aborted) throw new AuthError("CANCELLED");
+      onPhase("finishing");
+      exchanging = true;
+      await bounded((child) => request("/auth/firebase/complete", { transaction: transaction.transaction, token }, { signal: child }), { signal: attempt2, timeoutMs: requestTimeoutMs });
+    }, { signal, timeoutMs });
+  } catch (error) {
+    const failure = error instanceof AuthError ? error : new AuthError(error?.code || "NETWORK_ERROR");
+    if (exchanging && (!failure.status || failure.status >= 500 || failure.code === "INVALID_RESPONSE")) failure.ambiguous = true;
+    failure.message = authMessage(failure);
+    throw failure;
   } finally {
-    if (auth2) await sdk.signOut(auth2).catch(() => {
+    finished = true;
+    if (auth2 && isCurrent()) await bounded(() => sdk.signOut(auth2), { timeoutMs: 2e3 }).catch(() => {
     });
   }
 }
 
 // cloudflare-saas/public/firebase-login.js
 var auth;
-function firebaseLogin(config, invite, request) {
+var flight = null;
+var attempt = 0;
+function firebaseLogin(config, invite, request, options = {}) {
+  if (flight) return flight;
+  const id = ++attempt;
   const sdk = { initializeApp, getApps, GoogleAuthProvider, signInWithPopup, signOut, getAuthInstance: (app) => auth ?? (auth = initializeAuth(app, { persistence: S, popupRedirectResolver: se })) };
-  return firebaseFlow(sdk, config, invite, request);
+  flight = firebaseFlow(sdk, config, invite, request, { ...options, isCurrent: () => id === attempt }).finally(() => {
+    if (id === attempt) flight = null;
+  });
+  return flight;
 }
 
 // cloudflare-saas/public/app.js
+var transient = transientStorage(() => sessionStorage);
 var loginConfig = null;
 var oauthAccount = null;
 var session = null;
@@ -11060,6 +11362,7 @@ async function run(fn) {
   try {
     return await fn();
   } catch (e) {
+    if (["STALE_SESSION", "CANCELLED", "SIGN_IN"].includes(e.code) || e.name === "AbortError") return null;
     notify(e.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435.");
     return null;
   }
@@ -11072,10 +11375,10 @@ async function transport(name2, args = {}, options = {}) {
   const epoch = screenEpoch;
   const r = await fetch("/api/tools/" + encodeURIComponent(name2), { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrf ?? "" }, body: JSON.stringify(args), signal: options.signal });
   const d2 = await r.json();
-  if (epoch !== screenEpoch) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
+  if (epoch !== screenEpoch) throw Object.assign(Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D."), { code: "STALE_SESSION" });
   if (!r.ok) {
-    if (r.status === 401) showLogin();
-    throw Error({ BRIDGE_NOT_CONFIGURED: "\u0421\u0435\u0440\u0432\u0438\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", COMPUTE_UNAVAILABLE: "\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D.", REQUEST_PENDING: "\u0417\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u043E\u0431\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F.", REQUEST_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0435\u0440\u0435\u0434 \u043F\u043E\u0432\u0442\u043E\u0440\u043E\u043C.", STATE_CHANGED: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u043B\u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.", BUSY_OR_CONSENT_OR_LIMIT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", VALIDATION_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435: \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u0432\u0435\u0442\u044B, \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B." }[d2.error] || d2.message || d2.detail || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435.");
+    if (r.status === 401 && d2.error === "SIGN_IN" && !options.authBootstrap) authSession.expired();
+    throw Object.assign(Error({ BRIDGE_NOT_CONFIGURED: "\u0421\u0435\u0440\u0432\u0438\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", COMPUTE_UNAVAILABLE: "\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D.", REQUEST_PENDING: "\u0417\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u043E\u0431\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F.", REQUEST_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0435\u0440\u0435\u0434 \u043F\u043E\u0432\u0442\u043E\u0440\u043E\u043C.", STATE_CHANGED: "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u043B\u0438 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.", BUSY_OR_CONSENT_OR_LIMIT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", VALIDATION_FAILED: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435: \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u0442\u0432\u0435\u0442\u044B, \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F \u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043E\u0432\u0430\u043D\u043D\u044B\u0435 \u043E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B." }[d2.error] || d2.message || d2.detail || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435."), { status: r.status, code: d2.error });
   }
   return d2;
 }
@@ -12031,26 +12334,24 @@ $2("revoke").onclick = () => run(async () => {
 $2("delete-data").onclick = () => run(async () => {
   if (prompt("\u0414\u043B\u044F \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F \u043B\u0438\u0447\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445 \u0432\u0432\u0435\u0434\u0438\u0442\u0435: \u0423\u0414\u0410\u041B\u0418\u0422\u042C") !== "\u0423\u0414\u0410\u041B\u0418\u0422\u042C") return;
   const d2 = await cfApi("/api/personal/delete", { method: "POST", body: { confirm: "DELETE_MY_DATA" } });
-  sessionStorage.setItem("keto_deletion_receipt", d2.receipt);
-  state = null;
-  session = null;
-  showLogin();
+  transient.setItem("keto_deletion_receipt", d2.receipt);
+  authSession.signedOut();
   $2("deletion-recovery").hidden = false;
+  $2("deletion-recovery").open = true;
+  $2("deletion-code").value = d2.receipt;
   $2("deletion-status").textContent = "\u0423\u0434\u0430\u043B\u0435\u043D\u0438\u0435 \u0437\u0430\u043F\u0440\u043E\u0448\u0435\u043D\u043E. \u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u0435 \u044D\u0442\u043E\u0442 \u043A\u043E\u0434: " + d2.receipt;
 });
-$2("logout").onclick = () => run(async () => {
-  await cfApi("/api/logout", { method: "POST", body: {} });
-  state = null;
-  session = null;
-  showLogin();
-});
+$2("logout").onclick = () => run(() => authSession.logout());
 $2("diary-date").value = $2("menu-start").value = localDate();
 async function cfApi(path, { method = "GET", body } = {}) {
   const epoch = screenEpoch;
   const r = await fetch(path, { method, headers: { ...body ? { "Content-Type": "application/json" } : {}, ...session && method !== "GET" ? { "X-CSRF-Token": session.csrf } : {} }, body: body ? JSON.stringify(body) : void 0 });
   const d2 = await r.json();
-  if (epoch !== screenEpoch) throw Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D.");
-  if (!r.ok) throw Error({ SETUP_REQUIRED: "\u0412\u0445\u043E\u0434 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", INVITATION_REQUIRED: "\u041D\u0443\u0436\u043D\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0449\u0435\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u043F\u043E\u0447\u0442\u044B.", INVITE_NOT_AVAILABLE: "\u041F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E.", CONSENT_REQUIRED: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0440\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435.", IMAGE_PROCESSING_UNAVAILABLE: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430.", TOO_LARGE: "\u0424\u0430\u0439\u043B \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0439.", DEVELOPER_NOT_CONFIGURED: "\u0420\u0430\u043D\u043D\u0435\u0440 \u0438\u043B\u0438 \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0439 snapshot \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", DEVELOPER_QUOTA_OR_REPLAY: "\u041B\u0438\u043C\u0438\u0442 \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0439 \u0438\u0441\u0447\u0435\u0440\u043F\u0430\u043D \u0438\u043B\u0438 \u0437\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0441\u044F.", DEVELOPER_GENERATION_OR_TEST_FAILED: "\u0413\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F \u0438\u043B\u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043D\u0435 \u043F\u0440\u043E\u0448\u043B\u0430. \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u044B \u0442\u043E\u043B\u044C\u043A\u043E \u0441\u0442\u0438\u043B\u0438, \u0441\u043F\u0440\u0430\u0432\u043A\u0430 \u0438 UI-\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435; \u0441\u0435\u0440\u0432\u0435\u0440\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u0437\u0430\u0434\u0430\u0447\u0438.", DEVELOPER_BUSY_OR_DISABLED: "\u041F\u0438\u043B\u043E\u0442 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D \u0438\u043B\u0438 \u0434\u0440\u0443\u0433\u0430\u044F \u0437\u0430\u0434\u0430\u0447\u0430 \u0435\u0449\u0451 \u043E\u0442\u043A\u0440\u044B\u0442\u0430.", DEVELOPER_CANCELLED_OR_EXPIRED: "\u0417\u0430\u0434\u0430\u0447\u0430 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430 \u0438\u043B\u0438 \u0441\u0440\u043E\u043A \u0438\u0441\u0442\u0451\u043A.", IMAGE_LINK_UNSUPPORTED: "\u042D\u0442\u043E\u0442 \u0430\u0434\u0440\u0435\u0441 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0441\u044F. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B, \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442 \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B.", IMAGE_LINK_PRIVATE_QUERY: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0441\u043E\u0434\u0435\u0440\u0436\u0438\u0442 \u043D\u0435\u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043C\u044B\u0435 \u043F\u0430\u0440\u0430\u043C\u0435\u0442\u0440\u044B. \u0421\u043A\u0430\u0447\u0430\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0438 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B.", IMAGE_UPLOAD_REQUIRED: "\u0414\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0440\u0430\u0437\u043C\u0435\u0440\u0430 \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0438 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B: \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0441\u043E\u0436\u043C\u0451\u0442 \u0435\u0433\u043E \u043F\u0435\u0440\u0435\u0434 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u043E\u0439.", IMAGE_NOT_DIRECT: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0432\u0435\u0434\u0451\u0442 \u043D\u0435 \u043D\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B \u0438\u043B\u0438 \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442.", IMAGE_DNS_REJECTED: "\u0410\u0434\u0440\u0435\u0441 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u0440\u043E\u0448\u0451\u043B \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B.", IMAGE_TOO_LARGE: "\u0424\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 4 \u041C\u0411. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B \u0434\u043B\u044F \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0441\u0436\u0430\u0442\u0438\u044F." }[d2.error] || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E.");
+  if (epoch !== screenEpoch) throw Object.assign(Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D."), { code: "STALE_SESSION" });
+  if (!r.ok) {
+    if (r.status === 401 && d2.error === "SIGN_IN") authSession.expired();
+    throw Object.assign(Error({ SETUP_REQUIRED: "\u0412\u0445\u043E\u0434 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", INVITATION_REQUIRED: "\u041D\u0443\u0436\u043D\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0449\u0435\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u043F\u043E\u0447\u0442\u044B.", INVITE_NOT_AVAILABLE: "\u041F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E.", CONSENT_REQUIRED: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0440\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435.", IMAGE_PROCESSING_UNAVAILABLE: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430.", TOO_LARGE: "\u0424\u0430\u0439\u043B \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0439.", DEVELOPER_NOT_CONFIGURED: "\u0420\u0430\u043D\u043D\u0435\u0440 \u0438\u043B\u0438 \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0439 snapshot \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", DEVELOPER_QUOTA_OR_REPLAY: "\u041B\u0438\u043C\u0438\u0442 \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0439 \u0438\u0441\u0447\u0435\u0440\u043F\u0430\u043D \u0438\u043B\u0438 \u0437\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0441\u044F.", DEVELOPER_GENERATION_OR_TEST_FAILED: "\u0413\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F \u0438\u043B\u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043D\u0435 \u043F\u0440\u043E\u0448\u043B\u0430. \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u044B \u0442\u043E\u043B\u044C\u043A\u043E \u0441\u0442\u0438\u043B\u0438, \u0441\u043F\u0440\u0430\u0432\u043A\u0430 \u0438 UI-\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435; \u0441\u0435\u0440\u0432\u0435\u0440\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u0437\u0430\u0434\u0430\u0447\u0438.", DEVELOPER_BUSY_OR_DISABLED: "\u041F\u0438\u043B\u043E\u0442 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D \u0438\u043B\u0438 \u0434\u0440\u0443\u0433\u0430\u044F \u0437\u0430\u0434\u0430\u0447\u0430 \u0435\u0449\u0451 \u043E\u0442\u043A\u0440\u044B\u0442\u0430.", DEVELOPER_CANCELLED_OR_EXPIRED: "\u0417\u0430\u0434\u0430\u0447\u0430 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430 \u0438\u043B\u0438 \u0441\u0440\u043E\u043A \u0438\u0441\u0442\u0451\u043A.", IMAGE_LINK_UNSUPPORTED: "\u042D\u0442\u043E\u0442 \u0430\u0434\u0440\u0435\u0441 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0441\u044F. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B, \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442 \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B.", IMAGE_LINK_PRIVATE_QUERY: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0441\u043E\u0434\u0435\u0440\u0436\u0438\u0442 \u043D\u0435\u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043C\u044B\u0435 \u043F\u0430\u0440\u0430\u043C\u0435\u0442\u0440\u044B. \u0421\u043A\u0430\u0447\u0430\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0438 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B.", IMAGE_UPLOAD_REQUIRED: "\u0414\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0440\u0430\u0437\u043C\u0435\u0440\u0430 \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0438 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B: \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0441\u043E\u0436\u043C\u0451\u0442 \u0435\u0433\u043E \u043F\u0435\u0440\u0435\u0434 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u043E\u0439.", IMAGE_NOT_DIRECT: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0432\u0435\u0434\u0451\u0442 \u043D\u0435 \u043D\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B \u0438\u043B\u0438 \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442.", IMAGE_DNS_REJECTED: "\u0410\u0434\u0440\u0435\u0441 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u0440\u043E\u0448\u0451\u043B \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B.", IMAGE_TOO_LARGE: "\u0424\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 4 \u041C\u0411. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B \u0434\u043B\u044F \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0441\u0436\u0430\u0442\u0438\u044F." }[d2.error] || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E."), { status: r.status, code: d2.error });
+  }
   return d2;
 }
 $2("source-form").onsubmit = (e) => {
@@ -12188,74 +12489,30 @@ $2("source-recipe-form").onsubmit = (e) => {
     accept(d2);
   });
 };
-$2("cf-login").onclick = () => run(async () => {
-  if (!loginConfig) throw Error("\u0412\u0445\u043E\u0434 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0443.");
-  const invite = sessionStorage.getItem("keto_invite") || "";
-  if (loginConfig.provider === "firebase_google") {
-    await firebaseLogin(loginConfig.firebase, invite, (path, body) => cfApi(path, { method: "POST", body }));
-    await start();
-    return;
-  }
-  if (loginConfig.provider === "direct_google") {
-    const d2 = await cfApi("/auth/google/start", { method: "POST", body: { invite } });
-    location.assign(d2.authorization_url);
-    return;
-  }
-  throw Error("\u0412\u0445\u043E\u0434 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.");
-});
-$2("cf-claim-button").onclick = () => run(async () => {
-  await cfApi("/api/invites/claim", { method: "POST", body: { token: sessionStorage.getItem("keto_invite") || "" } });
-  sessionStorage.removeItem("keto_invite");
-  await start();
-});
-$2("cf-switch").onclick = () => run(async () => {
-  await cfApi("/api/logout", { method: "POST", body: {} });
-  session = null;
-  showLogin();
-});
+$2("cf-login").onclick = () => run(() => authSession.login(transient.getItem("keto_invite") || ""));
+$2("cf-claim-button").onclick = () => run(() => authSession.claim(transient.getItem("keto_invite") || ""));
+$2("cf-switch").onclick = () => run(() => authSession.logout());
+$2("cf-auth-retry").onclick = () => run(() => authSession.phase === "logout-error" ? authSession.logout() : authSession.retry());
+$2("cf-auth-logout").onclick = () => run(() => authSession.logout());
 $2("continue-deletion").onclick = () => run(async () => {
-  const receipt = sessionStorage.getItem("keto_deletion_receipt") || $2("deletion-code").value.trim();
+  const receipt = transient.getItem("keto_deletion_receipt") || $2("deletion-code").value.trim();
   if (!receipt) {
     $2("deletion-status").textContent = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0439 \u043A\u043E\u0434 \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F.";
     return;
   }
   const d2 = await cfApi("/api/deletion/continue", { method: "POST", body: { receipt } });
   $2("deletion-status").textContent = d2.status === "complete" ? "\u0410\u043A\u0442\u0438\u0432\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0443\u0434\u0430\u043B\u0435\u043D\u044B. \u041F\u043E\u043B\u0438\u0442\u0438\u043A\u0430 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0445 \u043A\u043E\u043F\u0438\u0439 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u0430\u044F." : "\u0423\u0434\u0430\u043B\u0435\u043D\u0438\u0435 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u0435\u0442\u0441\u044F; \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u043F\u043E\u0437\u0436\u0435. \u041A\u043E\u0434: " + receipt;
-  if (d2.status === "complete") sessionStorage.removeItem("keto_deletion_receipt");
+  if (d2.status === "complete") transient.removeItem("keto_deletion_receipt");
 });
-async function start() {
+function start() {
   const url = new URL(location.href), incoming = url.searchParams.get("invite");
   if (incoming) {
-    sessionStorage.setItem("keto_invite", incoming);
+    transient.setItem("keto_invite", incoming);
     url.searchParams.delete("invite");
     history.replaceState(null, "", url.pathname + url.search + url.hash);
   }
-  $2("deletion-code").value = sessionStorage.getItem("keto_deletion_receipt") || "";
-  try {
-    const r = await fetch("/auth/config");
-    loginConfig = r.ok ? await r.json() : null;
-  } catch {
-    loginConfig = null;
-  }
-  try {
-    session = await cfApi("/api/session");
-    csrf = session.csrf;
-    if (session.user.status === "pending") {
-      showLogin();
-      $2("cf-claim").hidden = false;
-      $2("cf-login-message").textContent = "\u0410\u043A\u043A\u0430\u0443\u043D\u0442: " + session.user.email;
-      return;
-    }
-    $2("cf-claim").hidden = true;
-    $2("admin-tab").hidden = session.user.role !== "admin";
-    developer.identity();
-    await refresh();
-    setView(guided.initial(state, location.hash), { replace: true, reason: "initial" });
-  } catch (e) {
-    session = null;
-    showLogin();
-    $2("cf-login-message").textContent = e.message;
-  }
+  $2("deletion-code").value = transient.getItem("keto_deletion_receipt") || "";
+  return authSession.start();
 }
 var mobile = setupMobile({ $: $2, el, call, accept, getState: () => state, setView, run, notify, openDialog: (kind, focus) => dialogs.open(kind, focus), closeDialog: () => dialogs.close(), epoch: () => screenEpoch, setImage: (value) => image = value, getImage: () => image, loadImageLink: async (url) => (await cfApi("/api/media/image-link", { method: "POST", body: { url, remote_request_acknowledged: true } })).image_data_url });
 var developer = setupDeveloper({ $: $2, el, api: cfApi, preview: async (path) => {
@@ -12295,4 +12552,77 @@ $2("menu-shop").onclick = () => {
   }
 };
 var ownDish = setupOwnDish({ $: $2, el, allergens: ALLERGENS, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu, openIntake: (source) => intake.open(source) });
+var renderedAuthPhase = null;
+function renderAuth({ phase, identity, config, error }) {
+  loginConfig = config;
+  const ready = phase === "ready", busy2 = ["checking", "loading", "signing-in", "finishing", "signing-out", "claiming"].includes(phase);
+  if (!ready && renderedAuthPhase === "ready") {
+    state = null;
+    clearScreen();
+  }
+  renderedAuthPhase = phase;
+  $2("login").hidden = ready;
+  $2("workspace").hidden = !ready;
+  $2("login").dataset.authPhase = phase;
+  $2("cf-auth-actions").setAttribute("aria-busy", String(busy2));
+  $2("cf-login").hidden = phase !== "signed-out" || !config;
+  $2("cf-login").disabled = busy2 || !config;
+  const needsRetry = ["session-error", "workspace-error", "logout-error"].includes(phase) || phase === "signed-out" && !config;
+  $2("cf-auth-retry").hidden = !needsRetry;
+  $2("cf-auth-retry").disabled = busy2;
+  $2("cf-auth-retry").textContent = phase === "workspace-error" ? "\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0443" : phase === "logout-error" ? "\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u0432\u044B\u0445\u043E\u0434" : "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432\u0445\u043E\u0434";
+  $2("cf-claim").hidden = !["pending", "claiming"].includes(phase);
+  $2("cf-claim-button").disabled = busy2;
+  $2("cf-switch").disabled = busy2;
+  $2("cf-auth-logout").hidden = !identity || !["session-error", "workspace-error", "logout-error"].includes(phase);
+  $2("cf-auth-logout").disabled = busy2;
+  $2("cf-auth-account").hidden = !identity || identity.user.status !== "active" || !["loading", "workspace-error", "ready"].includes(phase);
+  $2("cf-auth-account").textContent = identity?.user.status === "active" ? identity.user.role === "admin" ? "\u0412\u0445\u043E\u0434 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D \xB7 \u0430\u0434\u043C\u0438\u043D\u0438\u0441\u0442\u0440\u0430\u0442\u043E\u0440" : "\u0412\u0445\u043E\u0434 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D" : "";
+  const labels2 = { checking: "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C \u0432\u0445\u043E\u0434\u2026", "signing-in": "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u043C \u043E\u043A\u043D\u043E Google\u2026", finishing: "\u0417\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u043C \u0432\u0445\u043E\u0434\u2026", loading: "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u043C \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435\u2026", "signing-out": "\u0417\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u043C \u0441\u0435\u0430\u043D\u0441\u2026", claiming: "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435\u2026", "session-error": "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432\u0445\u043E\u0434. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.", "workspace-error": "\u0412\u0445\u043E\u0434 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D. \u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0443 \u2014 \u0437\u0430\u043D\u043E\u0432\u043E \u0432\u0445\u043E\u0434\u0438\u0442\u044C \u0432 Google \u043D\u0435 \u043D\u0443\u0436\u043D\u043E.", "logout-error": "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0432\u044B\u0445\u043E\u0434. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u0432\u044B\u0445\u043E\u0434, \u043A\u043E\u0433\u0434\u0430 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u0441\u044F \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435." };
+  $2("cf-login-message").textContent = phase === "signed-out" ? error ? authMessage(error) : config ? "\u0412\u043E\u0439\u0434\u0438\u0442\u0435 \u0447\u0435\u0440\u0435\u0437 Google, \u0447\u0442\u043E\u0431\u044B \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u043B\u0438\u0447\u043D\u043E\u0435 \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u043E." : "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0432\u0445\u043E\u0434\u0430\u2026" : phase === "pending" ? error ? authMessage(error) : "\u0410\u043A\u043A\u0430\u0443\u043D\u0442: " + identity.user.email + ". \u041F\u0440\u0438\u043C\u0438\u0442\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435, \u0447\u0442\u043E\u0431\u044B \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C." : labels2[phase] || "";
+  $2("cf-auth-detail").hidden = !error;
+  $2("cf-auth-code").textContent = error ? authDiagnostic(phase, error) : "";
+  $2("connection").textContent = ready ? "\u041B\u0438\u0447\u043D\u043E\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435" : busy2 ? "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0430\u0435\u043C\u0441\u044F\u2026" : identity ? "\u0412\u0445\u043E\u0434 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D" : "\u041B\u0438\u0447\u043D\u043E\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435";
+  document.querySelectorAll(".head-actions [data-view]").forEach((button) => button.disabled = !ready);
+  if (!ready) {
+    $2("nav-back").hidden = true;
+    $2("pending-open").hidden = true;
+  }
+  if (!busy2 && !ready && document.activeElement?.closest("[hidden]")) $2("cf-auth-title").focus({ preventScroll: true });
+}
+var authSession = createAuthSession({
+  api: (path, options = {}) => authJson(fetch, path, { ...options, csrf: session?.csrf }),
+  authenticate: (config, invite, options) => {
+    if (config.provider === "firebase_google") return firebaseLogin(config.firebase, invite, (path, body, requestOptions) => authJson(fetch, path, { method: "POST", body, ...requestOptions }), options);
+    return bounded((signal) => authJson(fetch, "/auth/google/start", { method: "POST", body: { invite }, signal }), { signal: options.signal }).then((data) => {
+      location.assign(data.authorization_url);
+      return { redirect: true };
+    });
+  },
+  identityChanged: (next) => {
+    if (!next) {
+      state = null;
+      session = null;
+      csrf = null;
+      showLogin();
+      return;
+    }
+    if (session?.user?.email && session.user.email !== next.user.email) {
+      state = null;
+      clearScreen();
+    }
+    session = next;
+    csrf = next.csrf;
+    $2("admin-tab").hidden = next.user.role !== "admin";
+    developer.identity();
+    if (next.user.status === "active") transient.removeItem("keto_invite");
+  },
+  loadWorkspace: (signal) => call("keto_open", {}, { signal, authBootstrap: true }),
+  openWorkspace: (data) => {
+    setState(data.state);
+    if (data.shopping) renderShopping(data.shopping);
+    setView(guided.initial(state, location.hash), { replace: true, reason: "initial" });
+  },
+  view: renderAuth
+});
 run(start);

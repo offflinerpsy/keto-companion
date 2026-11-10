@@ -1,0 +1,13 @@
+{
+  "schema": "keto-c18-browser-attempt-v1",
+  "source_commit": "8b2bdab735ce7c8427ee95e6d31d32c4816dc985",
+  "run": "c18-browser-1",
+  "status": "failed_fixture",
+  "passed": 15,
+  "failed": 1,
+  "not_run": 8,
+  "failure": "WebKit route.fulfill rejects 302 redirect status. Test intercepted a synthetic callback.",
+  "correction": "Use real loopback HTTP 303 callback with a synthetic HttpOnly cookie and verify the cookie is sent on subsequent session requests; no production behavior changed.",
+  "raw_report_preserved": "/Users/alexyarosh/Projects/keto-c18-artifacts/auth-attempt1-report.json",
+  "product_run": "not_started_due_to_auth_fixture_failure"
+}

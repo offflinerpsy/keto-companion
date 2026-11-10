@@ -1,0 +1,22 @@
+{
+  "schema": "keto-c18-live-http-v1",
+  "source_commit": "577432672abbcde12c400ea5de4462aa97cf6166",
+  "scope": "Read-only public assets/status and unauthenticated GET guards; actual Google login is separate.",
+  "checks": [
+    {
+      "name": "served_/",
+      "passed": false,
+      "status": 403,
+      "sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c"
+    }
+  ],
+  "error": "AssertionError: served_/",
+  "checked_at": "2026-11-10T16:41:18.329993+00:00",
+  "passed": false,
+  "total": 1,
+  "transport": "Python urllib TLS verified; no cookie jar or authenticated session",
+  "verifier_sha256": "c3f6c85aba4c4b7c2666eff9c846eeb84277748a5ac1a878a027893f0f9461b5",
+  "cause": "Cloudflare workers.dev Browser Integrity Check rejects default Python urllib user agent with error1010 before Worker execution.",
+  "correction": "Use descriptive KETO-Release-Verification/1.0 user agent per official Cloudflare documentation; no browser impersonation or security rule changes.",
+  "reference": "https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1010/"
+}

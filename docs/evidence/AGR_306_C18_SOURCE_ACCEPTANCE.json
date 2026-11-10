@@ -1,0 +1,150 @@
+{
+  "schema": "keto-source-acceptance-v1",
+  "task": "AGR-306-C18-AUTH",
+  "status": "passed",
+  "checked_at": "2026-11-10T16:20:29.369002+00:00",
+  "source_commit": "f53e12fffd86ed6ad67cd2d95448d6646e9baeac",
+  "source_branch": "codex/keto-auth-c18",
+  "base_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
+  "protected_source_baseline": "bf113ad3f95532f7a5d9e73f1063be68d6f8517cd0d8084ffcf4fd552f4a51f5",
+  "protected_source_files": 250,
+  "runtime_archive_sha256": "6815f4ce12969adfa7a9b6d2de92ec14c40dbc671ce0cc755b41cce0e62d72d2",
+  "checks": {
+    "python": {
+      "passed": 655,
+      "subtests": 6,
+      "skipped": 0,
+      "scope": "corrected C18 implementation before cloud workspace disconnected; exact native gate required again"
+    },
+    "node": {
+      "passed": 296,
+      "failed": 0,
+      "skipped": 0,
+      "source_commit": "8b2bdab735ce7c8427ee95e6d31d32c4816dc985",
+      "scope": "final production implementation; later changes were browser fixture only"
+    },
+    "contracts": "passed, zero drift",
+    "specification_links": 879,
+    "hygiene": {
+      "checked_files": 645,
+      "build_artifacts": 27,
+      "passed": true,
+      "findings": [],
+      "scope": "High-confidence patterns and path allowlist, not exhaustive secret detection or clinical/security validation"
+    },
+    "build": "passed; original size guards unchanged; modular Worker UTF-8",
+    "ordinary_runtime_pin": "Prior C17 pin retained intentionally until native acceptance"
+  },
+  "browser": {
+    "status": "passed",
+    "source_commit": "f53e12fffd86ed6ad67cd2d95448d6646e9baeac",
+    "run": "c18-browser-4",
+    "headless": true,
+    "playwright": "1.58.2",
+    "engines": [
+      "Chromium 1208",
+      "WebKit 2248"
+    ],
+    "viewport": [
+      402,
+      681
+    ],
+    "screen": [
+      402,
+      874
+    ],
+    "device_scale_factor": 3,
+    "large_text_width": 360,
+    "auth_cases": 12,
+    "food_cases": 7,
+    "passed": 38,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "results": {
+      "auth": {
+        "stats": {
+          "startTime": "2026-11-10T16:16:22.273Z",
+          "duration": 49109.559,
+          "expected": 24,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "report_sha256": "c5ddfb7d1f791b05c21b95247aac7c3e676e390181445455748f2ed297b69626",
+        "log_sha256": "c20a70e9fecafe8f8ba535a1889859386a913dd36199b20216fca1f5c356e83e"
+      },
+      "food": {
+        "stats": {
+          "startTime": "2026-11-10T16:17:13.927Z",
+          "duration": 160059.637,
+          "expected": 14,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "report_sha256": "8b17234e75f068066825dca6f992d4803dc7f087da2370a44ac7951de865bea6",
+        "log_sha256": "c3850a861bba11cd21e00cdd9e64ec1985a835c28ae6d1c02585275fbfa1ac81"
+      }
+    },
+    "completion_sha256": "a2c9f4edccc8401745719e1780ccf53b815b22e3fd53963e0946985c2747c809",
+    "family_data_writes": false,
+    "cleanup": {
+      "ports_closed": [
+        8898,
+        8899
+      ],
+      "temporary_dependency_symlinks_removed": true
+    }
+  },
+  "screenshots": [
+    {
+      "path": "docs/evidence/c18-recovery-webkit-402.png",
+      "bytes": 226055,
+      "sha256": "74ccc55c7f674dbcb5fcd9d5abb98200b41e46497435b77140d7360c219f13e1",
+      "visually_reviewed": true
+    },
+    {
+      "path": "docs/evidence/c18-recovery-large-webkit-402.png",
+      "bytes": 214453,
+      "sha256": "b6f597c4c799f4e1816dc0d4472807f8b4170a0b79d49f437a70032dd9b301b5",
+      "visually_reviewed": true
+    }
+  ],
+  "failed_iterations": [
+    "AGR_306_C18_BROWSER_ATTEMPT1.json",
+    "AGR_306_C18_BROWSER_ATTEMPT2.json",
+    "AGR_306_C18_BROWSER_ATTEMPT3.json"
+  ],
+  "independent_reviews": [
+    "UI and provider flow",
+    "Worker sessions and transaction rollback",
+    "QA and browser fixture oracle",
+    "release sequence and unchanged Azure digest"
+  ],
+  "prepatch_proof": "AGR_306_C18_PREPATCH.json",
+  "real_provider_before_patch": {
+    "ordinary_desktop_Google_login": true,
+    "owner_controls_visible": true,
+    "physical_iPhone_reproduced": false
+  },
+  "context7": {
+    "library": "Firebase",
+    "sdk_retained": "13.2.0",
+    "new_dependencies": []
+  },
+  "backend_changed": false,
+  "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+  "backend_runtime_code_sha256": "6f533ba4334edba14d902974f5a8653aa98cef376401c99815442911243b9978",
+  "environment_recovery": "Cloud scratch disconnected; exact committed source and preserved reports continued in authorized isolated Mac checkout. No original Mac repository checkout switched.",
+  "boundaries": [
+    "Physical iPhone17Pro Chrome not exercised; WebKit emulation is separate evidence.",
+    "Fresh ordinary Google login on published C18 remains a release gate.",
+    "No family diary/profile/consent test writes; invitation/deletion cases use isolated synthetic accounts.",
+    "Full admin surface still depends on successful workspace boot; verified identity remains recoverable during outage."
+  ],
+  "backend_scope": "Azure/Python compute; Cloudflare authentication Worker changed",
+  "azure_compute_changed": false,
+  "edge_auth_worker_changed": true,
+  "independent_evidence_review": "QA re-read both raw browser reports: matching SHA256, 24+14 expected, zero unexpected/flaky/skipped, empty errors; candidate commit changes only docs/state/screenshots."
+}

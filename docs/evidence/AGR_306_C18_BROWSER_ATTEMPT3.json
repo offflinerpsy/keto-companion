@@ -1,0 +1,14 @@
+{
+  "schema": "keto-c18-browser-attempt-v1",
+  "source_commit": "0814fe9e7526566231a39da5c41cffcd829e4761",
+  "run": "c18-browser-3",
+  "status": "failed_fixture",
+  "passed": 15,
+  "failed": 1,
+  "not_run": 8,
+  "failure": "WebKit intercepted request.allHeaders also omitted the installed synthetic cookie. Focused isolated diagnostic confirmed cookie exists in context but intercepted header lacks it.",
+  "correction": "Pass redirected session checks through the real loopback HTTP server and validate req.headers.cookie there. No context-cookie bypass or timeout increase.",
+  "raw_report_preserved": "/Users/alexyarosh/Projects/keto-c18-artifacts/auth-attempt3-report.json",
+  "diagnostic": "/Users/alexyarosh/Projects/keto-c18-artifacts/auth-diag-2.log",
+  "product_run": "not_started_due_to_auth_fixture_failure"
+}

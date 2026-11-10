@@ -74,9 +74,9 @@ async function oauthCallback(req,env){
  const attempt=await dbfirst(env,'DELETE FROM oauth_attempts WHERE state_hash=? AND expires_at>? RETURNING verifier,nonce_hash,invite_hash',await sha(state),now());if(!attempt)fail(400,'INVALID_CALLBACK');
  const form=new URLSearchParams({code,client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,redirect_uri:env.PUBLIC_ORIGIN+'/auth/google/callback',grant_type:'authorization_code',code_verifier:attempt.verifier});
  const tokens=await providerJson(await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:form}),32768);const g=await googleClaims(tokens.id_token,attempt.nonce_hash,env);
- return finishIdentity(env,g,attempt,false);
+ return finishIdentity(req,env,g,attempt,false);
 }
-async function finishIdentity(env,g,attempt,firebase){
+async function finishIdentity(req,env,g,attempt,firebase){
  const id='u_'+await sha(g.sub);let user=await dbfirst(env,'SELECT id,status,role,email FROM users WHERE id=? AND google_sub=?',id,g.sub);
  if(!user){
   const owner=g.email===OWNER;let inv=null;if(!owner&&attempt.invite_hash)inv=await dbfirst(env,'SELECT id FROM invites WHERE token_hash=? AND email=? AND expires_at>? AND revoked_at IS NULL AND claimed_by IS NULL',attempt.invite_hash,g.email,now());
@@ -88,7 +88,16 @@ async function finishIdentity(env,g,attempt,firebase){
  if(user.status==='pending'){
   const inv=attempt.invite_hash&&await dbfirst(env,'SELECT id FROM invites WHERE token_hash=? AND email=? AND expires_at>? AND revoked_at IS NULL AND claimed_by IS NULL',attempt.invite_hash,g.email,now());if(!inv)fail(403,'INVITATION_REQUIRED');
  }
- await dbrun(env,'DELETE FROM sessions WHERE expires_at<=?',now());const raw=random();const saved=await dbrun(env,'INSERT INTO sessions(token_hash,user_id,expires_at,created_at) SELECT ?,?,?,? WHERE (SELECT COUNT(*) FROM sessions WHERE user_id=? AND expires_at>?)<10',await sha(raw),id,now()+SESSION_TTL,now(),id,now());if(saved.meta.changes!==1)fail(503,'SESSION_LIMIT');await dbrun(env,'UPDATE users SET last_active=? WHERE id=?',now(),id);
+ const t=now();await dbrun(env,'DELETE FROM sessions WHERE expires_at<=?',t);const raw=random(),hash=await sha(raw),previous=cookie(req,'keto_session');
+ // Re-authentication replaces only the verified user's presented live session.
+ // One atomic update preserves the device cap without evicting other devices.
+ const priorHash=/^[A-Za-z0-9_-]{43}$/.test(previous)?await sha(previous):'';
+ const saved=await env.DB.batch([
+  env.DB.prepare('UPDATE sessions SET token_hash=?,expires_at=?,created_at=? WHERE token_hash=? AND user_id=? AND expires_at>?').bind(hash,t+SESSION_TTL,t,priorHash,id,t),
+  env.DB.prepare('INSERT INTO sessions(token_hash,user_id,expires_at,created_at) SELECT ?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM sessions WHERE token_hash=?) AND (SELECT COUNT(*) FROM sessions WHERE user_id=? AND expires_at>?)<10').bind(hash,id,t+SESSION_TTL,t,hash,id,t),
+  env.DB.prepare('UPDATE users SET last_active=? WHERE id=? AND EXISTS(SELECT 1 FROM sessions WHERE token_hash=? AND user_id=?)').bind(t,id,hash,id)
+ ]);
+ if(saved[0].meta.changes+saved[1].meta.changes!==1)fail(503,'SESSION_LIMIT');
  return firebase?json({ok:true},200,{'set-cookie':cookieSet('keto_session',raw,SESSION_TTL)}):new Response(null,{status:303,headers:{location:env.PUBLIC_ORIGIN+'/', 'set-cookie':cookieSet('keto_session',raw,SESSION_TTL),'cache-control':'no-store','referrer-policy':'no-referrer'}});
 }
 async function firebaseStart(req,env){
@@ -102,7 +111,7 @@ async function firebaseStart(req,env){
 async function firebaseComplete(req,env){
  origin(req,env);const x=await bodyJson(req,16384);if(Object.keys(x).sort().join()!=='token,transaction'||typeof x.token!=='string'||!/^[A-Za-z0-9_-]{43}$/.test(x.transaction||''))fail(400,'INVALID_BODY');const browser=cookie(req,'keto_firebase');if(!/^[A-Za-z0-9_-]{43}$/.test(browser))fail(400,'INVALID_CHALLENGE');
  const attempt=await dbfirst(env,'UPDATE firebase_challenges SET consumed_at=? WHERE transaction_hash=? AND cookie_hash=? AND expires_at>? AND consumed_at IS NULL RETURNING invite_hash',now(),await sha(x.transaction),await sha(browser),now());if(!attempt)fail(400,'INVALID_CHALLENGE');
- const g=await firebaseClaims(x.token,{readBounded,email,fail,now});return finishIdentity(env,g,attempt,true);
+ const g=await firebaseClaims(x.token,{readBounded,email,fail,now});return finishIdentity(req,env,g,attempt,true);
 }
 
 async function handle(req,env){
