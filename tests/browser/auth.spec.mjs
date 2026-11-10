@@ -7,7 +7,7 @@ async function fixture(page,options={}){
  const h={role:'admin',status:'active',sessionFailure:false,openFailure:false,configFailure:false,loggedIn:true,requests:[],errors:[],...options};
  page.on('pageerror',error=>h.errors.push(error.message));
  await page.route('**/auth/config',route=>route.fulfill({status:h.configFailure?503:200,json:h.configFailure?{error:'SETUP_REQUIRED'}:{provider:'direct_google'}}));
- await page.route('**/api/session',route=>{h.requests.push('session');const authenticated=h.loggedIn&&(!h.requireCookie||(route.request().headers().cookie||'').split(/;\s*/).includes('synthetic_ui_session=active'));return route.fulfill({status:h.sessionFailure?503:authenticated?200:401,json:h.sessionFailure?{error:'TEMPORARY_UNAVAILABLE'}:authenticated?{user:{role:h.role,status:h.status,email:'synthetic@example.test'},csrf:'synthetic-csrf'}:{error:'SIGN_IN'}})});
+ await page.route('**/api/session',async route=>{h.requests.push('session');const headers=await route.request().allHeaders();const authenticated=h.loggedIn&&(!h.requireCookie||(headers.cookie||'').split(/;\s*/).includes('synthetic_ui_session=active'));return route.fulfill({status:h.sessionFailure?503:authenticated?200:401,json:h.sessionFailure?{error:'TEMPORARY_UNAVAILABLE'}:authenticated?{user:{role:h.role,status:h.status,email:'synthetic@example.test'},csrf:'synthetic-csrf'}:{error:'SIGN_IN'}})});
  await page.route('**/api/tools/**',async route=>{
   const name=new URL(route.request().url()).pathname.split('/').at(-1);h.requests.push(name);
   if(name==='keto_open'&&h.holdOpen){const hold=h.holdOpen;h.holdOpen=null;hold.entered.resolve();await hold.release.promise}

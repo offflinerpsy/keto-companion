@@ -1,0 +1,14 @@
+{
+  "schema": "keto-c18-browser-attempt-v1",
+  "source_commit": "829daba464f156a86564617f4ad58d79c70552c8",
+  "run": "c18-browser-2",
+  "status": "failed_fixture",
+  "passed": 15,
+  "failed": 1,
+  "not_run": 8,
+  "failure": "Cookie installed by real localhost 303 redirect was hidden from synchronous Playwright request.headers() in WebKit. Session fixture returned 401.",
+  "correction": "Use documented asynchronous request.allHeaders() to check the synthetic cookie; preserve real redirect and cookie oracle.",
+  "reference": "https://playwright.dev/docs/api/class-request#request-headers",
+  "raw_report_preserved": "/Users/alexyarosh/Projects/keto-c18-artifacts/auth-attempt2-report.json",
+  "product_run": "not_started_due_to_auth_fixture_failure"
+}
