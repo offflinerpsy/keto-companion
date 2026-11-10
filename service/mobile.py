@@ -14,9 +14,16 @@ def compact_topics(d):
     if 'topics' not in d:return
     import json
     for t in d['topics'].values():t['messages']=t['messages'][-60:]
-    while sum(len(json.dumps(t['messages'],ensure_ascii=False).encode()) for t in d['topics'].values())>200000:
-        oldest=min((t for t in d['topics'].values() if t['messages']),key=lambda t:t['messages'][0].get('at',''))
+    sizes={tid:len(json.dumps(t['messages'],ensure_ascii=False).encode()) for tid,t in d['topics'].items()}
+    total=sum(sizes.values())
+    while total>200000:
+        candidates=[(tid,t) for tid,t in d['topics'].items() if t['messages']]
+        if not candidates:break
+        oldest_id,oldest=min(candidates,key=lambda pair:pair[1]['messages'][0].get('at',''))
         oldest['messages']=oldest['messages'][2:]
+        new_size=len(json.dumps(oldest['messages'],ensure_ascii=False).encode())
+        total+=new_size-sizes[oldest_id]
+        sizes[oldest_id]=new_size
     d['chat']=copy.deepcopy(d['topics']['main']['messages'])
 
 def topic(d,tid):

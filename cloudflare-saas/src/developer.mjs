@@ -82,6 +82,7 @@ export async function handleDeveloper(req,env,h){
     if(out.state!==null)throw Error('PRIVATE_CONTEXT_REJECTED');const validated=await validatePatch(out.response.patch,snapshot);
     if(!await alive(j))throw Error('DEVELOPER_CANCELLED_OR_EXPIRED');
     await env.UPLOADS.put(key(j.id,'patch'),JSON.stringify(validated.patch));await env.UPLOADS.put(key(j.id,'diff'),unifiedDiff(validated.patch,snapshot));
+    if(!await alive(j)){await purge(env,j.id);throw Error('DEVELOPER_CANCELLED_OR_EXPIRED')}
     await finish(j,'generating','generated',{patch_hash:validated.patch_hash,result_json:JSON.stringify({usage:out.response.usage||{},model:'gpt-6.1-sol',reasoning:'high',publication:false})});
     return h.json({id:j.id,state:'generated',summary:validated.patch.summary,notes:validated.patch.notes,patch_hash:validated.patch_hash,diff:unifiedDiff(validated.patch,snapshot),publication:false});
    }
@@ -91,11 +92,12 @@ export async function handleDeveloper(req,env,h){
    const result=await env.DEVELOPER_RUNNER.run({job_id:j.id,baseline:j.baseline,patch_hash:j.patch_hash,files:patch.files});
    if(!validTestReceipt(result,j,env.DEVELOPER_IMAGE_DIGEST))throw Error('RUNNER_TESTS_FAILED');
    if(!await alive(j))throw Error('DEVELOPER_CANCELLED_OR_EXPIRED');await env.UPLOADS.put(key(j.id,'preview'),privatePreview(patch,snapshot));
+   if(!await alive(j)){await purge(env,j.id);throw Error('DEVELOPER_CANCELLED_OR_EXPIRED')}
    const receipt={baseline:j.baseline,patch_hash:j.patch_hash,image_digest:result.image_digest,exit_code:result.exit_code,stages:result.stages,publication:false};await finish(j,'testing','tested',{result_json:JSON.stringify(receipt)});
    return h.json({id:j.id,state:'tested',receipt,preview:'/api/developer/artifact/preview?id='+j.id,diff:'/api/developer/artifact/diff?id='+j.id,publication:false});
   }catch(e){
    if(!(e instanceof h.Fail)){await run("UPDATE dev_jobs SET state='failed',revision=revision+1,error_code='GENERATION_OR_TEST_FAILED' WHERE id=? AND state IN ('draft','generating','generated','testing')",j.id);await event(j.id,'failed')}
-   const current=await load(j.id);if(['failed','cancelled','expired'].includes(current.state)){await purge(env,j.id);await run('UPDATE dev_settings SET active_job=NULL,lease_until=0 WHERE id=1 AND active_job=?',j.id)}
+   const current=await get('SELECT state FROM dev_jobs WHERE id=?',j.id);if(!current||['failed','cancelled','expired'].includes(current.state)){await purge(env,j.id);await run('UPDATE dev_settings SET active_job=NULL,lease_until=0 WHERE id=1 AND active_job=?',j.id)}
    if(e instanceof h.Fail)throw e;h.fail(422,'DEVELOPER_GENERATION_OR_TEST_FAILED');
   }
  }

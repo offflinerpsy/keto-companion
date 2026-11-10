@@ -1,8 +1,8 @@
 {
   "plugin": "keto-companion",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scope": "skill source, data and runtime only; excludes host-normalized listing metadata",
-  "date": "2026-11-07",
+  "date": "2026-11-10",
   "algorithm": "sha256",
   "files": [
     {
@@ -37,8 +37,8 @@
     },
     {
       "path": "skills/keto-companion/scripts/keto_core.py",
-      "sha256": "bd135da6960419c9e3375b47d73bc691d3f666712d055f36705b34dfc4c747d4",
-      "bytes": 60647
+      "sha256": "28855e702e24e8d1bee5da353247652f941ee650383f7eaee75ae584834c6b9c",
+      "bytes": 88515
     },
     {
       "path": "skills/keto-companion/scripts/keto_export.py",
@@ -47,8 +47,8 @@
     },
     {
       "path": "skills/keto-companion/scripts/self_check.py",
-      "sha256": "27786018141dc6520cc22142352ee57c866cb24a0741272d03c3f4f11cc1b054",
-      "bytes": 1203
+      "sha256": "cd37d75066150ae8b83049d1024a9c173d764c7b71cc5f24e4278dfc2196559e",
+      "bytes": 1204
     },
     {
       "path": "skills/keto-companion/templates/blank_state.json",
@@ -77,8 +77,8 @@
     },
     {
       "path": "skills/keto-companion/tests/test_core.py",
-      "sha256": "a6d1251219ecd5587710891f385057b03e156e8dfce7bb767fffca933312391d",
-      "bytes": 17174
+      "sha256": "488886432a1f372fbf0fb45849fbcc596bea7a09fb45b9c9d4fb84d6b4221c62",
+      "bytes": 17175
     },
     {
       "path": "skills/keto-diary/SKILL.md",
@@ -127,13 +127,13 @@
     },
     {
       "path": "skills/keto-menu/data/foods.json",
-      "sha256": "ecc5a02f033409b40e3fca7f8b33608ce3bf1e25c4004e8d1a4d777a9bd4cd6c",
-      "bytes": 58477
+      "sha256": "8b881cfbcfb553c5cf84a932e078799c9d0ba53d5a16efda5028fed074ad0fe9",
+      "bytes": 64186
     },
     {
       "path": "skills/keto-menu/data/recipes.json",
-      "sha256": "b876aa1ac0bdc0b6a35c896b3b62de7aac8a852cc2317f586f26f74fb4e049c3",
-      "bytes": 137525
+      "sha256": "0e924b0087025aac1aa3f181fde42477e9969650a3905a77aab2e0d418b9b54d",
+      "bytes": 244656
     },
     {
       "path": "skills/keto-safety/SKILL.md",

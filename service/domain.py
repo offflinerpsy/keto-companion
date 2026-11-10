@@ -108,7 +108,7 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
         if d['revision']!=expected_revision:raise Conflict('Устаревшая версия профиля')
         if v is not None:self.store.delete(subject,v)
         return {'message':'Активный профиль удалён. Для нового профиля потребуется новое согласие. Сроки удаления из резервных копий зависят от политики хранилища.','state':self.snapshot(new_document(subject,kind))}
-    def catalog(self,subject,query='',limit=12,kind='personal',include_food_ids=None,exclude_food_ids=None,max_minutes=None,offset=0,category=None):
+    def catalog(self,subject,query='',limit=12,kind='personal',include_food_ids=None,exclude_food_ids=None,max_minutes=None,offset=0,category=None,_max_limit=72):
         d,_=self.load(subject,kind);cat=k.merge_personal_catalog(self.base,d['core']);p=d['core']['profile']
         query=text(query,200)
         timing=re.search(r'\b(\d{1,3})\s*(?:минут[уы]?|мин)\b',query,flags=re.I)
@@ -120,7 +120,7 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
         if (included|excluded)-set(cat['foods']):raise InputError('Неизвестный продукт фильтра')
         if max_minutes is not None:max_minutes=k.integer(max_minutes,'max_minutes',1,180)
         offset=k.integer(offset,'offset',0,100000)
-        limit=k.integer(limit,'limit',1,72)
+        limit=k.integer(limit,'limit',1,max(72,_max_limit))
         if category is not None and category not in ('breakfast','main','side','component'):raise InputError('Неизвестная категория')
         candidates=[]
         for r in cat['recipes'].values():
@@ -149,6 +149,9 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
         if event_type=='kitchen.diary' and isinstance(payload,dict) and 'date' not in payload:
             zone=d['core']['profile'].get('timezone')
             if not zone:raise InputError('Подтвердите часовой пояс для дневника')
+            payload=dict(payload,date=datetime.now(ZoneInfo(zone)).date().isoformat())
+        if event_type=='kitchen.accept_day' and isinstance(payload,dict) and 'date' not in payload:
+            zone=d['core']['profile'].get('timezone') or 'UTC'
             payload=dict(payload,date=datetime.now(ZoneInfo(zone)).date().isoformat())
         if not storage_consent(d):raise PermissionError('Сначала согласие на сохранение профиля и дневника')
         if event_type=='plan.accept':planning.ensure_current(d)
@@ -484,15 +487,16 @@ class Service(ChatActionService,IntakeService,KitchenService,MobileService,plann
             choice=re.search(r'(?:второй|вторую|вариант\s*2|номер\s*2)',message.casefold())
             old_choices=topic(d,tid).get('choices',[])
             if choice and len(old_choices)>1:
-                chosen=old_choices[1];options=self.catalog(subject,'',72,kind)['recipes'];extra['recipes']=[r for r in options if r['recipe_id']==chosen]
+                chosen=old_choices[1];full_cap=max(72,len(self.base['recipes'])+len(d['core'].get('custom_recipes',{})));options=self.catalog(subject,'',full_cap,kind,_max_limit=full_cap)['recipes'];extra['recipes']=[r for r in options if r['recipe_id']==chosen]
                 reply='Второй вариант из этой темы. Проверьте состав; он ещё не выбран как меню.' if extra['recipes'] else 'Прежний вариант уже не подходит ограничениям. Уточните продукты для нового подбора.'
             else:
                 extra.update(self.catalog(subject,'' if filters['include_food_ids'] else parsed['query'],4,kind,**filters))
                 reply='Вот подходящие варианты из каталога с граммовками. Временные пожелания не изменяют профиль.'
                 for r in extra['recipes']:r['fit_note']='Соответствует указанным продуктам и времени; проверено по сохранённым ограничениям.';r['match']='exact'
                 if not extra['recipes']:
-                    partial=self.catalog(subject,'',72,kind,exclude_food_ids=filters['exclude_food_ids'],max_minutes=filters['max_minutes'])['recipes']
-                    if not partial:partial=self.catalog(subject,'',72,kind,include_food_ids=filters['include_food_ids'],exclude_food_ids=filters['exclude_food_ids'])['recipes']
+                    full_cap=max(72,len(self.base['recipes'])+len(d['core'].get('custom_recipes',{})))
+                    partial=self.catalog(subject,'',full_cap,kind,exclude_food_ids=filters['exclude_food_ids'],max_minutes=filters['max_minutes'],_max_limit=full_cap)['recipes']
+                    if not partial:partial=self.catalog(subject,'',full_cap,kind,include_food_ids=filters['include_food_ids'],exclude_food_ids=filters['exclude_food_ids'],_max_limit=full_cap)['recipes']
                     wanted=set(filters['include_food_ids']);partial.sort(key=lambda r:(-len(wanted&{i['food_id'] for i in r['ingredients']}),r['active_minutes']))
                     extra['recipes']=partial[:4]
                     for r in extra['recipes']:

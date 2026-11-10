@@ -23,6 +23,10 @@
     {
       "path": "cloudflare-saas/migrations/0008_shop_lookup.sql",
       "sha256": "38af85819867a6cfa68da1251059a92cbb31f91a343e4969a73f7f8c4168df39"
+    },
+    {
+      "path": "cloudflare-saas/migrations/0009_indexes.sql",
+      "sha256": "7c9fba6573e60cda411972171531a1c90b7581d09fd403a394a29be1d7ab5e91"
     }
   ],
   "notice": "Actual SQLite-compatible D1 migration result; no user data or database connection.",

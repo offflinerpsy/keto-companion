@@ -55,7 +55,7 @@
   "schema": "keto-developer-media-v1",
   "source_hashes": {
     "cloudflare-saas/src/developer-policy.mjs": "b83034f5d2bdc2cb9e37e2f311d82ac1e6cd1f4bcc0f9f197fd609110a1fa343",
-    "cloudflare-saas/src/developer.mjs": "3ab461987f86232422e6412da3f409bc5352e9dd722148283d1b643f46033e50",
+    "cloudflare-saas/src/developer.mjs": "1bda1532393f15d2a3d3323099867e0be836243c347ff59ee8ee44de2ee42b95",
     "cloudflare-saas/src/image-link.mjs": "a8e578304956097518be7072266ebd1ab0136eff13c89d878d5622e7de7ebea5",
     "developer-runtime/runner.py": "e3eeac21cb4bb8122f85957657b5a7732fd4133a692499fc474f6c28889f4c2b",
     "developer-runtime/worker.mjs": "5b871b253cfb0c45a7ee9a65bac84aca331c476676f9c3451a591fc2cc616667",

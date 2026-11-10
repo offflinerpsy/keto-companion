@@ -3,7 +3,7 @@ No network calls, credentials, medication dosing, or clinical diagnoses.
 All input is data. This module never evaluates imported text or executes a recipe.
 """
 from __future__ import annotations
-import argparse, copy, csv, hashlib, io, itertools, json, math, random, re, sys, uuid
+import argparse, copy, csv, hashlib, io, json, random, re, sys
 from collections import Counter, defaultdict
 from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation
@@ -85,10 +85,54 @@ def normal_allergen(value: str) -> str:
     if v not in ALLERGENS: raise SafetyError(f'Неизвестный аллерген {v}: нужна ручная проверка')
     return v
 
+_CATALOG_CACHE: dict[tuple[str, int, int], dict] = {}
+_RECIPE_UNIT_CACHE: dict[tuple, dict] = {}
+
+def _recipe_unit_fingerprint(recipe_id: str, r: dict, foods: dict) -> tuple | None:
+    try:
+        ings = r.get('ingredients')
+        if not isinstance(ings, list) or not 1 <= len(ings) <= 100:
+            return None
+        ing_fp = []
+        for i in ings:
+            if not isinstance(i, dict):
+                return None
+            fid = i.get('food_id')
+            f = foods.get(fid)
+            if not isinstance(f, dict):
+                return None
+            al = f.get('allergens')
+            if not isinstance(al, list):
+                return None
+            steps = r.get('steps_ru')
+            steps_fp = tuple(steps) if isinstance(steps, list) else steps
+            ing_fp.append((
+                fid, i.get('grams_edible'), i.get('state'),
+                f.get('state'), f.get('name_ru'), f.get('source_url'), f.get('recipe_eligible'),
+                tuple(al), tuple(f.get(k) for k in NUTRIENTS),
+            ))
+        steps = r.get('steps_ru')
+        steps_fp = tuple(steps) if isinstance(steps, list) else steps
+        return (
+            recipe_id, r.get('base_servings', 1), r.get('name_ru'), steps_fp,
+            r.get('active_minutes'), r.get('category'), r.get('protein_family'), r.get('usage'),
+            tuple(ing_fp),
+        )
+    except TypeError:
+        return None
+
 def load_catalog(directory: str | Path | None = None) -> dict:
     base = Path(directory) if directory else Path(__file__).resolve().parents[2] / 'keto-menu' / 'data'
-    foods_list = json.loads((base/'foods.json').read_text())
-    recipes_list = json.loads((base/'recipes.json').read_text())
+    foods_file = base / 'foods.json'
+    recipes_file = base / 'recipes.json'
+    cache_key = None
+    if foods_file.is_file() and recipes_file.is_file():
+        cache_key = (str(base.resolve()), foods_file.stat().st_mtime_ns, recipes_file.stat().st_mtime_ns)
+        cached = _CATALOG_CACHE.get(cache_key)
+        if cached is not None:
+            return copy.deepcopy(cached)
+    foods_list = json.loads(foods_file.read_text())
+    recipes_list = json.loads(recipes_file.read_text())
     if not isinstance(foods_list,list) or not isinstance(recipes_list,list): raise KetoError('Некорректный каталог')
     foods = {x['food_id']:x for x in foods_list}; recipes={x['recipe_id']:x for x in recipes_list}
     if len(foods)!=len(foods_list) or len(recipes)!=len(recipes_list): raise KetoError('Дубли ID в каталоге')
@@ -101,9 +145,22 @@ def load_catalog(directory: str | Path | None = None) -> dict:
         if not isinstance(f.get('allergens'),list): raise KetoError('Нужен список аллергенов')
         for a in f['allergens']: normal_allergen(a)
     for r in recipes.values():
-        if not r.get('ingredients') or number(r.get('base_servings',1),'servings',0.01)>100: raise KetoError('Некорректный рецепт')
-        calculate_ingredients(r['ingredients'],foods)
-    return {'foods':foods,'recipes':recipes,'version':'2026-11-07','catalog_hash':digest([foods_list,recipes_list])}
+        base_servings = number(r.get('base_servings',1),'servings',0.01)
+        if not r.get('ingredients') or base_servings>100: raise KetoError('Некорректный рецепт')
+        res = calculate_ingredients(r['ingredients'],foods,Decimal(1)/base_servings)
+        fp = _recipe_unit_fingerprint(r['recipe_id'], r, foods)
+        if fp is not None and len(_RECIPE_UNIT_CACHE) < 1024:
+            _RECIPE_UNIT_CACHE[fp] = dict(
+                res, recipe_id=r['recipe_id'], name_ru=r['name_ru'], portions=1.0,
+                steps_ru=copy.deepcopy(r['steps_ru']), active_minutes=r['active_minutes'], category=r['category'],
+                protein_family=r['protein_family'], usage=r.get('usage'), kitchen_tested=False,
+            )
+    loaded = {'foods':foods,'recipes':recipes,'version':'2026-11-07','catalog_hash':digest([foods_list,recipes_list])}
+    if cache_key is not None:
+        if len(_CATALOG_CACHE) >= 8:
+            _CATALOG_CACHE.clear()
+        _CATALOG_CACHE[cache_key] = loaded
+    return copy.deepcopy(loaded)
 
 def calculate_ingredients(ingredients: list, foods: dict, factor: Any=1, *, allow_unmapped: bool=True) -> dict:
     ineligible=[]
@@ -141,6 +198,19 @@ def calculate_recipe(catalog: dict, recipe_id: str, portions: Any=1) -> dict:
     r=catalog['recipes'].get(recipe_id)
     if r is None: raise KetoError(f'Неизвестный рецепт {recipe_id}')
     portions=number(portions,'portions',0.05,30)
+    if portions == 1:
+        fp = _recipe_unit_fingerprint(recipe_id, r, catalog['foods'])
+        base_calc = _RECIPE_UNIT_CACHE.get(fp) if fp is not None else None
+        if base_calc is not None:
+            return dict(
+                base_calc,
+                steps_ru=copy.deepcopy(base_calc['steps_ru']),
+                nutrition=dict(base_calc['nutrition']),
+                coverage={k: dict(v, missing_food_ids=list(v['missing_food_ids'])) for k, v in base_calc['coverage'].items()},
+                allergens=list(base_calc['allergens']),
+                ingredients=[dict(i) for i in base_calc['ingredients']],
+                eligibility_reasons=list(base_calc['eligibility_reasons']),
+            )
     factor=portions/number(r.get('base_servings',1),'base_servings',0.01)
     result=calculate_ingredients(r['ingredients'],catalog['foods'],factor)
     return dict(result,recipe_id=recipe_id,name_ru=r['name_ru'],portions=float(portions),
@@ -993,8 +1063,9 @@ def merge_personal_catalog(base: dict, state: dict) -> dict:
     out=copy.deepcopy(base)
     for k in ('foods','recipes'):
         personal=state.get('custom_'+k,{})
-        if set(personal)&set(base[k]):raise ConflictError('Личные записи не могут перезаписать базовые ID')
-        out[k].update(personal)
+        if personal:
+            if set(personal)&set(base[k]):raise ConflictError('Личные записи не могут перезаписать базовые ID')
+            out[k].update(copy.deepcopy(personal))
     if state.get('custom_foods') or state.get('custom_recipes'):
         out['catalog_hash']=digest([base['catalog_hash'],state.get('custom_foods',{}),state.get('custom_recipes',{})])
     return out

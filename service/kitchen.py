@@ -18,7 +18,7 @@ from zoneinfo import ZoneInfo
 from jsonschema import Draft202012Validator
 from .mobile import topic
 from .chat_actions import chat_context,check_chat_context,hunger_request
-from .recipe_brain import RecipeDesigner, RecipeUnavailable, recipe_schema
+from .recipe_brain import RecipeUnavailable, recipe_schema
 from .store import Conflict
 from . import food_source
 from . import food_search
@@ -263,7 +263,6 @@ def context_for(d, spec, cat, tid):
 
 def template_drafts(context, d, cat):
     spec = context['spec'];ids = [f['food_id'] for f in context['foods']];stock={i['food_id']:i for i in spec['pantry']}
-    recent = [r['recipe_id'] for r in init(d)['accepted'][-8:]]+[r.get('recipe_id') for r in d['core']['diary'][-8:] if r.get('intake_status')=='confirmed']
     output = []
     for m in context['methods']:
         roles = [[fid for fid in ids if fid in POLICY['groups'][role]] for role in m['roles']]
@@ -423,7 +422,8 @@ class KitchenService:
             return {'items':[dict(i,name_ru=cat['foods'][i['food_id']]['name_ru']) for i in payload['items']]}
         if action=='accept_day':
             group=topic(d,payload['thread_id'])['kitchen'];drafts=init(d)['drafts']
-            return {'day_items':[drafts[rid]['recipe']['name_ru'] for rid in group['candidate_ids']]}
+            day=payload.get('date') or datetime.now(ZoneInfo(d['core']['profile'].get('timezone') or 'UTC')).date().isoformat()
+            return {'date':day,'day_items':[drafts[rid]['recipe']['name_ru'] for rid in group['candidate_ids']]}
         if action not in ('save','favorite','diary','rate'):return None
         entry=init(d)['drafts'][payload['recipe_id']];rec=entry['recipe'];cat=self.kitchen_catalog(d);cat['recipes'][rec['recipe_id']]=rec
         portions=float(payload.get('fraction',1))*(rec['base_servings'] if payload.get('basis')=='batch' else 1)
@@ -508,12 +508,15 @@ class KitchenService:
             if set(payload)!={'fact_id'} or not any(p['id']==payload['fact_id'] for p in block['preferences']):raise ValueError('Предпочтение не найдено')
         elif action in ('save','favorite','rate','diary','accept_day'):
             allowed={'thread_id','recipe_id'}|({'rating'} if action=='rate' else {'fraction','basis'} if action=='diary' else set())
-            optional={'date','time','time_fold','timezone','meal'} if action=='diary' else set()
+            optional={'date','time','time_fold','timezone','meal'} if action=='diary' else {'date'} if action=='accept_day' else set()
             if not allowed<=set(payload) or set(payload)-allowed-optional:raise ValueError('Неверные параметры рецепта')
             t=topic(d,payload['thread_id']);group=t.get('kitchen',{})
             if payload['recipe_id'] not in group.get('candidate_ids',[]):raise ValueError('Выберите действительный вариант текущей темы')
             if action=='accept_day':
-                self.kitchen_day(d,group,require_valid=True)
+                if 'date' in payload:
+                    if not isinstance(payload['date'],str):raise ValueError('Неверная дата дня')
+                    date.fromisoformat(payload['date'])
+                self.kitchen_day(d,group,require_valid=True,target_date=payload.get('date'))
                 if len(set(d['core'].get('custom_recipes',{}))|set(group['candidate_ids']))>30:raise ValueError('Не больше 30 сохранённых рецептов')
             else:self.kitchen_card(d,payload['recipe_id'],group['spec'])
             if action in ('save','favorite') and len(d['core'].get('custom_recipes',{}))>=30 and payload['recipe_id'] not in d['core'].get('custom_recipes',{}):raise ValueError('Не больше 30 личных рецептов')
@@ -565,7 +568,7 @@ class KitchenService:
                     favorites=list(dict.fromkeys(d['core']['profile']['settings']['favorites']+[rid]))
                     d['core']=k.apply_event(d['core'],{'event_id':'fav_'+proposal_id,'type':'settings.update','payload':{'favorites':favorites},'confirmed':True},d['core']['state_revision'],d['core']['owner_account_id'],self.kitchen_catalog(d))
                 elif action=='accept_day':
-                    plan=self.kitchen_day(d,group,require_valid=True)['plan']
+                    plan=self.kitchen_day(d,group,require_valid=True,target_date=payload.get('date'))['plan']
                     d['core']=k.apply_event(d['core'],{'event_id':'day_'+proposal_id,'type':'plan.accept','payload':plan,'confirmed':True},d['core']['state_revision'],d['core']['owner_account_id'],self.kitchen_catalog(d))
                 if action=='accept_day':
                     block.setdefault('plan_pantry',{})[plan['plan_id']]=copy.deepcopy(group['spec']['pantry']);block['plan_pantry']=dict(list(block['plan_pantry'].items())[-8:])
@@ -646,7 +649,7 @@ class KitchenService:
             if len(output)==3:break
         return output
 
-    def kitchen_day(self,d,group,require_valid=False):
+    def kitchen_day(self,d,group,require_valid=False,target_date=None):
         k=core();spec=group['spec'];cat=self.kitchen_catalog(d);ids=group['candidate_ids'];issues=[]
         # Use per-person portions for daily nutrition; batch stock for all eaters.
         for rid in ids:cat['recipes'][rid]=init(d)['drafts'][rid]['recipe']
@@ -667,7 +670,7 @@ class KitchenService:
         if not d['core']['profile'].get('targets'):issues.append('confirmed_targets_required')
         plan=None
         if not issues:
-            day=datetime.now(ZoneInfo(d['core']['profile'].get('timezone') or 'UTC')).date().isoformat()
+            day=target_date or datetime.now(ZoneInfo(d['core']['profile'].get('timezone') or 'UTC')).date().isoformat()
             # Core catalogue hashing remains stable when these are saved as custom recipes.
             temp=copy.deepcopy(d['core']);temp.setdefault('custom_recipes',{}).update({rid:k.validate_custom_recipe(cat['recipes'][rid],cat) for rid in ids})
             cat=k.merge_personal_catalog(self.base,temp)
@@ -764,6 +767,8 @@ class KitchenService:
         if old:
             if old['hash']!=fingerprint:raise Conflict('request_id повторно использован с другим содержимым')
             if old['status']!='completed' or 'response' not in old:raise Conflict('Этот запрос уже начат или его экран устарел; результат не повторяется')
+            if d['holds'] or k.screen_profile(d['core']['profile'])['status'] in ('blocked','clinician_review'):raise k.SafetyError('Подбор приостановлен: сначала разбор нового ограничения')
+            if any(p['type']=='profile.update' and p['expires_at']>time.time() and set(p['payload']) & {'allergies','medications','screening'} for p in d['pending'].values()):raise k.SafetyError('Сначала подтвердите новые ограничения')
             return {**copy.deepcopy(old['response']),'state':self.snapshot(d),'replayed':True,'model_called':False}
         if expected_revision is not None and expected_revision!=d['revision']:raise Conflict('Устаревший экран кухни')
         if d['holds'] or k.screen_profile(d['core']['profile'])['status'] in ('blocked','clinician_review'):raise k.SafetyError('Подбор приостановлен: сначала разбор нового ограничения')

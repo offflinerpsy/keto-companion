@@ -416,11 +416,17 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
             return {'values':result['state']['ui']}
         raise InputError('Инструмент не реализован')
     app.state.invoke=invoke
+    async def read_bounded_body(req:Request,limit:int=1_700_000,message:str='Слишком большой запрос')->bytes:
+        pieces=[];size=0
+        async for chunk in req.stream():
+            size+=len(chunk)
+            if size>limit:raise HTTPException(413,message)
+            pieces.append(chunk)
+        return b''.join(pieces)
     @app.post('/api/tools/{name}')
     async def tool_route(name:str,req:Request):
         r=identity(req,True)
-        raw=await req.body()
-        if len(raw)>1_700_000:raise HTTPException(413,'Слишком большой запрос')
+        raw=await read_bounded_body(req,1_700_000,'Слишком большой запрос')
         try:args=json.loads(raw)
         except ValueError:raise HTTPException(400,'Неверный JSON')
         result=await run_in_threadpool(invoke,r,name,args)
@@ -439,8 +445,7 @@ def create_app(service=None,auth_records=None,signing_key=None,public_url=None,t
             if req.headers.get('content-type','').split(';')[0].strip().lower()!='application/json':return JSONResponse({'jsonrpc':'2.0','id':None,'error':{'code':-32000,'message':'Unsupported Media Type'}},status_code=415)
         protocol=req.headers.get('mcp-protocol-version')
         if protocol and protocol not in ('2025-03-26','2025-06-18','2025-11-25'):raise HTTPException(400,'Unsupported MCP version')
-        raw=await req.body()
-        if len(raw)>1_700_000:raise HTTPException(413,'Payload too large')
+        raw=await read_bounded_body(req,1_700_000,'Payload too large')
         try:j=json.loads(raw)
         except ValueError:return JSONResponse({'jsonrpc':'2.0','id':None,'error':{'code':-32700,'message':'Parse error'}},status_code=400)
         if not isinstance(j,dict) or j.get('jsonrpc')!='2.0' or not isinstance(j.get('method'),str):return JSONResponse({'jsonrpc':'2.0','id':None,'error':{'code':-32600,'message':'Invalid request'}},status_code=400)

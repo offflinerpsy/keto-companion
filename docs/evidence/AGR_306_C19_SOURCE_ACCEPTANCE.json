@@ -1,0 +1,67 @@
+{
+  "schema": "keto-source-acceptance-v1",
+  "id": "AGR-306-C19-FULL-REVIEW-OPTIMIZATION",
+  "linear_issue": "AGR-306",
+  "base_commit": "30fbec34381b6f243e1214de7a234feafed09766",
+  "branch": "codex/full-review-optimization-c19",
+  "checked_at": "2026-11-10T21:49:08.117149+00:00",
+  "runtime_code_sha256": "a7625ec1b6488ec742277592e8d89dae278ebb3768539cf1f3c8baca52d4704f",
+  "developer_snapshot_baseline": "6a9891513514a0905eb0c09435f0bf1a372b60e20ac44921d3d0f495b8a02b28",
+  "checks": {
+    "self_check": {
+      "passed": true,
+      "files_verified": 29,
+      "foods": 85,
+      "recipes": 108
+    },
+    "python_pytest": {
+      "passed": 663,
+      "skipped": 1,
+      "subtests": 6,
+      "failed": 0
+    },
+    "node_tests": {
+      "passed": 302,
+      "failed": 0
+    },
+    "legacy_ui": "passed",
+    "legacy_oauth_ui": "passed",
+    "contracts_check": {
+      "passed": true,
+      "files": 7,
+      "drift": []
+    },
+    "specification_check": {
+      "passed": true,
+      "documents_checked": 25,
+      "local_links_checked": 879
+    },
+    "repository_hygiene": {
+      "passed": true
+    },
+    "independent_diff_review": "gpt-6.1-sol/high read-only diff review completed; all 4 findings resolved and covered by regression tests"
+  },
+  "measured_optimizations": {
+    "usda_cheese_search_test_s": {
+      "before": 6.07,
+      "after": 0.65
+    },
+    "usda_whole_words_test_s": {
+      "before": 2.7,
+      "after": 0.38
+    },
+    "chat_compaction_test_s": {
+      "before": 1.82,
+      "after": 0.16
+    },
+    "edge_replay_blob_prune": "throttled to >=60s interval off every-request critical path",
+    "d1_indexes_migration": "cloudflare-saas/migrations/0009_indexes.sql",
+    "static_assets_http": "strong SHA-256 ETag + 304 Not Modified on non-HTML assets + cached Uint8Array binary decode; HTML retains Cache-Control: no-store"
+  },
+  "boundaries_preserved": {
+    "approved_runtime_pin_untouched": true,
+    "legacy_plugin_0_2_1_untouched": true,
+    "browser_or_cua_invoked": false,
+    "cloud_or_family_data_mutated": false
+  }
+}

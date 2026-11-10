@@ -7,6 +7,7 @@ fall back to substrings. There is no model, network lookup or nutrient inference
 """
 from __future__ import annotations
 from dataclasses import dataclass
+import functools
 import re
 import unicodedata
 
@@ -113,16 +114,45 @@ ALIASES = {word: family for family, words in FAMILIES.items() for word in words.
 # "сыром" is a cheese case form; raw uses "сырой/сыром виде" and the raw state.
 ALIASES['сыром'] = 'cheese'
 STOP = frozenset('с со из и или на в во к ко для по под за при a an the of with and in to продукты продукт еда блюдо блюда рецепт рецепты найти найди покажи пожалуйста'.split())
+_NORM_SUBS = (
+    (re.compile(r'\bсыром\s+виде\b'), 'сырой'),
+    (re.compile(r'\bcottage\s+cheese\b'), 'cottage'),
+    (re.compile(r'\bsour\s+cream\b'), 'sourcream'),
+    (re.compile(r'\b(peanut|almond|cashew|sesame|sunflower|soy|nut|seed|apple)\s+butters?\b'), r'\1 spread'),
+    (re.compile(r'\bcocoa\s+butter\b'), 'cocoa oil'),
+)
+_WORD_RE = re.compile(r'[^\W_]+', re.UNICODE)
+_ADDED_SUGAR_RE = re.compile(r'\b(?:(?:no|without)\s+added\s+sugars?|без\s+(?:добавленного|добавления)\s+сахара)\b')
+_FREE_RE = re.compile(r'\b([^\W_]+)[ -]+free\b')
+_ABSENCE_PATTERNS = (
+    (re.compile(r'\bunsalted\b'), 'salt'),
+    (re.compile(r'\bбезлактозн(?:ый|ое|ая)\b'), 'lactose'),
+    (re.compile(r'\bбезглютенов(?:ый|ое|ая)\b'), 'gluten'),
+)
+_CLAUSE_SPLIT_RE = re.compile(r'[,.;()]')
+_COMPOUND_PAIRS = (
+    ('olive','oil'),
+    ('coconut','oil'),
+    ('sunflower','oil'),
+    ('cream','oil'),
+    ('chicken','breast'),
+    ('turkey','breast'),
+    ('egg','white'),
+    ('cauliflower','cabbage'),
+)
 
+@functools.lru_cache(maxsize=32768)
 def normalize(value):
     value=' '.join(unicodedata.normalize('NFKC', str(value)).casefold().replace('ё','е').split())
-    for pattern,replacement in ((r'\bсыром\s+виде\b','сырой'),(r'\bcottage\s+cheese\b','cottage'),(r'\bsour\s+cream\b','sourcream'),(r'\b(peanut|almond|cashew|sesame|sunflower|soy|nut|seed|apple)\s+butters?\b',r'\1 spread'),(r'\bcocoa\s+butter\b','cocoa oil')):
-        value=re.sub(pattern,replacement,value)
+    for pattern,replacement in _NORM_SUBS:
+        value=pattern.sub(replacement,value)
     return value
 
+@functools.lru_cache(maxsize=32768)
 def words(value):
-    return tuple(re.findall(r'[^\W_]+', normalize(value), re.UNICODE))
+    return tuple(_WORD_RE.findall(normalize(value)))
 
+@functools.lru_cache(maxsize=32768)
 def document(value):
     raw = words(value)
     canonical = {ALIASES.get(word, word) for word in raw}
@@ -140,16 +170,17 @@ def absence_phrases(value):
         terms.add('added_sugar');return ' '
     def free(match):
         word=match.group(1);terms.add(ALIASES.get(word,word));return ' '
-    value=re.sub(r'\b(?:(?:no|without)\s+added\s+sugars?|без\s+(?:добавленного|добавления)\s+сахара)\b',added,normalize(value))
-    value=re.sub(r'\b([^\W_]+)[ -]+free\b',free,value)
-    for pattern,term in ((r'\bunsalted\b','salt'),(r'\bбезлактозн(?:ый|ое|ая)\b','lactose'),(r'\bбезглютенов(?:ый|ое|ая)\b','gluten')):
-        if re.search(pattern,value):terms.add(term);value=re.sub(pattern,' ',value)
+    value=_ADDED_SUGAR_RE.sub(added,normalize(value))
+    value=_FREE_RE.sub(free,value)
+    for pattern,term in _ABSENCE_PATTERNS:
+        if pattern.search(value):terms.add(term);value=pattern.sub(' ',value)
     return value,terms
 
+@functools.lru_cache(maxsize=16384)
 def explicit_absence(value):
     """Only wording actually present in a product name, not missing metadata."""
     value,absent=absence_phrases(value)
-    for part in re.split(r'[,.;()]',value):
+    for part in _CLAUSE_SPLIT_RE.split(value):
         tokens=words(part);active=False
         for index,word in enumerate(tokens):
             if word in ('без','without','no'):
@@ -159,7 +190,7 @@ def explicit_absence(value):
                 active=False
             term=ALIASES.get(word,word)
             if active and word not in STOP:absent.add(term)
-    return absent
+    return frozenset(absent)
 
 @dataclass(frozen=True)
 class Query:
@@ -170,17 +201,21 @@ class Query:
 
     def score(self, *fields, exclusion_fields=None):
         title = str(fields[0]) if fields else ''
-        def combine(values):
-            documents=[document(str(value or '')) for value in values]
-            return set().union(*(item[0] for item in documents)),tuple(word for item in documents for word in item[1])
-        concepts,raw=combine(fields)
-        excluded_concepts,excluded_raw=combine(exclusion_fields) if exclusion_fields is not None else (concepts,raw)
+        field_docs=[document(str(value or '')) for value in fields]
+        concepts=set().union(*(item[0] for item in field_docs)) if field_docs else set()
+        raw=tuple(word for item in field_docs for word in item[1])
+        if exclusion_fields is not None:
+            excl_docs=[document(str(value or '')) for value in exclusion_fields]
+            excluded_concepts=set().union(*(item[0] for item in excl_docs)) if excl_docs else set()
+            excluded_raw=tuple(word for item in excl_docs for word in item[1])
+        else:
+            excluded_concepts,excluded_raw=concepts,raw
         def matches_exclusion(term):
             return term in excluded_concepts or (term not in FAMILIES and len(term)>=3 and (any(w.startswith(term) for w in excluded_raw) or any(word.startswith(term) and family in excluded_concepts for word,family in ALIASES.items())))
-        if any(matches_exclusion(term) for term in self.excluded):
+        if self.excluded and any(matches_exclusion(term) for term in self.excluded):
             return None
         if self.qualifiers:
-            absence=set().union(*(explicit_absence(field) for field in fields))
+            absence=set().union(*(explicit_absence(str(field or '')) for field in fields))
             if not set(self.qualifiers)<=absence:return None
         exact = 0
         for index, term in enumerate(self.required):
@@ -190,12 +225,14 @@ class Query:
                 return None
         # Compound ingredient names must occur together in one field. A salad
         # containing olives plus butter is not evidence for olive oil.
-        for pair in (('olive','oil'),('coconut','oil'),('sunflower','oil'),('cream','oil'),('chicken','breast'),('turkey','breast'),('egg','white'),('cauliflower','cabbage')):
-            if set(pair)<=set(self.required) and not any(set(pair)<=document(str(field or ''))[0] for field in fields):
-                return None
-        title_concepts, _ = document(title)
+        if len(self.required)>=2:
+            req_set=set(self.required)
+            for pair in _COMPOUND_PAIRS:
+                if pair[0] in req_set and pair[1] in req_set and not any(pair[0] in d0 and pair[1] in d0 for d0,_ in field_docs):
+                    return None
+        title_concepts, title_raw = field_docs[0] if field_docs else document(title)
         title_matches = sum(term in title_concepts for term in self.required)
-        title_words = tuple(ALIASES.get(word,word) for word in words(title) if word not in STOP)
+        title_words = tuple(ALIASES.get(word,word) for word in title_raw if word not in STOP)
         phrase = bool(self.required and title_words == self.required)
         starts = bool(self.required and title_words[:len(self.required)] == self.required)
         return 100*phrase + 20*starts + 5*title_matches + exact
