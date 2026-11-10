@@ -7,7 +7,7 @@ async function fixture(page,options={}){
  const h={role:'admin',status:'active',sessionFailure:false,openFailure:false,configFailure:false,loggedIn:true,requests:[],errors:[],...options};
  page.on('pageerror',error=>h.errors.push(error.message));
  await page.route('**/auth/config',route=>route.fulfill({status:h.configFailure?503:200,json:h.configFailure?{error:'SETUP_REQUIRED'}:{provider:'direct_google'}}));
- await page.route('**/api/session',route=>{h.requests.push('session');return route.fulfill({status:h.sessionFailure?503:h.loggedIn?200:401,json:h.sessionFailure?{error:'TEMPORARY_UNAVAILABLE'}:h.loggedIn?{user:{role:h.role,status:h.status,email:'synthetic@example.test'},csrf:'synthetic-csrf'}:{error:'SIGN_IN'}})});
+ await page.route('**/api/session',route=>{h.requests.push('session');const authenticated=h.loggedIn&&(!h.requireCookie||(route.request().headers().cookie||'').split(/;\s*/).includes('synthetic_ui_session=active'));return route.fulfill({status:h.sessionFailure?503:authenticated?200:401,json:h.sessionFailure?{error:'TEMPORARY_UNAVAILABLE'}:authenticated?{user:{role:h.role,status:h.status,email:'synthetic@example.test'},csrf:'synthetic-csrf'}:{error:'SIGN_IN'}})});
  await page.route('**/api/tools/**',async route=>{
   const name=new URL(route.request().url()).pathname.split('/').at(-1);h.requests.push(name);
   if(name==='keto_open'&&h.holdOpen){const hold=h.holdOpen;h.holdOpen=null;hold.entered.resolve();await hold.release.promise}
@@ -18,7 +18,7 @@ async function fixture(page,options={}){
  });
  await page.route('**/api/admin/summary',route=>{h.requests.push('admin-summary');return route.fulfill({status:h.role==='admin'?200:403,json:h.role==='admin'?{active:2,pending:0,expired:0,members:[],invites:[]}:{error:'FORBIDDEN'}})});
  await page.route('**/auth/google/start',async route=>{h.requests.push('google-start');if(h.holdLogin){h.holdLogin.entered.resolve();await h.holdLogin.release.promise}return route.fulfill({json:{authorization_url:'http://127.0.0.1:8899/__synthetic_google_return'}})});
- await page.route('**/__synthetic_google_return',route=>{h.loggedIn=true;return route.fulfill({status:302,headers:{location:'/', 'set-cookie':'synthetic_ui_session=active; Path=/; HttpOnly; SameSite=Lax'},body:''})});
+ await page.route('**/__synthetic_google_return',route=>{h.loggedIn=true;h.requireCookie=true;return route.continue()});
  await page.route('**/api/logout',route=>{h.requests.push('logout');if(h.logoutFailure)return route.fulfill({status:503,json:{error:'TEMPORARY_UNAVAILABLE'}});h.loggedIn=false;return route.fulfill({json:{ok:true}})});
  await page.route('**/api/invites/claim',route=>{h.requests.push('claim');h.claimToken=route.request().postDataJSON().token;if(!/^[A-Za-z0-9_-]{43}$/.test(h.claimToken||''))return route.fulfill({status:400,json:{error:'INVALID_INVITE'}});h.status='active';return h.lostClaim?route.abort('failed'):route.fulfill({json:{ok:true}})});
  await page.route('**/api/personal/delete',route=>{h.requests.push('delete');h.loggedIn=false;return route.fulfill({status:202,json:{receipt:'synthetic-deletion-receipt',status:'pending'}})});

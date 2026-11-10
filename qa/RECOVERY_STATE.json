@@ -8,7 +8,7 @@
     "id": "AGR-306-C18-AUTH",
     "linear_issue": "AGR-306",
     "status": "in_progress",
-    "stage": "diagnose_then_source_acceptance",
+    "stage": "browser_fixture_correction_then_acceptance",
     "base_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
     "writer": "root",
     "scope": "Restore dependable Google sign-in and owner admin access; distinguish valid session from workspace boot failure; prevent duplicate and indefinitely pending sign-in attempts; bounded regression and real-user-flow verification",
@@ -19,7 +19,8 @@
       "No duplicate popup/challenge, no stale session resurrection, no token/cookie logging",
       "Reproduce confirmed defects before fix; automated auth lifecycle and real Worker regressions; existing exact-source private-family release"
     ],
-    "observed_live": "Existing connected desktop owner session opens workspace and owner-only controls; fresh sign-in not yet verified"
+    "observed_live": "Existing connected desktop owner session opens workspace and owner-only controls; fresh sign-in not yet verified",
+    "source_commit": "8b2bdab735ce7c8427ee95e6d31d32c4816dc985"
   },
   "last_completed": {
     "id": "AGR-306-C17-RELEASE",
@@ -86,6 +87,15 @@
         "completion_marker": "C17 QA .c17-release-artifacts/azure.exit",
         "status": "completed",
         "exit_code": 0
+      },
+      {
+        "host": "authorized owner Mac isolated C18 QA worktree",
+        "pid": 71042,
+        "run": "c18-browser-1",
+        "completion_marker": "/Users/alexyarosh/Projects/keto-c18-artifacts/browser-1.exit.json",
+        "status": "completed_failed_fixture",
+        "source_commit": "8b2bdab735ce7c8427ee95e6d31d32c4816dc985",
+        "exit_code": 1
       }
     ],
     "pending_cloud_builds": [],
