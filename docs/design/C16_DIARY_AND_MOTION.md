@@ -86,3 +86,7 @@ numbers, no drag gesture is added, and no application scroll wrapper is transfor
 Competitor material informed the order of summary and meals, grouped entries and
 visible targets. KETO keeps its own source-derived calculations and explicit
 confirmation; it does not copy a competitor's medical norms or brand assets.
+
+## Source packaging correction
+
+The first native source gate exposed a full-file developer patch exceeding its existing 60,000-byte limit after the final snapshot regeneration. Diary detail rules and motion now live in protected CSS modules, concatenated in their original byte order. The served CSS, JavaScript, HTML and legacy bundle remain byte-identical to browser run 6. The three editable paths, independent runner limit, combined 120,000-byte UI-source bound and 110,000-byte code/metadata bound remain enforced. A new actual-snapshot regression rejects stale generated sources and checks that every editable file accepts a bounded full-file patch.

@@ -26,7 +26,8 @@ def prepare(output,generated):
         data=(ROOT/name).read_bytes();entries.append({'path':name,'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)})
     baseline=hashlib.sha256(json.dumps(entries,separators=(',',':')).encode()).hexdigest()
     manifest={'schema':'keto-developer-snapshot-v1','baseline':baseline,'files':entries,'sources':[{'path':p,'sha256':hashlib.sha256((ROOT/p).read_bytes()).hexdigest(),'content':(ROOT/p).read_text()} for p in EDITABLE]}
-    if sum(len(s['content'].encode()) for s in manifest['sources'])>120000:raise ValueError('Model source bound')
+    preview={p:(ROOT/p).read_text() for p in ('cloudflare-saas/public/diary.css','cloudflare-saas/public/motion.css')}
+    if sum(len(s['content'].encode()) for s in manifest['sources'])+sum(len(s.encode()) for s in preview.values())>120000:raise ValueError('UI source bound')
     output.mkdir(parents=True,exist_ok=True);(output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
     raw=io.BytesIO()
     with tarfile.open(fileobj=raw,mode='w',format=tarfile.USTAR_FORMAT) as archive:
@@ -37,7 +38,7 @@ def prepare(output,generated):
     with (output/'source.tar.gz').open('wb') as f:
         with gzip.GzipFile(fileobj=f,mode='wb',mtime=0,filename='') as zipped:zipped.write(raw.getvalue())
     generated.parent.mkdir(parents=True,exist_ok=True)
-    generated.write_text('export const developerSnapshot='+json.dumps({'baseline':baseline,'sources':manifest['sources']},ensure_ascii=False,separators=(',',':'))+';\n')
+    generated.write_text('export const developerSnapshot='+json.dumps({'baseline':baseline,'sources':manifest['sources'],'preview':preview},ensure_ascii=False,separators=(',',':'))+';\n')
     return {'baseline':baseline,'files':len(entries),'archive_sha256':hashlib.sha256((output/'source.tar.gz').read_bytes()).hexdigest()}
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--output',type=Path,default=ROOT/'developer-runtime/build');p.add_argument('--generated',type=Path,default=ROOT/'cloudflare-saas/generated/developer-snapshot.mjs');a=p.parse_args();print(json.dumps(prepare(a.output,a.generated)))

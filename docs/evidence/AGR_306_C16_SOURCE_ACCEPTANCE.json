@@ -2,12 +2,12 @@
   "schema": "keto-source-acceptance-v1",
   "task": "AGR-306-C16-PRODUCT",
   "status": "passed",
-  "checked_at": "2026-11-10T11:18:21.752712+00:00",
+  "checked_at": "2026-11-10T11:31:03.736271+00:00",
   "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
   "source_branch": "codex/keto-diary-c16",
-  "protected_source_baseline": "faf6015908ea556c76d7f6103e21d85606c8d394f833874854138366cf5cf96a",
-  "protected_source_files": 238,
-  "runtime_archive_sha256": "6cccd603ab5c95e795088596c82bc3b93c8efa5cbc2f9c1f43d636dc33017959",
+  "protected_source_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+  "protected_source_files": 240,
+  "runtime_archive_sha256": "0d7a7cdd83bb1523434eb0fab2f8305d3e8090c87c295aaa701f968d3b75c7a9",
   "owner_device": "iPhone 17 Pro, not Max; Chrome; supplied screenshots imply 402 CSS px at DPR3",
   "checks": {
     "python": {
@@ -17,10 +17,10 @@
       "log_sha256": "5239c9c96cc937bc664fa9d19a1560c03421d1ea13dd4d450c68acff35741820"
     },
     "node": {
-      "passed": 259,
+      "passed": 260,
       "failed": 0,
       "skipped": 0,
-      "log_sha256": "f1dac2426aa2ea338ed909def32ddd9a63445a411f268b6b383594a56b635f99"
+      "log_sha256": "d5c7618615e92e7365a7da094763bf4338752c49f8696a068e5463b9abfcc5ed"
     },
     "contracts": {
       "passed": true,
@@ -159,5 +159,14 @@
     "No physical iPhone keyboard, browser chrome, camera, voice or real sign-in claim",
     "No clinical or full accessibility certification",
     "No cloud release performed by this source acceptance"
-  ]
+  ],
+  "initial_protected_baseline": "faf6015908ea556c76d7f6103e21d85606c8d394f833874854138366cf5cf96a",
+  "source_gate_correction": {
+    "receipt": "docs/evidence/AGR_306_C16_NATIVE_FAILURE.json",
+    "asset_equivalence": "docs/evidence/AGR_306_C16_ASSET_EQUIVALENCE.json",
+    "python_targeted_passed": 24,
+    "editable_css_bytes": 56438,
+    "guard_limits_unchanged": true,
+    "browser_artifacts_byte_identical": true
+  }
 }

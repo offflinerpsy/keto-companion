@@ -3,16 +3,20 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-10T11:18:21.752712+00:00",
+  "updated_at": "2026-11-10T11:31:03.736271+00:00",
   "active_task": {
     "id": "AGR-306-C16-RELEASE",
     "status": "in_progress",
-    "stage": "freeze_source_commit",
+    "stage": "corrected_source_freeze",
     "source_acceptance": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
     "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
-    "protected_baseline": "faf6015908ea556c76d7f6103e21d85606c8d394f833874854138366cf5cf96a",
+    "protected_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
     "writer": "root",
-    "deliverable": "Exact accepted runtime and Azure source adopted in existing private-family staging; readback evidence"
+    "deliverable": "Exact accepted runtime and Azure source adopted in existing private-family staging; readback evidence",
+    "candidate_commit": "2ec60e32bca79a2535c3a4b02b1718f23f0b1dd5",
+    "native_build": "86ba3306-509d-46df-94e0-1297ae6a34b6",
+    "native_build_status": "failed",
+    "previous_native_failure": "86ba3306-509d-46df-94e0-1297ae6a34b6"
   },
   "last_completed": {
     "id": "AGR-306-C15-UI",
@@ -71,7 +75,8 @@
     "accepted_runtime_image": "sha256:059d675cda4a8f89d0fda2d842940e1df2f2a479de8a83a18cc71c03217075c2",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
     "new_runtime_image_required": "Yes after C16 source is frozen; do not start until acceptance.",
-    "implementation_writer": "root"
+    "implementation_writer": "root",
+    "temporary_trigger_commands": "restored ordinary commands"
   },
   "owner_authorization": "Implementation, verification and release to the existing private family environment authorized. No Mac Codex desktop, new accounts or providers.",
   "product_plan": "docs/design/PRODUCT_DELIVERY_2026_11_09.md",
@@ -83,7 +88,8 @@
     "docs/evidence/AGR_306_C9_RECOVERY_BEFORE_C10.json",
     "docs/evidence/AGR_306_C14_NATIVE_FAILURE.json",
     "docs/evidence/AGR_306_C14_RUNTIME_CORRECTION.json",
-    "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json"
+    "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json",
+    "docs/evidence/AGR_306_C16_NATIVE_FAILURE.json"
   ],
   "limitations": [
     "C15 has not been accepted on the spouse physical iPhone 17 Pro.",
@@ -111,7 +117,7 @@
     "additional_owner_direction": "Animate UI reference adopted as pinned native/CSS dialog, disclosure and SVG success mark; preserve current architecture",
     "completed_checks": {
       "python": "639 passed; 6 subtests",
-      "node": "259 passed",
+      "node": "260 passed after final generated snapshot",
       "browser": "22 passed in Chromium/WebKit; 0 failed/flaky/skipped",
       "contracts_specification_hygiene": "passed"
     }

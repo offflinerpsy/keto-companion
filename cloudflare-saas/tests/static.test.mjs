@@ -21,7 +21,7 @@ test('bundled Worker embeds standalone assets without binding',async()=>{
 test('modular bundle references separately packaged text assets',()=>{
  const source=readFileSync(new URL('../dist/worker-modules.mjs',import.meta.url),'utf8');
  const allowed=['cloudflare-saas/public/app.css','cloudflare-saas/public/developer-extension.js','cloudflare-saas/public/help.html'];
- let editableBytes=0;
+ let editableBytes=0,previewBytes=0;
  if(process.env.KETO_DEVELOPER_SNAPSHOT_SKIP==='1'){
   // Isolated candidate builds deliberately contain no editable-source snapshot.
   assert.equal(developerSnapshot,null,'isolated build omits the source snapshot');
@@ -29,9 +29,11 @@ test('modular bundle references separately packaged text assets',()=>{
   assert(developerSnapshot,'ordinary build requires the source snapshot');
   assert.deepEqual(developerSnapshot.sources.map(s=>s.path).sort(),allowed);
   editableBytes=developerSnapshot.sources.reduce((n,s)=>n+Buffer.byteLength(s.content,'utf8'),0);
+  assert.deepEqual(Object.keys(developerSnapshot.preview).sort(),['cloudflare-saas/public/diary.css','cloudflare-saas/public/motion.css']);
+  previewBytes=Object.values(developerSnapshot.preview).reduce((n,s)=>n+Buffer.byteLength(s,'utf8'),0);
  }
  // The fixed editable-source payload is intentional; ordinary app assets stay external.
- assert(editableBytes<=120000,'existing editable-source bound');
- assert(Buffer.byteLength(source,'utf8')-editableBytes<=110000,'bounded Worker code and metadata');for(const p of ['index.html','app.bundle.js','style.css','help.html','privacy.html','delete.html']){assert(source.includes('./assets/'+p));assert(readFileSync(new URL('../dist/assets/'+p,import.meta.url)).length>0)}assert(!source.includes('data-view="sources"'));
+ assert(editableBytes+previewBytes<=120000,'existing aggregate UI-source bound');
+ assert(Buffer.byteLength(source,'utf8')-editableBytes-previewBytes<=110000,'bounded Worker code and metadata');for(const p of ['index.html','app.bundle.js','style.css','help.html','privacy.html','delete.html']){assert(source.includes('./assets/'+p));assert(readFileSync(new URL('../dist/assets/'+p,import.meta.url)).length>0)}assert(!source.includes('data-view="sources"'));
 });
 test('PWA manifest and PNG icons are served as actual files from text modules',async()=>{const {default:worker}=await import('../dist/worker.mjs');const manifest=await worker.fetch(new Request('https://pilot.example.test/manifest.webmanifest'),{});assert.equal(manifest.status,200);assert.equal((await manifest.json()).display,'standalone');const icon=await worker.fetch(new Request('https://pilot.example.test/icon-192.png'),{});assert.equal(icon.headers.get('content-type'),'image/png');const bytes=new Uint8Array(await icon.arrayBuffer());assert.deepEqual([...bytes.slice(0,8)],[137,80,78,71,13,10,26,10]);});

@@ -1,0 +1,26 @@
+{
+  "task": "AGR-306-C16-RELEASE",
+  "status": "corrected_source_accepted_native_retry_pending",
+  "updated_at": "2026-11-10T11:23:00.421530+00:00",
+  "candidate_commit": "2ec60e32bca79a2535c3a4b02b1718f23f0b1dd5",
+  "pull_request": 22,
+  "native_build": "86ba3306-509d-46df-94e0-1297ae6a34b6",
+  "baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+  "archive_sha256": "0d7a7cdd83bb1523434eb0fab2f8305d3e8090c87c295aaa701f968d3b75c7a9",
+  "runner_worker_sha256": "ed7fdc52c3e02b2947128a633134b3face929fdade30c34c371c905b99b268c3",
+  "source_acceptance": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
+  "browser_cleanup": {
+    "supervisor_pid": 35361,
+    "supervisor_absent": true,
+    "fixture_port_8898_has_no_listener": true,
+    "checked_at": "2026-11-10T11:21:12Z"
+  },
+  "rules": [
+    "Do not start another image build while this UUID is pending or effect is uncertain",
+    "Restore ordinary trigger after terminal status",
+    "Only accepted exact image can update approved-runtime pin",
+    "Azure ZIP uses committed Git bytes plus exactly two hash-checked fonts"
+  ],
+  "next_stage": "new exact source gate; no prior image was created",
+  "prior_failure": "86ba3306-509d-46df-94e0-1297ae6a34b6"
+}

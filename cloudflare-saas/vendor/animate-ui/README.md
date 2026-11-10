@@ -24,7 +24,7 @@ the KETO application, not redistributed as a standalone component collection.
 - `packages/react/src/internal/item-indicator.tsx`: 300 ms draw without the
   checkbox delay, applied to that check after a durable server receipt.
 
-Implementation: `cloudflare-saas/public/app.css` and `intake-ui.js`. There is no
+Implementation: `cloudflare-saas/public/motion.css` and `intake-ui.js`. There is no
 React, Motion runtime, remote stylesheet, runtime CDN or global CLI installation.
 Keyboard/native form semantics remain browser-owned. Reduced motion disables
 movement, drawing and pseudo-element transitions; the saved mark remains visible.

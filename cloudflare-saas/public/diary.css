@@ -1,0 +1,27 @@
+
+/* Compact overview keeps the meal map within easy reach on 402px screens. */
+.diary-date-picker{position:relative;min-height:50px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:8px;font-weight:500;font-size:.94em}
+.diary-date-picker input{position:absolute;inset:0;opacity:0;min-height:100%;cursor:pointer}
+.diary-date-picker:focus-within{outline:3px solid var(--accent);outline-offset:3px}
+.diary-summary-heading{margin-bottom:6px;min-height:36px}.diary-summary-heading>span{margin-left:auto}.diary-summary-heading .diary-goals{margin:-6px -8px -6px 0;padding:10px;min-width:44px;width:44px;min-height:44px;flex-basis:44px}
+.diary-macros{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px}
+.diary-macro.energy{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2px 10px;padding:0 0 14px}
+.diary-macro.energy .macro-heading{grid-column:1}.diary-macro.energy .macro-value{grid-column:1;font-size:1.55em;margin:0}
+.diary-macro.energy .macro-target{grid-column:2;grid-row:2;align-self:end;text-align:right;font-size:14px}
+.diary-macro.energy .macro-progress{grid-column:1/-1;margin-top:6px}
+.macro-heading{gap:5px}.macro-heading h3{font-size:max(.76em,13px)}.macro-icon::before{width:16px;height:16px;flex-basis:16px}
+.diary-macro .macro-value{font-size:1.12em;margin:5px 0 2px}.macro-target{font-size:max(.76em,13px);min-height:1.4em}
+.diary-macro.fiber{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.diary-macro.fiber .macro-value{font-size:.9em;margin:0;white-space:nowrap}.diary-macro.fiber .macro-heading{align-items:center}.diary-macro.fiber .macro-target{font-size:13px}.diary-macro.fiber .macro-progress{display:none}
+#diary-receipt .receipt-food{font-size:.95em;flex-basis:100%;font-weight:500;line-height:1.4}
+#intake-dialog{scroll-padding-bottom:88px}
+body.large .diary-macros{grid-template-columns:repeat(2,minmax(0,1fr))}body.large .diary-macro.energy{display:block}body.large .diary-macro.energy .macro-target{text-align:left}body.large .diary-macro.fiber{grid-column:auto;display:block}body.large .diary-macro.fiber .macro-progress{display:block}
+@media(max-width:370px){.diary-macro .macro-target{font-size:13px}.diary-macro.fiber{flex-wrap:wrap}}
+
+.intake-time-input{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;align-items:center}.intake-time-input:has(button[hidden]){grid-template-columns:minmax(0,1fr)}.intake-time-input button.icon-only{min-width:44px;width:44px;min-height:48px;padding:10px;border-color:transparent;background:var(--bg)}
+.intake-time-field{min-width:0;margin:0 0 18px}.intake-time-field>label{margin-bottom:8px}.diary-date-picker input:focus-visible{opacity:1;background:var(--paper)}
+
+/* Keep the first meal close to its overview, including on a 402px phone. */
+#diary-summary{padding-block:12px}.diary-summary-heading{margin-bottom:4px;min-height:32px}
+.diary-macros{gap:12px 10px}.diary-macro .macro-value{line-height:1.2}.diary-macro.energy{padding-bottom:10px}.diary-macro.energy .macro-value{font-size:1.45em;line-height:1.2}.diary-macro.fiber{padding-top:10px}
+#diary-entries>.diary-meal:first-child{margin-top:14px}.diary-discuss{margin-top:4px}
