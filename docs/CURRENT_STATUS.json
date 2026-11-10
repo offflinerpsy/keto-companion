@@ -1,23 +1,23 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-10T14:44:36.860Z",
+  "updated_at": "2026-11-10T16:20:29.369002+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "AGR-306",
     "status": "In Progress",
-    "stage": "C18_auth_blocker_diagnosis_and_source",
+    "stage": "C18_source_accepted_native_release_pending",
     "source_branch": "codex/keto-auth-c18",
     "base_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
-    "implementation_completed": false,
+    "implementation_completed": true,
     "release_performed": false,
-    "next_action": "Diagnose fresh Google login and owner session; implement bounded auth recovery and regression proof before exact-source release."
+    "next_action": "Native exact-source runtime acceptance, ordinary staging deploy, fresh Google owner login."
   },
   "last_completed": "AGR-306-C17 meaningful food search, accessible reviewed reference and 108 recipes released to existing private family staging.",
   "next_task": {
     "id": "AGR-306-C18-RELEASE",
-    "status": "blocked_on_source_acceptance"
+    "status": "in_progress"
   },
   "staging": {
     "deployed": true,
@@ -69,7 +69,10 @@
     "specification_links_checked": 879,
     "Cloudflare_full_gate": "C17_exact_release_commit_passed",
     "actual_cloud_compatibility_date": "2026-11-07",
-    "current_final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
+    "current_final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
+    "c18_source": "docs/evidence/AGR_306_C18_SOURCE_ACCEPTANCE.json",
+    "c18_browser_scenarios": 38,
+    "c18_node": 296
   },
   "not_verified": [
     "C17 was not exercised on the physical iPhone 17 Pro (not Max); mobile Chromium/WebKit evidence is synthetic.",
