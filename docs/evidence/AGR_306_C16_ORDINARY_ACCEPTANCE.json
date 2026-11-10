@@ -1,0 +1,228 @@
+{
+  "schema": "keto-c16-ordinary-acceptance-v1",
+  "status": "completed",
+  "build": {
+    "id": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+    "status": "stopped",
+    "outcome": "success",
+    "commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "stopped": "2026-11-10T11:58:25.145Z",
+    "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+    "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+  },
+  "source_gate": {
+    "checks": [
+      {
+        "name": "python_env",
+        "exit": 0
+      },
+      {
+        "name": "python_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "node_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "container_sdk",
+        "exit": 0
+      },
+      {
+        "name": "container_worker_build",
+        "exit": 0
+      },
+      {
+        "name": "runtime_fonts",
+        "exit": 0
+      },
+      {
+        "name": "all_python",
+        "exit": 0
+      },
+      {
+        "name": "all_node",
+        "exit": 0
+      },
+      {
+        "name": "legacy_ui",
+        "exit": 0
+      },
+      {
+        "name": "legacy_oauth_ui",
+        "exit": 0
+      },
+      {
+        "name": "contracts",
+        "exit": 0
+      },
+      {
+        "name": "specification",
+        "exit": 0
+      },
+      {
+        "name": "web_build",
+        "exit": 0
+      },
+      {
+        "name": "legacy_build",
+        "exit": 0
+      },
+      {
+        "name": "hygiene",
+        "exit": 0
+      },
+      {
+        "name": "generated_assets_match",
+        "exit": 0
+      }
+    ],
+    "seconds": 156.4,
+    "scope": "trusted reviewed source; no real data or paid model calls",
+    "github_actions_required": false
+  },
+  "runtime": {
+    "task": "CF-DEV-MEDIA-08",
+    "scope": "actual private Cloudflare Container through service RPC; one fixed synthetic UI patch, no family session or app data",
+    "baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+    "patch_hash": "dc1f87ea820e71d645fae38a6446cb30505d01bddd999029ccd8c2e7ef66f461",
+    "image_digest": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
+    "status": "passed",
+    "exit_code": 0,
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "temporary_probe_deleted": true,
+    "no_credentials_returned": true,
+    "no_database_or_R2_binding": true,
+    "actual_owner_UI_tested": false
+  },
+  "guard": {
+    "run_id": "d041802c-b1eb-4663-8c96-91c4b26cbce8",
+    "probe_name": "keto-developer-check-28c7950092",
+    "job_id": "a4b5a9de-8e4f-4ea0-b7ae-70314b92f95b",
+    "upload": "delivered_unverified",
+    "readiness": "known_handler_shape",
+    "post": "delivered_unverified",
+    "post_count": 1,
+    "cleanup": "delivered_unverified",
+    "events": [
+      {
+        "method": "PUT",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "POST",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "GET",
+        "status": 404,
+        "type": "known_handler_shape"
+      },
+      {
+        "method": "POST",
+        "status": 200,
+        "type": "json"
+      },
+      {
+        "method": "DELETE",
+        "status": 200,
+        "type": "json"
+      }
+    ],
+    "post_result": {
+      "status": "passed",
+      "baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+      "patch_hash": "dc1f87ea820e71d645fae38a6446cb30505d01bddd999029ccd8c2e7ef66f461",
+      "image_digest": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
+      "exit_code": 0,
+      "stages": [
+        {
+          "name": "syntax",
+          "exit_code": 0,
+          "passed_count": null
+        },
+        {
+          "name": "build",
+          "exit_code": 0,
+          "passed_count": null
+        },
+        {
+          "name": "product",
+          "exit_code": 0,
+          "passed_count": 14
+        },
+        {
+          "name": "python",
+          "exit_code": 0,
+          "passed_count": 17
+        }
+      ]
+    },
+    "outcome": "verifier_passed"
+  },
+  "pinned_promotion": {
+    "baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+    "image_digest": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "deploy": {
+    "task": "CF-DEV-MEDIA-08",
+    "worker": "keto-companion-saas-staging",
+    "account": "0609100baf768271ea2811c9a9ee2b16",
+    "commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "version_id": "9ce80b6f1e7a4bdf9cef3d6ded459ef9",
+    "tag": "35d20e3e19a74997aa077809e9839e38",
+    "main_module_sha256": "7e82968e072b48edb5d96845122b2dff128f09bbf68ef4f995e4fc78da69088f",
+    "modules": 20,
+    "compute_configured": true,
+    "private_source": true
+  },
+  "test_summaries": [
+    "639 passed, 6 subtests passed in 83.59s (0:01:23)",
+    "ℹ tests 260",
+    "ℹ pass 260",
+    "ℹ fail 0",
+    "ℹ tests 12",
+    "ℹ pass 12",
+    "ℹ fail 0"
+  ],
+  "prior_failure": "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json",
+  "same_source_and_image_retry": true
+}

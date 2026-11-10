@@ -3,29 +3,26 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-10T11:53:43.701371+00:00",
-  "active_task": {
-    "id": "AGR-306-C16-RELEASE",
-    "status": "in_progress",
-    "stage": "one_bounded_ordinary_retry",
-    "source_acceptance": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
-    "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
-    "protected_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
-    "writer": "root",
-    "deliverable": "Exact accepted runtime and Azure source adopted in existing private-family staging; readback evidence",
-    "candidate_commit": "9b577ea6013e311fa026f37f2d5b2b7de517765a",
-    "native_build": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
-    "native_build_status": "success",
-    "previous_native_failure": "86ba3306-509d-46df-94e0-1297ae6a34b6",
-    "candidate_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
-    "rollout_id": "36519e20-f8cc-44fa-bfb0-9e5306c68963",
-    "native_acceptance": "docs/evidence/AGR_306_C16_NATIVE_ACCEPTANCE.json",
-    "release_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
-    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
-    "prior_ordinary_failure": "aa205ca4-dd1e-47f7-97e5-2c43949026f1"
-  },
+  "updated_at": "2026-11-10T12:01:43.033847+00:00",
+  "active_task": null,
   "last_completed": {
+    "id": "AGR-306-C16-RELEASE",
+    "linear_issue": "AGR-306",
+    "status": "completed",
+    "scope": "technical_private_family_release",
+    "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "release_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
+    "report_ru": "docs/evidence/AGR_306_C16_UI_RESULT_RU.md",
+    "native_build": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
+    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+    "build_status": "success",
+    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
+    "worker_version": "9ce80b6f-1e7a-4bdf-9cef-3d6ded459ef9",
+    "pull_request": 22,
+    "product_acceptance": "physical_iPhone_17_Pro_pending"
+  },
+  "previous_completed": {
     "id": "AGR-306-C15-UI",
     "linear_issue": "AGR-306",
     "status": "completed",
@@ -41,26 +38,10 @@
     "pull_request": 21,
     "product_acceptance": "physical_spouse_iPhone_pending"
   },
-  "previous_completed": {
-    "id": "AGR-306-C14-RELEASE",
-    "linear_issue": "AGR-306",
-    "status": "completed",
-    "scope": "technical_private_family_release",
-    "source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
-    "release_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
-    "report_ru": "docs/evidence/AGR_306_C14_RELEASE_RESULT_RU.md",
-    "native_build": "91c9326b-8fca-4200-883c-427e5b623adf",
-    "ordinary_build": "72ee574c-cc97-4aa9-9932-11ffc1b2f32e",
-    "build_status": "success",
-    "azure_deployment": "4828b5ce-8243-4819-914b-aae05f7abc89",
-    "worker_version": "47563a14-fb6d-41c2-af11-0be54e9a5003",
-    "pull_request": 20,
-    "product_acceptance": "physical_spouse_iPhone_pending"
-  },
   "next_task": {
     "id": "AGR-306-PHYSICAL-ACCEPTANCE",
-    "status": "after_technical_release",
-    "action": "Owner checks the published C16 journey on actual iPhone 17 Pro; no identity bypass or speculative rebuild."
+    "status": "awaiting_physical_owner_session",
+    "action": "Owner refreshes published app and checks the food portion -> confirm -> visible diary/total -> edit/repeat flow on the actual iPhone 17 Pro; no speculative rebuild."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -73,15 +54,7 @@
         "exit_code": 0
       }
     ],
-    "pending_cloud_builds": [
-      {
-        "uuid": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
-        "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-        "status": "queued",
-        "created_on": "2026-11-10T11:53:42.563Z",
-        "phase": "same_R_same_image_ordinary_retry"
-      }
-    ],
+    "pending_cloud_builds": [],
     "pending_azure_operation": null,
     "temporary_probes": [],
     "active_container_instances": [],
@@ -89,8 +62,8 @@
     "accepted_runtime_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
     "accepted_runtime_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
-    "new_runtime_image_required": "No; C16 image accepted. Ordinary promotion must reuse it.",
-    "implementation_writer": "root",
+    "new_runtime_image_required": "No. C16 complete; use the published app for physical acceptance.",
+    "implementation_writer": null,
     "temporary_trigger_commands": "ordinary commands restored and verified"
   },
   "owner_authorization": "Implementation, verification and release to the existing private family environment authorized. No Mac Codex desktop, new accounts or providers.",
@@ -108,10 +81,11 @@
     "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json"
   ],
   "limitations": [
-    "C15 has not been accepted on the spouse physical iPhone 17 Pro.",
-    "No fresh spouse sign-in or signed live food-intake transaction was performed; family diary and profile data were not changed for verification.",
-    "Physical iPhone keyboard, camera/barcode/photo and dictation were not revalidated for C15.",
-    "Synthetic browser, HTTP and runtime checks do not establish clinical effectiveness or full accessibility compliance."
+    "C16 was not exercised on the physical iPhone 17 Pro (not Max); mobile WebKit/Chromium is synthetic browser evidence.",
+    "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
+    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C16.",
+    "Assistant tests establish confirmed context and deterministic answers, not the quality of a new live model response.",
+    "Synthetic checks do not establish clinical effectiveness or complete accessibility compliance."
   ],
   "source_completed": {
     "id": "AGR-306-C16-PRODUCT",
