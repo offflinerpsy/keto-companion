@@ -95,11 +95,11 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "7dd4bcca22c904d3eb925769ad59a784f4d3bc6afa9f6d422c33a96d3b3908e4",
-    "cloudflare-saas/public/index.html": "eb648120c26fdec7884087da450588bdc163607ed91935e86a108a15f2ffc987",
+    "cloudflare-saas/public/app.css": "be9c5b27d3ad5d4422f37f527d13d131bfa31c7538499783342e7e3a15db0262",
+    "cloudflare-saas/public/index.html": "f36ccec086a0270e4073ed0c0b4ac98038e05249d806286a834d929892ea025e",
     "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
     "cloudflare-saas/src/compute.mjs": "50dbeb05fce25d51b1141d3c974fd9774976ce912da8f7d074f8c296041ea97d",
-    "cloudflare-saas/src/worker.mjs": "091c18c3f990d3ad5eb93735a9e6f58c3144c22b042ab01cfd65f67b00d8f785",
+    "cloudflare-saas/src/worker.mjs": "f6617cec4f70a8f2328da93dd2aa86fef106d05134c231e653990bed400f9eb6",
     "service/app.py": "6b27c065f17dddd300e4b6dd41a725d233cea2c65327da3445c583cd7e012cc0"
   },
   "static_elements": [
@@ -153,8 +153,30 @@
       "tag": "section"
     },
     {
+      "id": "cf-auth-title",
+      "tag": "h2"
+    },
+    {
+      "id": "cf-auth-account",
+      "tag": "p"
+    },
+    {
+      "id": "cf-login-message",
+      "tag": "p"
+    },
+    {
+      "id": "cf-auth-actions",
+      "tag": "div"
+    },
+    {
       "id": "cf-login",
-      "tag": "button"
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "cf-auth-retry",
+      "tag": "button",
+      "type": "button"
     },
     {
       "id": "cf-claim",
@@ -162,19 +184,30 @@
     },
     {
       "id": "cf-claim-button",
-      "tag": "button"
+      "tag": "button",
+      "type": "button"
     },
     {
       "id": "cf-switch",
-      "tag": "button"
+      "tag": "button",
+      "type": "button"
     },
     {
-      "id": "cf-login-message",
+      "id": "cf-auth-logout",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "cf-auth-detail",
+      "tag": "details"
+    },
+    {
+      "id": "cf-auth-code",
       "tag": "p"
     },
     {
       "id": "deletion-recovery",
-      "tag": "div"
+      "tag": "details"
     },
     {
       "id": "deletion-code",
@@ -182,7 +215,8 @@
     },
     {
       "id": "continue-deletion",
-      "tag": "button"
+      "tag": "button",
+      "type": "button"
     },
     {
       "id": "deletion-status",
