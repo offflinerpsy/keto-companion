@@ -322,7 +322,8 @@
     ],
     "probes": [],
     "active_instances": [],
-    "instance_total": 25
+    "instance_total": 25,
+    "probe_inventory_note": "Initial inventory filter covered probe/acceptance names; actual keto-developer-check prefix is independently covered by final live readback. Native accepted receipt itself requires temporary_probe_deleted=true."
   },
   "ordinary_trigger_restored": true,
   "family_records_written": false

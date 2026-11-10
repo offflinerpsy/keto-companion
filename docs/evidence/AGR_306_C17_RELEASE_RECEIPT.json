@@ -1,0 +1,101 @@
+{
+  "schema": "keto-c17-release-receipt-v1",
+  "task": "AGR-306-C17-RELEASE",
+  "status": "completed_technical_private_family_release",
+  "recorded_at": "2026-11-10T14:44:36.860Z",
+  "browser_verified_source": "442e17a6dac9c1126d0f10d6a1fa37cf6c868c70",
+  "accepted_source_candidate": "966079b7e8c4d878fb0edc2b0a2ed9d02e706468",
+  "deployed_frontend_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+  "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+  "backend_changed": true,
+  "source_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+  "source_archive_sha256": "be11883e013b79315f4474715a7a41358eb7057d935930539103a8b189b3c613",
+  "image_digest": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+  "native_build": "ab053a65-d9c0-4066-8644-46f2a621d7b9",
+  "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
+  "native_build_attempts": 1,
+  "ordinary_build_attempts": 1,
+  "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e",
+  "azure_runtime_code_sha256": "6f533ba4334edba14d902974f5a8653aa98cef376401c99815442911243b9978",
+  "azure_archive_sha256": "4f36cf6807e24f2eb4dcb23e329b322353c9d2777914dd518b4dd9466694b458",
+  "worker_version": "28fd21df-78d8-40b0-91f4-56785dc9ad22",
+  "worker_deployment": "1aac5b3a-9d97-44b6-aaeb-1e948c9df3e0",
+  "traffic_percent": 100,
+  "application_url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/",
+  "pull_request": 23,
+  "pull_request_url": "https://github.com/offflinerpsy/keto-companion/pull/23",
+  "catalogue": {
+    "recipes_before": 72,
+    "recipes_after": 108,
+    "egg_before": 9,
+    "egg_after": 24,
+    "new_original_recipes": 36,
+    "prepared_foods": 85,
+    "reference_records": 7793,
+    "additional_reference_records": 7708,
+    "cheese_query_reference_matches": 289,
+    "cheese_count_note": "Matching reference records include cheese-containing dishes and derivatives; not 289 distinct cheeses.",
+    "original_food_bytes_sha256": "8b881cfbcfb553c5cf84a932e078799c9d0ba53d5a16efda5028fed074ad0fe9",
+    "original_72_normalized_sha256": "18aeac293471803e679537e42498b27da563739906764726b43f6d1bc78ba0d0"
+  },
+  "checks": {
+    "python": 655,
+    "python_subtests": 6,
+    "node": 266,
+    "browser_scenarios": 14,
+    "browser_unique_scenarios": 7,
+    "browser_engines": [
+      "Chromium",
+      "WebKit"
+    ],
+    "mobile_widths": [
+      360,
+      390,
+      402,
+      430
+    ],
+    "ops": 12,
+    "full_source_stages": 16,
+    "actual_runtime_product": 14,
+    "actual_runtime_python": 17,
+    "live_http": 15,
+    "served_asset_hashes": 6
+  },
+  "ordinary_trigger_restored": true,
+  "temporary_probes": [],
+  "active_instances": [],
+  "pending_cloud_operations": [],
+  "family_records_written": false,
+  "evidence": {
+    "source": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json",
+    "runtime": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
+    "azure_package": "docs/evidence/AGR_306_C17_AZURE_PACKAGE.json",
+    "azure": "docs/evidence/AGR_306_C17_AZURE_DEPLOYMENT.json",
+    "ordinary": "docs/evidence/AGR_306_C17_ORDINARY_ACCEPTANCE.json",
+    "readback": "docs/evidence/AGR_306_C17_LIVE_READBACK.json",
+    "http": "docs/evidence/AGR_306_C17_LIVE_HTTP.json",
+    "report_ru": "docs/evidence/AGR_306_C17_SEARCH_RESULT_RU.md"
+  },
+  "independent_review": "Backend/package, UI/focus, QA and final 402px screenshot reviews completed; no remaining reported blocker.",
+  "external_github_review": {
+    "submitted_reviews": 0,
+    "status": "not_claimed",
+    "scope": "Independent subagent reviews and completed native CI are recorded separately."
+  },
+  "continuation": {
+    "reason_for_visible_pause": "Existing native pipelines prepare Node/Python and run full source gates before deployment. Recorded operations advanced and completed; no C17 image or ordinary build was restarted.",
+    "native_source_gate_seconds": 210.32,
+    "ordinary_source_gate_seconds": 203.69,
+    "operation_ids_recorded": true,
+    "duplicate_deployments_started": false
+  },
+  "limitations": [
+    "C17 was not exercised on the physical iPhone 17 Pro (not Max); mobile Chromium/WebKit evidence is synthetic.",
+    "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
+    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C17.",
+    "New recipes use calculated existing ingredient nutrition; they have not been kitchen tested or clinically validated.",
+    "The wide reference is pinned historical USDA data, includes English names and cheese-containing derivatives, and is not a complete live branded-food catalogue.",
+    "Existing confirmed assistant memory and safety/consent rules were preserved; C17 does not claim a new live model quality evaluation."
+  ],
+  "next_action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes."
+}

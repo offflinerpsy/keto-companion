@@ -1,7 +1,7 @@
 {
   "schema": "keto-release-progress-v1",
   "task": "AGR-306-C17-RELEASE",
-  "status": "in_progress",
+  "status": "completed",
   "source_candidate": "966079b7e8c4d878fb0edc2b0a2ed9d02e706468",
   "protected_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
   "native": {
@@ -24,6 +24,28 @@
     "acceptance_receipt": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
     "ordinary_trigger_restored": true
   },
-  "next_check": "Freeze R with actual accepted runtime pin; verify exact R ZIP and Azure adoption before ordinary deployment.",
-  "previous_live_source": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504"
+  "next_check": "Technical release completed; physical iPhone 17 Pro acceptance is the next task.",
+  "previous_live_source": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+  "release_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+  "azure": {
+    "status": "completed",
+    "archive_sha256": "4f36cf6807e24f2eb4dcb23e329b322353c9d2777914dd518b4dd9466694b458",
+    "deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e",
+    "exact_source_adopted": true,
+    "acceptance_receipt": "docs/evidence/AGR_306_C17_AZURE_DEPLOYMENT.json"
+  },
+  "ordinary": {
+    "build_uuid": "c2d02177-7204-457f-b345-eae5e538aaa8",
+    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "created_on": "2026-11-10T14:36:07.614Z",
+    "status": "stopped",
+    "outcome": "success",
+    "worker_version": "28fd21df-78d8-40b0-91f4-56785dc9ad22"
+  },
+  "live_checks": {
+    "http": 15,
+    "served_asset_hashes": 6,
+    "passed": true
+  },
+  "final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
 }

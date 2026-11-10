@@ -24,12 +24,14 @@
       "cloudflare-saas/public/setup-ui.js",
       "cloudflare-saas/public/kitchen-ui.js",
       "cloudflare-saas/public/mobile-ui.js",
-      "cloudflare-saas/public/routes.js"
+      "cloudflare-saas/public/routes.js",
+      "cloudflare-saas/public/food-picker.js"
     ],
     "worker": "cloudflare-saas/src/worker.mjs",
     "orchestration": "service/domain.py",
     "food_arithmetic": "library/skills/keto-companion/scripts/keto_core.py",
-    "personal_state": "private Cloudflare D1 document for SaaS; legacy Azure client separate"
+    "personal_state": "private Cloudflare D1 document for SaaS; legacy Azure client separate",
+    "food_search": "service/food_search.py"
   },
   "generated_files_do_not_hand_edit": [
     "cloudflare-saas/public/style.css",

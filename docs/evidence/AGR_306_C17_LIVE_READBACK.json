@@ -1,0 +1,188 @@
+{
+  "checked_at": "2026-11-10T14:43:02.978Z",
+  "trigger": [
+    {
+      "id": "88639670-f75a-46f5-ae89-85a2d8387a7c",
+      "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+      "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+      "root_directory": "/",
+      "branch_includes": [
+        "release/staging-0.3.0"
+      ],
+      "branch_excludes": [],
+      "path_includes": [
+        "cloudflare-saas/**",
+        "scripts/deploy_cloudflare_staging.mjs",
+        "artifacts/**",
+        "qa/firebase-public-config.json"
+      ],
+      "path_excludes": [],
+      "build_caching_enabled": true
+    }
+  ],
+  "app": {
+    "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "name": "keto-companion-developer-runner",
+    "version": 14,
+    "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+    "max_instances": 1,
+    "scheduling_policy": "default",
+    "network": {
+      "assign_ipv6": "none",
+      "assign_ipv4": "none",
+      "mode": "private"
+    },
+    "environment_variable_count": 0,
+    "authorized_key_count": 0,
+    "observability": {
+      "logs": {
+        "enabled": false
+      }
+    }
+  },
+  "runner": {
+    "bindings": [
+      {
+        "name": "DEVELOPER_BASELINE",
+        "text": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+        "type": "plain_text"
+      },
+      {
+        "name": "DEVELOPER_IMAGE_DIGEST",
+        "text": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+        "type": "plain_text"
+      },
+      {
+        "class_name": "KetoTester",
+        "name": "KETO_TESTER",
+        "namespace_id": "b0a394e990794e51ba4f38a9339bb308",
+        "type": "durable_object_namespace"
+      }
+    ],
+    "tags": [
+      "keto",
+      "developer-isolated",
+      "baseline:3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75"
+    ],
+    "compatibility_date": "2026-11-07",
+    "logpush": false
+  },
+  "main": {
+    "bindings": [
+      {
+        "name": "AUTH_PROVIDER",
+        "text": "firebase_google",
+        "type": "plain_text"
+      },
+      {
+        "database_id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+        "id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+        "name": "DB",
+        "type": "d1"
+      },
+      {
+        "name": "DEVELOPER_BASELINE",
+        "text": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+        "type": "plain_text"
+      },
+      {
+        "name": "DEVELOPER_IMAGE_DIGEST",
+        "text": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+        "type": "plain_text"
+      },
+      {
+        "entrypoint": "DeveloperRunner",
+        "environment": "production",
+        "name": "DEVELOPER_RUNNER",
+        "service": "keto-companion-developer-runner",
+        "type": "service"
+      },
+      {
+        "name": "FIREBASE_AUTH_HELPER_MODE",
+        "text": "same-origin",
+        "type": "plain_text"
+      },
+      {
+        "name": "FIREBASE_PUBLIC_CONFIG_JSON",
+        "type": "plain_text",
+        "projectId": "keto-companion-auth-261107",
+        "authDomain": "keto-companion-auth-261107.firebaseapp.com"
+      },
+      {
+        "name": "KETO_EDGE_BRIDGE_URL",
+        "text": "https://keto-companion-ay-20261107.azurewebsites.net/internal/keto/compute",
+        "type": "plain_text"
+      },
+      {
+        "name": "KETO_EDGE_SIGNING_JWK",
+        "type": "secret_text"
+      },
+      {
+        "name": "OWNER_GOOGLE_EMAIL",
+        "type": "plain_text"
+      },
+      {
+        "name": "PUBLIC_ORIGIN",
+        "text": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+        "type": "plain_text"
+      },
+      {
+        "name": "SESSION_HMAC_KEY",
+        "type": "secret_text"
+      },
+      {
+        "bucket_name": "keto-companion-private-staging",
+        "name": "UPLOADS",
+        "type": "r2_bucket"
+      }
+    ],
+    "tags": [
+      "keto",
+      "staging",
+      "commit:745c5b4eef9484949dc2f381c1aa1d16ec96c319"
+    ],
+    "compatibility_date": "2026-11-07",
+    "logpush": false
+  },
+  "deployments": [
+    {
+      "id": "1aac5b3a-9d97-44b6-aaeb-1e948c9df3e0",
+      "source": "api",
+      "strategy": "percentage",
+      "annotations": {
+        "workers/message": "Automatic deployment on upload.",
+        "workers/triggered_by": "upload"
+      },
+      "versions": [
+        {
+          "version_id": "28fd21df-78d8-40b0-91f4-56785dc9ad22",
+          "percentage": 100
+        }
+      ],
+      "created_on": "2026-11-10T14:41:46.227355Z"
+    },
+    {
+      "id": "d734fb00-1ab3-44dd-8388-0d5cfe25289f",
+      "source": "api",
+      "strategy": "percentage",
+      "annotations": {
+        "workers/message": "Automatic deployment on upload.",
+        "workers/triggered_by": "upload"
+      },
+      "versions": [
+        {
+          "version_id": "9ce80b6f-1e7a-4bdf-9cef-3d6ded459ef9",
+          "percentage": 100
+        }
+      ],
+      "created_on": "2026-11-10T11:58:22.289993Z"
+    }
+  ],
+  "probes": [],
+  "active_instances": [],
+  "instance_total": 26,
+  "instance_state_counts": {
+    "inactive": 26
+  },
+  "instance_filter_note": "API returned historical inactive rows despite state=active query; normalized observed nested state values explicitly."
+}
