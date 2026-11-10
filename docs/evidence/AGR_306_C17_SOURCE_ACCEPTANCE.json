@@ -1,0 +1,210 @@
+{
+  "schema": "keto-source-acceptance-v1",
+  "task": "AGR-306-C17-SEARCH",
+  "status": "passed",
+  "checked_at": "2026-11-10T14:19:21.138Z",
+  "base_commit": "2e60f59fcc4d9388da8831f86e12c5a27db1976a",
+  "source_commit": "442e17a6dac9c1126d0f10d6a1fa37cf6c868c70",
+  "source_branch": "codex/keto-search-c17",
+  "protected_source_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+  "protected_source_files": 246,
+  "runtime_archive_sha256": "be11883e013b79315f4474715a7a41358eb7057d935930539103a8b189b3c613",
+  "runtime_code_sha256": "6f533ba4334edba14d902974f5a8653aa98cef376401c99815442911243b9978",
+  "owner_device": "iPhone 17 Pro, not Max; Chrome; 402 CSS px at DPR3",
+  "checks": {
+    "python": {
+      "passed": 655,
+      "subtests": 6,
+      "skipped": 0,
+      "log_sha256": "742bd8227fd675351596a19f8598dc294be3131dee8d63f5e3fb29a0909fba14"
+    },
+    "node": {
+      "passed": 266,
+      "failed": 0,
+      "skipped": 0,
+      "log_sha256": "6a950d73151c5b166f6e4446db059b93a0c4191f7387f141e3ca64b89c629d16"
+    },
+    "focused_picker_and_intake": {
+      "passed": 15,
+      "failed": 0,
+      "log_sha256": "24c3d27fab1e2565913837099a6a2a3afd6a71802070bebf7a05e8ae14795ff7"
+    },
+    "contracts": {
+      "passed": true,
+      "drift": []
+    },
+    "specification": {
+      "passed": true,
+      "documents": 25,
+      "local_links": 879
+    },
+    "repository": {
+      "passed": true,
+      "files": 621,
+      "artifacts": 27
+    },
+    "legacy_ui_and_oauth": "passed",
+    "web_and_legacy_build": "passed",
+    "diff_check": "passed",
+    "ordinary_runtime_pin": "Not yet accepted: prior C16 pin is intentionally retained until actual C17 native image acceptance."
+  },
+  "browser": {
+    "status": "passed",
+    "run": "c17-browser-4",
+    "source_commit": "442e17a6dac9c1126d0f10d6a1fa37cf6c868c70",
+    "host": "authorized owner Mac, isolated exact-source QA worktree",
+    "playwright": "1.58.2",
+    "engines": [
+      "Chromium 1208",
+      "WebKit 2248"
+    ],
+    "viewport": [
+      402,
+      681
+    ],
+    "screen": [
+      402,
+      874
+    ],
+    "device_scale_factor": 3,
+    "widths_checked": [
+      360,
+      390,
+      402,
+      430
+    ],
+    "short_height": 420,
+    "started_at": "2026-11-10T14:09:20.692Z",
+    "duration_ms": 167612.271,
+    "passed": 14,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "report_sha256": "503d724ea8cecd96fd9692a876fa69dcc79f33aaf8a45d5f9c1005f2916c982d",
+    "log_sha256": "1b9cb2a592814b25d41aa52a2727692ceb443f577c150d94babddf82e4fc5e99",
+    "completion_sha256": "cb77a02b7de569f70aa634967749476759ce55038b82a9358355d9d5ed2fcc42",
+    "source_transfer_sha256": "255926e5a542b70434a710cbafd4062c698dc1d813be8046e1d6f1a0f9de7eaf",
+    "coverage": [
+      "сыр has five prepared cheese choices and no raw meat/fish; explicit raw alternative works",
+      "wide reference paginates 8 to 16 without duplicates; zero-seed гауда results are revealed",
+      "changing query keeps selected cheddar and 75 g until deliberate replacement",
+      "reference review is bounded at 360/390/402/430 px and short 420 px height",
+      "reviewed source import selects only the matching confirmed personal ID",
+      "source import alone does not write intake; confirmed 75 g intake appears in real SQLite diary",
+      "focus survives selection, confirmation and cancelled review",
+      "own-dish picker preserves unique ingredients and existing 40 g quantity",
+      "Enter in review name does not submit enclosing form; Enter on review button submits once",
+      "cancelled review rejects late real source_import proposal",
+      "all 108 recipes reachable through 24-item pages; egg search has 24 and retains filters/exclusions",
+      "existing own-dish batch, unknown-label and portion-calculator intake flows pass in both engines"
+    ],
+    "cleanup": {
+      "test_port_8898_listening": false,
+      "owned_processes_remaining": false
+    }
+  },
+  "screenshots": [
+    {
+      "path": "docs/evidence/c17-chromium-402-cheese.png",
+      "bytes": 169419,
+      "sha256": "2950ef22ea6557bf802164b91a4d5f5055da648253fea53e6fd02cc40c0a5d37",
+      "visually_reviewed": true
+    },
+    {
+      "path": "docs/evidence/c17-webkit-402-source-review.png",
+      "bytes": 167535,
+      "sha256": "aa0eb52ff0b5f8414dcaf9bcd7ff09c96a5d6461fdfd8525b1fb54a0772189b7",
+      "visually_reviewed": true
+    }
+  ],
+  "failed_iterations": [
+    {
+      "run": "python-full-1",
+      "passed": 653,
+      "failed": 2,
+      "reason": "Two old catalogue-size assertions expected 72; updated to actual 108.",
+      "log_sha256": "cabdc63e6d5f454368df9fa606c5d3cdb3303864c77d8cfa47e442467a980bca"
+    },
+    {
+      "run": "node-full-1",
+      "passed": 253,
+      "failed": 25,
+      "reason": "24 VM harnesses omitted the new shared picker dependency; one old runtime-pin equality failure is expected before new image acceptance.",
+      "log_sha256": "a16a00899b59fcad9f52c9b53a4a891fb2c0f796ca4390d3eee0c14751795a16"
+    },
+    {
+      "run": "harness-fix-1",
+      "passed": 30,
+      "failed": 3,
+      "reason": "Missing afterApplied fixture, old status assertion, and real redundant pantry request on route re-entry. All corrected.",
+      "log_sha256": "791211a072916a0b8b76df34503b0d1a9a5648ac5041e7941dbaabcdbb66000d"
+    },
+    {
+      "run": "browser-1",
+      "exit_code": 130,
+      "failed": 1,
+      "interrupted": 1,
+      "not_run": 12,
+      "reason": "Select accessible-name oracle included option text; exact combobox-role locator fixed. Owned run interrupted after actionable first failure.",
+      "log_sha256": "3e2faa976ade906e8a952811d686e00115f42cc38e2315f83868905acf831088",
+      "report_sha256": "89a42646a1a48a423be2215b2cc7e57ebb2fb6e8aa5834f08c8cf97a7f8b6bac"
+    },
+    {
+      "run": "browser-2",
+      "exit_code": 1,
+      "passed": 5,
+      "failed": 1,
+      "reason": "Existing grocery assertion used lowercase-only text; corrected to case-insensitive actual C16 wording.",
+      "log_sha256": "21619821f09cd87e667ed537c7caad45ad6e2af268839efac4a0ef925251dd0e",
+      "report_sha256": "9a052456fed0aee9857e561e513c5befdedf7354b2026583160075fd957eacbf"
+    }
+  ],
+  "prior_pass": {
+    "run": "browser-3",
+    "passed": 14,
+    "report_sha256": "9dbe05707ab8b72b64bd9a8a5c194e3f8648fadc2eb99c891a9d4b8eaf534327",
+    "followup": "Visual review led to explicit-search result reveal and stable focus; final C4 rerun above passed."
+  },
+  "resolved_blockers": [
+    "Substring matching confused сыр and сырой across three independent matchers; replaced by shared explicit word families.",
+    "Wide USDA reference was hidden behind separate workflow; made directly reachable without changing reviewed personal import rules.",
+    "Review input Enter could submit enclosing own-dish form; contained without breaking native action buttons.",
+    "Explicit search left results below the fold, including source-only results; reveals current completed results while debounced typing preserves position."
+  ],
+  "independent_reviews": [
+    "backend correctness and scope",
+    "UI/focus/selection",
+    "QA real HTTP/SQLite and packaging"
+  ],
+  "catalogue": {
+    "recipes_before": 72,
+    "recipes_after": 108,
+    "egg_before": 9,
+    "egg_after": 24,
+    "new_original_recipes": 36,
+    "prepared_foods": 85,
+    "reference_records": 7793,
+    "additional_reference_records": 7708,
+    "cheese_query_reference_matches": 289,
+    "cheese_count_note": "Matching reference records include cheese-containing dishes and derivatives; not 289 distinct cheeses.",
+    "original_food_bytes_sha256": "8b881cfbcfb553c5cf84a932e078799c9d0ba53d5a16efda5028fed074ad0fe9",
+    "original_72_normalized_sha256": "18aeac293471803e679537e42498b27da563739906764726b43f6d1bc78ba0d0"
+  },
+  "context7": {
+    "library": "/python/cpython",
+    "topics": [
+      "Unicode NFKC",
+      "casefold",
+      "Unicode regex word boundaries"
+    ],
+    "dependencies_added": []
+  },
+  "boundaries": [
+    "Synthetic real HTTP/SQLite accounts only; no family diary/profile writes.",
+    "No physical iPhone keyboard/browser chrome, fresh family sign-in or live family transaction claim.",
+    "Original recipe additions are calculated from existing ingredient nutrition, not kitchen- or clinically validated.",
+    "Pinned historical USDA source is not a live or complete branded-food catalogue; some names remain English.",
+    "This receipt accepts source behavior; cloud image, exact Azure adoption and ordinary deployment remain separate release gates."
+  ]
+}

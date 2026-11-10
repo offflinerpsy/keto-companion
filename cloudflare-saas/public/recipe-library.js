@@ -9,7 +9,7 @@ export function createRecipeLibrary({call,readFilters,render,clear=()=>{},status
   try{
    const d=await call({...filters,limit:24,offset:start});
    if(serial!==token||screen!==epoch()||fingerprint(readFilters())!==key)return;
-   render(d,append);scope=key;offset=start+d.recipes.length;retry=null;status(`Показано ${offset} из ${d.total}. ${d.note}`);more(d.has_more,false);
+   render(d,append);scope=key;offset=start+d.recipes.length;retry=null;status(`Показано ${offset} из ${d.total}`);more(d.has_more,false);
   }catch(e){
    if(serial===token&&screen===epoch()&&fingerprint(readFilters())===key){retry={append,key};status('Не удалось загрузить рецепты. Попробуйте снова.');more(true,true)}
    throw e;

@@ -48,7 +48,7 @@
   ],
   "notice": "Equipment options do not imply possession by each user; generated recipe variants are not reference recipe count or kitchen-tested dishes.",
   "policy_version": "kitchen-v1.1",
-  "reference_recipe_count": 72,
+  "reference_recipe_count": 108,
   "schema": "keto-kitchen-capabilities-v1",
   "source_sha256": "c706197819a0a684866f2b7a7645e3e92ee8a0bad2881e94cb833d6654c7cf2a"
 }

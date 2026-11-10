@@ -102,7 +102,7 @@ test('manual grocery review preserves unknowns and records eaten grams independe
  expect(entry.nutrition_snapshot.nutrition.fiber_g).toBeNull();expect(entry.nutrition_snapshot.nutrition.net_carbohydrate_g).toBeNull();
  expect(entry.nutrition_snapshot.allergens).toContain('milk');
  expect(after.state.kitchen.pantry).toEqual(before.state.kitchen.pantry);
- await expect(page.locator('#diary-summary')).toContainText('125 ккал');await expect(page.locator('#diary-summary')).toContainText('неполные данные');
+ await expect(page.locator('#diary-summary')).toContainText('125 ккал');await expect(page.locator('#diary-summary')).toContainText(/неполные данные/i);
  await expect(page.locator('#diary-entries')).toContainText(name);await page.reload();
  await expect(page.locator('[data-page=diary]')).toBeVisible();await page.locator('#diary-day').fill('2026-01-06');await page.locator('#diary-day').dispatchEvent('change');
  await expect(page.locator('#diary-entries')).toContainText(name);expect((await state(request)).stored_diary[0]).toEqual(entry);
@@ -113,8 +113,8 @@ test('portion calculator transfers the selected food and grams through explicit 
  await page.locator('#nav [data-view=diary]').click();
  await page.locator('[data-page=diary]').getByText('Продукт и порция',{exact:true}).click();
  await page.locator('#portion-query').fill('Авокадо');await page.locator('#portion-search button').click();
- await expect(page.locator('#portion-food option[value=F171705]')).toHaveCount(1);
- await page.locator('#portion-food').selectOption('F171705');await page.locator('#portion-grams').fill('75');
+ await page.locator('#portion-results').getByRole('button',{name:'Авокадо, мякоть · сырой продукт',exact:true}).click();
+ await expect(page.locator('#portion-food')).toHaveValue('F171705');await page.locator('#portion-grams').fill('75');
  await page.locator('#portion-form').getByRole('button',{name:'Рассчитать порцию',exact:true}).click();
  await expect(page.locator('#portion-result')).toContainText('Энергия: 120 ккал');
  await expect(page.locator('#portion-result')).toContainText('ГИ: неизвестен.');

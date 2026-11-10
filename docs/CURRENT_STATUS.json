@@ -1,73 +1,73 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-10T12:01:43.033847+00:00",
+  "updated_at": "2026-11-10T14:44:36.860Z",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
     "id": "AGR-306",
     "status": "In Progress",
-    "stage": "C16_deployed_physical_iPhone_acceptance_pending",
-    "source_branch": "codex/keto-diary-c16",
-    "candidate_commit": "9b577ea6013e311fa026f37f2d5b2b7de517765a",
-    "release_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "stage": "C17_deployed_physical_iPhone_acceptance_pending",
+    "source_branch": "codex/keto-search-c17",
+    "candidate_commit": "966079b7e8c4d878fb0edc2b0a2ed9d02e706468",
+    "release_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
     "implementation_completed": true,
     "release_performed": true,
-    "source_acceptance": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
-    "native_acceptance": "docs/evidence/AGR_306_C16_NATIVE_ACCEPTANCE.json",
-    "native_build": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
-    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
-    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
-    "azure_acceptance": "docs/evidence/AGR_306_C16_AZURE_DEPLOYMENT.json",
-    "technical_release_acceptance": "Completed: exact-source 16-stage full CI, 12 ops, same-image runtime acceptance, exact Azure adoption, 100% main deployment, six matching assets and 15 live read-only checks.",
-    "physical_iPhone_acceptance": "iPhone 17 Pro (not Max): pending; synthetic WebKit/Chromium acceptance is separate.",
-    "next_action": "Owner refreshes published app and checks the food portion -> confirm -> visible diary/total -> edit/repeat flow on the actual iPhone 17 Pro; no speculative rebuild.",
-    "prior_ordinary_failure": "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json",
-    "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "final_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json"
+    "source_acceptance": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json",
+    "native_acceptance": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
+    "native_build": "ab053a65-d9c0-4066-8644-46f2a621d7b9",
+    "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
+    "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e",
+    "azure_acceptance": "docs/evidence/AGR_306_C17_AZURE_DEPLOYMENT.json",
+    "technical_release_acceptance": "Completed: exact-source 16-stage full CI, 12 ops, same-image runtime acceptance, exact Azure code adoption, 100% main deployment, six matching assets and 15 live read-only checks.",
+    "physical_iPhone_acceptance": "iPhone 17 Pro (not Max): pending; synthetic WebKit/Chromium evidence is separate.",
+    "next_action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes.",
+    "final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
   },
-  "last_completed": "AGR-306-C16 mobile forms, visible nutrition, confirmed memory and Animate UI details released to existing private family staging.",
+  "last_completed": "AGR-306-C17 meaningful food search, accessible reviewed reference and 108 recipes released to existing private family staging.",
   "next_task": {
-    "id": "AGR-306-PHYSICAL-ACCEPTANCE",
+    "id": "AGR-306-C17-PHYSICAL-ACCEPTANCE",
     "status": "awaiting_physical_owner_session",
-    "action": "Owner refreshes published app and checks the food portion -> confirm -> visible diary/total -> edit/repeat flow on the actual iPhone 17 Pro; no speculative rebuild."
+    "action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes."
   },
   "staging": {
     "deployed": true,
     "compute_connected": true,
     "google_real_user_login_verified": true,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
     "http_checks_passed": 15,
-    "synthetic_e2e_checks": 22,
+    "synthetic_e2e_checks": 14,
     "synthetic_cleanup_verified": true,
     "mobile_deployed": true,
-    "mobile_backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "mobile_backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
     "kitchen_deployed": true,
     "audit_fixes_deployed": true,
-    "family_release_acceptance": "C16 technically released; physical iPhone 17 Pro acceptance pending.",
+    "family_release_acceptance": "C17 technically released; physical iPhone 17 Pro acceptance pending.",
     "developer_preview_runner_connected": true,
-    "design_applied": "C16 bounded native temporal inputs/dialogs, visible durable meal map and complete-day nutrients, current agreed targets, confirmed assistant context, licensed Animate UI native/CSS motion.",
+    "design_applied": "C16 mobile forms/diary/confirmed memory/Animate UI preserved; C17 shared readable product picker, stable focus, visible wide reference and search result reveal.",
     "google_real_user_login_evidence": "Owner confirmed the preceding same-origin login repair on iPhone; fresh C15 spouse login was not exercised.",
-    "worker_version_id": "9ce80b6f-1e7a-4bdf-9cef-3d6ded459ef9",
+    "worker_version_id": "28fd21df-78d8-40b0-91f4-56785dc9ad22",
     "current_C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
-    "synthetic_e2e_scope": "22 C16 browser scenarios (11 per engine) on local HTTP/SQLite; not a new signed family transaction.",
+    "synthetic_e2e_scope": "14 C17 browser scenarios (7 per engine) on real local HTTP/SQLite, separate from retained C16 evidence; not a new signed family transaction.",
     "current_C14_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
     "current_C15_receipt": "docs/evidence/AGR_306_C15_RELEASE_RECEIPT.json",
-    "current_C16_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json"
+    "current_C16_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
+    "current_C17_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
   },
   "production": {
     "saas_deployed": false,
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 639,
+    "python_tests": 655,
     "python_subtests": 6,
-    "node_synthetic_tests": 260,
+    "node_synthetic_tests": 266,
     "python_skipped": 0,
-    "browser_scenarios": 22,
-    "browser_unique_scenarios": 11,
+    "browser_scenarios": 14,
+    "browser_unique_scenarios": 7,
     "browser_engines": [
       "Chromium",
       "WebKit"
@@ -79,29 +79,30 @@
     "current_live_http_checks": 15,
     "served_asset_hashes": 6,
     "specification_links_checked": 879,
-    "Cloudflare_full_gate": "C16_exact_release_commit_passed",
+    "Cloudflare_full_gate": "C17_exact_release_commit_passed",
     "actual_cloud_compatibility_date": "2026-11-07",
-    "current_final_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json"
+    "current_final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
   },
   "not_verified": [
-    "C16 was not exercised on the physical iPhone 17 Pro (not Max); mobile WebKit/Chromium is synthetic browser evidence.",
+    "C17 was not exercised on the physical iPhone 17 Pro (not Max); mobile Chromium/WebKit evidence is synthetic.",
     "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
-    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C16.",
-    "Assistant tests establish confirmed context and deterministic answers, not the quality of a new live model response.",
-    "Synthetic checks do not establish clinical effectiveness or complete accessibility compliance."
+    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C17.",
+    "New recipes use calculated existing ingredient nutrition; they have not been kitchen tested or clinically validated.",
+    "The wide reference is pinned historical USDA data, includes English names and cheese-containing derivatives, and is not a complete live branded-food catalogue.",
+    "Existing confirmed assistant memory and safety/consent rules were preserved; C17 does not claim a new live model quality evaluation."
   ],
   "repository": "https://github.com/offflinerpsy/keto-companion",
   "visibility": "private",
   "github": {
-    "checkpoint_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "checkpoint_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
     "checkpoint_issue": 1,
     "staging_issue": 2,
-    "ci_status": "C16_ordinary_release_success_live_verified",
+    "ci_status": "C17_ordinary_release_success_live_verified",
     "ci_run_ids": [
       42410047614,
       42410148697
     ],
-    "native_cloudflare_build": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
+    "native_cloudflare_build": "ab053a65-d9c0-4066-8644-46f2a621d7b9",
     "release_pull_request": 4,
     "release_merge_commit": "4661687931e263a9fd002239a4ec473aaaa8356e",
     "next_acceptance_issue": 10,
@@ -113,14 +114,14 @@
     "kitchen_pr": 12,
     "audit_pr": 14,
     "audit_merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0",
-    "active_release_pr": 22,
+    "active_release_pr": 23,
     "developer_media_release_pr": 17,
     "developer_media_merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
-    "current_release_pr": 22,
-    "current_release_pr_url": "https://github.com/offflinerpsy/keto-companion/pull/22",
-    "deployed_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504"
+    "current_release_pr": 23,
+    "current_release_pr_url": "https://github.com/offflinerpsy/keto-companion/pull/23",
+    "deployed_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319"
   },
-  "mobile_acceptance": "C16: 22 Chromium/WebKit scenarios and reviewed 402px screenshots; physical iPhone 17 Pro pending.",
+  "mobile_acceptance": "C17: 14 Chromium/WebKit search/import/intake scenarios and reviewed 402px screenshots; physical iPhone 17 Pro pending. C16 form and diary evidence retained.",
   "mobile_source": {
     "task": "KETO-MOBILE-006",
     "status": "completed_locally",
@@ -131,7 +132,7 @@
     "real_device_audio_tested": false,
     "cloud_changes": false
   },
-  "mobile_stage": "C16_deployed_physical_iPhone_acceptance_pending",
+  "mobile_stage": "C17_deployed_physical_iPhone_acceptance_pending",
   "mobile_receipt": "docs/evidence/MOBILE_RELEASE_RECEIPT.json",
   "owner_feedback": {
     "dictation": "user confirms works",
@@ -180,7 +181,7 @@
     "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
   },
   "release_blocker_legacy": "Historical connection blocker resolved for release. Azure and main Cloudflare C14 publication completed and verified.",
-  "current_release_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
+  "current_release_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
   "google_login_repair": {
     "status": "completed_private_staging; owner_iPhone_confirmed",
     "receipt": "docs/evidence/GOOGLE_LOGIN_RECOVERY_RECEIPT.json",
@@ -198,19 +199,20 @@
       "C12 contextual actions",
       "C13 food sources",
       "C15 UI details",
-      "C16 native forms, visible daily nutrition, confirmed memory and Animate UI motion"
+      "C16 native forms, visible daily nutrition, confirmed memory and Animate UI motion",
+      "C17 word-aware food search, accessible reviewed USDA picker and 108 recipes"
     ],
     "stage": "completed_technical_release_physical_acceptance_pending",
-    "native_receipt": "docs/evidence/AGR_306_C16_NATIVE_ACCEPTANCE.json",
-    "local_browser_receipt": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
-    "runtime_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
-    "runtime_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
-    "deployed_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "final_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
-    "report_ru": "docs/evidence/AGR_306_C16_UI_RESULT_RU.md",
-    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
-    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a"
+    "native_receipt": "docs/evidence/AGR_306_C17_NATIVE_ACCEPTANCE.json",
+    "local_browser_receipt": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json",
+    "runtime_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+    "runtime_image": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
+    "deployed_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
+    "report_ru": "docs/evidence/AGR_306_C17_SEARCH_RESULT_RU.md",
+    "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
+    "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e"
   },
   "historical_C15_evidence": {
     "python_tests": 627,
@@ -239,6 +241,56 @@
     "current_final_receipt": "docs/evidence/AGR_306_C15_RELEASE_RECEIPT.json"
   },
   "external_github_review": {
+    "status": "not_claimed",
+    "pull_request": 23,
+    "submitted_reviews": 0,
+    "independent_subagent_review_and_ci": "completed separately; no GitHub review approval claimed"
+  },
+  "historical_C16_evidence": {
+    "python_tests": 639,
+    "python_subtests": 6,
+    "node_synthetic_tests": 260,
+    "python_skipped": 0,
+    "browser_scenarios": 22,
+    "browser_unique_scenarios": 11,
+    "browser_engines": [
+      "Chromium",
+      "WebKit"
+    ],
+    "ops_tests": 12,
+    "full_source_stages": 16,
+    "actual_runtime_product_tests": 14,
+    "actual_runtime_python_tests": 17,
+    "current_live_http_checks": 15,
+    "served_asset_hashes": 6,
+    "specification_links_checked": 879,
+    "Cloudflare_full_gate": "C16_exact_release_commit_passed",
+    "actual_cloud_compatibility_date": "2026-11-07",
+    "current_final_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json"
+  },
+  "historical_C16_delivery": {
+    "task": "AGR-306",
+    "implemented": [
+      "C10 shell",
+      "C11 intake/history",
+      "C12 contextual actions",
+      "C13 food sources",
+      "C15 UI details",
+      "C16 native forms, visible daily nutrition, confirmed memory and Animate UI motion"
+    ],
+    "stage": "completed_technical_release_physical_acceptance_pending",
+    "native_receipt": "docs/evidence/AGR_306_C16_NATIVE_ACCEPTANCE.json",
+    "local_browser_receipt": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
+    "runtime_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
+    "runtime_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
+    "deployed_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "final_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
+    "report_ru": "docs/evidence/AGR_306_C16_UI_RESULT_RU.md",
+    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a"
+  },
+  "historical_C16_external_github_review": {
     "status": "not_completed_usage_limit",
     "pull_request": 22,
     "source": "PR issue comments read on 2026-11-10; no completed GitHub review entries",

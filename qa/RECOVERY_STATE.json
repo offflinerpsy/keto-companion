@@ -3,9 +3,26 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-10T12:01:43.033847+00:00",
+  "updated_at": "2026-11-10",
   "active_task": null,
   "last_completed": {
+    "id": "AGR-306-C17-RELEASE",
+    "linear_issue": "AGR-306",
+    "status": "completed",
+    "scope": "technical_private_family_release",
+    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "release_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
+    "report_ru": "docs/evidence/AGR_306_C17_SEARCH_RESULT_RU.md",
+    "native_build": "ab053a65-d9c0-4066-8644-46f2a621d7b9",
+    "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
+    "build_status": "success",
+    "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e",
+    "worker_version": "28fd21df-78d8-40b0-91f4-56785dc9ad22",
+    "pull_request": 23,
+    "product_acceptance": "physical_iPhone_17_Pro_pending"
+  },
+  "previous_completed": {
     "id": "AGR-306-C16-RELEASE",
     "linear_issue": "AGR-306",
     "status": "completed",
@@ -22,26 +39,10 @@
     "pull_request": 22,
     "product_acceptance": "physical_iPhone_17_Pro_pending"
   },
-  "previous_completed": {
-    "id": "AGR-306-C15-UI",
-    "linear_issue": "AGR-306",
-    "status": "completed",
-    "scope": "UI details and technical_private_family_release",
-    "source_commit": "ad5f4b63479e226ca080ae22f3102d4d34c9e3fb",
-    "backend_source_commit": "a7c080df6589ab55b48fe448a50e20f66837d70b",
-    "release_receipt": "docs/evidence/AGR_306_C15_RELEASE_RECEIPT.json",
-    "report_ru": "docs/evidence/AGR_306_C15_UI_RESULT_RU.md",
-    "native_build": "c1ed4836-1b42-49d6-a29b-3990949135a0",
-    "ordinary_build": "876e4382-2a92-457d-a5ad-219e9df2e61f",
-    "build_status": "success",
-    "worker_version": "630d78af-8da7-41f5-ad1a-ace7849ead46",
-    "pull_request": 21,
-    "product_acceptance": "physical_spouse_iPhone_pending"
-  },
   "next_task": {
-    "id": "AGR-306-PHYSICAL-ACCEPTANCE",
+    "id": "AGR-306-C17-PHYSICAL-ACCEPTANCE",
     "status": "awaiting_physical_owner_session",
-    "action": "Owner refreshes published app and checks the food portion -> confirm -> visible diary/total -> edit/repeat flow on the actual iPhone 17 Pro; no speculative rebuild."
+    "action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -52,6 +53,23 @@
         "completion_marker": ".c16-qa-6.exit",
         "status": "completed",
         "exit_code": 0
+      },
+      {
+        "host": "authorized owner Mac isolated C17 QA worktree",
+        "pid": 55228,
+        "run": "c17-browser-4",
+        "completion_marker": ".c17-browser-4.exit.json",
+        "status": "completed",
+        "exit_code": 0,
+        "port_8898_released": true
+      },
+      {
+        "host": "authorized owner Mac C17 release worktree",
+        "pid": 58710,
+        "run": "C17 exact Azure ZIP deployment",
+        "completion_marker": "C17 QA .c17-release-artifacts/azure.exit",
+        "status": "completed",
+        "exit_code": 0
       }
     ],
     "pending_cloud_builds": [],
@@ -59,11 +77,11 @@
     "temporary_probes": [],
     "active_container_instances": [],
     "accepted_runtime_pin": "ops/approved-runtime.json",
-    "accepted_runtime_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
-    "accepted_runtime_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
+    "accepted_runtime_baseline": "3f51f32d77f743375fccef4377252a08e48c5f8d3830e286509297a08ef77b75",
+    "accepted_runtime_image": "sha256:fb38519914fdd6ac96d7594fceed7d08987b3a980e5b2b824d0a89ec509557f1",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
-    "new_runtime_image_required": "No. C16 complete; use the published app for physical acceptance.",
-    "implementation_writer": null,
+    "new_runtime_image_required": false,
+    "implementation_writer": "root",
     "temporary_trigger_commands": "ordinary commands restored and verified"
   },
   "owner_authorization": "Implementation, verification and release to the existing private family environment authorized. No Mac Codex desktop, new accounts or providers.",
@@ -81,35 +99,36 @@
     "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json"
   ],
   "limitations": [
-    "C16 was not exercised on the physical iPhone 17 Pro (not Max); mobile WebKit/Chromium is synthetic browser evidence.",
+    "C17 was not exercised on the physical iPhone 17 Pro (not Max); mobile Chromium/WebKit evidence is synthetic.",
     "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
-    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C16.",
-    "Assistant tests establish confirmed context and deterministic answers, not the quality of a new live model response.",
-    "Synthetic checks do not establish clinical effectiveness or complete accessibility compliance."
+    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C17.",
+    "New recipes use calculated existing ingredient nutrition; they have not been kitchen tested or clinically validated.",
+    "The wide reference is pinned historical USDA data, includes English names and cheese-containing derivatives, and is not a complete live branded-food catalogue.",
+    "Existing confirmed assistant memory and safety/consent rules were preserved; C17 does not claim a new live model quality evaluation."
   ],
   "source_completed": {
-    "id": "AGR-306-C16-PRODUCT",
+    "id": "AGR-306-C17-SEARCH",
     "status": "completed",
     "stage": "source_accepted",
-    "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
-    "deliverable": "iPhone temporal-input/dialog containment, visible durable diary receipts, day nutrition map, confirmed assistant memory",
-    "acceptance": [
-      "402 CSS px mobile geometry and native picker semantics",
-      "saved intake immediately visible even if history refresh fails",
-      "account-scoped day navigation, unconfirmed timezone read fallback",
-      "actual full-day totals and current agreed targets with incomplete-data states",
-      "confirmed server memory used by deterministic answer and assistant context",
-      "existing native CI and private-family release, with exact Azure adoption if Python changes"
-    ],
-    "device": "iPhone 17 Pro (not Max), Chrome; owner screenshots 1206px wide",
+    "base_commit": "2e60f59fcc4d9388da8831f86e12c5a27db1976a",
     "writer": "root",
-    "evidence": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
-    "additional_owner_direction": "Animate UI reference adopted as pinned native/CSS dialog, disclosure and SVG success mark; preserve current architecture",
-    "completed_checks": {
-      "python": "639 passed; 6 subtests",
-      "node": "260 passed after final generated snapshot",
-      "browser": "22 passed in Chromium/WebKit; 0 failed/flaky/skipped",
-      "contracts_specification_hygiene": "passed"
-    }
+    "deliverable": "Meaningful Russian food/recipe matching, accessible wide food reference and varied verified-ingredient recipe expansion",
+    "acceptance": [
+      "сыр does not match raw meat or fish; word forms and multiword queries work",
+      "same query semantics in portion, own dish, pantry and USDA",
+      "wide reference accessible from selection with explicit review/import preserved",
+      "recipe ingredient/name search, filters and pagination correct; varied original recipes use actual catalog nutrition",
+      "targeted offline/browser checks then existing exact-source private-family release"
+    ],
+    "owner_feedback": "IMG_0996.png, IMG_0997.png, IMG_0998.png: cheese/raw substring collision, few cheeses and only nine egg recipes",
+    "source_checks": {
+      "python": "655 passed; 6 subtests",
+      "node": "266 passed on final source",
+      "browser": "14 passed Chromium/WebKit; no failed, flaky or skipped",
+      "contracts_specification_hygiene": "passed",
+      "review": "independent backend, UI, QA and package review; final blockers resolved"
+    },
+    "source_commit": "442e17a6dac9c1126d0f10d6a1fa37cf6c868c70",
+    "evidence": "docs/evidence/AGR_306_C17_SOURCE_ACCEPTANCE.json"
   }
 }

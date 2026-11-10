@@ -1,0 +1,22 @@
+{
+  "schema": "keto-c17-azure-adoption-v1",
+  "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+  "archive_sha256": "4f36cf6807e24f2eb4dcb23e329b322353c9d2777914dd518b4dd9466694b458",
+  "deployment": {
+    "complete": true,
+    "id": "b9ad2675-dba1-4900-8ce0-007da5b8a76e",
+    "status": 4
+  },
+  "http_status": 200,
+  "cache_control": "no-store",
+  "runtime": {
+    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "runtime_code_sha256": "6f533ba4334edba14d902974f5a8653aa98cef376401c99815442911243b9978",
+    "edge_signature": "Ed25519",
+    "authentication_required": true,
+    "medical_monitoring": false
+  },
+  "passed": true,
+  "checked_at": "2026-11-10T14:35:42.600310+00:00",
+  "scope": "Read-only source-code adoption and existing private authentication contract; no family records."
+}

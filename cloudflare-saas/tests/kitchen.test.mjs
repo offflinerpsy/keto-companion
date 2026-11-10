@@ -122,8 +122,12 @@ test('kitchen load stops before foods when route becomes stale during status',as
  const host=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':new Node(),proposals:new Node()};let finish,valid=true,calls=[];const ui=setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async(_,p)=>{calls.push(p.action);return await new Promise(r=>finish=r)},getState:()=>({active_thread:'main'}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1});const pending=ui.load(()=>valid);valid=false;finish({});assert.equal(await pending,false);assert.deepEqual(calls,['status']);
 });
 
-test('everyday matching preserves state and refuses invented brand or percentages',async()=>{
- const {filterEverydayFoods}=await import('../public/kitchen-ui.js');const foods=[{name_ru:'Огурец с кожурой',state:'raw'},{name_ru:'Огурец с кожурой',state:'cooked'},{name_ru:'Капуста белокочанная',state:'raw'},{name_ru:'Творог',state:'ready_to_eat'},{name_ru:'Сметана',state:'ready_to_eat'},{name_ru:'Минтай',state:'raw'},{name_ru:'Сыр чеддер',state:'ready_to_eat'}];for(const q of ['сыр','творог','сметана','свежий огурец','белокочанная капуста','минтай'])assert.equal(filterEverydayFoods(foods,q).length,1,q);for(const q of ['сыр российский','сметана 20%','минтай бренд'])assert.equal(filterEverydayFoods(foods,q).length,0,q);assert.equal(filterEverydayFoods(foods,'свежий огурец')[0].state,'raw');
+test('pantry picker uses the shared server query and keeps an unknown qualifier',async()=>{
+ const host=new Node(),nodes={'kitchen-studio':host,'kitchen-memory':new Node(),proposals:new Node()},calls=[];
+ const foods=[{food_id:'F1',name_ru:'Сыр чеддер',state:'ready_to_eat'},{food_id:'F2',name_ru:'Сырая куриная грудка',state:'raw'}];
+ const ui=setupKitchen({$:id=>nodes[id],el:(...a)=>new Node(...a),call:async(_,p)=>{calls.push(p);if(p.action==='status')return {};return {foods:p.query?(p.query==='сыр'?foods.slice(0,1):[]):foods}},getState:()=>({active_thread:'main'}),accept(){},run:fn=>fn(),notify(){},setView(){},epoch:()=>1});
+ await ui.load();const input=descendants(host).find(x=>x.id==='kitchen-product');input.value='сыр';input.oninput();await new Promise(r=>setTimeout(r,260));assert.equal(calls.at(-1).query,'сыр');const list=descendants(host).find(x=>x.attributes['aria-label']==='Продукты справочника и личные продукты');assert(descendants(list).some(x=>x.textContent==='Сыр чеддер'));assert(!descendants(list).some(x=>x.textContent==='Сырая куриная грудка'));
+ input.value='сыр российский';input.oninput();await new Promise(r=>setTimeout(r,260));assert.equal(calls.at(-1).query,'сыр российский');assert(!descendants(list).some(x=>x.textContent==='Сыр чеддер'));ui.reset();
 });
 
 test('reset removes previous personal food from picker before next account loads',async()=>{

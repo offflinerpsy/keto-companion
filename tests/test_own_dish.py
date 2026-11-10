@@ -49,7 +49,7 @@ def test_library_pages_and_unknown_stock(svc):
  while pages[-1]['has_more']:
   pages.append(svc.catalog('synthetic-one',limit=9,offset=offset));offset+=9
  ids=[r['recipe_id'] for page in pages for r in page['recipes']]
- assert len(ids)==len(set(ids))==first['total']==72
+ assert len(ids)==len(set(ids))==first['total']==108
  assert len({r['category'] for r in first['recipes']})>1
  assert all(r['category']=='side' for r in svc.catalog('synthetic-one',category='side')['recipes'])
  row={'food_id':'F1','name_ru':'Продукт','state':'raw','grams_edible':100}; result=missing_list([row],[{'food_id':'F1','grams':None}]);assert result[0]['grams_edible'] is None and result[0]['required_grams']==100 and result[0]['stock_quantity_unknown']

@@ -33,7 +33,7 @@ def healthy(svc):
  event(svc,'profile.update',{'screening':s,'timezone':'Europe/Minsk'})
  event(svc,'targets.update',{'status':'agreed','agreed_at':'2026-11-07T00:00:00Z','basis_note':'SYNTHETIC ONLY','energy_min_kcal':1700,'energy_max_kcal':1900,'protein_min_g':85,'protein_max_g':180,'carb_basis':'net_estimate','carb_max_g':40,'fiber_min_g':25,'saturated_fat_max_pct':10})
 
-def test_baseline_catalog(svc):assert len(svc.base['recipes'])==72
+def test_baseline_catalog(svc):assert len(svc.base['recipes'])==108
 @pytest.mark.parametrize('bad',['../other','a/b','', 'x'*101])
 def test_key_validation(bad):
  with pytest.raises(ValueError):safe_key(bad)
