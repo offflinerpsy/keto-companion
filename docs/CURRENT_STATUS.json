@@ -1,30 +1,21 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-10T16:32:56.061199+00:00",
+  "updated_at": "2026-11-10T16:49:29.981Z",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
-  "active_task": {
-    "id": "AGR-306",
-    "status": "In Progress",
-    "stage": "C18_native_accepted_ordinary_pending",
-    "source_branch": "codex/keto-auth-c18",
-    "base_commit": "3e2bf597c647c72d831b872dc85bb79f0440bcbf",
-    "implementation_completed": true,
-    "release_performed": false,
-    "next_action": "Ordinary exact-source staging deployment then fresh real Google owner login."
-  },
-  "last_completed": "AGR-306-C17 meaningful food search, accessible reviewed reference and 108 recipes released to existing private family staging.",
+  "active_task": null,
+  "last_completed": "AGR-306-C18: auth repair released; fresh real desktop Google login, server admin access and reload verified.",
   "next_task": {
-    "id": "AGR-306-C18-RELEASE",
-    "status": "in_progress"
+    "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
+    "status": "awaiting_device_observation"
   },
   "staging": {
     "deployed": true,
     "compute_connected": true,
-    "google_real_user_login_verified": false,
+    "google_real_user_login_verified": true,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "source_commit": "577432672abbcde12c400ea5de4462aa97cf6166",
     "http_checks_passed": 15,
     "synthetic_e2e_checks": 14,
     "synthetic_cleanup_verified": true,
@@ -33,17 +24,18 @@
     "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
     "kitchen_deployed": true,
     "audit_fixes_deployed": true,
-    "family_release_acceptance": "C17 technical release retained; C18 fresh sign-in blocker reported by owner.",
+    "family_release_acceptance": "C18 technical auth release and real desktop owner login accepted; physical iPhone pending.",
     "developer_preview_runner_connected": true,
     "design_applied": "C16 mobile forms/diary/confirmed memory/Animate UI preserved; C17 shared readable product picker, stable focus, visible wide reference and search result reveal.",
-    "google_real_user_login_evidence": "Historical owner confirmation retained in GOOGLE_LOGIN_RECOVERY_RECEIPT; current owner reports fresh login blocked. C18 revalidation in progress.",
-    "worker_version_id": "28fd21df-78d8-40b0-91f4-56785dc9ad22",
+    "google_real_user_login_evidence": "docs/evidence/AGR_306_C18_REAL_LOGIN.json",
+    "worker_version_id": "397db31a-255f-408c-b2e1-9fb61fe2fec1",
     "current_C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
     "synthetic_e2e_scope": "14 C17 browser scenarios (7 per engine) on real local HTTP/SQLite, separate from retained C16 evidence; not a new signed family transaction.",
     "current_C14_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
     "current_C15_receipt": "docs/evidence/AGR_306_C15_RELEASE_RECEIPT.json",
     "current_C16_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
-    "current_C17_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
+    "current_C17_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
+    "current_C18_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json"
   },
   "production": {
     "saas_deployed": false,
@@ -52,10 +44,10 @@
   "evidence": {
     "python_tests": 655,
     "python_subtests": 6,
-    "node_synthetic_tests": 266,
+    "node_synthetic_tests": 296,
     "python_skipped": 0,
-    "browser_scenarios": 14,
-    "browser_unique_scenarios": 7,
+    "browser_scenarios": 38,
+    "browser_unique_scenarios": 19,
     "browser_engines": [
       "Chromium",
       "WebKit"
@@ -67,20 +59,18 @@
     "current_live_http_checks": 15,
     "served_asset_hashes": 6,
     "specification_links_checked": 879,
-    "Cloudflare_full_gate": "C17_exact_release_commit_passed",
+    "Cloudflare_full_gate": "C18_exact_release_commit_passed",
     "actual_cloud_compatibility_date": "2026-11-07",
-    "current_final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
+    "current_final_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json",
     "c18_source": "docs/evidence/AGR_306_C18_SOURCE_ACCEPTANCE.json",
     "c18_browser_scenarios": 38,
     "c18_node": 296
   },
   "not_verified": [
-    "C17 was not exercised on the physical iPhone 17 Pro (not Max); mobile Chromium/WebKit evidence is synthetic.",
-    "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
-    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C17.",
-    "New recipes use calculated existing ingredient nutrition; they have not been kitchen tested or clinically validated.",
-    "The wide reference is pinned historical USDA data, includes English names and cheese-containing derivatives, and is not a complete live branded-food catalogue.",
-    "Existing confirmed assistant memory and safety/consent rules were preserved; C17 does not claim a new live model quality evaluation."
+    "The physical iPhone17Pro Chrome failure was not reproduced; real Google login was verified in connected desktop Chrome and synthetic mobile cases in Chromium/WebKit.",
+    "No family diary/profile/consent test writes. Actual login updates ordinary session and last-active metadata.",
+    "Full member administration is available after workspace load; during compute outage the verified identity and retry action remain visible.",
+    "No new live family signed food-write, device keyboard, camera, microphone or clinical acceptance is claimed."
   ],
   "repository": "https://github.com/offflinerpsy/keto-companion",
   "visibility": "private",
@@ -105,14 +95,14 @@
     "kitchen_pr": 12,
     "audit_pr": 14,
     "audit_merge_commit": "3dd6897d8696b0e241433a9c4d55f7e94c8be2a0",
-    "active_release_pr": 23,
+    "active_release_pr": null,
     "developer_media_release_pr": 17,
     "developer_media_merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
-    "current_release_pr": 23,
-    "current_release_pr_url": "https://github.com/offflinerpsy/keto-companion/pull/23",
-    "deployed_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319"
+    "current_release_pr": 24,
+    "current_release_pr_url": "https://github.com/offflinerpsy/keto-companion/pull/24",
+    "deployed_source_commit": "577432672abbcde12c400ea5de4462aa97cf6166"
   },
-  "mobile_acceptance": "C17: 14 Chromium/WebKit search/import/intake scenarios and reviewed 402px screenshots; physical iPhone 17 Pro pending. C16 form and diary evidence retained.",
+  "mobile_acceptance": "C18: 24 auth plus 14 food Chromium/WebKit scenarios; fresh real desktop Google login/admin/reload accepted. Physical iPhone17Pro Chrome remains unverified.",
   "mobile_source": {
     "task": "KETO-MOBILE-006",
     "status": "completed_locally",

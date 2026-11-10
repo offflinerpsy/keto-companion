@@ -1,0 +1,116 @@
+{
+  "schema": "keto-c18-ordinary-acceptance-v1",
+  "status": "passed",
+  "recorded_at": "2026-11-10T16:41:13.065Z",
+  "build": {
+    "id": "23188e7c-5b70-4392-84df-b05c59449f23",
+    "status": "stopped",
+    "outcome": "success",
+    "commit": "577432672abbcde12c400ea5de4462aa97cf6166",
+    "stopped": "2026-11-10T16:40:51.449Z",
+    "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+    "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+  },
+  "source_gate": {
+    "checks": [
+      {
+        "name": "python_env",
+        "exit": 0
+      },
+      {
+        "name": "python_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "node_dependencies",
+        "exit": 0
+      },
+      {
+        "name": "container_sdk",
+        "exit": 0
+      },
+      {
+        "name": "container_worker_build",
+        "exit": 0
+      },
+      {
+        "name": "runtime_fonts",
+        "exit": 0
+      },
+      {
+        "name": "all_python",
+        "exit": 0
+      },
+      {
+        "name": "all_node",
+        "exit": 0
+      },
+      {
+        "name": "legacy_ui",
+        "exit": 0
+      },
+      {
+        "name": "legacy_oauth_ui",
+        "exit": 0
+      },
+      {
+        "name": "contracts",
+        "exit": 0
+      },
+      {
+        "name": "specification",
+        "exit": 0
+      },
+      {
+        "name": "web_build",
+        "exit": 0
+      },
+      {
+        "name": "legacy_build",
+        "exit": 0
+      },
+      {
+        "name": "hygiene",
+        "exit": 0
+      },
+      {
+        "name": "generated_assets_match",
+        "exit": 0
+      }
+    ],
+    "seconds": 279.3,
+    "scope": "trusted reviewed source; no real data or paid model calls",
+    "github_actions_required": false
+  },
+  "runtime": {
+    "baseline": "bf113ad3f95532f7a5d9e73f1063be68d6f8517cd0d8084ffcf4fd552f4a51f5",
+    "image_digest": "sha256:2e7ca6e2448f156e5e0ba8d3d31f324c7bced900bf3774fbf061d847adce8345",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "deployment": {
+    "task": "CF-DEV-MEDIA-08",
+    "worker": "keto-companion-saas-staging",
+    "account": "0609100baf768271ea2811c9a9ee2b16",
+    "commit": "577432672abbcde12c400ea5de4462aa97cf6166",
+    "version_id": "397db31a255f408cb2e19fb61fe2fec1",
+    "tag": "35d20e3e19a74997aa077809e9839e38",
+    "main_module_sha256": "941fd6ffc415b2bc2e94550bcc7d58dab717d620dd334038a13f537faf4cf08d",
+    "modules": 20,
+    "compute_configured": true,
+    "private_source": true
+  },
+  "test_summaries": [
+    "655 passed, 6 subtests passed in 158.06s (0:02:38)",
+    "ℹ tests 296",
+    "ℹ pass 296",
+    "ℹ fail 0",
+    "ℹ tests 12",
+    "ℹ pass 12",
+    "ℹ fail 0"
+  ]
+}

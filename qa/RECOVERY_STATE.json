@@ -3,28 +3,27 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/Users/alexyarosh/Projects/keto-companion-c18-qa",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-10",
-  "active_task": {
+  "updated_at": "2026-11-10T16:49:29.981Z",
+  "active_task": null,
+  "last_completed": {
     "id": "AGR-306-C18-RELEASE",
     "linear_issue": "AGR-306",
-    "status": "in_progress",
-    "stage": "ordinary_release_pending",
-    "writer": "root via authorized isolated Mac checkout",
-    "source_commit": "f53e12fffd86ed6ad67cd2d95448d6646e9baeac",
-    "scope": "Release accepted auth repair through existing native and ordinary Cloudflare gates; retain byte-identical C17 Azure; verify fresh real login and server admin controls.",
-    "candidate_commit": "4734d850ca5008fd5a7d61d7c01f2bfd5ef83d5d",
-    "build_uuid": "b6ce09a1-446d-4b03-914a-d5bbf7f8329e",
-    "source_gate": {
-      "stages": 16,
-      "python": 655,
-      "python_subtests": 6,
-      "node": 296,
-      "status": "passed"
-    },
+    "status": "completed",
+    "scope": "existing private family auth repair release",
+    "source_commit": "577432672abbcde12c400ea5de4462aa97cf6166",
+    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "release_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json",
+    "report_ru": "docs/evidence/AGR_306_C18_AUTH_RESULT_RU.md",
     "native_build": "b6ce09a1-446d-4b03-914a-d5bbf7f8329e",
-    "native_status": "success"
+    "ordinary_build": "23188e7c-5b70-4392-84df-b05c59449f23",
+    "build_status": "success",
+    "worker_version": "397db31a-255f-408c-b2e1-9fb61fe2fec1",
+    "pull_request": 24,
+    "real_google_login_verified": true,
+    "admin_access_verified": true,
+    "product_acceptance": "physical_iPhone_17_Pro_pending; real_desktop_google_verified"
   },
-  "last_completed": {
+  "previous_completed": {
     "id": "AGR-306-C17-RELEASE",
     "linear_issue": "AGR-306",
     "status": "completed",
@@ -41,27 +40,10 @@
     "pull_request": 23,
     "product_acceptance": "physical_iPhone_17_Pro_pending"
   },
-  "previous_completed": {
-    "id": "AGR-306-C16-RELEASE",
-    "linear_issue": "AGR-306",
-    "status": "completed",
-    "scope": "technical_private_family_release",
-    "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "backend_source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
-    "release_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
-    "report_ru": "docs/evidence/AGR_306_C16_UI_RESULT_RU.md",
-    "native_build": "5b6f78a4-fd88-4e4b-be8c-96150728aa49",
-    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
-    "build_status": "success",
-    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
-    "worker_version": "9ce80b6f-1e7a-4bdf-9cef-3d6ded459ef9",
-    "pull_request": 22,
-    "product_acceptance": "physical_iPhone_17_Pro_pending"
-  },
   "next_task": {
-    "id": "AGR-306-C18-LIVE-VERIFY",
-    "status": "blocked_on_release",
-    "action": "Verify served source hashes and fresh real owner Google login after ordinary deployment."
+    "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
+    "status": "awaiting_device_observation",
+    "action": "Technical release complete; physical iPhone feedback is separate. Do not restart completed builds or tests without a new concrete failure."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -154,13 +136,10 @@
     "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json"
   ],
   "limitations": [
-    "C18 user reports fresh sign-in blocker; C17 physical acceptance cannot proceed until repaired.",
-    "C17 was not exercised on the physical iPhone 17 Pro (not Max); mobile Chromium/WebKit evidence is synthetic.",
-    "No fresh family sign-in or signed live Cloudflare-Azure-D1 food write was performed; family diary/profile records were not changed for verification.",
-    "Physical keyboard, browser chrome, camera/barcode/photo and dictation were not revalidated in C17.",
-    "New recipes use calculated existing ingredient nutrition; they have not been kitchen tested or clinically validated.",
-    "The wide reference is pinned historical USDA data, includes English names and cheese-containing derivatives, and is not a complete live branded-food catalogue.",
-    "Existing confirmed assistant memory and safety/consent rules were preserved; C17 does not claim a new live model quality evaluation."
+    "The physical iPhone17Pro Chrome failure was not reproduced; real Google login was verified in connected desktop Chrome and synthetic mobile cases in Chromium/WebKit.",
+    "No family diary/profile/consent test writes. Actual login updates ordinary session and last-active metadata.",
+    "Full member administration is available after workspace load; during compute outage the verified identity and retry action remain visible.",
+    "No new live family signed food-write, device keyboard, camera, microphone or clinical acceptance is claimed."
   ],
   "source_completed": {
     "id": "AGR-306-C18-AUTH",

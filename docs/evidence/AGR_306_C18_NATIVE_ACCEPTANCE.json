@@ -291,7 +291,6 @@
         "id": "1aac5b3a-9d97-44b6-aaeb-1e948c9df3e0",
         "source": "api",
         "strategy": "percentage",
-        "author_email": "offflinerpsy@gmail.com",
         "annotations": {
           "workers/message": "Automatic deployment on upload.",
           "workers/triggered_by": "upload"
@@ -308,7 +307,6 @@
         "id": "d734fb00-1ab3-44dd-8388-0d5cfe25289f",
         "source": "api",
         "strategy": "percentage",
-        "author_email": "offflinerpsy@gmail.com",
         "annotations": {
           "workers/message": "Automatic deployment on upload.",
           "workers/triggered_by": "upload"

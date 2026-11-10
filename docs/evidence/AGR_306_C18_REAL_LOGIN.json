@@ -1,0 +1,33 @@
+{
+  "schema": "keto-c18-real-google-login-v1",
+  "checked_at": "2026-11-10T16:46:40.001Z",
+  "source_commit": "577432672abbcde12c400ea5de4462aa97cf6166",
+  "origin": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "device": "Connected owner desktop Chrome",
+  "provider": "Google via existing Firebase/same-origin helper",
+  "ordinary_ui_logout": true,
+  "signed_out_login_button_observed": true,
+  "google_account_chooser_observed": true,
+  "existing_owner_account_selected": true,
+  "workspace_phase": "ready",
+  "login_button_hidden": true,
+  "owner_only_controls_visible": true,
+  "server_admin_screen_loaded": true,
+  "admin_summary": {
+    "active": 1,
+    "pending": 0,
+    "expired": 0
+  },
+  "full_page_reload_preserved_session": true,
+  "console_errors": 0,
+  "auth_or_membership_bypass": false,
+  "credentials_or_session_values_read": false,
+  "family_diary_profile_consent_test_writes": false,
+  "physical_iPhone_tested": false,
+  "note": "Actual provider flow on published R; separate from synthetic Chromium/WebKit browser fixtures. Ordinary sign-in updates session/last-active metadata.",
+  "screenshot": {
+    "path": "docs/evidence/c18-live-profile.jpg",
+    "sha256": "eb4d19aeebe8612d81ccd24d0a2c5862a52c4921d2ce87154650de0a1172adcc",
+    "caption": "Desktop profile after actual Google sign-in and full page reload. Server admin screen was separately verified; owner controls are below the screenshot viewport."
+  }
+}
