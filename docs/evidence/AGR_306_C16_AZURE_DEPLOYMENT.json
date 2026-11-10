@@ -1,0 +1,35 @@
+{
+  "schema": "keto-c16-azure-deployment-v1",
+  "status": "completed_and_adoption_verified",
+  "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+  "subscription": "c446448a-67ca-4c67-9f95-e74b41f3c247",
+  "resource_group": "rg-keto-companion",
+  "app": "keto-companion-ay-20261107",
+  "archive_sha256": "53687bb7b278f239df0d407fbd919b64f4253957efad0a73ba478a613abfe574",
+  "archive_bytes": 1536157,
+  "package_receipt": "docs/evidence/AGR_306_C16_AZURE_PACKAGE.json",
+  "checked_at": "2026-11-10T11:45:21.429011+00:00",
+  "http_status": 200,
+  "cache_control": "no-store",
+  "fields": {
+    "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "runtime_code_sha256": "10cc7ad515b708c1745d795358c9dc4beda696750e3e78c5d4206d72ca67fac6",
+    "edge_signature": "Ed25519",
+    "authentication_required": true,
+    "medical_monitoring": false
+  },
+  "deployment": {
+    "complete": true,
+    "id": "2105b20e-e45a-4c33-bfbc-7316f167976a",
+    "status": 4
+  },
+  "settings_written": [
+    "KETO_SOURCE_COMMIT",
+    "KETO_EDGE_PUBLIC_JWK"
+  ],
+  "model_settings_preserved": true,
+  "private_key_read_or_transferred": false,
+  "personal_state_migration": false,
+  "family_records_written": false,
+  "limitation": "Exact deployed code adoption; no fresh signed Cloudflare-Azure-D1 family transaction."
+}

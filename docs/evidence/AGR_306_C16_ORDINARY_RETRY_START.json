@@ -1,0 +1,8 @@
+{
+  "id": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+  "status": "queued",
+  "commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+  "created_on": "2026-11-10T11:53:42.563Z",
+  "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+  "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+}

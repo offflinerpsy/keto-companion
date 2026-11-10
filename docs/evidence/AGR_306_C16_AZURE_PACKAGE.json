@@ -1,0 +1,398 @@
+{
+  "task": "AGR-306-C16-RELEASE",
+  "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+  "archive": "/Users/alexyarosh/Projects/keto-companion-c16-qa/.c16-release-artifacts/c16-c2b5d20a1a1a.zip",
+  "archive_sha256": "53687bb7b278f239df0d407fbd919b64f4253957efad0a73ba478a613abfe574",
+  "bytes": 1536157,
+  "members": 71,
+  "runtime_code_sha256": "10cc7ad515b708c1745d795358c9dc4beda696750e3e78c5d4206d72ca67fac6",
+  "runtime_code_files": [
+    "function_app.py",
+    "library/skills/keto-companion/scripts/keto_core.py",
+    "service/__init__.py",
+    "service/app.py",
+    "service/brain.py",
+    "service/chat_actions.py",
+    "service/confirmation.py",
+    "service/developer.py",
+    "service/domain.py",
+    "service/edge_bridge.py",
+    "service/entra.py",
+    "service/food_source.py",
+    "service/intake.py",
+    "service/kitchen.py",
+    "service/label.py",
+    "service/mobile.py",
+    "service/mobile_exports.py",
+    "service/oauth_bridge.py",
+    "service/planning.py",
+    "service/portion_search.py",
+    "service/recipe_brain.py",
+    "service/speech.py",
+    "service/store.py"
+  ],
+  "legacy_bundle_sha256": "88e40133e7737b257c565bb13c9b09f880e3e23f4cd021e478145eb4dac05d9a",
+  "settings": "/Users/alexyarosh/Projects/keto-companion-c16-qa/.c16-release-artifacts/public-settings.json",
+  "settings_keys": [
+    "KETO_SOURCE_COMMIT",
+    "KETO_EDGE_PUBLIC_JWK"
+  ],
+  "inventory": [
+    {
+      "path": "function_app.py",
+      "bytes": 151,
+      "sha256": "be1574af3ad437b4c48da4a9b561b9c271ca1c764452020ccf6108bdf38b203d"
+    },
+    {
+      "path": "host.json",
+      "bytes": 264,
+      "sha256": "ca72e33083b5fa941069012987bd1ba74ef053769afaceaf4a05146727012d05"
+    },
+    {
+      "path": "library/.app.json",
+      "bytes": 104,
+      "sha256": "f5928fa740f11d5636f764d6885d14c1ac51497e10458023cc46db5868ecd540"
+    },
+    {
+      "path": "library/.codex-plugin/plugin.json",
+      "bytes": 2679,
+      "sha256": "bd1b9cf5700fd3d66f3ece7ad1896618e2b4fe22a2e0f94c223d99a2c8d4053b"
+    },
+    {
+      "path": "library/CHANGELOG.md",
+      "bytes": 1198,
+      "sha256": "f074e668a60fed9125d0bf583c43d92b3baef7763e6cc737227deeb3dbc7e1f9"
+    },
+    {
+      "path": "library/README.md",
+      "bytes": 4002,
+      "sha256": "de39646f07f10edd6754315dafa2059d0acffa278957b70ed16ce11f5b3e0e68"
+    },
+    {
+      "path": "library/assets/icon.svg",
+      "bytes": 276,
+      "sha256": "e8873cffc4fef9d65a4fb656f47d53edf4de0e09c36454abb22f66a052a3299e"
+    },
+    {
+      "path": "library/plugin.json",
+      "bytes": 2846,
+      "sha256": "ae0d7b9bc85752c04980c99f137423c8f80f532bbdd0c8e8d1f139f0fc60414d"
+    },
+    {
+      "path": "library/runtime_manifest.json",
+      "bytes": 5404,
+      "sha256": "b6a7d1a9b4f0e9ff85a4096e5afea7d0b6aa4169272a67e9c880024deb3b27c5"
+    },
+    {
+      "path": "library/skills/keto-companion/SKILL.md",
+      "bytes": 8345,
+      "sha256": "0a3000ea5cf85fe95688672d5ff1b67f65b8f297a06824fbb6aa598c300b7031"
+    },
+    {
+      "path": "library/skills/keto-companion/references/capability-contract.md",
+      "bytes": 3428,
+      "sha256": "33c6ab2ff904486ffa38a07880eb34ec990cc91545b55d7d88543ce1ad3148c8"
+    },
+    {
+      "path": "library/skills/keto-companion/references/clinical-launch-checklist.md",
+      "bytes": 2545,
+      "sha256": "b5293009b8a4810b2df201242cc5140c3bbbb887782ba5cbec68dd0877084fce"
+    },
+    {
+      "path": "library/skills/keto-companion/references/google-state.md",
+      "bytes": 6264,
+      "sha256": "3de6df87b1d27a745d4b672fe0ec1137e17748c11eabf7196cdce2d1c74993b5"
+    },
+    {
+      "path": "library/skills/keto-companion/references/onboarding.md",
+      "bytes": 4512,
+      "sha256": "5c506bc45c2cee64429581d8e796308afed64afc181420dbf7bd28a3b0350425"
+    },
+    {
+      "path": "library/skills/keto-companion/references/runtime.md",
+      "bytes": 3753,
+      "sha256": "867d8d1dfd07606cf61d62e05d70d45449e7e182ef07f761d684702517d6fea3"
+    },
+    {
+      "path": "library/skills/keto-companion/scripts/keto_core.py",
+      "bytes": 85268,
+      "sha256": "3ed80085a8f094707dc946c953ae6b8ce601c609df3b4667294558dff1db63b6"
+    },
+    {
+      "path": "library/skills/keto-companion/scripts/keto_export.py",
+      "bytes": 30498,
+      "sha256": "cd32b088782918f8ea00f99d50be53a3e0fe69f8432241e2516dc08b71dccc2a"
+    },
+    {
+      "path": "library/skills/keto-companion/scripts/self_check.py",
+      "bytes": 1203,
+      "sha256": "27786018141dc6520cc22142352ee57c866cb24a0741272d03c3f4f11cc1b054"
+    },
+    {
+      "path": "library/skills/keto-companion/templates/blank_state.json",
+      "bytes": 2021,
+      "sha256": "5f4da1f4a874662858d230e7dae8b79247e4ad408cc310d8136b8368ed01e7f2"
+    },
+    {
+      "path": "library/skills/keto-companion/templates/default_settings.json",
+      "bytes": 518,
+      "sha256": "b268e4009096b367fddc93dc5fada691f9655a847838f938d9e11d78ee4f76a0"
+    },
+    {
+      "path": "library/skills/keto-companion/templates/profile.example.empty.json",
+      "bytes": 1469,
+      "sha256": "7ad0732ac1ce7b34dd733362c24e4f9f7d73c3107ee7fe36c34b3c2758ebda07"
+    },
+    {
+      "path": "library/skills/keto-companion/templates/settings.schema.json",
+      "bytes": 2622,
+      "sha256": "fc73a4b5df76a2f0689153aa4fcd54c1a7939a4ba470e07dbc5fd268fb1be795"
+    },
+    {
+      "path": "library/skills/keto-companion/tests/behavior_cases_50_not_executed.json",
+      "bytes": 16751,
+      "sha256": "540b65a898a0877327da63cd4d84f9abc4885e8180a98a4a5538631084ea50ae"
+    },
+    {
+      "path": "library/skills/keto-companion/tests/test_core.py",
+      "bytes": 17174,
+      "sha256": "c18cfc5674d70cee5c09ac7fc122ad51ffc01c5c4c9d44c9586ce3ab3b5686ab"
+    },
+    {
+      "path": "library/skills/keto-diary/SKILL.md",
+      "bytes": 3798,
+      "sha256": "ad9cf2c43fb42151c94d3805b877794a19ef8f87b333e6331c65d1745dae0f5c"
+    },
+    {
+      "path": "library/skills/keto-evidence/SKILL.md",
+      "bytes": 3228,
+      "sha256": "10fb6154068976a5acb28d118fe511f668fde116c1352a6bcacec668d0382895"
+    },
+    {
+      "path": "library/skills/keto-evidence/references/ANNOTATED_BIBLIOGRAPHY_RU.md",
+      "bytes": 50309,
+      "sha256": "137b2d4d505e85f71102edf2b04eddb8556fa6eeace165808a89006933ec243c"
+    },
+    {
+      "path": "library/skills/keto-evidence/references/RESEARCH_REPORT_RU.md",
+      "bytes": 42219,
+      "sha256": "12a2718143c9b1158adc1f44a093a0d69048b225890eab6866d70e790d379ca4"
+    },
+    {
+      "path": "library/skills/keto-evidence/references/calculation_sources.json",
+      "bytes": 497,
+      "sha256": "c58dc276de4fd0a4f74c99eab7b69191c6450ab2c44f37a672bd2acabf105135"
+    },
+    {
+      "path": "library/skills/keto-evidence/references/evidence_matrix.json",
+      "bytes": 12370,
+      "sha256": "426c3bb766ea0eb1b9b2e9644f1dc2d595a529ccddc5a222676488609b5301f7"
+    },
+    {
+      "path": "library/skills/keto-evidence/references/sources.json",
+      "bytes": 67009,
+      "sha256": "51c30a82cf3f8d4176708f5b086fc34beeac75b1dcf9b02aebebdf4b76ba9294"
+    },
+    {
+      "path": "library/skills/keto-export/SKILL.md",
+      "bytes": 7709,
+      "sha256": "46d7c39cf9e693f837d58d8a2bc4915942aaef44492d8ee7ee1ac67cb7580c2c"
+    },
+    {
+      "path": "library/skills/keto-menu/SKILL.md",
+      "bytes": 5486,
+      "sha256": "5b9492b5e3292d08d035493e4a82e7aa100da5ac3e322699dc97fb328eaa4992"
+    },
+    {
+      "path": "library/skills/keto-menu/data/foods.json",
+      "bytes": 64186,
+      "sha256": "8b881cfbcfb553c5cf84a932e078799c9d0ba53d5a16efda5028fed074ad0fe9"
+    },
+    {
+      "path": "library/skills/keto-menu/data/recipes.json",
+      "bytes": 137525,
+      "sha256": "b876aa1ac0bdc0b6a35c896b3b62de7aac8a852cc2317f586f26f74fb4e049c3"
+    },
+    {
+      "path": "library/skills/keto-menu/data/usda-reference/usda-receipt.json",
+      "bytes": 5811,
+      "sha256": "8a8538e08d5c192bd985973f29dc64ed1861455a4a15aa01b5fb5d59fb945ea9"
+    },
+    {
+      "path": "library/skills/keto-menu/data/usda-reference/usda-ru-search-metadata.json",
+      "bytes": 62133,
+      "sha256": "b56b922580401f8c3db32d05a56b7b5adcd42d1e0776f44363b6637552347574"
+    },
+    {
+      "path": "library/skills/keto-menu/data/usda-reference/usda-sr-legacy-normalized.json.gz",
+      "bytes": 461921,
+      "sha256": "e97cf011bef1f601f7ee30b92dbf050f01bc94e1eda49ee97ff6066d23fca5d0"
+    },
+    {
+      "path": "library/skills/keto-safety/SKILL.md",
+      "bytes": 4937,
+      "sha256": "c34e667d8020d4ff8ff7d518ed6cd6273a3d2d6a9159d3c9dc31529518a0d081"
+    },
+    {
+      "path": "library/skills/keto-safety/references/safety_rules.json",
+      "bytes": 8399,
+      "sha256": "8e7d34d6494702d38e4757c2bf3f868cab46bee584218da3f82fd87c4d120757"
+    },
+    {
+      "path": "library/skills/keto-settings/SKILL.md",
+      "bytes": 4427,
+      "sha256": "8d23269fcd9bac75f9df72323cf28f0029d2c6c47113fa2fef83d2f365584b4d"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 239,
+      "sha256": "21215078ed4be98eebb42f9ec98de019cb1d2b57bb639f74eb687132b57aea40"
+    },
+    {
+      "path": "runtime-fonts/NotoSans-Bold.ttf",
+      "bytes": 575740,
+      "sha256": "c976e4b1b99edc88775377fcc21692ca4bfa46b6d6ca6522bfda505b28ff9d6a"
+    },
+    {
+      "path": "runtime-fonts/NotoSans-Regular.ttf",
+      "bytes": 569208,
+      "sha256": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+    },
+    {
+      "path": "service/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "service/app.py",
+      "bytes": 41277,
+      "sha256": "0cc87143a60232a6d65687796c59a3ca46a51738b89c3d3cf6e7051e93fdd582"
+    },
+    {
+      "path": "service/brain.py",
+      "bytes": 16092,
+      "sha256": "e649f386fc6efe6acf9a235492355d3e304304e7d27183d6387b180efb56ae13"
+    },
+    {
+      "path": "service/chat_actions.py",
+      "bytes": 12208,
+      "sha256": "8c0daa26f07f05fe59f4938f901f9f6b8405ec7232d87072b377db76d2dc64e8"
+    },
+    {
+      "path": "service/confirmation.py",
+      "bytes": 1729,
+      "sha256": "ea6775eee8f28cd28babc741f891db5bd54ac0cc05a6fc9b2cfe06c9e547239d"
+    },
+    {
+      "path": "service/data/kitchen_policy.json",
+      "bytes": 15623,
+      "sha256": "c706197819a0a684866f2b7a7645e3e92ee8a0bad2881e94cb833d6654c7cf2a"
+    },
+    {
+      "path": "service/data/starter_policy_sources.json",
+      "bytes": 2134,
+      "sha256": "8672cbfcde6048c52a7d9126c8a2c1f753635e5b075739f4256c0d9e287d6fb7"
+    },
+    {
+      "path": "service/developer.py",
+      "bytes": 5385,
+      "sha256": "27558c8b633fb85d58709ccb418d97fffffbc9e44aeffa7536873547f9dbc2da"
+    },
+    {
+      "path": "service/domain.py",
+      "bytes": 56333,
+      "sha256": "1aa59ecd371a8c5ccbabff135cf1da4fc703842f3ca675c4a69d1c2d297c0af9"
+    },
+    {
+      "path": "service/edge_bridge.py",
+      "bytes": 9996,
+      "sha256": "344e6d9ca5c3e7ae53637fea87d14e4f710db522978f6d60abd0ffb72eee0bd6"
+    },
+    {
+      "path": "service/entra.py",
+      "bytes": 1833,
+      "sha256": "25a8992109d0503592da5ea532a3c13454f37d6766bd079a82dc15b21cb816f2"
+    },
+    {
+      "path": "service/food_source.py",
+      "bytes": 4624,
+      "sha256": "550ea9025fe907c59eef7ef8108e1d993ac67c2ea1f34680a8f96066b4c2b51e"
+    },
+    {
+      "path": "service/intake.py",
+      "bytes": 10191,
+      "sha256": "bce4dc982dfca3fb57ff594c196b435228de1a3b5b7169141065e4b880e88f83"
+    },
+    {
+      "path": "service/kitchen.py",
+      "bytes": 96370,
+      "sha256": "e0497d82c1deb82b9e46c7fed1bf77e30ee13e94fd8b22ab6340098b8757d3b2"
+    },
+    {
+      "path": "service/label.py",
+      "bytes": 3553,
+      "sha256": "fc9d17dc1192e321d749d55a84854ce47a58562f10665ba182f49f81853c7bf2"
+    },
+    {
+      "path": "service/mobile.py",
+      "bytes": 12998,
+      "sha256": "3b158d14b40528296859341aa380150fe5c5e261b2c0f504859ebb3ba1822451"
+    },
+    {
+      "path": "service/mobile_exports.py",
+      "bytes": 6267,
+      "sha256": "a2a2ec137116bd36f56eb71699612e409fe27574870818ab6486215674c2ddde"
+    },
+    {
+      "path": "service/oauth_bridge.py",
+      "bytes": 10854,
+      "sha256": "1809ce1a1a68ffeae4e16e504e20cf06b05fb9fbc0fb2734f5d81e86d9c79f12"
+    },
+    {
+      "path": "service/planning.py",
+      "bytes": 13326,
+      "sha256": "0d9d4f133fd33e4f1d35ba040b574b59a3c12cf9127c944c7e64966c0a4a258d"
+    },
+    {
+      "path": "service/portion_search.py",
+      "bytes": 5203,
+      "sha256": "389354184095982c545ab261afa2b4a15d28c66befba20bc36e099033a0f8fba"
+    },
+    {
+      "path": "service/recipe_brain.py",
+      "bytes": 5914,
+      "sha256": "ea08723c1b0dbb87490cf3edff7e05b7aa0962ad1ad5a26fb12527210cac6eab"
+    },
+    {
+      "path": "service/speech.py",
+      "bytes": 6616,
+      "sha256": "e8a70184611d7c54dc26b2331bb14fdbaf90343edecae8bcb71f8a8409163b9e"
+    },
+    {
+      "path": "service/static/app.bundle.js",
+      "bytes": 915758,
+      "sha256": "88e40133e7737b257c565bb13c9b09f880e3e23f4cd021e478145eb4dac05d9a"
+    },
+    {
+      "path": "service/static/app.js",
+      "bytes": 33934,
+      "sha256": "a40d1da694fd62d4cd9e1ebc7ef4fc435d0d0c95c02f664b8f1491cc81a75d2e"
+    },
+    {
+      "path": "service/static/index.html",
+      "bytes": 19720,
+      "sha256": "018c16438ed11d805e8649f010e5c6ea18c85fdfe4feaae7b66b323769ccf3c4"
+    },
+    {
+      "path": "service/static/style.css",
+      "bytes": 13566,
+      "sha256": "65765360b0633c90b8b9b9b68ff767a19162fc490c710822e13a116b278676a5"
+    },
+    {
+      "path": "service/store.py",
+      "bytes": 5009,
+      "sha256": "0a236d617f5f417b17a5e3b7616b4972c5e0bc0ae8a07d859467b3f9dec32cf4"
+    }
+  ],
+  "created_at": "2026-11-10T11:42:04.262734+00:00"
+}

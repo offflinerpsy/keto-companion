@@ -3,11 +3,11 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/workspace/scratch/7b30ca21ef3f/keto-companion",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-10T11:41:40.085823+00:00",
+  "updated_at": "2026-11-10T11:53:43.701371+00:00",
   "active_task": {
     "id": "AGR-306-C16-RELEASE",
     "status": "in_progress",
-    "stage": "azure_exact_source_adoption",
+    "stage": "one_bounded_ordinary_retry",
     "source_acceptance": "docs/evidence/AGR_306_C16_SOURCE_ACCEPTANCE.json",
     "base_commit": "b39c40ab17791c8c5ec4af3235edc81a565019f8",
     "protected_baseline": "c490d59cf722b74e9df97b983929cec5196571f36f3bf1c0acf3497136f9b3b1",
@@ -19,7 +19,11 @@
     "previous_native_failure": "86ba3306-509d-46df-94e0-1297ae6a34b6",
     "candidate_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
     "rollout_id": "36519e20-f8cc-44fa-bfb0-9e5306c68963",
-    "native_acceptance": "docs/evidence/AGR_306_C16_NATIVE_ACCEPTANCE.json"
+    "native_acceptance": "docs/evidence/AGR_306_C16_NATIVE_ACCEPTANCE.json",
+    "release_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+    "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+    "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
+    "prior_ordinary_failure": "aa205ca4-dd1e-47f7-97e5-2c43949026f1"
   },
   "last_completed": {
     "id": "AGR-306-C15-UI",
@@ -69,7 +73,15 @@
         "exit_code": 0
       }
     ],
-    "pending_cloud_builds": [],
+    "pending_cloud_builds": [
+      {
+        "uuid": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+        "source_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+        "status": "queued",
+        "created_on": "2026-11-10T11:53:42.563Z",
+        "phase": "same_R_same_image_ordinary_retry"
+      }
+    ],
     "pending_azure_operation": null,
     "temporary_probes": [],
     "active_container_instances": [],
@@ -92,7 +104,8 @@
     "docs/evidence/AGR_306_C14_NATIVE_FAILURE.json",
     "docs/evidence/AGR_306_C14_RUNTIME_CORRECTION.json",
     "docs/evidence/AGR_306_C15_NATIVE_FAILURE.json",
-    "docs/evidence/AGR_306_C16_NATIVE_FAILURE.json"
+    "docs/evidence/AGR_306_C16_NATIVE_FAILURE.json",
+    "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json"
   ],
   "limitations": [
     "C15 has not been accepted on the spouse physical iPhone 17 Pro.",

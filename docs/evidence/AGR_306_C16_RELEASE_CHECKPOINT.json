@@ -1,6 +1,6 @@
 {
   "task": "AGR-306-C16-RELEASE",
-  "status": "runtime_accepted_azure_and_main_pending",
+  "status": "azure_adopted_same_image_ordinary_retry",
   "updated_at": "2026-11-10T11:32:11.402538+00:00",
   "candidate_commit": "9b577ea6013e311fa026f37f2d5b2b7de517765a",
   "pull_request": 22,
@@ -21,8 +21,12 @@
     "Only accepted exact image can update approved-runtime pin",
     "Azure ZIP uses committed Git bytes plus exactly two hash-checked fonts"
   ],
-  "next_stage": "exact Azure ZIP and ordinary main Worker promotion",
+  "next_stage": "Observe exact recorded ordinary retry; no additional image build",
   "prior_failure": "86ba3306-509d-46df-94e0-1297ae6a34b6",
   "native_acceptance": "docs/evidence/AGR_306_C16_NATIVE_ACCEPTANCE.json",
-  "accepted_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e"
+  "accepted_image": "sha256:a9bc422174410dac9039dba161d92f28c822c6bd18071227da1652b09dad2c8e",
+  "release_commit": "c2b5d20a1a1aabcf6bf25d43c7e37f39f614e504",
+  "azure_deployment": "2105b20e-e45a-4c33-bfbc-7316f167976a",
+  "ordinary_build": "a36d9b46-03e9-4fe5-88d9-962917459fb1",
+  "prior_ordinary_failure": "docs/evidence/AGR_306_C16_ORDINARY_FAILURE.json"
 }
