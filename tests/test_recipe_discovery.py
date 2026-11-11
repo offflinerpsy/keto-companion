@@ -90,3 +90,69 @@ def test_import_ingredient_russian_reference_names_match_actual_foods():
  for query,expected in [('капуста пекинская','USDA169979'),('лук зеленый','USDA170005'),('сок лимонный','USDA167747')]:
   rows=food_source.search(query,None,20)['candidates'];assert expected in {r['candidate_id'] for r in rows}
  olives=food_source.search('оливки',None,8)['candidates'];assert olives[0]['name_en'].startswith('Olives,')
+
+def test_safe_diagnostic_classifies_attempted_timeout_without_exception_text():
+ import httpx
+ def timeout(payload):raise httpx.ReadTimeout('private provider response/query/credential must never be retained')
+ with pytest.raises(RecipeUnavailable) as caught:RecipeDiscovery(timeout).discover('сыр')
+ audit=caught.value.audit
+ assert audit['status']=='failed' and audit['attempted'] is True and audit['stage']=='provider_request'
+ assert audit['error_code']=='DISCOVERY_READ_TIMEOUT' and audit['http_status'] is None and audit['latency_ms']>=0
+ assert audit['usage_known'] is False and audit['web_search_requests'] is None
+ assert 'private provider' not in json.dumps(audit)
+
+@pytest.mark.parametrize('kind,stage,code',[('incomplete','provider_status','DISCOVERY_PROVIDER_INCOMPLETE'),('json','recipe_json','DISCOVERY_RECIPE_JSON_INVALID'),('schema','recipe_schema','DISCOVERY_SCHEMA_INVALID'),('grounding','search_grounding','DISCOVERY_SEARCH_UNVERIFIED'),('source','recipe_sources','DISCOVERY_SOURCE_UNGROUNDED')])
+def test_diagnostic_preserves_known_usage_and_precise_validation_stage(kind,stage,code):
+ value=response()
+ if kind=='incomplete':value.update(status='incomplete',incomplete_details={'reason':'max_output_tokens'})
+ if kind=='json':value['output'][1]['content'][0]['text']='not JSON'
+ if kind=='schema':value['output'][1]['content'][0]['text']='{"recipes":[{"invented":"private"}]}'
+ if kind=='grounding':value['output'].pop(0)
+ if kind=='source':value['output'][0]['action']['sources']=[]
+ with pytest.raises(RecipeUnavailable) as caught:RecipeDiscovery(lambda payload:value).discover('сыр')
+ audit=caught.value.audit;assert audit['stage']==stage and audit['error_code']==code and audit['status']=='failed'
+ assert audit['usage_known'] is True and audit['input_tokens']==10 and audit['output_tokens']==20 and audit['web_search_requests']==1
+ if kind=='incomplete':assert audit['provider_incomplete_reason']=='max_output_tokens'
+ assert 'invented' not in json.dumps(audit) and 'private' not in json.dumps(audit)
+
+def test_http_provider_status_is_retained_without_reading_body(monkeypatch):
+ from types import SimpleNamespace
+ import service.recipe_discovery as module
+ class Response:
+  status_code=429
+  def __enter__(self):return self
+  def __exit__(self,*args):pass
+  def iter_bytes(self):raise AssertionError('Error response body must not be read')
+ class Client:
+  def __init__(self,**kwargs):pass
+  def __enter__(self):return self
+  def __exit__(self,*args):pass
+  def stream(self,*args,**kwargs):return Response()
+ monkeypatch.setenv('AZURE_OPENAI_ENDPOINT','https://offflinerpsy-4097-resource.openai.azure.com');monkeypatch.setattr(module.httpx,'Client',Client)
+ with pytest.raises(RecipeUnavailable) as caught:RecipeDiscovery(credential=SimpleNamespace(get_token=lambda *args:SimpleNamespace(token='synthetic'))).discover('сыр')
+ assert caught.value.audit['http_status']==429 and caught.value.audit['error_code']=='DISCOVERY_PROVIDER_HTTP' and caught.value.audit['status']=='failed'
+
+def test_failed_discovery_diagnostic_remains_available_on_normal_read(tmp_path):
+ import httpx
+ s=Service(SQLiteStore(tmp_path/'diagnostic.db'),FakeBrain());consent(s)
+ def timeout(payload):raise httpx.ReadTimeout('never persist this string')
+ s.recipe_discovery=RecipeDiscovery(timeout);rev=s.opened('synthetic-one')['state']['revision']
+ result=s.kitchen('synthetic-one','discover',query='сыр',request_id='discovery_diagnostic_001',expected_revision=rev)
+ assert result['discovery_error_code']=='DISCOVERY_READ_TIMEOUT' and result['model_called'] is True
+ diagnostic=s.opened('synthetic-one')['state']['kitchen']['discovery']['diagnostic']
+ assert diagnostic['error_code']=='DISCOVERY_READ_TIMEOUT' and diagnostic['stage']=='provider_request' and diagnostic['status']=='failed'
+ assert 'never persist' not in json.dumps(diagnostic)
+
+def test_content_filter_is_terminal_precise_and_persists_without_retry(tmp_path):
+ s=Service(SQLiteStore(tmp_path/'filtered.db'),FakeBrain());consent(s);calls=[]
+ def filtered(payload):
+  calls.append(payload);return {'status':'incomplete','incomplete_details':{'reason':'content_filter'},'usage':{'input_tokens':4755,'output_tokens':60},'tool_usage':{'web_search':{'num_requests':3}}}
+ s.recipe_discovery=RecipeDiscovery(filtered);revision=s.opened('synthetic-one')['state']['revision']
+ result=s.kitchen('synthetic-one','discover',query='сыр',request_id='discovery_content_filter_001',expected_revision=revision)
+ assert result['discovery_failed'] and result['discovery_error_code']=='DISCOVERY_CONTENT_FILTER'
+ assert 'остановлен фильтром сервиса' in result['message'] and 'Запрос не повторялся' in result['message']
+ audit=result['model_roles'][0];assert audit['provider_incomplete_reason']=='content_filter' and audit['status']=='failed' and audit['usage_known'] is True
+ assert audit['input_tokens']==4755 and audit['output_tokens']==60 and audit['web_search_requests']==3
+ assert s.opened('synthetic-one')['state']['kitchen']['discovery']['diagnostic']==audit
+ with pytest.raises(Conflict):s.kitchen('synthetic-one','discover',query='сыр',request_id='discovery_content_filter_001',expected_revision=revision)
+ assert len(calls)==1 and s.load('synthetic-one')[0]['usage']['calls']==1

@@ -1,0 +1,68 @@
+{
+  "issue": "AGR-306",
+  "increment": "C25",
+  "stage": "hosted_regional_pass_recipe_discovery_failed",
+  "observed_at": "2026-11-11T15:30:57.032114+00:00",
+  "deployed_source": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+  "viewport_css": {
+    "width": 402,
+    "height": 873
+  },
+  "surface": "native background Chrome PERSONAL Offliner extensiona1f97a64;ownedtab1973326817",
+  "online": {
+    "query": "сыр",
+    "request_id": "f014bdcdebbf41d4acdc7fa0b303dc9e",
+    "expected_revision": 8,
+    "started_at": "2026-11-11T15:23:03.572Z",
+    "server_finished_at": "2026-11-11T15:23:53Z",
+    "ui_terminal_observed_at": "2026-11-11T15:23:58.261Z",
+    "job_status": "completed",
+    "discovery_status": "failed",
+    "discovery_failed": true,
+    "attempted": true,
+    "model_called": true,
+    "model_roles_status": "not_called;inaccurate on exception,not proof of no attempt",
+    "cause": "not retained by adapter;cannot retrospectively establish timeout",
+    "repeated": false,
+    "live_success": false
+  },
+  "regional": {
+    "origin": "normal own-dish ingredient picker",
+    "query": "Савушкин",
+    "wide": false,
+    "rendered_hits": 9,
+    "examples": [
+      "Творог классический 9% · Савушкин · Россия",
+      "Йогурт TEOS 2% · Савушкин · Беларусь · Россия"
+    ],
+    "canonical_barcode": "4810268031793",
+    "canonical_name": "Греческий йогурт Натуральный 2%",
+    "canonical_nutrients_from_OFF": {
+      "kcal": 66.8,
+      "protein_g": 8,
+      "fat_g": 2,
+      "carbohydrate_g": 4.2
+    },
+    "basis": "unconfirmed;review required",
+    "source": "https://world.openfoodfacts.org/product/4810268031793",
+    "allergens": "milk;possible gluten/nut traces,actual source text retained",
+    "saved": false,
+    "cancel_preserved_query": true,
+    "passed": true
+  },
+  "screenshots": [
+    "docs/evidence/AGR_306_C25_LIVE_REGIONAL.png",
+    "docs/evidence/AGR_306_C25_LIVE_REGIONAL_REVIEW.png"
+  ],
+  "cleanup": {
+    "tab1973326817": "closed,absence independently verified",
+    "viewport": "reset",
+    "CUA": "completion summary and kernel reset acknowledged"
+  },
+  "limits": [
+    "Not physical iPhone acceptance",
+    "No family diary/profile/product test saves",
+    "Online discovery remains open failure;source/cloud gates alone do not establish functionality"
+  ],
+  "next_action": "Diagnose one fresh publicquery with safe per-stage telemetry;fix proven cause then exact release and hosted acceptance."
+}

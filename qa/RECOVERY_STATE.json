@@ -3,16 +3,17 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-11T14:28:36.099023+00:00",
+  "updated_at": "2026-11-11T15:30:57.032114+00:00",
   "active_task": {
     "id": "AGR-306-C25-ONLINE-RECIPES",
     "status": "in_progress",
-    "stage": "source_and_mobile_accepted_release_pending",
+    "stage": "cloud_released_hosted_recipe_failure_diagnosis",
     "writer": "root",
     "scope": "Actual sourced external recipe discovery→review→calculation→personal save/intake; regional package search from normal picker and available-carb propagation",
     "actual_capability": "Same Azure Sol/high web_search probe completed23.058s with search/open_page/citations; no new provider/account",
     "source_receipt": "docs/evidence/AGR_306_C25_SOURCE_ACCEPTANCE.json",
-    "ui_receipt": "docs/evidence/AGR_306_C25_UI_ACCEPTANCE.json"
+    "ui_receipt": "docs/evidence/AGR_306_C25_UI_ACCEPTANCE.json",
+    "hosted_evidence": "docs/evidence/AGR_306_C25_LIVE_UI.json"
   },
   "last_completed": {
     "id": "AGR-306-C24-RELEASE",
@@ -48,7 +49,7 @@
   },
   "next_task": {
     "id": "AGR-306-C25-RELEASE",
-    "action": "Freeze source, native actual-runtime acceptance, exact Azure ZIP/digest adoption, then ordinary Worker promotion and hosted online search."
+    "action": "Diagnose retained failure safely;fix proved cause, then exact release and hosted real query acceptance. No blind retry."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
