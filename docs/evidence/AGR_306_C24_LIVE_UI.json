@@ -1,0 +1,46 @@
+{
+  "schema": "keto-live-ui-acceptance-v1",
+  "issue": "AGR-306",
+  "increment": "C24",
+  "observed_at": "2026-11-11T12:36:24.315849+00:00",
+  "origin": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "deployed_source": "cd3d6463f109a531b752472f0153e3abc5fe94e2",
+  "client_revision": "0.7.1-C24",
+  "browser": "native Chrome PERSONAL Offliner existing active administrator session",
+  "viewport_css": {
+    "width": 402,
+    "height": 874
+  },
+  "report": {
+    "number": "KETO-1",
+    "description_marker": "Техническая проверка C24 · 11.11.2026",
+    "delivery": "independently_verified",
+    "final_status": "closed",
+    "canonical_issue": "https://linear.app/agregator/issue/AGR-306",
+    "scope": "one explicitly technical QA report; no diary/profile/consent writes"
+  },
+  "passed": [
+    "new button visible on actual hosted app",
+    "plain Russian reviewed block/description/context/version",
+    "one submission received KETO-1",
+    "admin ready_to_verify with fix version/evidence/Linear link",
+    "own reporter closure",
+    "closed report persisted after reload and normal authenticated fetch",
+    "no horizontal overflow"
+  ],
+  "screenshots": [
+    "docs/evidence/AGR_306_C24_LIVE_PREVIEW.png",
+    "docs/evidence/AGR_306_C24_LIVE_CLOSED_REPORT.png"
+  ],
+  "cleanup": {
+    "tab": "1973326807 closed and absence verified",
+    "viewport": "reset",
+    "CUA": "completion summary and kernel reset acknowledged",
+    "servers": "none"
+  },
+  "limitations": [
+    "Physical iPhone keyboard dictation not tested",
+    "Screenshot capture and automatic Linear creation intentionally absent",
+    "Intermittent prior cooking/search delay root cause not established by this report feature"
+  ]
+}

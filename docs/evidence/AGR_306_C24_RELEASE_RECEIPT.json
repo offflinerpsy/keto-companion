@@ -1,7 +1,7 @@
 {
   "schema": "keto-c24-release-receipt-v1",
   "task": "AGR-306-C24",
-  "status": "completed_cloud_release_live_ui_pending",
+  "status": "completed_cloud_and_live_ui",
   "recorded_at": "2026-11-11T12:30:05.539Z",
   "source_candidate": "7bcbb19048b4d41d0f64587df7d3613f7b9b776a",
   "deployed_frontend_commit": "cd3d6463f109a531b752472f0153e3abc5fe94e2",
@@ -53,8 +53,19 @@
   },
   "failure_resolution": "Initial ordinary source+ops passed but container RPC returned502 before stages. Exact previous job/probe reconciled terminal; unchanged pinned image subsequently passed isolated acceptance and one coordinator-authorized ordinary retry. Underlying suppressed RPC exception remains unknown.",
   "limitations": [
-    "Root owns final authenticated live UI/report lifecycle smoke and its receipt.",
     "Physical iPhone dictation and actual user acceptance remain separate.",
     "Azure backend remains accepted C19 identity; no new Azure live verification or deployment in C24."
-  ]
+  ],
+  "live_ui": "docs/evidence/AGR_306_C24_LIVE_UI.json",
+  "live_bug_report_test_by_root": {
+    "number": "KETO-1",
+    "status": "closed",
+    "after_reload_verified": true
+  },
+  "github_actions": {
+    "run": 43021108501,
+    "status": "not_started_billing_account_lock",
+    "passing_claim": false,
+    "acceptance": "existing Cloudflare full gates and real runtime passed"
+  }
 }
