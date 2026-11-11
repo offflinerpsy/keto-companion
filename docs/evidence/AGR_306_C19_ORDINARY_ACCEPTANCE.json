@@ -1,0 +1,38 @@
+{
+  "schema": "keto-c19-ordinary-acceptance-v1",
+  "status": "passed",
+  "recorded_at": "2026-11-11T08:02:23.555814+00:00",
+  "build": {
+    "id": "4f22f49d-b54c-4df6-abef-15deb9c6f31d",
+    "status": "stopped",
+    "outcome": "success",
+    "commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "stopped": "2026-11-11T07:49:17.875Z",
+    "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+    "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+  },
+  "source_gate": {
+    "passed": true,
+    "stages": 16,
+    "seconds": 146.86,
+    "ops_tests": 12
+  },
+  "runtime": {
+    "baseline": "612ca0d65e8940979a917578d1e29f937afc9c74471b65b850755ff15127f8ef",
+    "image_digest": "sha256:936aeff225a6f661c2cd87fbfdc84100c059532eac8b661e9937cc837c625db7",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "deployment": {
+    "worker": "keto-companion-saas-staging",
+    "account": "0609100baf768271ea2811c9a9ee2b16",
+    "commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "version_id": "8e27cf3e-6698-4511-8258-c5cadbf236f2",
+    "deployment_id": "fd3ed2ae-b841-473b-a930-cbbfa405fa52",
+    "traffic_percent": 100
+  }
+}

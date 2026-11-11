@@ -1,11 +1,11 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-10T16:49:29.981Z",
+  "updated_at": "2026-11-11T08:02:23.555814+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": null,
-  "last_completed": "AGR-306-C18: auth repair released; fresh real desktop Google login, server admin access and reload verified.",
+  "last_completed": "AGR-306-C19/C20: full code/logic/performance optimization, UI/UX & contextual Russian micro-guides upgrade, D1 0009 indexes, Azure compute & Cloudflare staging deployed and verified.",
   "next_task": {
     "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
     "status": "awaiting_device_observation"
@@ -15,39 +15,40 @@
     "compute_connected": true,
     "google_real_user_login_verified": true,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "577432672abbcde12c400ea5de4462aa97cf6166",
-    "http_checks_passed": 15,
+    "source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "http_checks_passed": 16,
     "synthetic_e2e_checks": 14,
     "synthetic_cleanup_verified": true,
     "mobile_deployed": true,
-    "mobile_backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
+    "mobile_backend_source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "backend_source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
     "kitchen_deployed": true,
     "audit_fixes_deployed": true,
-    "family_release_acceptance": "C18 technical auth release and real desktop owner login accepted; physical iPhone pending.",
+    "family_release_acceptance": "C19/C20 full technical, backend, Worker/D1 and UI/UX staging release verified; physical iPhone 17 Pro observation pending.",
     "developer_preview_runner_connected": true,
-    "design_applied": "C16 mobile forms/diary/confirmed memory/Animate UI preserved; C17 shared readable product picker, stable focus, visible wide reference and search result reveal.",
+    "design_applied": "C19/C20 calm iOS-familiar hierarchy, translucent bars with reduced-transparency fallback, tabular-nums, and contextual Russian micro-guides (.ux-hint, .ux-callout, .ux-guide) across all screens.",
     "google_real_user_login_evidence": "docs/evidence/AGR_306_C18_REAL_LOGIN.json",
-    "worker_version_id": "397db31a-255f-408c-b2e1-9fb61fe2fec1",
+    "worker_version_id": "8e27cf3e-6698-4511-8258-c5cadbf236f2",
     "current_C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
     "synthetic_e2e_scope": "14 C17 browser scenarios (7 per engine) on real local HTTP/SQLite, separate from retained C16 evidence; not a new signed family transaction.",
     "current_C14_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
     "current_C15_receipt": "docs/evidence/AGR_306_C15_RELEASE_RECEIPT.json",
     "current_C16_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
     "current_C17_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
-    "current_C18_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json"
+    "current_C18_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json",
+    "current_C19_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json"
   },
   "production": {
     "saas_deployed": false,
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 655,
+    "python_tests": 663,
     "python_subtests": 6,
-    "node_synthetic_tests": 296,
-    "python_skipped": 0,
-    "browser_scenarios": 38,
-    "browser_unique_scenarios": 19,
+    "node_synthetic_tests": 302,
+    "python_skipped": 1,
+    "browser_scenarios": 91,
+    "browser_unique_scenarios": 54,
     "browser_engines": [
       "Chromium",
       "WebKit"
@@ -56,12 +57,12 @@
     "full_source_stages": 16,
     "actual_runtime_product_tests": 14,
     "actual_runtime_python_tests": 17,
-    "current_live_http_checks": 15,
+    "current_live_http_checks": 16,
     "served_asset_hashes": 6,
     "specification_links_checked": 879,
-    "Cloudflare_full_gate": "C18_exact_release_commit_passed",
+    "Cloudflare_full_gate": "C19_exact_release_commit_passed",
     "actual_cloud_compatibility_date": "2026-11-07",
-    "current_final_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json",
+    "current_final_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json",
     "c18_source": "docs/evidence/AGR_306_C18_SOURCE_ACCEPTANCE.json",
     "c18_browser_scenarios": 38,
     "c18_node": 296
@@ -162,7 +163,7 @@
     "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
   },
   "release_blocker_legacy": "Historical connection blocker resolved for release. Azure and main Cloudflare C14 publication completed and verified.",
-  "current_release_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
+  "current_release_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json",
   "google_login_repair": {
     "status": "completed_private_staging; owner_iPhone_confirmed",
     "receipt": "docs/evidence/GOOGLE_LOGIN_RECOVERY_RECEIPT.json",
@@ -177,7 +178,11 @@
     "task": "AGR-306",
     "stage": "C18_auth_blocker_in_progress",
     "deployed_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "previous_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
+    "previous_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
+    "id": "AGR-306-C19-C20-RELEASE",
+    "status": "completed",
+    "source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json"
   },
   "historical_C15_evidence": {
     "python_tests": 627,
