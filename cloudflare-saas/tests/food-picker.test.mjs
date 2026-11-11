@@ -82,3 +82,11 @@ test('untrusted names stay text and an already-imported reference uses its curre
  const f=fixture(args=>args.action==='foods'?{foods:args.query==='Uowner123'?[personal]:[]}:{total:1,candidates:[{...candidate,name_ru_unofficial:name,already_imported:true,personal_food_id:'Uowner123'}],next_cursor:null});
  f.input.value='сыр';await f.picker.search();await openSource(f);assert(!all(f.root).some(n=>n.tag==='img'));await find(f.root,name+' · Уже сохранён · выбрать').onclick();assert.deepEqual(f.selected,[personal]);assert(!f.calls.some(x=>x.action==='source_import'));
 });
+
+test('C25 regional return selects only its live originating query and survives ordinary local review',async()=>{
+ const root=el('div'),input=el('input'),selected=[];let target,screen=1;
+ const picker=createFoodPicker({root,input,el,call:async()=>({foods:[]}),getState:()=>({revision:1}),accept(){},run:fn=>fn(),epoch:()=>screen,foodState:x=>x,onSelect:f=>selected.push(f),openRegional:x=>{target=x}});
+ input.value='Савушкин';await picker.search();await find(root,'Искать упаковку в России и Беларуси').onclick();assert.equal(target.query,'Савушкин');target.origin.select(cheese);assert.deepEqual(selected,[cheese]);
+ input.value='Простоквашино';await picker.search();await find(root,'Искать упаковку в России и Беларуси').onclick();input.value='другой продукт';target.origin.select(fish);assert.equal(selected.length,1);
+ input.value='Савушкин';await picker.search();await find(root,'Искать упаковку в России и Беларуси').onclick();screen++;picker.reset();target.origin.select(fish);assert.equal(selected.length,1);
+});

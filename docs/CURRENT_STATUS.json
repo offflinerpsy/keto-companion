@@ -1,34 +1,40 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-11T10:45:06.322556+00:00",
+  "updated_at": "2026-11-11T22:19:45.949809+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
-  "active_task": null,
-  "last_completed": "AGR-306-C21/C22: loading recovery and concrete mobile own-dish/search corrections deployed and checked in live mobile viewport.",
+  "active_task": {
+    "id": "AGR-306-C26-BARCODE-LABEL",
+    "status": "in_progress",
+    "stage": "source_and_mobile_accepted_release_pending",
+    "source_receipt": "docs/evidence/AGR_306_C26_SOURCE_ACCEPTANCE.json",
+    "next_action": "Freeze exact source and run existing native acceptance then pinned ordinary release; no new recovery hook."
+  },
+  "last_completed": "C24 contextual bug reports released;C25 regional picker/search/review accepted on actual hosted402x873;online recipe discovery remains unaccepted after real failures.",
   "next_task": {
-    "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
-    "status": "owner_reload_and_observation_pending"
+    "id": "AGR-306-C25",
+    "status": "same_task_open_for_service_filter_diagnosis_and_actual_online_acceptance"
   },
   "staging": {
     "deployed": true,
     "compute_connected": true,
     "google_real_user_login_verified": true,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "9afff2a2f3abf778121e3ab833c0a4dd15543d75",
+    "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
     "http_checks_passed": 16,
     "synthetic_e2e_checks": 14,
     "synthetic_cleanup_verified": true,
     "mobile_deployed": true,
-    "mobile_backend_source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
-    "backend_source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "mobile_backend_source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "backend_source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
     "kitchen_deployed": true,
     "audit_fixes_deployed": true,
     "family_release_acceptance": "C19/C20 full technical, backend, Worker/D1 and UI/UX staging release verified; physical iPhone 17 Pro observation pending.",
     "developer_preview_runner_connected": true,
     "design_applied": "C19/C20 calm iOS-familiar hierarchy, translucent bars with reduced-transparency fallback, tabular-nums, and contextual Russian micro-guides (.ux-hint, .ux-callout, .ux-guide) across all screens.",
     "google_real_user_login_evidence": "docs/evidence/AGR_306_C18_REAL_LOGIN.json",
-    "worker_version_id": "a1a493ac-e036-46cf-bc37-63e4d1be3e64",
+    "worker_version_id": "840eea4c-d131-44e3-8d00-00ed51d84350",
     "current_C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
     "synthetic_e2e_scope": "14 C17 browser scenarios (7 per engine) on real local HTTP/SQLite, separate from retained C16 evidence; not a new signed family transaction.",
     "current_C14_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
@@ -37,16 +43,19 @@
     "current_C17_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
     "current_C18_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json",
     "current_C19_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json",
-    "current_C22_receipt": "docs/evidence/AGR_306_C22_RELEASE_RECEIPT.json"
+    "current_C22_receipt": "docs/evidence/AGR_306_C22_RELEASE_RECEIPT.json",
+    "current_C24_receipt": "docs/evidence/AGR_306_C24_RELEASE_RECEIPT.json",
+    "current_C25_receipt": "docs/evidence/AGR_306_C25_RELEASE_RECEIPT.json",
+    "current_C25_followup_receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json"
   },
   "production": {
     "saas_deployed": false,
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 664,
+    "python_tests": 682,
     "python_subtests": 6,
-    "node_synthetic_tests": 309,
+    "node_synthetic_tests": 325,
     "python_skipped": 1,
     "browser_scenarios": 91,
     "browser_unique_scenarios": 54,
@@ -63,12 +72,14 @@
     "specification_links_checked": 879,
     "Cloudflare_full_gate": "C19_exact_release_commit_passed",
     "actual_cloud_compatibility_date": "2026-11-07",
-    "current_final_receipt": "docs/evidence/AGR_306_C22_RELEASE_RECEIPT.json",
+    "current_final_receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json",
     "c18_source": "docs/evidence/AGR_306_C18_SOURCE_ACCEPTANCE.json",
     "c18_browser_scenarios": 38,
     "c18_node": 296,
-    "current_live_ui_receipt": "docs/evidence/AGR_306_C22_LIVE_UI.json",
-    "C19_historical_http_receipt": "docs/evidence/AGR_306_C19_LIVE_HTTP.json"
+    "current_live_ui_receipt": "docs/evidence/AGR_306_C25_LIVE_UI.json",
+    "C19_historical_http_receipt": "docs/evidence/AGR_306_C19_LIVE_HTTP.json",
+    "followup_main_promotion": "not_completed;readinessGET500/POSTnotdelivered;recoverysetupAPI400;privateactivepinsrestored",
+    "source_scope": "New diagnostic source passed full gates;private runner restored prior accepted image for main compatibility;no new live search success"
   },
   "not_verified": [
     "The physical iPhone17Pro Chrome failure was not reproduced; real Google login was verified in connected desktop Chrome and synthetic mobile cases in Chromium/WebKit.",
@@ -91,7 +102,7 @@
     "release_pull_request": 4,
     "release_merge_commit": "4661687931e263a9fd002239a4ec473aaaa8356e",
     "next_acceptance_issue": 10,
-    "current_canonical_branch": "codex/c21-loading-repair",
+    "current_canonical_branch": "codex/c25-online-recipes",
     "mobile_release_pr": 7,
     "mobile_merge_commit": "b92f1bfd58b93785c115874be923bbeec0a3b3dd",
     "onboarding_pr": 9,
@@ -102,11 +113,11 @@
     "active_release_pr": null,
     "developer_media_release_pr": 17,
     "developer_media_merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
-    "current_release_pr": 26,
-    "current_release_pr_url": "https://github.com/offflinerpsy/keto-companion/pull/26",
-    "deployed_source_commit": "9afff2a2f3abf778121e3ab833c0a4dd15543d75"
+    "current_release_pr": 28,
+    "current_release_pr_url": "https://github.com/offflinerpsy/keto-companion/pull/28",
+    "deployed_source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3"
   },
-  "mobile_acceptance": "C22 root actual live Chrome402x874: correct14px side padding, clear labels, cheese search1982ms for one sample, selected cheddar focuses blank grams; physical iPhone remains separate.",
+  "mobile_acceptance": "Root nativebackgroundChrome402x873:normalpicker Савушкин→9OFFRU/BYhits→canonicalTEOSbarcode4810268031793review→cancel;no savedtesthealthdata. Onlineсырfailed at50s;separate onepublicdiagnosticHTTP200/incomplete/content_filter. PhysicaliPhone acceptance separate.",
   "mobile_source": {
     "task": "KETO-MOBILE-006",
     "status": "completed_locally",
@@ -117,7 +128,7 @@
     "real_device_audio_tested": false,
     "cloud_changes": false
   },
-  "mobile_stage": "C22_deployed_live_mobile_browser_verified_physical_iPhone_pending",
+  "mobile_stage": "C25_regional_hosted_verified_recipe_online_not_accepted",
   "mobile_receipt": "docs/evidence/MOBILE_RELEASE_RECEIPT.json",
   "owner_feedback": {
     "dictation": "user confirms works",
@@ -166,7 +177,7 @@
     "next_action": "Parent: run network-none image acceptance for the final reviewed snapshot, then reconcile the same baseline/image digest in native Cloudflare before the separate release."
   },
   "release_blocker_legacy": "Historical connection blocker resolved for release. Azure and main Cloudflare C14 publication completed and verified.",
-  "current_release_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json",
+  "current_release_receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json",
   "google_login_repair": {
     "status": "completed_private_staging; owner_iPhone_confirmed",
     "receipt": "docs/evidence/GOOGLE_LOGIN_RECOVERY_RECEIPT.json",
@@ -178,14 +189,20 @@
     "current_status": "C18 user-reported fresh login regression; historical owner confirmation is not current validation."
   },
   "current_delivery": {
-    "task": "AGR-306",
-    "stage": "C18_auth_blocker_in_progress",
-    "deployed_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "previous_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
-    "id": "AGR-306-C19-C20-RELEASE",
-    "status": "completed",
-    "source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
-    "receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json"
+    "id": "AGR-306-C25",
+    "status": "PARTIAL:regional_and_backend_handling_live;online_query_unaccepted;main_priorC25;private_active_pins_restored_compatible",
+    "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "receipt": "docs/evidence/AGR_306_C25_RELEASE_RECEIPT.json",
+    "live_ui": "docs/evidence/AGR_306_C25_LIVE_UI.json",
+    "failure_diagnosis": "docs/evidence/AGR_306_C25_DISCOVERY_FAILURE.json",
+    "followup_backend_source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "followup_backend_adoption": "docs/evidence/AGR_306_C25_FOLLOWUP_AZURE_ADOPTION_NATIVE_UI.json",
+    "followup_promotion_failure": "docs/evidence/AGR_306_C25_FOLLOWUP_ORDINARY_FAILURE_1.json",
+    "followup_main_promoted": false,
+    "private_runtime_baseline": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+    "private_runtime_image": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
+    "private_app_version": 23,
+    "service_case": "docs/evidence/AGR_306_C25_AZURE_SEARCH_CASE.md"
   },
   "historical_C15_evidence": {
     "python_tests": 627,
@@ -312,5 +329,22 @@
     "physical_iPhone_acceptance": "iPhone 17 Pro (not Max): pending; synthetic WebKit/Chromium evidence is separate.",
     "next_action": "Owner refreshes the existing signed-in app on iPhone 17 Pro, checks сыр -> deliberate selection -> 75 g -> confirm -> visible diary/total, and яйцо in recipes.",
     "final_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json"
+  },
+  "online_discovery": {
+    "implemented": true,
+    "hosted_generic_query_accepted": false,
+    "current_service_limitation": "A fresh publicqueryсыр returned incomplete/content_filter;originalhostedfailurecause UNKNOWN;no retry or bypass.",
+    "precise_failurehandling_source": "e858f86",
+    "precise_failurehandling_released": true,
+    "region_hosted_accepted": true,
+    "precise_failurehandling_backend_released": true,
+    "main_worker_followup_promoted": false
+  },
+  "previous_c25_partial": {
+    "id": "AGR-306-C25-ONLINE-RECIPES",
+    "status": "in_progress",
+    "stage": "regional_accepted;backend_error_handling_live;online_search_acceptance_open",
+    "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "exact_next_action": "Obtain service-side diagnosis for the prepared Azure content_filter case without replaying the refused request or weakening policy. No automatic jobs pending."
   }
 }

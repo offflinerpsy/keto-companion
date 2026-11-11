@@ -1,0 +1,47 @@
+{
+  "schema": "keto-c25-followup-recovery-setup-failure-v1",
+  "status": "blocked_before_build",
+  "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+  "expected_baseline": "4a0656df54cb4abba3dc64d317eabc51c943a763b833583aa9dab285b408d3a1",
+  "expected_image_digest": "sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5",
+  "readback_hook_sha256": "0e706a63eb7c0c28c5cc0e0cf307508afceec30c9b01db94d5d818f64fb36dde",
+  "attempts": [
+    {
+      "operation": "install_isolated_commands",
+      "delivery": "not_delivered",
+      "result": "HTTP400 code12002 Invalid request body; independent readback confirms original ordinary commands unchanged",
+      "build_command_length": 205,
+      "deploy_command_length": 3167
+    },
+    {
+      "operation": "install_isolated_commands_compact_deploy",
+      "delivery": "not_delivered",
+      "result": "HTTP400 code12002 Invalid request body; final independent readback confirms original ordinary controls unchanged",
+      "build_command_length": 1694,
+      "deploy_command_length": 335
+    }
+  ],
+  "final_readback": {
+    "at": "2026-11-11T16:15:11.243Z",
+    "commands": {
+      "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+      "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+    },
+    "build_count": 71,
+    "active_builds": [],
+    "pagination": {
+      "next_page": false,
+      "page": 1,
+      "per_page": 200,
+      "count": 71,
+      "total_count": 71,
+      "total_pages": 1
+    }
+  },
+  "isolated_build_started": false,
+  "acceptance_post_started": false,
+  "ordinary_retry_started": false,
+  "mutable_effects_delivered": false,
+  "limitation": "Both inline hook command forms were rejected by Cloudflare trigger PATCH argument validation (400/12002). Existing committed acceptance helper does not expose the additional metadata-readback hook. No exact supported way to supply that code for unchanged commit48ac620 was established; no third attempt or weaker guard used.",
+  "next_action": "Coordinator chooses a supported way to supply required ephemeral readback code; no third setup attempt or ordinary retry by worker."
+}

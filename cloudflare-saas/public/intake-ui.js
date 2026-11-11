@@ -1,7 +1,7 @@
 // One editor and one server-reviewed confirmation for all consumed-food sources.
 import {nutritionOverview,diaryNavigation,validDiaryDay} from './diary-model.js';
 const MEALS={breakfast:'Завтрак',lunch:'Обед',dinner:'Ужин',snack:'Перекус'};
-const NUTRIENTS=[['energy_kcal','Энергия','ккал'],['protein_g','Белки','г'],['fat_g','Жиры','г'],['carbohydrate_total_g','Общие углеводы','г'],['fiber_g','Клетчатка','г']];
+const NUTRIENTS=[['energy_kcal','Энергия','ккал'],['protein_g','Белки','г'],['fat_g','Жиры','г'],['carbohydrate_total_g','Общие углеводы','г'],['fiber_g','Клетчатка','г'],['available_carbohydrate_g','Доступные углеводы','г']];
 const number=(n,digits=1)=>n==null?'нет данных':new Intl.NumberFormat('ru-RU',{maximumFractionDigits:digits}).format(n);
 function savedCheck(el){const mark=el('span','saved-check');mark.setAttribute('aria-hidden','true');mark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path pathLength="1" d="m4 12 5 5L20 6"/></svg>';return mark}
 export function profileClock(zone,now=new Date()){
@@ -16,7 +16,7 @@ function entryClock(entry){if(entry?.time)return entry.time;return entry?.eaten_
 export function nutritionNodes(el,calculation){
  const grid=el('dl','intake-nutrients'),nutrition=calculation?.nutrition||{},coverage=calculation?.coverage||{};
  for(const [key,label,unit] of NUTRIENTS){const value=nutrition[key],known=coverage[key]?.known_subtotal;grid.append(el('dt','',label),el('dd','',(value==null||coverage[key]?.complete===false)?(known==null||known===0?'нет данных · неполные данные':`учтено ${number(known,key==='energy_kcal'?0:1)} ${unit} · неполные данные`):`${number(value,key==='energy_kcal'?0:1)} ${unit}`))}
- if(calculation?.available_carbohydrate_g!=null)grid.append(el('dt','','Доступные углеводы'),el('dd','',number(calculation.available_carbohydrate_g)+' г'));
+
  return [grid];
 }
 export function intakeReviewNodes(el,preview){

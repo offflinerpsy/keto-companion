@@ -1,0 +1,17 @@
+{
+  "task": "AGR-306-C25",
+  "observed_at": "2026-11-11T15:08:02.710Z",
+  "surface": "native Chrome PERSONAL Offliner existing authorized normal UI route; no direct-public HTTP probe",
+  "url": "https://keto-companion-ay-20261107.azurewebsites.net/status?cache_bypass=C25",
+  "status": 200,
+  "cache_control": "no-store",
+  "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+  "runtime_code_sha256": "70ce2226af25afdc9ef6e87cd6c6e4a07f13f63c0321ae2db36df48fe40609a9",
+  "edge_signature": "Ed25519",
+  "authentication_required": true,
+  "medical_monitoring": false,
+  "expected_source": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+  "expected_runtime": "70ce2226af25afdc9ef6e87cd6c6e4a07f13f63c0321ae2db36df48fe40609a9",
+  "header_evidence": "tab-scoped Network.responseReceived after normal page reload; only status and Cache-Control selected",
+  "passed": true
+}

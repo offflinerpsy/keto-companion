@@ -1,9 +1,9 @@
 // cloudflare-saas/public/bug-report-contract.js
-var REPORT_UI_VERSION = "0.7.1-C24";
+var REPORT_UI_VERSION = "0.7.1-C26";
 var REPORT_ROUTES = ["chat", "today", "diary", "recipes", "products", "more", "settings", "admin", "developer", "memory", "sources", "targets", "knowledge", "setup", "setup-consent", "setup-about", "setup-restrictions", "setup-targets"];
 var REPORT_BLOCKS = { page: { label: "\u0412\u0435\u0441\u044C \u044D\u043A\u0440\u0430\u043D", selector: null }, navigation: { label: "\u0412\u0435\u0440\u0445\u043D\u0435\u0435 \u043C\u0435\u043D\u044E \u0438 \u043D\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044F", selector: ".top" }, chat: { label: "\u0427\u0430\u0442 \u0438 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u0430 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F", selector: '[data-page="chat"]' }, recipes: { label: "\u041F\u043E\u0438\u0441\u043A \u0438 \u0441\u043F\u0438\u0441\u043E\u043A \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", selector: '[data-testid="recipe-library"]' }, own_dish: { label: "\u0421\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E", selector: "#own-dish-root" }, pantry: { label: "\u0414\u043E\u043C\u0430\u0448\u043D\u0438\u0435 \u0437\u0430\u043F\u0430\u0441\u044B", selector: "#kitchen-studio" }, shop: { label: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", selector: "#shop-root" }, diary: { label: "\u0417\u0430\u043F\u0438\u0441\u044C \u0435\u0434\u044B \u0438 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", selector: '[data-page="diary"]' }, profile: { label: "\u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438", selector: '[data-page="more"]' }, setup: { label: "\u0417\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E \u0438 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F", selector: '[data-page="setup"]' }, proposal: { label: "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0439", selector: "#proposal-dialog" } };
-var REPORT_STATUSES = { new: "\u041F\u043E\u043B\u0443\u0447\u0435\u043D\u043E", in_progress: "\u0412 \u0440\u0430\u0431\u043E\u0442\u0435", ready_to_verify: "\u041C\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C", closed: "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \u0438 \u0437\u0430\u043A\u0440\u044B\u0442\u043E" };
-var REPORT_ERRORS = ["SERVICE_UNAVAILABLE", "COMPUTE_UNAVAILABLE", "REQUEST_PENDING", "REQUEST_FAILED", "STATE_CHANGED", "BUSY_OR_CONSENT_OR_LIMIT", "VALIDATION_FAILED", "NETWORK_TIMEOUT", "NETWORK_ERROR"];
+var REPORT_STATUSES = { new: "\u041F\u043E\u043B\u0443\u0447\u0435\u043D\u043E \xB7 \u043E\u0436\u0438\u0434\u0430\u0435\u0442 \u0440\u0430\u0437\u0431\u043E\u0440\u0430", in_progress: "\u0412 \u0440\u0430\u0431\u043E\u0442\u0435", ready_to_verify: "\u041C\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C", closed: "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \u0438 \u0437\u0430\u043A\u0440\u044B\u0442\u043E" };
+var REPORT_ERRORS = "SERVICE_UNAVAILABLE COMPUTE_UNAVAILABLE REQUEST_PENDING REQUEST_FAILED STATE_CHANGED BUSY_OR_CONSENT_OR_LIMIT VALIDATION_FAILED NETWORK_TIMEOUT NETWORK_ERROR INVALID_BARCODE".split(" ").concat("BACKOFF THROTTLED TIMEOUT NETWORK_ERROR HTTP_ERROR RESPONSE_TOO_LARGE INVALID_RESPONSE".split(" ").map((code) => "PROVIDER_" + code));
 function reportContext({ route, version: version2, width, height, errorCode = "" }) {
   return { route: REPORT_ROUTES.includes(route) ? route : "more", version: typeof version2 === "string" && /^[a-zA-Z0-9._-]{1,80}$/.test(version2) ? version2 : "unknown", viewport: { width: Math.max(1, Math.min(1e4, Math.round(width) || 1)), height: Math.max(1, Math.min(1e4, Math.round(height) || 1)) }, error_code: REPORT_ERRORS.includes(errorCode) ? errorCode : "" };
 }
@@ -133,7 +133,7 @@ function setupBugReports({ $: $3, el: el2, api, epoch, getSession, getRoute, sto
     frozen(false);
     description.value = "";
     $3("bug-technical").checked = false;
-    message("\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 " + reportNumber(report.number) + " \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u043E. \u0421\u0442\u0430\u0442\u0443\u0441: " + REPORT_STATUSES[report.status] + ".");
+    message("\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 " + reportNumber(report.number) + " \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u043E. \u0421\u0442\u0430\u0442\u0443\u0441: " + REPORT_STATUSES[report.status] + ". \u0418\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u0435\u0442\u0441\u044F \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438.");
     void load(false, false);
   }
   async function action(fn) {
@@ -430,7 +430,7 @@ function setupBugReports({ $: $3, el: el2, api, epoch, getSession, getRoute, sto
 }
 
 // cloudflare-saas/public/food-picker.js
-function createFoodPicker({ root, input, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, onSelect, selectionMessage, allergens = [], debounce = 220 }) {
+function createFoodPicker({ root, input, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, onSelect, selectionMessage, allergens = [], debounce = 220, openRegional }) {
   let version2 = 0, detailVersion = 0, timer = null, query = "", foods = [], page = 0, cursor = null, sourceBusy = false, pending = null;
   const status = el2("p", "food-search-status"), hint = el2("div", "food-search-hint"), list = el2("div", "food-result-list"), source = el2("section", "food-reference"), sourceStatus = el2("p", "muted"), sourceRows = el2("div", "food-result-list"), review = el2("section", "food-source-review");
   status.setAttribute("role", "status");
@@ -453,9 +453,17 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
   more.setAttribute("data-icon", "plus");
   const wide = button("\u0418\u0441\u043A\u0430\u0442\u044C \u0432 USDA \u2014 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u043C \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A\u0435", () => loadSource(false));
   wide.hidden = true;
+  const regional = button("\u0418\u0441\u043A\u0430\u0442\u044C \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443 \u0432 \u0420\u043E\u0441\u0441\u0438\u0438 \u0438 \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438", () => {
+    const stamp = version2, screen = epoch(), q2 = input.value.trim();
+    if (!q2) return;
+    openRegional?.({ query: q2, origin: { valid: () => current(stamp, screen, q2), select: (food) => {
+      if (current(stamp, screen, q2)) select(food);
+    } } });
+  });
+  regional.hidden = true;
   const catalogueHint = el2("p", "ux-hint", "\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0439 \u043A\u0430\u0442\u0430\u043B\u043E\u0433 \u2014 \u043E\u0442\u043E\u0431\u0440\u0430\u043D\u043D\u044B\u0435 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u044B\u0435 \u0438 \u0432\u0430\u0448\u0438 \u043B\u0438\u0447\u043D\u044B\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B. \u0414\u043B\u044F \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u043E\u0439 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438 \u0432 \u0420\u043E\u0441\u0441\u0438\u0438 \u0438\u043B\u0438 \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438 \u0441\u0432\u0435\u0440\u044F\u0439\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432 \u0441 \u0435\u0451 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u043E\u0439.");
   source.append(el2("h3", "", "\u0414\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A USDA"), el2("p", "ux-hint", "USDA \u2014 \u0441\u043F\u0440\u0430\u0432\u043E\u0447\u043D\u0438\u043A \u0441\u043E\u0441\u0442\u0430\u0432\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u0432 \u0421\u0428\u0410. \u042D\u0442\u043E \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A \u043D\u0430 100 \u0433, \u0430 \u043D\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0430\u0448\u0435\u0439 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438 \u0432 \u0420\u043E\u0441\u0441\u0438\u0438 \u0438\u043B\u0438 \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438. \u041F\u0435\u0440\u0435\u0434 \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435\u043C \u0441\u0432\u0435\u0440\u044F\u0439\u0442\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0438 \u0441\u043E\u0441\u0442\u0430\u0432 \u0441 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u043E\u0439."), sourceStatus, sourceRows, more);
-  root.append(status, catalogueHint, hint, list, wide, source, review);
+  root.append(status, catalogueHint, hint, list, regional, wide, source, review);
   const current = (stamp, screen, q2) => stamp === version2 && screen === epoch() && q2 === input.value.trim();
   function invalidate() {
     version2++;
@@ -470,6 +478,7 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
     sourceRows.replaceChildren();
     source.hidden = true;
     wide.hidden = true;
+    regional.hidden = true;
     more.hidden = true;
     status.textContent = "";
   }
@@ -523,6 +532,7 @@ function createFoodPicker({ root, input, el: el2, call: call2, getState, accept:
         return search({ reveal: true });
       }, "text-btn"));
       wide.hidden = false;
+      regional.hidden = !openRegional;
       if (reveal && current(stamp, screen, q2) && (!root.getClientRects || root.getClientRects().length)) {
         status.focus?.({ preventScroll: true });
         root.scrollIntoView?.({ block: "start", behavior: "instant" });
@@ -1474,13 +1484,15 @@ function createScanner({ video, load = loadScanner, getMedia = (constraints) => 
   return canvas.toDataURL("image/jpeg", 0.85);
 }, schedule = (fn, ms) => setTimeout(fn, ms), cancelTimer = (id) => clearTimeout(id), onState = () => {
 }, onCode = () => {
-} }) {
-  let token = 0, stream = null, active = false, timer = null, flight2 = Promise.resolve();
+}, timeoutMs = 2e4 }) {
+  let token = 0, stream = null, active = false, timer = null, watchdog = null, flight2 = Promise.resolve();
   function stop() {
     token++;
     active = false;
     if (timer !== null) cancelTimer(timer);
     timer = null;
+    if (watchdog !== null) cancelTimer(watchdog);
+    watchdog = null;
     const s2 = stream;
     stream = null;
     if (s2) for (const track of s2.getTracks()) track.stop();
@@ -1492,6 +1504,12 @@ function createScanner({ video, load = loadScanner, getMedia = (constraints) => 
     const id = token;
     active = true;
     onState("opening");
+    watchdog = schedule(() => {
+      if (id === token) {
+        stop();
+        onState("timeout");
+      }
+    }, timeoutMs);
     try {
       video = replaceVideo(video);
       const preview = video;
@@ -1558,10 +1576,10 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
 }, onPantryReset = () => {
 }, onOwnFood = () => {
 }, setView: setView2 = () => {
-}, openIntake }) {
+}, openIntake, lookupTimeoutMs = 12e3, schedule = (fn, ms) => setTimeout(fn, ms), cancelTimer = (id) => clearTimeout(id) }) {
   const root = $3("shop-root");
-  let image2 = null, generation = 0, pending = null, saved = null, source = null, abort = null, ready = true, preparing = false, ownHint = null, pantryPending = null, pantryBusy = false, uncertainLabelAttempt = null;
-  root.innerHTML = `<details class="panel"><summary data-icon="barcode">\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</summary><p class="ux-hint">\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u0438\u0449\u0435\u0442 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438 \u043F\u043E \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044E \u0438\u043B\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443 \u0438\u0437 \u0420\u043E\u0441\u0441\u0438\u0438, \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438 \u0438 \u0434\u0440\u0443\u0433\u0438\u0445 \u0441\u0442\u0440\u0430\u043D; \u043F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439.</p><div id="shop-search-stage" hidden><form id="shop-search-form"><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0431\u0440\u0435\u043D\u0434<input id="shop-query" minlength="2" maxlength="80" required></label><label class="check"><input id="shop-wide" type="checkbox"> \u0418\u0441\u043A\u0430\u0442\u044C \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C</label><button type="submit">\u041D\u0430\u0439\u0442\u0438 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443</button></form><p class="ux-hint">\u041F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E \u0438\u0449\u0435\u043C \u0437\u0430\u043F\u0438\u0441\u0438 \u0434\u043B\u044F \u0420\u043E\u0441\u0441\u0438\u0438 \u0438 \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438; \u0434\u043B\u044F \u0434\u0440\u0443\u0433\u0438\u0445 \u0441\u0442\u0440\u0430\u043D \u0432\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \xAB\u0418\u0441\u043A\u0430\u0442\u044C \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C\xBB. \u0423\u043A\u0430\u0437\u0430\u043D\u043D\u0430\u044F \u0441\u0442\u0440\u0430\u043D\u0430 \u043D\u0435 \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u0440\u0443\u0435\u0442 \u043D\u0430\u043B\u0438\u0447\u0438\u0435 \u0432 \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0435.</p><div id="shop-search-results" aria-live="polite"></div></div><div id="shop-methods" class="shop-methods"><button id="shop-name-method" type="button" data-icon="search">\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044E</button><button id="shop-scan" type="button" data-icon="scan">\u0421\u043A\u0430\u043D\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434</button><button id="shop-barcode-method" type="button" data-icon="barcode">\u0412\u0432\u0435\u0441\u0442\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434</button><button id="shop-photo-method" type="button" data-icon="camera">\u0424\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438</button><button id="shop-manual" type="button" data-icon="edit">\u0412\u0432\u0435\u0441\u0442\u0438 \u0432\u0440\u0443\u0447\u043D\u0443\u044E</button></div><button id="shop-other-method" class="secondary" type="button" hidden data-icon="left">\u0414\u0440\u0443\u0433\u043E\u0439 \u0441\u043F\u043E\u0441\u043E\u0431</button><div id="shop-scanner" hidden><p class="ux-hint">\u0415\u0441\u043B\u0438 \u043A\u0430\u043C\u0435\u0440\u0430 \u043D\u0435 \u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0435\u0442 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434, \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0435\u0433\u043E \u0446\u0438\u0444\u0440\u044B \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0432 \u043F\u043E\u043B\u0435 \u043D\u0438\u0436\u0435.</p><video id="shop-video" muted playsinline></video><button id="shop-stop-scan" type="button">\u0417\u0430\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u043C\u0435\u0440\u0443</button></div><div id="shop-photo-stage" hidden><p class="ux-hint">\u0424\u043E\u0442\u043E \u0447\u0438\u0442\u0430\u0435\u0442 \u0442\u0430\u0431\u043B\u0438\u0446\u0443 \u043F\u0438\u0449\u0435\u0432\u043E\u0439 \u0446\u0435\u043D\u043D\u043E\u0441\u0442\u0438 \u043F\u043E\u0441\u043B\u0435 \u043D\u0430\u0436\u0430\u0442\u0438\u044F \xAB\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443\xBB \u2014 \u0441\u043D\u0438\u043C\u0438\u0442\u0435 \u0442\u0430\u0431\u043B\u0438\u0446\u0443 \u0440\u043E\u0432\u043D\u043E \u0438 \u0431\u0435\u0437 \u0431\u043B\u0438\u043A\u043E\u0432.</p><div class="shop-photo-actions"><label class="secondary photo-button shop-file-label">\u0421\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443<input id="shop-camera" type="file" accept="image/*" capture="environment"></label><label class="secondary photo-button shop-file-label">\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0444\u043E\u0442\u043E<input id="shop-photo" type="file" accept="image/*"></label></div><img id="shop-preview" alt="\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438" hidden style="max-width:100%;max-height:240px"><button id="shop-read" type="button" disabled data-icon="scan">\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443</button><button id="shop-cancel" type="button" hidden>\u041E\u0442\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0436\u0438\u0434\u0430\u043D\u0438\u0435</button></div><div id="shop-barcode-stage" hidden><p class="ux-hint">\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0446\u0438\u0444\u0440\u044B \u043F\u043E\u0434 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u043E\u043C, \u0435\u0441\u043B\u0438 \u043E\u043D \u043D\u0435 \u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0435\u0442\u0441\u044F \u043A\u0430\u043C\u0435\u0440\u043E\u0439; \u043D\u0430\u0439\u0434\u0435\u043D\u043D\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C \u043D\u0443\u0436\u043D\u043E \u0441\u0432\u0435\u0440\u0438\u0442\u044C \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439.</p><label>\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434<input id="shop-barcode" inputmode="numeric" maxlength="14"></label><button id="shop-find" type="button" data-icon="search">\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443</button></div><p id="shop-status" role="status"></p><div id="shop-candidate"></div><form id="shop-form" hidden><h3>\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442</h3><p class="ux-callout" data-shop-loaded hidden>\u0414\u0430\u043D\u043D\u044B\u0435 \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043D\u044B \u0434\u043B\u044F \u0441\u0432\u0435\u0440\u043A\u0438 \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0447\u0438\u0441\u043B\u0430 \u0438 \u043E\u0441\u043D\u043E\u0432\u0443 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435. \u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u0435\u0449\u0451 \u043D\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D.</p><p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u043A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u043E \u043D\u0430 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443. \u0414\u043B\u044F 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438 \u043D\u0443\u0436\u043D\u0430 \u044F\u0432\u043D\u043E \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u043C\u0430\u0441\u0441\u0430 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u0435 \u043E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u043F\u0443\u0441\u0442\u044B\u043C.</p><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435<select name="state" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435</option><option value="ready_to_eat">\u0413\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E</option><option value="raw">\u0421\u044B\u0440\u043E\u0439</option><option value="dry">\u0421\u0443\u0445\u043E\u0439</option><option value="cooked">\u0413\u043E\u0442\u043E\u0432\u044B\u0439</option><option value="canned">\u041A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439</option><option value="ready_to_cook">\u0414\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F</option></select></label><label>\u041E\u0441\u043D\u043E\u0432\u0430 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439<select name="unit_basis" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443</option><option value="per100g">\u041D\u0430 100 \u0433</option><option value="per100ml">\u041D\u0430 100 \u043C\u043B</option><option value="perserving">\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E</option></select></label><label data-shop-mass-wrap><span data-shop-mass-label>\u041C\u0430\u0441\u0441\u0430 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438, \u0433</span><input name="basis_mass" inputmode="decimal"></label><p class="ux-hint" data-shop-basis-hint>\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435, \u043A \u043A\u0430\u043A\u043E\u0439 \u043E\u0441\u043D\u043E\u0432\u0435 \u043E\u0442\u043D\u043E\u0441\u044F\u0442\u0441\u044F \u0447\u0438\u0441\u043B\u0430 \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435.</p><label>\u042D\u043D\u0435\u0440\u0433\u0438\u044F, \u043A\u043A\u0430\u043B<input name="energy_kcal" inputmode="decimal"></label><label>\u0411\u0435\u043B\u043A\u0438, \u0433<input name="protein_g" inputmode="decimal"></label><label>\u0416\u0438\u0440\u044B, \u0433<input name="fat_g" inputmode="decimal"></label><label>\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433<input name="carb" inputmode="decimal"></label><label>\u041A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B<select name="basis"><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438</option><option value="unknown">\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E</option><option value="total_includes_fiber">\u0412\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443</option><option value="available_excludes_fiber">\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438</option></select></label><label>\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433<input name="fiber_g" inputmode="decimal"></label><p class="ux-hint">\u0421\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043F\u0438\u0441\u044C \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432 \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435. \u0415\u0441\u043B\u0438 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E \u0438\u043B\u0438 \u043D\u0430 \u043F\u0430\u0447\u043A\u0435 \u043D\u0435\u0442 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438 \u2014 \u043E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u043F\u043E\u043B\u0435 \u043F\u0443\u0441\u0442\u044B\u043C (\xAB\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445\xBB, \u0430 \u043D\u0435 0).</p><details class="ux-guide"><summary>\u041A\u0430\u043A \u043E\u0442\u043B\u0438\u0447\u0430\u044E\u0442\u0441\u044F \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430\u0445 (\u0415\u0421/\u0421\u041D\u0413 \u0438 \u0421\u0428\u0410)?</summary><div class="ux-guide-body"><p>\u041D\u0430 \u043C\u043D\u043E\u0433\u0438\u0445 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430\u0445 \u0421\u0428\u0410 \xABTotal Carbohydrate\xBB \u0432\u043A\u043B\u044E\u0447\u0430\u0435\u0442 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443 (\xAB\u0412\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443\xBB). \u041D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430\u0445 \u0415\u0421, \u0412\u0435\u043B\u0438\u043A\u043E\u0431\u0440\u0438\u0442\u0430\u043D\u0438\u0438 \u0438 \u0447\u0430\u0441\u0442\u0438 \u0442\u043E\u0432\u0430\u0440\u043E\u0432 \u0421\u041D\u0413 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u0447\u0430\u0441\u0442\u043E \u0443\u0436\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438 (\xAB\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438\xBB) \u2014 \u0438\u0437 \u043D\u0438\u0445 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443 \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u043E \u0432\u044B\u0447\u0438\u0442\u0430\u0442\u044C \u043D\u0435\u043B\u044C\u0437\u044F. \u0415\u0441\u043B\u0438 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u044D\u0442\u043E \u043D\u0435\u043E\u0447\u0435\u0432\u0438\u0434\u043D\u043E, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \xAB\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\xBB.</p></div></details><details id="shop-allergen-review"><summary>\u0410\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443</summary><fieldset id="shop-allergens"><legend>\u041E\u0442\u043C\u0435\u0442\u044C\u0442\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438</legend></fieldset></details><label class="check"><input name="confirm" type="checkbox"> \u042F \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u043B(\u0430) \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043E\u0441\u043D\u043E\u0432\u0443, \u043C\u0430\u0441\u0441\u0443, \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</label><details id="shop-portion-options"><summary>\u041F\u043E\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u0443\u044E \u043F\u043E\u0440\u0446\u0438\u044E</summary><p class="ux-hint">\u041F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u0435\u0440\u0435\u0441\u0447\u0451\u0442 \u043D\u0430 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u2014 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u0435\u0449\u0451 \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u0437\u0430\u043F\u0438\u0441\u0430\u043D\u043E.</p><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0434\u043B\u044F \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0439 \u0435\u0434\u0438\u043D\u0438\u0446\u0435 (\u0433, \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0439)<input name="portion" inputmode="decimal"></label><button id="shop-portion" type="button">\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C</button><p id="shop-portion-result" role="status"></p></details><p>\u0413\u043B\u0438\u043A\u0435\u043C\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0438\u043D\u0434\u0435\u043A\u0441: \u043D\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445.</p><button id="shop-submit" type="submit">\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C</button></form><div id="shop-next" hidden><p id="shop-saved-name"></p><p class="ux-callout">\u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D. \u041F\u0440\u0438 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u0438 \u0437\u0430\u043F\u0438\u0441\u0438 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u043D\u0430\u0447\u0430\u043B\u044C\u043D\u044B\u0435 100 \u0433 \u043C\u043E\u0436\u043D\u043E \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043D\u0430 \u0432\u0430\u0448\u0443 \u0444\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u0443\u044E \u043F\u043E\u0440\u0446\u0438\u044E.</p><button id="shop-record" class="primary" type="button" data-icon="plus">\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435</button><details id="shop-next-options"><summary>\u0417\u0430\u043F\u0430\u0441\u044B \u0438 \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</summary><p class="ux-hint">\u0414\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0432 \u0437\u0430\u043F\u0430\u0441\u044B \u0438\u043B\u0438 \u0441\u0431\u043E\u0440\u043A\u0430 \u0441\u0432\u043E\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430 \u043D\u0435 \u0437\u0430\u043F\u0438\u0441\u044B\u0432\u0430\u044E\u0442 \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A.</p><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0432 \u0437\u0430\u043F\u0430\u0441\u0430\u0445, \u0433<input id="shop-grams" inputmode="decimal"></label><div class="button-row"><button id="shop-pantry" type="button" data-icon="basket">\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0437\u0430\u043F\u0430\u0441\u044B</button><button id="shop-own" type="button" data-icon="recipe">\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</button><button id="shop-suggest" type="button" hidden data-icon="recipe">\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button></div></details></div></details>`;
+  let image2 = null, generation = 0, pending = null, saved = null, source = null, abort = null, ready = true, preparing = false, ownHint = null, pantryPending = null, pantryBusy = false, uncertainLabelAttempt = null, lookup = null, editedFields = /* @__PURE__ */ new Set();
+  root.innerHTML = `<details class="panel"><summary data-icon="barcode">\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0432 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</summary><p class="ux-hint">\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u0438\u0449\u0435\u0442 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438 \u043F\u043E \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044E \u0438\u043B\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443 \u0438\u0437 \u0420\u043E\u0441\u0441\u0438\u0438, \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438 \u0438 \u0434\u0440\u0443\u0433\u0438\u0445 \u0441\u0442\u0440\u0430\u043D; \u043F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439.</p><div id="shop-search-stage" hidden><form id="shop-search-form"><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0431\u0440\u0435\u043D\u0434<input id="shop-query" minlength="2" maxlength="80" required></label><label class="check"><input id="shop-wide" type="checkbox"> \u0418\u0441\u043A\u0430\u0442\u044C \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C</label><button type="submit">\u041D\u0430\u0439\u0442\u0438 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443</button></form><p class="ux-hint">\u041F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E \u0438\u0449\u0435\u043C \u0437\u0430\u043F\u0438\u0441\u0438 \u0434\u043B\u044F \u0420\u043E\u0441\u0441\u0438\u0438 \u0438 \u0411\u0435\u043B\u0430\u0440\u0443\u0441\u0438; \u0434\u043B\u044F \u0434\u0440\u0443\u0433\u0438\u0445 \u0441\u0442\u0440\u0430\u043D \u0432\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \xAB\u0418\u0441\u043A\u0430\u0442\u044C \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C\xBB. \u0423\u043A\u0430\u0437\u0430\u043D\u043D\u0430\u044F \u0441\u0442\u0440\u0430\u043D\u0430 \u043D\u0435 \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u0440\u0443\u0435\u0442 \u043D\u0430\u043B\u0438\u0447\u0438\u0435 \u0432 \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0435.</p><div id="shop-search-results" aria-live="polite"></div></div><div id="shop-methods" class="shop-methods"><button id="shop-name-method" type="button" data-icon="search">\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u044E</button><button id="shop-scan" type="button" data-icon="scan">\u0421\u043A\u0430\u043D\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434</button><button id="shop-barcode-method" type="button" data-icon="barcode">\u0412\u0432\u0435\u0441\u0442\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434</button><button id="shop-photo-method" type="button" data-icon="camera">\u0424\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438</button><button id="shop-manual" type="button" data-icon="edit">\u0412\u0432\u0435\u0441\u0442\u0438 \u0432\u0440\u0443\u0447\u043D\u0443\u044E</button></div><button id="shop-other-method" class="secondary" type="button" hidden data-icon="left">\u0414\u0440\u0443\u0433\u043E\u0439 \u0441\u043F\u043E\u0441\u043E\u0431</button><div id="shop-scanner" hidden><p class="ux-hint">\u0415\u0441\u043B\u0438 \u043A\u0430\u043C\u0435\u0440\u0430 \u043D\u0435 \u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0435\u0442 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434, \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0435\u0433\u043E \u0446\u0438\u0444\u0440\u044B \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0432 \u043F\u043E\u043B\u0435 \u043D\u0438\u0436\u0435.</p><video id="shop-video" muted playsinline></video><button id="shop-stop-scan" type="button">\u0417\u0430\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u043C\u0435\u0440\u0443</button></div><div id="shop-photo-stage" hidden><p class="ux-hint">\u0421\u043D\u0438\u043C\u0438\u0442\u0435 \u0442\u0430\u0431\u043B\u0438\u0446\u0443 \u043F\u0438\u0449\u0435\u0432\u043E\u0439 \u0446\u0435\u043D\u043D\u043E\u0441\u0442\u0438; \u0441\u043E\u0441\u0442\u0430\u0432 \u0431\u0435\u0437 \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u043D\u0435 \u0434\u0430\u0451\u0442 \u0447\u0438\u0441\u0435\u043B \u0411\u0416\u0423. \u0424\u043E\u0442\u043E \u0447\u0438\u0442\u0430\u0435\u0442 \u0442\u0430\u0431\u043B\u0438\u0446\u0443 \u043F\u043E\u0441\u043B\u0435 \u043D\u0430\u0436\u0430\u0442\u0438\u044F \xAB\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443\xBB \u2014 \u0441\u043D\u0438\u043C\u0438\u0442\u0435 \u0442\u0430\u0431\u043B\u0438\u0446\u0443 \u0440\u043E\u0432\u043D\u043E \u0438 \u0431\u0435\u0437 \u0431\u043B\u0438\u043A\u043E\u0432.</p><div class="shop-photo-actions"><label class="secondary photo-button shop-file-label">\u0421\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443<input id="shop-camera" type="file" accept="image/*" capture="environment"></label><label class="secondary photo-button shop-file-label">\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0444\u043E\u0442\u043E<input id="shop-photo" type="file" accept="image/*"></label></div><img id="shop-preview" alt="\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438" hidden style="max-width:100%;max-height:240px"><button id="shop-read" type="button" disabled data-icon="scan">\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443</button><button id="shop-cancel" type="button" hidden>\u041E\u0442\u043C\u0435\u043D\u0438\u0442\u044C \u043E\u0436\u0438\u0434\u0430\u043D\u0438\u0435</button></div><div id="shop-barcode-stage" hidden><p class="ux-hint">\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0446\u0438\u0444\u0440\u044B \u043F\u043E\u0434 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u043E\u043C, \u0435\u0441\u043B\u0438 \u043E\u043D \u043D\u0435 \u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0435\u0442\u0441\u044F \u043A\u0430\u043C\u0435\u0440\u043E\u0439; \u043D\u0430\u0439\u0434\u0435\u043D\u043D\u0443\u044E \u0437\u0430\u043F\u0438\u0441\u044C \u043D\u0443\u0436\u043D\u043E \u0441\u0432\u0435\u0440\u0438\u0442\u044C \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439.</p><label>\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434<input id="shop-barcode" inputmode="numeric" maxlength="14"></label><button id="shop-find" type="button" data-icon="search">\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443</button></div><p id="shop-status" role="status"></p><button id="shop-lookup-cancel" type="button" class="secondary" hidden>\u041E\u0442\u043C\u0435\u043D\u0438\u0442\u044C \u043F\u043E\u0438\u0441\u043A</button><div id="shop-fallback" class="button-row" hidden><button id="shop-fallback-photo" type="button" class="secondary">\u0424\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u043F\u0438\u0449\u0435\u0432\u043E\u0439 \u0446\u0435\u043D\u043D\u043E\u0441\u0442\u0438</button><button id="shop-fallback-manual" type="button" class="secondary">\u0412\u0432\u0435\u0441\u0442\u0438 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E</button><button id="shop-rescan" type="button" class="secondary">\u0421\u043A\u0430\u043D\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u043E\u0439 \u043A\u043E\u0434</button></div><div id="shop-candidate"></div><form id="shop-form" class="form-stack" hidden><h3>\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442</h3><p class="ux-callout" data-shop-loaded hidden>\u0414\u0430\u043D\u043D\u044B\u0435 \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043D\u044B \u0434\u043B\u044F \u0441\u0432\u0435\u0440\u043A\u0438 \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0447\u0438\u0441\u043B\u0430 \u0438 \u043E\u0441\u043D\u043E\u0432\u0443 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435. \u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u0435\u0449\u0451 \u043D\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D.</p><p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u043A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u043E \u043D\u0430 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u0438 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443. \u0414\u043B\u044F 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438 \u043D\u0443\u0436\u043D\u0430 \u044F\u0432\u043D\u043E \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430\u044F \u043C\u0430\u0441\u0441\u0430 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445. \u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u0435 \u043E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u043F\u0443\u0441\u0442\u044B\u043C.</p><fieldset class="form-section"><legend>\u041F\u0440\u043E\u0434\u0443\u043A\u0442</legend><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435<select name="state" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435</option><option value="ready_to_eat">\u0413\u043E\u0442\u043E\u0432 \u043A \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u044E</option><option value="raw">\u0421\u044B\u0440\u043E\u0439</option><option value="dry">\u0421\u0443\u0445\u043E\u0439</option><option value="cooked">\u0413\u043E\u0442\u043E\u0432\u044B\u0439</option><option value="canned">\u041A\u043E\u043D\u0441\u0435\u0440\u0432\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439</option><option value="ready_to_cook">\u0414\u043B\u044F \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F</option></select></label></fieldset><fieldset class="form-section"><legend>\u041E\u0441\u043D\u043E\u0432\u0430 \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435</legend><label>\u041E\u0441\u043D\u043E\u0432\u0430 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0439<select name="unit_basis" required><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443</option><option value="per100g">\u041D\u0430 100 \u0433</option><option value="per100ml">\u041D\u0430 100 \u043C\u043B</option><option value="perserving">\u041D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E</option></select></label><label data-shop-mass-wrap><span data-shop-mass-label>\u041C\u0430\u0441\u0441\u0430 100 \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0438, \u0433</span><input name="basis_mass" inputmode="decimal"></label><p class="ux-hint" data-shop-basis-hint>\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435, \u043A \u043A\u0430\u043A\u043E\u0439 \u043E\u0441\u043D\u043E\u0432\u0435 \u043E\u0442\u043D\u043E\u0441\u044F\u0442\u0441\u044F \u0447\u0438\u0441\u043B\u0430 \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435.</p></fieldset><fieldset class="form-section"><legend>\u041F\u0438\u0449\u0435\u0432\u0430\u044F \u0446\u0435\u043D\u043D\u043E\u0441\u0442\u044C</legend><div class="form-nutrients"><label>\u042D\u043D\u0435\u0440\u0433\u0438\u044F, \u043A\u043A\u0430\u043B<input name="energy_kcal" inputmode="decimal"></label><label>\u0411\u0435\u043B\u043A\u0438, \u0433<input name="protein_g" inputmode="decimal"></label><label>\u0416\u0438\u0440\u044B, \u0433<input name="fat_g" inputmode="decimal"></label><label>\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B, \u0433<input name="carb" inputmode="decimal"></label><label>\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430, \u0433<input name="fiber_g" inputmode="decimal"></label></div><label>\u041A\u0430\u043A \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B<select name="basis"><option value="">\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438</option><option value="unknown">\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E</option><option value="total_includes_fiber">\u0412\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443</option><option value="available_excludes_fiber">\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438</option></select></label><p class="ux-hint">\u0421\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043F\u0438\u0441\u044C \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u043E\u0432 \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0435. \u0415\u0441\u043B\u0438 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u0435 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E \u0438\u043B\u0438 \u043D\u0430 \u043F\u0430\u0447\u043A\u0435 \u043D\u0435\u0442 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438 \u2014 \u043E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u043F\u043E\u043B\u0435 \u043F\u0443\u0441\u0442\u044B\u043C (\xAB\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445\xBB, \u0430 \u043D\u0435 0).</p><details class="ux-guide"><summary>\u041A\u0430\u043A \u043E\u0442\u043B\u0438\u0447\u0430\u044E\u0442\u0441\u044F \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u043D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430\u0445 (\u0415\u0421/\u0421\u041D\u0413 \u0438 \u0421\u0428\u0410)?</summary><div class="ux-guide-body"><p>\u041D\u0430 \u043C\u043D\u043E\u0433\u0438\u0445 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430\u0445 \u0421\u0428\u0410 \xABTotal Carbohydrate\xBB \u0432\u043A\u043B\u044E\u0447\u0430\u0435\u0442 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443 (\xAB\u0412\u0441\u0435\u0433\u043E, \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443\xBB). \u041D\u0430 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0430\u0445 \u0415\u0421, \u0412\u0435\u043B\u0438\u043A\u043E\u0431\u0440\u0438\u0442\u0430\u043D\u0438\u0438 \u0438 \u0447\u0430\u0441\u0442\u0438 \u0442\u043E\u0432\u0430\u0440\u043E\u0432 \u0421\u041D\u0413 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B \u0447\u0430\u0441\u0442\u043E \u0443\u0436\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u044B \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438 (\xAB\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435, \u0431\u0435\u0437 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0438\xBB) \u2014 \u0438\u0437 \u043D\u0438\u0445 \u043A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0443 \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u043E \u0432\u044B\u0447\u0438\u0442\u0430\u0442\u044C \u043D\u0435\u043B\u044C\u0437\u044F. \u0415\u0441\u043B\u0438 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u044D\u0442\u043E \u043D\u0435\u043E\u0447\u0435\u0432\u0438\u0434\u043D\u043E, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \xAB\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\xBB.</p></div></details></fieldset><fieldset class="form-section"><legend>\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C</legend><details id="shop-allergen-review"><summary>\u0410\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443</summary><fieldset id="shop-allergens"><legend>\u041E\u0442\u043C\u0435\u0442\u044C\u0442\u0435 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438</legend></fieldset></details><label class="check"><input name="confirm" type="checkbox"> \u042F \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u043B(\u0430) \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043E\u0441\u043D\u043E\u0432\u0443, \u043C\u0430\u0441\u0441\u0443, \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F \u0438 \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D\u044B \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435</label><details id="shop-portion-options"><summary>\u041F\u043E\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u0443\u044E \u043F\u043E\u0440\u0446\u0438\u044E</summary><p class="ux-hint">\u041F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u043F\u0435\u0440\u0435\u0441\u0447\u0451\u0442 \u043D\u0430 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u0443\u044E \u043C\u0430\u0441\u0441\u0443 \u2014 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u0435\u0449\u0451 \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u0437\u0430\u043F\u0438\u0441\u0430\u043D\u043E.</p><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0434\u043B\u044F \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0439 \u0435\u0434\u0438\u043D\u0438\u0446\u0435 (\u0433, \u043C\u043B \u0438\u043B\u0438 \u043F\u043E\u0440\u0446\u0438\u0439)<input name="portion" inputmode="decimal"></label><button id="shop-portion" type="button">\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C</button><p id="shop-portion-result" role="status"></p></details><p>\u0413\u043B\u0438\u043A\u0435\u043C\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0438\u043D\u0434\u0435\u043A\u0441: \u043D\u0435\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445.</p><button id="shop-submit" type="submit">\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0435\u0440\u0435\u0434 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C</button></fieldset></form><div id="shop-next" hidden><p id="shop-saved-name"></p><p class="ux-callout">\u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D. \u041F\u0440\u0438 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u0438 \u0437\u0430\u043F\u0438\u0441\u0438 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u043D\u0430\u0447\u0430\u043B\u044C\u043D\u044B\u0435 100 \u0433 \u043C\u043E\u0436\u043D\u043E \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043D\u0430 \u0432\u0430\u0448\u0443 \u0444\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u0443\u044E \u043F\u043E\u0440\u0446\u0438\u044E.</p><button id="shop-record" class="primary" type="button" data-icon="plus">\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435</button><details id="shop-next-options"><summary>\u0417\u0430\u043F\u0430\u0441\u044B \u0438 \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</summary><p class="ux-hint">\u0414\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0432 \u0437\u0430\u043F\u0430\u0441\u044B \u0438\u043B\u0438 \u0441\u0431\u043E\u0440\u043A\u0430 \u0441\u0432\u043E\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430 \u043D\u0435 \u0437\u0430\u043F\u0438\u0441\u044B\u0432\u0430\u044E\u0442 \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A.</p><label>\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0432 \u0437\u0430\u043F\u0430\u0441\u0430\u0445, \u0433<input id="shop-grams" inputmode="decimal"></label><div class="button-row"><button id="shop-pantry" type="button" data-icon="basket">\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0437\u0430\u043F\u0430\u0441\u044B</button><button id="shop-own" type="button" data-icon="recipe">\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</button><button id="shop-suggest" type="button" hidden data-icon="recipe">\u041F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button></div></details></div></details>`;
   const form = $3("shop-form"), status = $3("shop-status"), preview = $3("shop-preview"), next = $3("shop-next");
   const basisHint = form.querySelector("[data-shop-basis-hint]"), loadedNotice = form.querySelector("[data-shop-loaded]"), massWrap = form.querySelector("[data-shop-mass-wrap]"), massLabel = form.querySelector("[data-shop-mass-label]");
   function syncBasisHint() {
@@ -1573,34 +1591,123 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
   form.addEventListener("change", syncBasisHint);
   syncBasisHint();
   const scanner = scannerFactory({ video: $3("shop-video"), onState(state2) {
-    status.textContent = { opening: "\u041E\u0436\u0438\u0434\u0430\u0435\u043C \u0434\u043E\u0441\u0442\u0443\u043F \u043A \u043A\u0430\u043C\u0435\u0440\u0435. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u043C\u0435\u0440\u0443 \u0438\u043B\u0438 \u0432\u0432\u0435\u0441\u0442\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.", scanning: "\u041D\u0430\u0432\u0435\u0434\u0438\u0442\u0435 \u043A\u0430\u043C\u0435\u0440\u0443 \u043D\u0430 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434.", denied: "\u041D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u0430 \u043A \u043A\u0430\u043C\u0435\u0440\u0435. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0434\u043E\u0441\u0442\u0443\u043F \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.", error: "\u041A\u0430\u043C\u0435\u0440\u0430 \u0438\u043B\u0438 \u0441\u043A\u0430\u043D\u0435\u0440 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B. \u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438\u043B\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438." }[state2];
-    if (state2 === "denied" || state2 === "error") $3("shop-scanner").hidden = true;
+    status.textContent = { opening: "\u041E\u0436\u0438\u0434\u0430\u0435\u043C \u0434\u043E\u0441\u0442\u0443\u043F \u043A \u043A\u0430\u043C\u0435\u0440\u0435. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u043C\u0435\u0440\u0443 \u0438\u043B\u0438 \u0432\u0432\u0435\u0441\u0442\u0438 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.", scanning: "\u041D\u0430\u0432\u0435\u0434\u0438\u0442\u0435 \u043A\u0430\u043C\u0435\u0440\u0443 \u043D\u0430 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434.", denied: "\u041D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u0430 \u043A \u043A\u0430\u043C\u0435\u0440\u0435. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0434\u043E\u0441\u0442\u0443\u043F \u0432 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0438\u043B\u0438 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.", error: "\u041A\u0430\u043C\u0435\u0440\u0430 \u0438\u043B\u0438 \u0441\u043A\u0430\u043D\u0435\u0440 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B. \u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438\u043B\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438.", timeout: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0440\u043E\u0447\u0438\u0442\u0430\u0442\u044C \u043A\u043E\u0434 \u0437\u0430 \u043E\u0442\u0432\u0435\u0434\u0451\u043D\u043D\u043E\u0435 \u0432\u0440\u0435\u043C\u044F. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0439 \u043A\u043E\u0434, \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434." }[state2];
+    if (["denied", "error", "timeout"].includes(state2)) {
+      $3("shop-scanner").hidden = true;
+      $3("shop-fallback").hidden = false;
+    }
   }, onCode(code) {
     $3("shop-scanner").hidden = true;
+    stage("barcode");
     $3("shop-barcode").value = code;
-    $3("shop-find").onclick();
+    $3("shop-find").textContent = "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u043A\u043E\u0434 \u0438 \u043D\u0430\u0439\u0442\u0438";
+    status.textContent = "\u041F\u0440\u043E\u0447\u0438\u0442\u0430\u043D \u043A\u043E\u0434: " + code + ". \u0421\u0432\u0435\u0440\u044C\u0442\u0435 \u0446\u0438\u0444\u0440\u044B \u043D\u0430 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435 \u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u043F\u043E\u0438\u0441\u043A. \u0415\u0441\u043B\u0438 \u043A\u043E\u0434\u043E\u0432 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E, \u043C\u043E\u0436\u043D\u043E \u0441\u043A\u0430\u043D\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0434\u0440\u0443\u0433\u043E\u0439.";
+    $3("shop-fallback").hidden = false;
   } });
   function stopScanner() {
     scanner.stop();
     $3("shop-scanner").hidden = true;
   }
-  let searchToken = 0;
+  function cancelLookup(message = "\u041F\u043E\u0438\u0441\u043A \u043E\u0442\u043C\u0435\u043D\u0451\u043D. \u041C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434.") {
+    const op = lookup;
+    if (!op) return;
+    lookup = null;
+    op.controller.abort();
+    op.reject(Object.assign(Error(message), { code: "CANCELLED" }));
+    cancelTimer(op.timer);
+    $3("shop-find").disabled = false;
+    $3("shop-lookup-cancel").hidden = true;
+    status.textContent = message;
+    if (op.path === "/api/shop/search") $3("shop-search-results").replaceChildren(el2("p", "muted", message));
+    $3("shop-fallback").hidden = false;
+  }
+  async function requestLookup(path, body) {
+    cancelLookup();
+    const controller = new AbortController(), op = { controller, path, epoch: epoch() };
+    lookup = op;
+    $3("shop-find").disabled = true;
+    $3("shop-lookup-cancel").hidden = false;
+    $3("shop-fallback").hidden = false;
+    const cancelled = new Promise((_, reject) => {
+      op.reject = reject;
+      op.timer = schedule(() => {
+        controller.abort();
+        reject(Object.assign(Error("\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u043D\u0435 \u043E\u0442\u0432\u0435\u0442\u0438\u043B \u0432\u043E\u0432\u0440\u0435\u043C\u044F. \u041C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434."), { code: "NETWORK_TIMEOUT" }));
+      }, lookupTimeoutMs);
+    });
+    try {
+      return await Promise.race([Promise.resolve(api(path, "POST", body, { signal: controller.signal })), cancelled]);
+    } finally {
+      cancelTimer(op.timer);
+      if (lookup === op) {
+        lookup = null;
+        $3("shop-find").disabled = false;
+        $3("shop-lookup-cancel").hidden = true;
+        if (op.epoch !== epoch()) {
+          status.textContent = "\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041F\u043E\u0438\u0441\u043A \u043E\u0442\u043C\u0435\u043D\u0451\u043D.";
+          if (path === "/api/shop/search") $3("shop-search-results").replaceChildren();
+        }
+      }
+    }
+  }
+  function lookupFailure(err) {
+    return { INVALID_BARCODE: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u043B\u0438\u043D\u0443 \u0438 \u043A\u043E\u043D\u0442\u0440\u043E\u043B\u044C\u043D\u0443\u044E \u0446\u0438\u0444\u0440\u0443 \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0430.", PROVIDER_BACKOFF: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0438\u043B \u0437\u0430\u043F\u0440\u043E\u0441\u044B. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", PROVIDER_THROTTLED: "\u0421\u043B\u0438\u0448\u043A\u043E\u043C \u043C\u043D\u043E\u0433\u043E \u0437\u0430\u043F\u0440\u043E\u0441\u043E\u0432 \u043A \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0443. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", PROVIDER_TIMEOUT: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u043D\u0435 \u043E\u0442\u0432\u0435\u0442\u0438\u043B \u0432\u043E\u0432\u0440\u0435\u043C\u044F.", NETWORK_TIMEOUT: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u043D\u0435 \u043E\u0442\u0432\u0435\u0442\u0438\u043B \u0432\u043E\u0432\u0440\u0435\u043C\u044F.", PROVIDER_NETWORK_ERROR: "\u041D\u0435\u0442 \u0441\u0432\u044F\u0437\u0438 \u0441 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u043E\u043C.", STALE_SESSION: "\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0438\u0441\u043A \u043F\u043E\u0441\u043B\u0435 \u0432\u0445\u043E\u0434\u0430." }[err?.code] || "\u041F\u043E\u0438\u0441\u043A \u0432 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D.";
+  }
+  $3("shop-lookup-cancel").onclick = () => {
+    generation++;
+    searchToken++;
+    cancelLookup();
+  };
+  $3("shop-fallback-photo").onclick = () => method("photo");
+  $3("shop-fallback-manual").onclick = () => {
+    $3("shop-manual").onclick();
+  };
+  $3("shop-rescan").onclick = () => {
+    $3("shop-scan").onclick();
+  };
+  let searchToken = 0, searchOrigin = null;
+  const returnBox = el2("div", "button-row"), returnButton = el2("button", "primary", "\u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u0441 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u043E\u043C"), cancelReturn = el2("button", "secondary", "\u041E\u0442\u043C\u0435\u043D\u0438\u0442\u044C \u0438 \u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F");
+  returnButton.type = cancelReturn.type = "button";
+  returnBox.hidden = true;
+  returnButton.hidden = true;
+  returnBox.append(returnButton, cancelReturn);
+  $3("shop-root").prepend(returnBox);
+  returnButton.onclick = () => {
+    const origin = searchOrigin, food = saved;
+    searchOrigin = null;
+    returnBox.hidden = true;
+    if (origin?.valid() && food) {
+      origin.select({ food_id: food.id, name_ru: food.name, state: food.state });
+      origin.back();
+    }
+  };
+  cancelReturn.onclick = () => {
+    const origin = searchOrigin;
+    searchOrigin = null;
+    returnBox.hidden = true;
+    origin?.back();
+  };
   $3("shop-query").addEventListener("input", () => {
+    cancelLookup("\u0417\u0430\u043F\u0440\u043E\u0441 \u0438\u0437\u043C\u0435\u043D\u0451\u043D. \u041D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041D\u0430\u0439\u0442\u0438 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443\xBB, \u0447\u0442\u043E\u0431\u044B \u0438\u0441\u043A\u0430\u0442\u044C \u0441\u043D\u043E\u0432\u0430.");
     searchToken++;
     $3("shop-search-results").replaceChildren();
   });
   $3("shop-wide").addEventListener("change", () => {
+    cancelLookup("\u0423\u0441\u043B\u043E\u0432\u0438\u044F \u043F\u043E\u0438\u0441\u043A\u0430 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u044B. \u041D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041D\u0430\u0439\u0442\u0438 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443\xBB \u0441\u043D\u043E\u0432\u0430.");
     searchToken++;
     $3("shop-search-results").replaceChildren();
   });
   $3("shop-search-form").onsubmit = (e) => {
     e.preventDefault();
+    if (lookup) return;
     run2(async () => {
       const token = ++searchToken, stamp = epoch(), query = $3("shop-query").value.trim(), wide = $3("shop-wide").checked, box = $3("shop-search-results");
+      status.textContent = "\u0418\u0449\u0435\u043C \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438\u2026";
       box.replaceChildren(el2("p", "muted", "\u0418\u0449\u0435\u043C \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0438\u2026"));
       try {
-        const d2 = await api("/api/shop/search", "POST", { query, wide });
+        const d2 = await requestLookup("/api/shop/search", { query, wide });
         if (token !== searchToken || stamp !== epoch()) return;
+        status.textContent = d2.hits.length ? "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u0438 \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0451 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439." : "\u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0432 \u044D\u0442\u043E\u043C \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0435. \u041C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434.";
         box.replaceChildren();
         if (!d2.hits.length) box.append(el2("p", "muted", "\u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041C\u043E\u0436\u043D\u043E \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u043F\u043E\u0438\u0441\u043A \u043F\u043E \u0432\u0441\u0435\u043C \u0441\u0442\u0440\u0430\u043D\u0430\u043C, \u0441\u0444\u043E\u0442\u043E\u0433\u0440\u0430\u0444\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443 \u0438\u043B\u0438 \u0432\u0432\u0435\u0441\u0442\u0438 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E."));
         for (const hit of d2.hits) {
@@ -1615,11 +1722,20 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
         }
         box.append(el2("p", "muted", "Open Food Facts \xB7 ODbL. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0437\u0430\u043F\u0438\u0441\u044C \u0438 \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439."));
       } catch (err) {
-        if (token === searchToken && stamp === epoch()) box.replaceChildren(el2("p", "muted", "\u041F\u043E\u0438\u0441\u043A \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D: " + err.message));
+        if (token === searchToken && stamp === epoch()) {
+          status.textContent = lookupFailure(err) + " \u041C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434.";
+          box.replaceChildren(el2("p", "muted", lookupFailure(err) + " \u041C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434."));
+          if (err.code !== "CANCELLED") throw err;
+        }
       }
     });
   };
-  function leave() {
+  function leave(keepOrigin = false) {
+    cancelLookup();
+    if (!keepOrigin) {
+      searchOrigin = null;
+      returnBox.hidden = true;
+    }
     stopScanner();
     searchToken++;
     generation++;
@@ -1633,6 +1749,7 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     }
   }
   function stage(name2) {
+    $3("shop-fallback").hidden = !["barcode", "scan", "review"].includes(name2);
     $3("shop-methods").hidden = Boolean(name2);
     $3("shop-other-method").hidden = !name2;
     $3("shop-search-stage").hidden = name2 !== "name";
@@ -1643,8 +1760,10 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     next.hidden = name2 !== "saved";
   }
   function method(name2) {
-    leave();
+    leave(true);
     stage(name2);
+    if (!/Запрос мог быть обработан/.test(status.textContent)) status.textContent = "";
+    if (name2 === "barcode") $3("shop-find").textContent = "\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443";
   }
   $3("shop-other-method").onclick = () => {
     method("");
@@ -1665,10 +1784,10 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
   $3("shop-photo-method").onclick = () => method("photo");
   const panel = root.querySelector("details");
   panel.addEventListener("toggle", () => {
-    if (!panel.open) stopScanner();
+    if (!panel.open) leave(true);
   });
   if (typeof document !== "undefined") document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopScanner();
+    if (document.hidden) leave(true);
   });
   for (const [id, label] of allergens) {
     const l2 = el2("label", "check", label), i = el2("input");
@@ -1705,7 +1824,15 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     syncBasisHint();
     setReady(false);
   }
-  form.addEventListener("input", () => {
+  form.addEventListener("input", (event) => {
+    if (event?.target?.name) editedFields.add(event.target.name);
+    if (!$3("shop-cancel").hidden) {
+      abort?.abort();
+      $3("shop-cancel").hidden = true;
+      $3("shop-read").disabled = !image2;
+      status.textContent = "\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u044B. \u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u0447\u0442\u0435\u043D\u0438\u044F \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E; \u0437\u0430\u043F\u0440\u043E\u0441 \u043C\u043E\u0433 \u0431\u044B\u0442\u044C \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u0430\u043D.";
+    }
+    cancelLookup("\u0414\u0430\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u044B. \u041F\u043E\u0438\u0441\u043A \u043E\u0442\u043C\u0435\u043D\u0451\u043D; \u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D.");
     syncBasisHint();
     generation++;
     if (saved) {
@@ -1722,6 +1849,7 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
   $3("shop-manual").onclick = () => {
     method("manual");
     if (saved) clearCandidate();
+    source = null;
     setReady(true);
     status.textContent = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0438\u0445 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435.";
   };
@@ -1731,7 +1859,6 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     abort?.abort();
     image2 = null;
     uncertainLabelAttempt = null;
-    clearCandidate();
     preview.hidden = true;
     $3("shop-read").disabled = true;
     if (!file) return;
@@ -1748,15 +1875,19 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     const off = source?.provider === "Open Food Facts", name2 = { Energy: "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", Protein: "\u0411\u0435\u043B\u043A\u0438", Fat: "\u0416\u0438\u0440\u044B", Carbohydrates: "\u0423\u0433\u043B\u0435\u0432\u043E\u0434\u044B", Fiber: "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430" }[x.name] || x.name, unit = { kcal: "\u043A\u043A\u0430\u043B", g: "\u0433", ml: "\u043C\u043B" }[x.unit] || x.unit, column = off && x.column === "100 g/ml (provider; verify label)" ? "\u043D\u0430 100 \u0433 \u0438\u043B\u0438 100 \u043C\u043B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0435" : x.column;
     return `${name2}: ${x.value ?? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445"} ${unit ?? ""} (${column ?? "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430"})`;
   }
-  function show(c2) {
+  function show(c2, { label = false } = {}) {
+    const code = $3("shop-barcode").value, kept = label ? Object.fromEntries([...editedFields].filter((k) => form.elements[k] && k !== "confirm").map((k) => [k, form.elements[k].value])) : {};
     clearCandidate();
+    if (!label) editedFields.clear();
     if (c2) stage("review");
     else form.hidden = true;
-    source = c2?.provenance || null;
+    source = label ? null : c2?.provenance || null;
     loadedNotice.hidden = !c2;
     const host = $3("shop-candidate");
     if (!c2) {
-      status.textContent = "\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.";
+      $3("shop-barcode").value = code;
+      $3("shop-fallback").hidden = false;
+      status.textContent = "\u041F\u0440\u043E\u0434\u0443\u043A\u0442 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0432 \u044D\u0442\u043E\u043C \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0435. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u043F\u0438\u0449\u0435\u0432\u043E\u0439 \u0446\u0435\u043D\u043D\u043E\u0441\u0442\u0438 \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434.";
       return;
     }
     form.elements.confirm.checked = false;
@@ -1764,6 +1895,7 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     if (c2.name) form.elements.name.value = c2.name;
     $3("shop-barcode").value = typeof c2.barcode === "string" && /^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(c2.barcode) ? c2.barcode : "";
     host.append(el2("h3", "", "\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u0434\u043B\u044F \u0441\u0432\u0435\u0440\u043A\u0438 \u0441 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u043E\u0439"));
+    host.append(el2("p", "ux-hint", "\u0415\u0441\u043B\u0438 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0430 \u043D\u0435 \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u044E\u0442, \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434 \u043D\u0438\u0436\u0435."));
     for (const line of [c2.name, c2.brand, c2.barcode ? "\u0428\u0442\u0440\u0438\u0445\u043A\u043E\u0434: " + c2.barcode : null, "\u041E\u0441\u043D\u043E\u0432\u0430: " + ({ per100g: "\u043D\u0430 100 \u0433", per100ml: "\u043D\u0430 100 \u043C\u043B", perserving: "\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044E", unknown: "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" }[c2.basis] || "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430"), ...c2.nutrients.map(nutrientLine), c2.ingredients_text, c2.allergen_statement_text, ...c2.unresolved_fields.map(unresolvedLabel), c2.reshoot_hint]) if (line) host.append(el2("p", "", line));
     const original = el2("details");
     original.append(el2("summary", "", "\u0418\u0441\u0445\u043E\u0434\u043D\u044B\u0435 \u043F\u043E\u0434\u043F\u0438\u0441\u0438 \u0438 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F"));
@@ -1794,6 +1926,8 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
         const matching = c2.nutrients.filter((r) => (r.column || "\u043A\u043E\u043B\u043E\u043D\u043A\u0430 \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u0430") === column && (r.name || "").toLowerCase().trim() === caption && /^(total carbohydrates? \(includes fib(?:er|re)\))$/.test(caption) && ["g", "\u0433"].includes((r.unit || "").toLowerCase().trim()) && typeof r.value === "number" && Number.isFinite(r.value) && r.value >= 0 && r.value === keys.carb[0]);
         if (matching.length === 1) f.basis.value = "total_includes_fiber";
       }
+      if (label) for (const [key, value] of Object.entries(kept)) f[key].value = value;
+      f.confirm.checked = false;
       syncBasisHint();
       status.textContent = "\u0427\u0438\u0441\u043B\u0430 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u044B \u0432 \u0438\u0441\u0445\u043E\u0434\u043D\u043E\u0439 \u043E\u0441\u043D\u043E\u0432\u0435. \u0421\u0432\u0435\u0440\u044C\u0442\u0435 \u043A\u0430\u0436\u0434\u044B\u0439 \u043F\u0443\u043D\u043A\u0442, \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0441\u043D\u043E\u0432\u0443 \u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435.";
     }
@@ -1806,6 +1940,14 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
         b2.onclick = () => applyColumn(column);
         host.append(b2);
       }
+    }
+    if (label) {
+      if (code) $3("shop-barcode").value = code;
+      for (const [key, value] of Object.entries(kept)) form.elements[key].value = value;
+      form.elements.confirm.checked = false;
+      syncBasisHint();
+      host.append(el2("p", "ux-hint", "\u0427\u0438\u0441\u043B\u0430 \u0438\u0437 \u043B\u0438\u0447\u043D\u043E\u0439 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438: \u044D\u0442\u043E \u043D\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 Open Food Facts. \u041A\u043E\u0434 " + ($3("shop-barcode").value || "\u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D") + " \u2014 \u043F\u0440\u0435\u0434\u0432\u0430\u0440\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0439 \u0438\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440; \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0443\u043F\u0430\u043A\u043E\u0432\u043A\u0443."));
+      if (Object.keys(kept).length) host.append(el2("p", "ux-hint", "\u0412\u0430\u0448\u0438 \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B; \u0441\u0432\u0435\u0440\u044C\u0442\u0435 \u0438\u0445 \u0441 \u043D\u043E\u0432\u043E\u0439 \u0442\u0430\u0431\u043B\u0438\u0446\u0435\u0439."));
     }
     if (source) {
       const p = el2("p", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: Open Food Facts, ODbL \xB7 "), a2 = el2("a", "", "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430");
@@ -1820,19 +1962,28 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
   $3("shop-read").onclick = () => run2(async () => {
     if (!image2) return;
     const g = ++generation, e = epoch(), reqId = uncertainLabelAttempt?.image === image2 ? uncertainLabelAttempt.request_id : crypto.randomUUID().replaceAll("-", "");
+    const labelImage = image2;
+    uncertainLabelAttempt = { image: labelImage, request_id: reqId };
     abort = new AbortController();
     $3("shop-read").disabled = true;
     $3("shop-cancel").hidden = false;
     status.textContent = "\u0427\u0438\u0442\u0430\u044E \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0443\u2026";
     try {
       const d2 = await call2("keto_label_extract", { request_id: reqId, image_data_url: image2 }, { signal: abort.signal });
-      uncertainLabelAttempt = null;
-      if (current(g, e)) show(d2.review_candidate);
+      if (current(g, e)) {
+        uncertainLabelAttempt = null;
+        show(d2.review_candidate, { label: true });
+      }
     } catch (err) {
-      const keepAttempt = !err?.status && err?.name !== "AbortError" || err?.code === "REQUEST_PENDING" || err?.status >= 500;
-      if (keepAttempt) uncertainLabelAttempt = { image: image2, request_id: reqId };
-      else uncertainLabelAttempt = null;
-      if (current(g, e)) status.textContent = err?.status ? "\u0427\u0442\u0435\u043D\u0438\u0435 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E: " + (err.message || "\u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0444\u043E\u0442\u043E.") : "\u0421\u0432\u044F\u0437\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043B\u0430\u0441\u044C: \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043D\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D. \u041F\u043E\u0432\u0442\u043E\u0440\u043D\u043E\u0435 \u043D\u0430\u0436\u0430\u0442\u0438\u0435 \u0441\u0432\u0435\u0440\u0438\u0442 \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441 \u0431\u0435\u0437 \u0434\u0432\u043E\u0439\u043D\u043E\u0433\u043E \u0441\u043F\u0438\u0441\u0430\u043D\u0438\u044F.";
+      const keepAttempt = !err?.status || err?.code === "REQUEST_PENDING" || err?.status >= 500;
+      if (current(g, e)) {
+        if (keepAttempt) uncertainLabelAttempt = { image: labelImage, request_id: reqId };
+        else uncertainLabelAttempt = null;
+      }
+      if (current(g, e)) {
+        $3("shop-fallback").hidden = false;
+        status.textContent = err?.status ? "\u0427\u0442\u0435\u043D\u0438\u0435 \u044D\u0442\u0438\u043A\u0435\u0442\u043A\u0438 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E: " + (err.message || "\u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0444\u043E\u0442\u043E.") : "\u0421\u0432\u044F\u0437\u044C \u043F\u0440\u0435\u0440\u0432\u0430\u043B\u0430\u0441\u044C: \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043D\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D. \u041F\u043E\u0432\u0442\u043E\u0440\u043D\u043E\u0435 \u043D\u0430\u0436\u0430\u0442\u0438\u0435 \u0441\u0432\u0435\u0440\u0438\u0442 \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441 \u0431\u0435\u0437 \u0434\u0432\u043E\u0439\u043D\u043E\u0433\u043E \u0441\u043F\u0438\u0441\u0430\u043D\u0438\u044F.";
+      }
       throw err;
     } finally {
       if (current(g, e)) {
@@ -1851,21 +2002,35 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
   };
   $3("shop-barcode").oninput = () => {
     stopScanner();
+    editedFields.clear();
     generation++;
+    cancelLookup("\u041A\u043E\u0434 \u0438\u0437\u043C\u0435\u043D\u0451\u043D. \u041D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443\xBB \u0434\u043B\u044F \u043D\u043E\u0432\u043E\u0433\u043E \u043F\u043E\u0438\u0441\u043A\u0430.");
     abort?.abort();
     clearCandidate();
+    $3("shop-fallback").hidden = false;
+    status.textContent = "\u041A\u043E\u0434 \u0438\u0437\u043C\u0435\u043D\u0451\u043D. \u041D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041D\u0430\u0439\u0442\u0438 \u043F\u043E \u0448\u0442\u0440\u0438\u0445\u043A\u043E\u0434\u0443\xBB \u0434\u043B\u044F \u043D\u043E\u0432\u043E\u0433\u043E \u043F\u043E\u0438\u0441\u043A\u0430.";
   };
   $3("shop-find").onclick = () => run2(async () => {
+    if (lookup) return;
     stopScanner();
     const barcode = $3("shop-barcode").value.trim(), g = ++generation, e = epoch();
+    editedFields.clear();
     clearCandidate();
-    status.textContent = "\u0418\u0449\u0443\u2026";
+    status.textContent = "\u0418\u0449\u0443 \u0432 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0435\u2026";
+    $3("shop-fallback").hidden = false;
     try {
-      const d2 = await api("/api/shop/barcode", "POST", { barcode });
-      if (current(g, e)) show(d2.review_candidate);
+      const d2 = await requestLookup("/api/shop/barcode", { barcode });
+      if (current(g, e)) {
+        show(d2.review_candidate);
+        if (/^(?:02|2\d)/.test(barcode)) status.textContent += " \u041A\u043E\u0434 \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u043D\u043E\u0439 \u043D\u0430\u043A\u043B\u0435\u0439\u043A\u0438 \u043C\u043E\u0436\u0435\u0442 \u0434\u0435\u0439\u0441\u0442\u0432\u043E\u0432\u0430\u0442\u044C \u0442\u043E\u043B\u044C\u043A\u043E \u0432 \u044D\u0442\u043E\u043C \u043C\u0430\u0433\u0430\u0437\u0438\u043D\u0435. \u041F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u043A\u043E\u0434 \u043F\u0440\u043E\u0438\u0437\u0432\u043E\u0434\u0438\u0442\u0435\u043B\u044F \u0438\u043B\u0438 \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B.";
+      }
     } catch (err) {
-      if (current(g, e)) status.textContent = "\u041F\u043E\u0438\u0441\u043A \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u041C\u043E\u0436\u043D\u043E \u0437\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0430\u043D\u043D\u044B\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.";
-      throw err;
+      if (/^PROVIDER_HTTP_\d+$/.test(err?.code)) err.code = "PROVIDER_HTTP_ERROR";
+      if (current(g, e)) {
+        status.textContent = lookupFailure(err) + " \u041C\u043E\u0436\u043D\u043E \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u0444\u043E\u0442\u043E \u0442\u0430\u0431\u043B\u0438\u0446\u044B \u0438\u043B\u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0432\u0432\u043E\u0434.";
+        $3("shop-fallback").hidden = false;
+        if (err.code !== "CANCELLED") throw err;
+      }
     }
   });
   function number2(v2, max) {
@@ -1964,7 +2129,16 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
     d2.open = true;
     d2.scrollIntoView({ block: "start" });
   };
-  return { afterApplied(d2) {
+  return { openSearch({ query, origin }) {
+    searchOrigin = origin;
+    method("name");
+    returnBox.hidden = false;
+    returnButton.hidden = true;
+    $3("shop-query").value = query;
+    $3("shop-wide").checked = false;
+    $3("shop-root").querySelector("details").open = true;
+    $3("shop-search-form").requestSubmit();
+  }, afterApplied(d2) {
     if (pantryPending && d2?.receipt?.id === pantryPending.proposal && d2.receipt.type === "kitchen.pantry") {
       const p = pantryPending;
       pantryPending = null;
@@ -1987,12 +2161,17 @@ function setupShop({ $: $3, el: el2, call: call2, api, getState, accept: accept2
         $3("shop-saved-name").textContent = "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043F\u0440\u043E\u0434\u0443\u043A\u0442: " + p.name;
         $3("shop-pantry").textContent = "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u0432 \u0437\u0430\u043F\u0430\u0441\u044B";
         status.textContent = "\u041B\u0438\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D.";
+        returnButton.hidden = !searchOrigin?.valid();
         next.scrollIntoView?.({ block: "nearest" });
       }
     } else if (pending && d2?.state?.pending && !d2.state.pending.some((p) => p.id === pending.proposal)) {
       pending = null;
     }
   }, stopScanner, leave, reset() {
+    cancelLookup();
+    editedFields.clear();
+    searchOrigin = null;
+    returnBox.hidden = true;
     stage("");
     for (const id of ["shop-next-options", "shop-allergen-review", "shop-portion-options"]) $3(id).open = false;
     stopScanner();
@@ -2084,7 +2263,7 @@ function createRecipeLibrary({ call: call2, readFilters, render, clear = () => {
 }
 
 // cloudflare-saas/public/own-dish.js
-function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, numberRu: numberRu2, openIntake, allergens = [] }) {
+function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, numberRu: numberRu2, openIntake, allergens = [], openRegional }) {
   const root = $3("own-dish-root");
   root.innerHTML = `<details class="panel"><summary data-icon="recipe">\u0421\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E</summary><div class="own-dish-content"><p class="ux-hint">\u0414\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u044B \u0441 \u043C\u0430\u0441\u0441\u043E\u0439 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u043E\u0439 \u0447\u0430\u0441\u0442\u0438, \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u0447\u0438\u0441\u043B\u043E \u043F\u043E\u0440\u0446\u0438\u0439 \u0432\u043E \u0432\u0441\u0451\u043C \u0431\u043B\u044E\u0434\u0435 \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E\xBB. \u041F\u043E\u0441\u043B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u0443\u044E \u0447\u0430\u0441\u0442\u044C \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E \u0437\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A.</p><details class="ux-guide"><summary>\u0427\u0435\u043C \xAB\u043F\u043E\u0440\u0446\u0438\u044F\xBB \u043E\u0442\u043B\u0438\u0447\u0430\u0435\u0442\u0441\u044F \u043E\u0442 \xAB\u0434\u043E\u043B\u0438 \u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430\xBB?</summary><div class="ux-guide-body"><p>\u0415\u0441\u043B\u0438 \u0432 \u0431\u043B\u044E\u0434\u0435 4 \u043F\u043E\u0440\u0446\u0438\u0438, \u0442\u043E \xAB1 \u043F\u043E\u0440\u0446\u0438\u044F\xBB \u043F\u0440\u0438 \u0437\u0430\u043F\u0438\u0441\u0438 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u2014 \u044D\u0442\u043E \u0447\u0435\u0442\u0432\u0435\u0440\u0442\u044C \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u043E\u0433\u043E \u0431\u043B\u044E\u0434\u0430, \u0430 \xAB0,5 \u043F\u043E\u0440\u0446\u0438\u0438\xBB \u2014 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u043E\u0434\u043D\u043E\u0439 \u0442\u0430\u0440\u0435\u043B\u043A\u0438. \u0415\u0441\u043B\u0438 \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u0435\u0434\u0438\u043D\u0438\u0446\u0443 \xAB\u0434\u043E\u043B\u044F \u0432\u0441\u0435\u0433\u043E \u0431\u043B\u044E\u0434\u0430\xBB \u0438 \u0443\u043A\u0430\u0437\u0430\u0442\u044C 0,5 \u2014 \u0432 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u0437\u0430\u043F\u0438\u0448\u0435\u0442\u0441\u044F \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u0432\u0441\u0435\u0439 \u043A\u0430\u0441\u0442\u0440\u044E\u043B\u0438 (2 \u0438\u0437 4 \u043F\u043E\u0440\u0446\u0438\u0439).</p></div></details><form id="own-form"><label>\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435<input name="name" maxlength="200" required></label><label>\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F<select name="category"><option value="main">\u041E\u0441\u043D\u043E\u0432\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E</option><option value="breakfast">\u0417\u0430\u0432\u0442\u0440\u0430\u043A</option><option value="side">\u0413\u0430\u0440\u043D\u0438\u0440</option><option value="component">\u041A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442</option></select></label><label>\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u043E \u0432\u0441\u0451\u043C \u0431\u043B\u044E\u0434\u0435<input name="servings" type="text" inputmode="decimal" value="1" required><span id="own-servings-error" role="alert"></span></label><label>\u0412\u0440\u0435\u043C\u044F \u0440\u0430\u0431\u043E\u0442\u044B \u043D\u0430 \u043A\u0443\u0445\u043D\u0435, \u043C\u0438\u043D\u0443\u0442<input name="minutes" type="number" min="1" max="360" value="15" required><span class="ux-hint">\u0421\u043A\u043E\u043B\u044C\u043A\u043E \u043C\u0438\u043D\u0443\u0442 \u0432\u044B \u0433\u043E\u0442\u043E\u0432\u0438\u0442\u0435 \u0441\u0430\u043C\u0438: \u0440\u0435\u0436\u0435\u0442\u0435, \u0441\u043C\u0435\u0448\u0438\u0432\u0430\u0435\u0442\u0435, \u043E\u0431\u0436\u0430\u0440\u0438\u0432\u0430\u0435\u0442\u0435. \u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u0432 \u0434\u0443\u0445\u043E\u0432\u043A\u0435 \u0438\u043B\u0438 \u0445\u043E\u043B\u043E\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0435 \u0441\u044E\u0434\u0430 \u043D\u0435 \u0432\u0445\u043E\u0434\u0438\u0442.</span></label><label>\u041D\u0430\u0439\u0442\u0438 \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442<input name="search" type="search" autocomplete="off"></label><div id="own-results"></div><p class="ux-hint">\u041F\u0440\u0438 \u0432\u044B\u0431\u043E\u0440\u0435 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0434\u043E\u0431\u0430\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0431\u0435\u0437 \u0443\u0433\u0430\u0434\u044B\u0432\u0430\u043D\u0438\u044F \u0433\u0440\u0430\u043C\u043C\u043E\u0432 \u2014 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u043C\u0430\u0441\u0441\u0443 \u0441\u044A\u0435\u0434\u043E\u0431\u043D\u043E\u0439 \u0447\u0430\u0441\u0442\u0438 \u0434\u043B\u044F \u043A\u0430\u0436\u0434\u043E\u0433\u043E \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u0430.</p><div id="own-rows"></div><label>\u041A\u0430\u043A \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C<textarea name="steps" maxlength="5000" required placeholder="\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440: \u043D\u0430\u0440\u0435\u0436\u044C\u0442\u0435 \u043E\u0432\u043E\u0449\u0438, \u0441\u043C\u0435\u0448\u0430\u0439\u0442\u0435 \u0441 \u0441\u044B\u0440\u043E\u043C \u0438 \u0437\u0430\u043F\u0435\u043A\u0430\u0439\u0442\u0435 \u0434\u043E \u0433\u043E\u0442\u043E\u0432\u043D\u043E\u0441\u0442\u0438."></textarea><span class="ux-hint">\u0417\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u0441\u0432\u043E\u0439 \u043F\u043E\u0440\u044F\u0434\u043E\u043A \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u044F. \u041E\u043D \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u0441\u044F \u0432\u043C\u0435\u0441\u0442\u0435 \u0441 \u0441\u043E\u0441\u0442\u0430\u0432\u043E\u043C \u0431\u043B\u044E\u0434\u0430.</span></label><p id="own-form-error" role="alert"></p><button type="submit">\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button><button id="own-save" type="button" hidden>\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0431\u043B\u044E\u0434\u043E</button></form><div id="own-preview" aria-live="polite"></div><div id="own-intake" hidden><label>\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E<select id="own-saved"></select></label><button id="own-detail" type="button">\u0421\u043E\u0441\u0442\u0430\u0432 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435</button><div id="own-detail-result" aria-live="polite"></div><button id="own-record" class="primary" type="button">\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0441\u044A\u0435\u0434\u0435\u043D\u043D\u043E\u0435</button></div></div></details>`;
   const form = $3("own-form");
@@ -2093,7 +2272,13 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   const servingsField = form.elements.namedItem("servings");
   servingsField.setAttribute("aria-describedby", servingsHint.id);
   servingsField.insertAdjacentElement("afterend", servingsHint);
-  let rows = [], id = null, stamp = "", saved = null;
+  const sourceReview = el2("input");
+  sourceReview.type = "checkbox";
+  const sourceReviewWrap = el2("label", "check", "\u042F \u0443\u0442\u043E\u0447\u043D\u0438\u043B(\u0430) \u043F\u0440\u043E\u043F\u0443\u0449\u0435\u043D\u043D\u044B\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u0430, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F, \u0432\u044B\u0445\u043E\u0434 \u0438 \u043F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435 \u043F\u043E \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0443; \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0441\u043E\u0441\u0442\u0430\u0432\u0430 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u044B.");
+  sourceReviewWrap.append(sourceReview);
+  sourceReviewWrap.hidden = true;
+  form.append(sourceReviewWrap);
+  let rows = [], id = null, stamp = "", saved = null, provenance = null, matchingRow = null;
   function decimal(value, label, min, max, near) {
     const raw = String(value ?? "").trim();
     let error = "";
@@ -2110,6 +2295,10 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     id = null;
     stamp = "";
     saved = null;
+    provenance = null;
+    matchingRow = null;
+    sourceReview.checked = false;
+    sourceReviewWrap.hidden = true;
     form.reset();
     $3("own-rows").replaceChildren();
     $3("own-preview").replaceChildren();
@@ -2121,7 +2310,9 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     $3("own-intake").hidden = true;
   }
   function payload() {
-    return { recipe_id: id || (id = "R" + crypto.randomUUID().replaceAll("-", "")), name_ru: form.elements.namedItem("name").value, category: form.elements.namedItem("category").value, base_servings: decimal(form.elements.namedItem("servings").value, "\u0447\u0438\u0441\u043B\u043E \u043F\u043E\u0440\u0446\u0438\u0439", 0.1, 30, $3("own-servings-error")), active_minutes: decimal(form.elements.namedItem("minutes").value, "\u0432\u0440\u0435\u043C\u044F", 1, 360), ingredients: rows.map((x) => ({ food_id: x.food_id, state: x.state, grams_edible: decimal(x.grams, "\u0433\u0440\u0430\u043C\u043C\u044B \u0434\u043B\u044F \xAB" + x.name_ru + "\xBB", 1e-3, 5e3, x.error) })), steps_ru: form.elements.namedItem("steps").value };
+    if (provenance && !sourceReview.checked) throw Error("\u0423\u0442\u043E\u0447\u043D\u0438\u0442\u0435 \u043F\u0440\u043E\u043F\u0443\u0441\u043A\u0438 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0430 \u0438 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0441\u043E\u0441\u0442\u0430\u0432\u0430.");
+    if (rows.some((row) => !row.food_id)) throw Error("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0434\u043B\u044F \u043A\u0430\u0436\u0434\u043E\u0433\u043E \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u0430 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0430.");
+    return { ...provenance ? { provenance, source_review_confirmed: true } : {}, recipe_id: id || (id = "R" + crypto.randomUUID().replaceAll("-", "")), name_ru: form.elements.namedItem("name").value, category: form.elements.namedItem("category").value, base_servings: decimal(form.elements.namedItem("servings").value, "\u0447\u0438\u0441\u043B\u043E \u043F\u043E\u0440\u0446\u0438\u0439", 0.1, 30, $3("own-servings-error")), active_minutes: decimal(form.elements.namedItem("minutes").value, "\u0432\u0440\u0435\u043C\u044F", 1, 360), ingredients: rows.map((x) => ({ food_id: x.food_id, state: x.state, grams_edible: decimal(x.grams, "\u0433\u0440\u0430\u043C\u043C\u044B \u0434\u043B\u044F \xAB" + x.name_ru + "\xBB", 1e-3, 5e3, x.error) })), steps_ru: form.elements.namedItem("steps").value };
   }
   function changed() {
     stamp = "";
@@ -2133,7 +2324,38 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     box.replaceChildren();
     for (const row of rows) {
       const line = el2("div", "own-ingredient");
-      line.append(el2("span", "", row.name_ru + " \xB7 " + foodState2(row.state)));
+      line.append(el2("span", "", row.name_ru + " \xB7 " + (row.state ? foodState2(row.state) : "\u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u043E")));
+      if (row.original) line.append(el2("p", "ux-hint", "\u0412 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0435: " + row.original));
+      const match = el2("button", "secondary", "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u043F\u0440\u043E\u0434\u0443\u043A\u0442 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435");
+      match.type = "button";
+      match.onclick = () => {
+        matchingRow = row;
+        form.elements.namedItem("search").value = row.searchName || row.name_ru;
+        run2(() => foodPicker.search({ reveal: true }));
+      };
+      line.append(match);
+      if (row.matches?.length) {
+        const options = el2("select");
+        options.setAttribute("aria-label", "\u0421\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435: " + row.name_ru);
+        const empty = el2("option", "", "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043D\u043E\u0435 \u0441\u043E\u043E\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435");
+        empty.value = "";
+        options.append(empty);
+        for (const f of row.matches) {
+          const o2 = el2("option", "", f.name_ru + " \xB7 " + foodState2(f.state));
+          o2.value = f.food_id;
+          options.append(o2);
+        }
+        options.value = row.food_id || "";
+        options.onchange = () => {
+          const f = row.matches.find((x) => x.food_id === options.value);
+          if (f) {
+            Object.assign(row, f);
+            draw();
+            changed();
+          }
+        };
+        line.append(options);
+      }
       const gram = el2("input");
       gram.type = "text";
       gram.inputMode = "decimal";
@@ -2167,12 +2389,19 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
   }
   function preview(box, p) {
     const batch = p.whole_batch;
+    if (p.provenance) {
+      const a2 = el2("a", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: " + new URL(p.provenance.source_url).hostname);
+      a2.href = p.provenance.source_url;
+      a2.target = "_blank";
+      a2.rel = "noopener noreferrer";
+      box.append(a2);
+    }
     box.append(el2("h4", "", batch.name_ru + " \xB7 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0435 \u0431\u043B\u044E\u0434\u043E"), el2("p", "muted", "\u0420\u0430\u0441\u0447\u0451\u0442 \u0434\u043B\u044F \u0444\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0439 \u0437\u0430\u043F\u0438\u0441\u0438 \u043F\u0438\u0442\u0430\u043D\u0438\u044F; \u044D\u0442\u043E \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u043E\u0435 \u043C\u0435\u043D\u044E."));
     if (p.servings != null) box.append(el2("p", "", `\u041F\u043E\u0440\u0446\u0438\u0439 \u0432\u043E \u0432\u0441\u0451\u043C \u0431\u043B\u044E\u0434\u0435: ${numberRu2(p.servings)}`));
     for (const i of batch.ingredients) box.append(el2("p", "", i.name_ru + " \u2014 " + numberRu2(i.grams_edible) + " \u0433 \xB7 " + foodState2(i.state)));
     if (p.steps_ru) box.append(el2("p", "", "\u041F\u0440\u0438\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u0438\u0435: " + p.steps_ru));
     for (const [title, c2] of [["\u0412\u0441\u0451 \u0431\u043B\u044E\u0434\u043E", batch], ["\u041E\u0434\u043D\u0430 \u043F\u043E\u0440\u0446\u0438\u044F", p.per_portion]]) {
-      const fields = [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043E\u043A", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"], ["net_carbohydrate_g", "\u0420\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0435 \u0447\u0438\u0441\u0442\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"]];
+      const fields = [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043E\u043A", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"], ["net_carbohydrate_g", "\u0420\u0430\u0441\u0447\u0451\u0442\u043D\u044B\u0435 \u0447\u0438\u0441\u0442\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["available_carbohydrate_g", "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"]];
       const section = el2("section", "own-nutrition"), list = el2("dl", "intake-nutrients");
       section.append(el2("h4", "", title));
       for (const [k, n, u2] of fields) {
@@ -2184,7 +2413,14 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     }
     if (p.issues?.some((x) => x.startsWith("allergen:"))) box.append(el2("p", "notice", "\u0412 \u0441\u043E\u0441\u0442\u0430\u0432\u0435 \u043E\u0442\u043C\u0435\u0447\u0435\u043D \u0430\u043B\u043B\u0435\u0440\u0433\u0435\u043D \u0438\u0437 \u0432\u0430\u0448\u0435\u0433\u043E \u043F\u0440\u043E\u0444\u0438\u043B\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u0435\u0440\u0435\u0434 \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u0435\u043D\u0438\u0435\u043C."));
   }
-  const foodPicker = createFoodPicker({ root: $3("own-results"), input: form.elements.namedItem("search"), el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, allergens, selectionMessage: (food) => "\u0414\u043E\u0431\u0430\u0432\u043B\u0435\u043D \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442: " + food.name_ru + ". \u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0435\u0433\u043E \u043C\u0430\u0441\u0441\u0443 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445 \u043D\u0438\u0436\u0435, \u0437\u0430\u0442\u0435\u043C \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u043E\u0441\u0442\u0430\u043B\u044C\u043D\u044B\u0435 \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u044B \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E\xBB.", onSelect: (food) => {
+  const foodPicker = createFoodPicker({ root: $3("own-results"), input: form.elements.namedItem("search"), el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, allergens, openRegional, selectionMessage: (food) => "\u0414\u043E\u0431\u0430\u0432\u043B\u0435\u043D \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442: " + food.name_ru + ". \u0423\u043A\u0430\u0436\u0438\u0442\u0435 \u0435\u0433\u043E \u043C\u0430\u0441\u0441\u0443 \u0432 \u0433\u0440\u0430\u043C\u043C\u0430\u0445 \u043D\u0438\u0436\u0435, \u0437\u0430\u0442\u0435\u043C \u0434\u043E\u0431\u0430\u0432\u044C\u0442\u0435 \u043E\u0441\u0442\u0430\u043B\u044C\u043D\u044B\u0435 \u0438\u043D\u0433\u0440\u0435\u0434\u0438\u0435\u043D\u0442\u044B \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u043E\xBB.", onSelect: (food) => {
+    if (matchingRow && rows.includes(matchingRow)) {
+      Object.assign(matchingRow, food);
+      matchingRow = null;
+      draw();
+      changed();
+      return rows.find((row) => row.food_id === food.food_id)?.input;
+    }
     if (!rows.some((row) => row.food_id === food.food_id)) {
       rows.push({ ...food, grams: "" });
       draw();
@@ -2262,6 +2498,10 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       foodPicker.reset();
       form.reset();
       rows = [];
+      provenance = null;
+      matchingRow = null;
+      sourceReview.checked = false;
+      sourceReviewWrap.hidden = true;
       id = null;
       stamp = "";
       draw();
@@ -2281,7 +2521,170 @@ function setupOwnDish({ $: $3, el: el2, call: call2, getState, accept: accept2, 
       changed();
     }
   }
-  return { reset, preview, savedReceipt, update, addConfirmedFood, afterApplied: foodPicker.afterApplied };
+  function importRecipe(recipe) {
+    foodPicker.reset();
+    id = null;
+    stamp = "";
+    saved = null;
+    matchingRow = null;
+    provenance = recipe.provenance;
+    sourceReview.checked = false;
+    sourceReviewWrap.hidden = false;
+    form.elements.namedItem("name").value = recipe.title;
+    form.elements.namedItem("servings").value = recipe.servings ?? "";
+    form.elements.namedItem("minutes").value = recipe.active_minutes ?? "";
+    form.elements.namedItem("steps").value = recipe.steps_ru;
+    rows = recipe.ingredients.map((i) => ({ food_id: null, name_ru: i.name, searchName: i.name, state: null, grams: i.grams ?? "", original: i.text + (i.amount ? " \xB7 " + i.amount : ""), matches: i.matches }));
+    draw();
+    changed();
+    $3("own-preview").replaceChildren(el2("p", "notice", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: " + new URL(provenance.source_url).hostname + ". " + (recipe.servings_text ? "\u0412\u044B\u0445\u043E\u0434 \u0432 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0435: " + recipe.servings_text + ". " : "") + "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043A\u0430\u0436\u0434\u044B\u0439 \u043F\u0440\u043E\u0434\u0443\u043A\u0442, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043C\u0430\u0441\u0441\u0443 \u0438 \u0447\u0438\u0441\u043B\u043E \u043F\u043E\u0440\u0446\u0438\u0439. \u0413\u043E\u0442\u043E\u0432\u0430\u044F \u043C\u0430\u0441\u0441\u0430 \u043D\u0435 \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u044B\u0432\u0430\u0435\u0442\u0441\u044F \u0438\u0437 \u0441\u044B\u0440\u043E\u0439."), ...recipe.questions.map((q2) => el2("p", "ux-hint", q2)));
+    root.querySelector("details").open = true;
+    root.scrollIntoView?.({ block: "start" });
+  }
+  return { importRecipe, reset, preview, savedReceipt, update, addConfirmedFood, afterApplied: foodPicker.afterApplied };
+}
+
+// cloudflare-saas/public/recipe-discovery.js
+function setupRecipeDiscovery({ $: $3, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, importRecipe }) {
+  const root = $3("recipe-discovery-root");
+  root.innerHTML = '<section class="panel"><h2>\u041D\u0430\u0439\u0442\u0438 \u043D\u043E\u0432\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442 \u0432 \u0438\u043D\u0442\u0435\u0440\u043D\u0435\u0442\u0435</h2><p class="ux-hint">\u041D\u0430\u0439\u0434\u0451\u043C \u0440\u0435\u0446\u0435\u043F\u0442\u044B \u043D\u0430 \u0441\u0430\u0439\u0442\u0430\u0445. \u0412\u0432\u043E\u0434\u0438\u0442\u0435 \u0431\u043B\u044E\u0434\u043E \u0438\u043B\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0431\u0435\u0437 \u043B\u0438\u0447\u043D\u044B\u0445 \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u0439. \u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438 \u0434\u043D\u0435\u0432\u043D\u0438\u043A \u043D\u0435 \u043F\u0435\u0440\u0435\u0434\u0430\u044E\u0442\u0441\u044F \u0432 \u043F\u043E\u0438\u0441\u043A. \u041F\u0435\u0440\u0435\u0434 \u0440\u0430\u0441\u0447\u0451\u0442\u043E\u043C \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u0430\u0432.</p><form id="discovery-form"><label>\u0411\u043B\u044E\u0434\u043E \u0438\u043B\u0438 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u044B \u0434\u043B\u044F \u043F\u043E\u0438\u0441\u043A\u0430<input id="discovery-query" maxlength="200" required placeholder="\u041D\u0430\u043F\u0440\u0438\u043C\u0435\u0440: \u0441\u044B\u0440\u043D\u0438\u043A\u0438 \u0441 \u043A\u043E\u043A\u043E\u0441\u043E\u0432\u043E\u0439 \u043C\u0443\u043A\u043E\u0439"></label><button id="discovery-submit" type="submit">\u0418\u0441\u043A\u0430\u0442\u044C \u043D\u043E\u0432\u044B\u0435 \u0440\u0435\u0446\u0435\u043F\u0442\u044B</button><button id="discovery-cancel" type="button" hidden>\u041F\u0440\u0435\u043A\u0440\u0430\u0442\u0438\u0442\u044C \u043E\u0436\u0438\u0434\u0430\u043D\u0438\u0435</button></form><p id="discovery-status" role="status" aria-live="polite"></p><div id="discovery-results"></div></section>';
+  let token = 0, pending = null, abort = null, knownRequest = null;
+  function storageKey() {
+    const owner = getState()?.profile?.owner_account_id;
+    return owner ? "keto:public-discovery:" + owner : null;
+  }
+  function storePending(value) {
+    try {
+      const key = storageKey();
+      if (key) {
+        if (value) globalThis.sessionStorage?.setItem(key, JSON.stringify(value));
+        else globalThis.sessionStorage?.removeItem(key);
+      }
+    } catch {
+    }
+  }
+  function restorePending() {
+    try {
+      const key = storageKey(), value = key && JSON.parse(globalThis.sessionStorage?.getItem(key) || "null"), a2 = value?.args;
+      if (a2 && a2.action === "discover" && typeof a2.query === "string" && a2.query.length <= 200 && /^[A-Za-z0-9_-]{8,100}$/.test(a2.request_id) && Number.isInteger(a2.expected_revision)) return value;
+    } catch {
+    }
+    return null;
+  }
+  const form = $3("discovery-form"), status = $3("discovery-status"), results = $3("discovery-results"), button = $3("discovery-submit");
+  function draw(data) {
+    results.replaceChildren();
+    for (const recipe of data.recipes || []) {
+      const card = el2("article", "recipe-card"), a2 = el2("a", "", "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A: " + new URL(recipe.provenance.source_url).hostname);
+      a2.href = recipe.provenance.source_url;
+      a2.target = "_blank";
+      a2.rel = "noopener noreferrer";
+      const choose = el2("button", "secondary", "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0441\u043E\u0441\u0442\u0430\u0432 \u0432 \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440\u0435");
+      choose.type = "button";
+      const screen = epoch();
+      choose.onclick = () => {
+        if (screen === epoch()) importRecipe(recipe);
+      };
+      card.append(el2("h3", "", recipe.title), a2, el2("p", "muted", "\u041D\u0430\u0439\u0434\u0435\u043D\u043E: " + new Date(recipe.provenance.retrieved_at).toLocaleString("ru-RU") + " \xB7 \u0438\u0437 \u0432\u043D\u0435\u0448\u043D\u0435\u0433\u043E \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0430"), el2("p", "", recipe.ingredients.length ? recipe.ingredients.map((i) => i.text).join("; ") : "\u041D\u0430\u0439\u0434\u0435\u043D \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A; \u0441\u043E\u0441\u0442\u0430\u0432 \u0435\u0449\u0451 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u0438 \u0437\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u0435 \u043F\u0440\u043E\u043F\u0443\u0441\u043A\u0438 \u0432 \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440\u0435."), choose);
+      results.append(card);
+    }
+  }
+  async function search() {
+    const query = $3("discovery-query").value.trim();
+    if (!query || button.disabled) return;
+    if (pending && pending.args.query !== query) {
+      status.textContent = "\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441 \u0435\u0449\u0451 \u043D\u0435 \u0441\u0432\u0435\u0440\u0451\u043D. \u0412\u0435\u0440\u043D\u0438\u0442\u0435 \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0442\u0435\u043A\u0441\u0442 \u0434\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0430.";
+      return;
+    }
+    const stamp = ++token, screen = epoch();
+    pending = pending || { args: { action: "discover", query, request_id: crypto.randomUUID().replaceAll("-", ""), expected_revision: getState().revision } };
+    knownRequest = pending.args.request_id;
+    storePending(pending);
+    button.disabled = true;
+    $3("discovery-cancel").hidden = false;
+    status.textContent = "\u0418\u0449\u0435\u043C \u0438 \u0447\u0438\u0442\u0430\u0435\u043C \u043F\u0443\u0431\u043B\u0438\u0447\u043D\u044B\u0435 \u0440\u0435\u0446\u0435\u043F\u0442\u044B\u2026 \u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0430\u044F \u0431\u0438\u0431\u043B\u0438\u043E\u0442\u0435\u043A\u0430 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430 \u043D\u0438\u0436\u0435.";
+    abort = new AbortController();
+    try {
+      const data = await call2("keto_kitchen", pending.args, { signal: abort.signal });
+      if (stamp !== token || screen !== epoch()) return;
+      pending = null;
+      storePending(null);
+      accept2(data);
+      draw(data);
+      status.textContent = data.message;
+      button.textContent = data.discovery_failed ? "\u0418\u0441\u043A\u0430\u0442\u044C \u043D\u043E\u0432\u044B\u043C \u0437\u0430\u043F\u0440\u043E\u0441\u043E\u043C" : "\u0418\u0441\u043A\u0430\u0442\u044C \u043D\u043E\u0432\u044B\u0435 \u0440\u0435\u0446\u0435\u043F\u0442\u044B";
+    } catch (error) {
+      if (stamp !== token || screen !== epoch()) return;
+      status.textContent = "\u041F\u043E\u0438\u0441\u043A \u043D\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D: " + error.message + " \u0410\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u043F\u043E\u0432\u0442\u043E\u0440\u0430 \u043D\u0435\u0442.";
+      if (error.code === "REQUEST_FAILED" || error.status === 422) {
+        pending = null;
+        storePending(null);
+        button.textContent = "\u0418\u0441\u043A\u0430\u0442\u044C \u043D\u043E\u0432\u044B\u043C \u0437\u0430\u043F\u0440\u043E\u0441\u043E\u043C";
+      } else button.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441";
+    } finally {
+      if (stamp === token) {
+        button.disabled = false;
+        $3("discovery-cancel").hidden = true;
+        abort = null;
+      }
+    }
+  }
+  form.onsubmit = (event) => {
+    event.preventDefault();
+    run2(search);
+  };
+  $3("discovery-cancel").onclick = () => {
+    token++;
+    abort?.abort();
+    abort = null;
+    button.disabled = false;
+    button.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441";
+    $3("discovery-cancel").hidden = true;
+    status.textContent = "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043F\u0440\u0435\u043A\u0440\u0430\u0449\u0435\u043D\u043E; \u0437\u0430\u043F\u0440\u043E\u0441 \u043C\u043E\u0433 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044C\u0441\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0442\u0435\u043C \u0436\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435\u043C \u043F\u0435\u0440\u0435\u0434 \u043D\u043E\u0432\u044B\u043C \u043F\u043E\u0438\u0441\u043A\u043E\u043C.";
+  };
+  $3("recipe-query").addEventListener("input", () => {
+    if (!pending && !button.disabled) $3("discovery-query").value = $3("recipe-query").value;
+  });
+  return { update(state2) {
+    pending = pending || restorePending();
+    const recent = state2?.kitchen?.discovery;
+    if (pending && recent?.request_id !== pending.args.request_id) {
+      $3("discovery-query").value = pending.args.query;
+      button.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441";
+      status.textContent = "\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441 \u0435\u0449\u0451 \u043D\u0435 \u0441\u0432\u0435\u0440\u0451\u043D. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0435\u0433\u043E \u0431\u0435\u0437 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u043D\u044B\u0445 \u0434\u0430\u043D\u043D\u044B\u0445.";
+      return;
+    }
+    if (!recent || recent.request_id === knownRequest && !pending) return;
+    knownRequest = recent.request_id;
+    if (recent.status === "pending") {
+      pending = pending || { args: { action: "discover", query: recent.query, request_id: recent.request_id, expected_revision: recent.expected_revision } };
+      storePending(pending);
+      $3("discovery-query").value = recent.query;
+      button.textContent = "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441";
+      status.textContent = "\u0415\u0441\u0442\u044C \u043D\u0430\u0447\u0430\u0442\u044B\u0439 \u0432\u043D\u0435\u0448\u043D\u0438\u0439 \u043F\u043E\u0438\u0441\u043A. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0437\u0430\u043F\u0440\u043E\u0441; \u043D\u043E\u0432\u044B\u0439 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043D\u0435 \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u0442\u0441\u044F.";
+    } else if (recent.status === "completed" && recent.response) {
+      pending = null;
+      storePending(null);
+      draw(recent.response);
+      status.textContent = "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0439 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043F\u043E\u0438\u0441\u043A\u0430: " + recent.response.message;
+    } else if (recent.status === "failed") {
+      pending = null;
+      storePending(null);
+      status.textContent = "\u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0432\u043D\u0435\u0448\u043D\u0438\u0439 \u043F\u043E\u0438\u0441\u043A \u043D\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D; \u043C\u043E\u0436\u043D\u043E \u043E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u043D\u043E\u0432\u044B\u0439 \u0437\u0430\u043F\u0440\u043E\u0441.";
+    }
+  }, reset() {
+    knownRequest = null;
+    token++;
+    abort?.abort();
+    abort = null;
+    pending = null;
+    form.reset();
+    results.replaceChildren();
+    status.textContent = "";
+    button.disabled = false;
+    button.textContent = "\u0418\u0441\u043A\u0430\u0442\u044C \u043D\u043E\u0432\u044B\u0435 \u0440\u0435\u0446\u0435\u043F\u0442\u044B";
+    $3("discovery-cancel").hidden = true;
+  } };
 }
 
 // cloudflare-saas/public/developer-ui.js
@@ -6157,7 +6560,7 @@ function diaryNavigation(storage, account) {
 
 // cloudflare-saas/public/intake-ui.js
 var MEALS = { breakfast: "\u0417\u0430\u0432\u0442\u0440\u0430\u043A", lunch: "\u041E\u0431\u0435\u0434", dinner: "\u0423\u0436\u0438\u043D", snack: "\u041F\u0435\u0440\u0435\u043A\u0443\u0441" };
-var NUTRIENTS = [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043A\u0438", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"]];
+var NUTRIENTS = [["energy_kcal", "\u042D\u043D\u0435\u0440\u0433\u0438\u044F", "\u043A\u043A\u0430\u043B"], ["protein_g", "\u0411\u0435\u043B\u043A\u0438", "\u0433"], ["fat_g", "\u0416\u0438\u0440\u044B", "\u0433"], ["carbohydrate_total_g", "\u041E\u0431\u0449\u0438\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"], ["fiber_g", "\u041A\u043B\u0435\u0442\u0447\u0430\u0442\u043A\u0430", "\u0433"], ["available_carbohydrate_g", "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B", "\u0433"]];
 var number = (n, digits = 1) => n == null ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(n);
 function savedCheck(el2) {
   const mark = el2("span", "saved-check");
@@ -6201,7 +6604,6 @@ function nutritionNodes(el2, calculation) {
     const value = nutrition[key], known = coverage[key]?.known_subtotal;
     grid.append(el2("dt", "", label), el2("dd", "", value == null || coverage[key]?.complete === false ? known == null || known === 0 ? "\u043D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445 \xB7 \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435" : `\u0443\u0447\u0442\u0435\u043D\u043E ${number(known, key === "energy_kcal" ? 0 : 1)} ${unit} \xB7 \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u0435 \u0434\u0430\u043D\u043D\u044B\u0435` : `${number(value, key === "energy_kcal" ? 0 : 1)} ${unit}`));
   }
-  if (calculation?.available_carbohydrate_g != null) grid.append(el2("dt", "", "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u0443\u0433\u043B\u0435\u0432\u043E\u0434\u044B"), el2("dd", "", number(calculation.available_carbohydrate_g) + " \u0433"));
   return [grid];
 }
 function intakeReviewNodes(el2, preview) {
@@ -12035,6 +12437,7 @@ function renderTranquilSummary(next) {
 }
 function clearScreen() {
   bugReports.reset();
+  recipeDiscovery.reset();
   document.querySelectorAll(".catalog-saved-receipt").forEach((node) => node.remove());
   dialogs.reset();
   chatActions.reset();
@@ -12209,6 +12612,7 @@ function setState(next) {
   if (Array.isArray(next.holds) && next.holds.length && Number.isInteger(next.revision)) safetyHoldFloorRevision = Math.max(safetyHoldFloorRevision, next.revision);
   state = next;
   ownDish.update(state);
+  recipeDiscovery.update(state);
   developer.identity();
   renderState();
 }
@@ -12828,7 +13232,11 @@ $2("portion-food").addEventListener("change", () => {
 for (const id of ["portion-grams", "portion-gi", "portion-source", "portion-match"]) {
   for (const event of ["input", "change"]) $2(id).addEventListener(event, clearPortionResult);
 }
-var portionPicker = createFoodPicker({ root: $2("portion-results"), input: $2("portion-query"), el, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, allergens: ALLERGENS, onSelect: (food) => {
+function openRegionalSearch(target, back) {
+  shop.openSearch({ ...target, origin: { ...target.origin, back: () => setView(back) } });
+  setView("products");
+}
+var portionPicker = createFoodPicker({ openRegional: (target) => openRegionalSearch(target, "diary"), root: $2("portion-results"), input: $2("portion-query"), el, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, allergens: ALLERGENS, onSelect: (food) => {
   portionFoods = [food];
   $2("portion-food").value = food.food_id;
   $2("portion-selected-name").textContent = food.name_ru;
@@ -13183,7 +13591,7 @@ var chatActions = setupChatActions({ el, call: recipePageCall, getState: () => s
     dialogs.open("recipe", "recipe-close-top");
   } else openRecipe(recipe, source);
 }, openIntake: (source) => intake.open(source), showProposal });
-var shop = setupShop({ $: $2, el, call: recipePageCall, api: (path, method, body) => cfApi(path, { method, body }), getState: () => state, accept, run, epoch: () => screenEpoch, allergens: ALLERGENS, onPantryPreview: (name2) => {
+var shop = setupShop({ $: $2, el, call: recipePageCall, api: (path, method, body, options = {}) => cfApi(path, { method, body, ...options }), getState: () => state, accept, run, epoch: () => screenEpoch, allergens: ALLERGENS, onPantryPreview: (name2) => {
   setView("recipes");
   $2("recipe-kitchen-disclosure").open = true;
   kitchen.previewSavedPantry(name2);
@@ -13196,7 +13604,8 @@ $2("menu-shop").onclick = () => {
     panel.scrollIntoView({ block: "nearest" });
   }
 };
-var ownDish = setupOwnDish({ $: $2, el, allergens: ALLERGENS, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu, openIntake: (source) => intake.open(source) });
+var ownDish = setupOwnDish({ openRegional: (target) => openRegionalSearch(target, "recipes"), $: $2, el, allergens: ALLERGENS, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, foodState, numberRu, openIntake: (source) => intake.open(source) });
+var recipeDiscovery = setupRecipeDiscovery({ $: $2, el, call: recipePageCall, getState: () => state, accept, run, epoch: () => screenEpoch, importRecipe: (recipe) => ownDish.importRecipe(recipe) });
 var renderedAuthPhase = null;
 function renderAuth({ phase, identity, config, error }) {
   loginConfig = config;

@@ -2,22 +2,19 @@
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/Users/alexyarosh/Projects/keto-companion-azure",
-  "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-11T12:36:24.315849+00:00",
+  "source_version": "2e54f9bfce101158a92929fdac2f70a604f18205",
+  "updated_at": "2026-11-11T22:52:19.787151+00:00",
   "active_task": null,
   "last_completed": {
-    "id": "AGR-306-C24-RELEASE",
-    "linear_issue": "AGR-306",
+    "id": "AGR-306-C26-BARCODE-LABEL",
     "status": "completed",
-    "scope": "Contextual private bug reporting and verified report lifecycle",
-    "source_commit": "cd3d6463f109a531b752472f0153e3abc5fe94e2",
-    "release_receipt": "docs/evidence/AGR_306_C24_RELEASE_RECEIPT.json",
-    "native_build": "71a06dd4-e885-4073-9462-fd6915c84751",
-    "ordinary_build": "773baac3-14ac-494c-8b60-9794feb41e7c",
-    "worker_version": "e281e7e8-9215-46e9-b51a-69b9f7557afd",
-    "live_ui": "docs/evidence/AGR_306_C24_LIVE_UI.json",
-    "pull_request": 27,
-    "product_acceptance": "live report lifecycle verified; physical phone dictation remains owner observation"
+    "scope": "Technical release and hosted barcode-label/mobile-form acceptance; owner physical camera separate",
+    "source_commit": "16030614d4efe03c0b9444a45cc0fd963e64eabe",
+    "release_commit": "2e54f9bfce101158a92929fdac2f70a604f18205",
+    "release_receipt": "docs/evidence/AGR_306_C26_RELEASE_RECEIPT.json",
+    "hosted_receipt": "docs/evidence/AGR_306_C26_HOSTED_UI.json",
+    "worker_version": "947ef19c-3d8f-4fe5-a3c7-14a54d11b2ea",
+    "bug_report": "KETO-2 ready; not closed; owner phone verification pending"
   },
   "previous_completed": {
     "id": "AGR-306-C18-RELEASE",
@@ -38,8 +35,8 @@
     "product_acceptance": "physical_iPhone_17_Pro_pending; real_desktop_google_verified"
   },
   "next_task": {
-    "id": "AGR-306-OWNER-REPORT-TRIAGE",
-    "action": "Owner reloads current app and reports concrete remaining failures; triage selected report with source/version before new implementation."
+    "id": "AGR-306-C26-OWNER-DEVICE",
+    "action": "Owner verifies same package on physical iPhone17Pro/Chrome after refresh; KETO-2 has verified release/evidence and remains ready. No rebuild/retry without new concrete evidence."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -110,8 +107,8 @@
     "temporary_probes": [],
     "active_container_instances": [],
     "accepted_runtime_pin": "ops/approved-runtime.json",
-    "accepted_runtime_baseline": "fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77",
-    "accepted_runtime_image": "sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f",
+    "accepted_runtime_baseline": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+    "accepted_runtime_image": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
     "new_runtime_image_required": false,
     "implementation_writer": null,
@@ -135,7 +132,8 @@
     "The physical iPhone17Pro Chrome failure was not reproduced; real Google login was verified in connected desktop Chrome and synthetic mobile cases in Chromium/WebKit.",
     "No family diary/profile/consent test writes. Actual login updates ordinary session and last-active metadata.",
     "Full member administration is available after workspace load; during compute outage the verified identity and retry action remain visible.",
-    "No new live family signed food-write, device keyboard, camera, microphone or clinical acceptance is claimed."
+    "No new live family signed food-write, device keyboard, camera, microphone or clinical acceptance is claimed.",
+    "C26 barcode-label technical release verified; physical phone camera not verified; original incident barcode unknown. C25 Azure recipe content_filter remains unresolved without replay."
   ],
   "source_completed": {
     "id": "AGR-306-C21-C22",
@@ -226,5 +224,41 @@
     "worker_version": "a1a493ac-e036-46cf-bc37-63e4d1be3e64",
     "pull_request": 26,
     "product_acceptance": "physical_iPhone_after_reload_pending"
+  },
+  "accepted_partial_delivery": {
+    "id": "AGR-306-C25",
+    "regional": "actual9OFFhits+exactTEOSreview+cancel from normal picker,402x873",
+    "online": "notaccepted;hostedqueryfailed;separatecontent_filterdiagnostic",
+    "backend_source": "48ac620091f392f07af9511be05dd27b499c680c",
+    "main_source": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "main_and_private_active_pins": "matched prior acceptedC25;appv23;latestuploadedsettings discrepancy retained",
+    "receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json"
+  },
+  "previous_c25_partial": {
+    "id": "AGR-306-C25-ONLINE-RECIPES",
+    "status": "in_progress",
+    "stage": "online_search_service_filter_case_prepared;regional_and_backend_handling_live",
+    "writer": "root",
+    "scope": "Actual sourced external recipe discovery→review→calculation→personal save/intake; regional package search from normal picker and available-carb propagation",
+    "actual_capability": "Same Azure Sol/high web_search probe completed23.058s with search/open_page/citations; no new provider/account",
+    "source_receipt": "docs/evidence/AGR_306_C25_SOURCE_ACCEPTANCE.json",
+    "ui_receipt": "docs/evidence/AGR_306_C25_UI_ACCEPTANCE.json",
+    "hosted_evidence": "docs/evidence/AGR_306_C25_LIVE_UI.json",
+    "release_receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json",
+    "service_case": "docs/evidence/AGR_306_C25_AZURE_SEARCH_CASE.md"
+  },
+  "previous_C24_completed": {
+    "id": "AGR-306-C24-RELEASE",
+    "linear_issue": "AGR-306",
+    "status": "completed",
+    "scope": "Contextual private bug reporting and verified report lifecycle",
+    "source_commit": "cd3d6463f109a531b752472f0153e3abc5fe94e2",
+    "release_receipt": "docs/evidence/AGR_306_C24_RELEASE_RECEIPT.json",
+    "native_build": "71a06dd4-e885-4073-9462-fd6915c84751",
+    "ordinary_build": "773baac3-14ac-494c-8b60-9794feb41e7c",
+    "worker_version": "e281e7e8-9215-46e9-b51a-69b9f7557afd",
+    "live_ui": "docs/evidence/AGR_306_C24_LIVE_UI.json",
+    "pull_request": 27,
+    "product_acceptance": "live report lifecycle verified; physical phone dictation remains owner observation"
   }
 }

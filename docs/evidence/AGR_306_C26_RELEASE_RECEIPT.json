@@ -1,0 +1,268 @@
+{
+  "schema": "keto-c26-release-receipt-v1",
+  "task": "AGR-306-C26",
+  "status": "RELEASED_HOSTED_UI_PENDING",
+  "recorded_at": "2026-11-11T22:45:25.737Z",
+  "source_commit": "16030614d4efe03c0b9444a45cc0fd963e64eabe",
+  "release_commit": "2e54f9bfce101158a92929fdac2f70a604f18205",
+  "native": {
+    "build_uuid": "8aed5f86-1383-4c5d-8d70-14d348996424",
+    "status": "stopped",
+    "outcome": "success",
+    "accepted": {
+      "task": "CF-DEV-MEDIA-08",
+      "baseline": "a6a2661856ffa954f91faf4cb1e52425a60fcc10bf75e4782c3259703ce3b77e",
+      "image_digest": "sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461",
+      "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "max_instances": 1,
+      "network_policy": "Container class enableInternet=false; no egress exceptions",
+      "stages": [
+        {
+          "name": "syntax",
+          "exit_code": 0,
+          "passed_count": null,
+          "truncated": false
+        },
+        {
+          "name": "build",
+          "exit_code": 0,
+          "passed_count": null,
+          "truncated": false
+        },
+        {
+          "name": "product",
+          "exit_code": 0,
+          "passed_count": 14,
+          "truncated": false
+        },
+        {
+          "name": "python",
+          "exit_code": 0,
+          "passed_count": 17,
+          "truncated": false
+        }
+      ],
+      "private_credentials_transported_to_agent": false,
+      "publication_broker": false,
+      "runtime_user_flow_tested": false,
+      "actual_cloud_container_acceptance": true,
+      "temporary_probe_deleted": true
+    },
+    "receipt": "docs/evidence/AGR_306_C26_NATIVE_ACCEPTANCE.json"
+  },
+  "ordinary": {
+    "build_uuid": "a42a2bf0-cdda-47eb-80e9-358543c251f6",
+    "status": "stopped",
+    "outcome": "success",
+    "stopped_on": "2026-11-11T22:44:34.145Z",
+    "source_checks": {
+      "python": 682,
+      "python_subtests": 6,
+      "node": 338,
+      "ops": 12,
+      "source_stages": 16,
+      "seconds": 172.66,
+      "generated_assets_match": true
+    },
+    "http": {
+      "run_id": "2b1d3ae9-3e84-4d71-b065-c8d4af7f7149",
+      "probe_name": "keto-developer-check-a85bc9e706",
+      "job_id": "7679576a-feff-48cb-865d-6c7b03dff649",
+      "upload": "delivered_unverified",
+      "readiness": "known_handler_shape",
+      "post": "delivered_unverified",
+      "post_count": 1,
+      "cleanup": "delivered_unverified",
+      "events": [
+        {
+          "method": "PUT",
+          "status": 200,
+          "type": "json"
+        },
+        {
+          "method": "POST",
+          "status": 200,
+          "type": "json"
+        },
+        {
+          "method": "GET",
+          "status": 200,
+          "type": "json"
+        },
+        {
+          "method": "GET",
+          "status": 404,
+          "type": "known_handler_shape"
+        },
+        {
+          "method": "POST",
+          "status": 200,
+          "type": "json"
+        },
+        {
+          "method": "DELETE",
+          "status": 200,
+          "type": "json"
+        }
+      ],
+      "post_result": {
+        "status": "passed",
+        "baseline": "a6a2661856ffa954f91faf4cb1e52425a60fcc10bf75e4782c3259703ce3b77e",
+        "patch_hash": "1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75",
+        "image_digest": "sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461",
+        "exit_code": 0,
+        "stages": [
+          {
+            "name": "syntax",
+            "exit_code": 0,
+            "passed_count": null
+          },
+          {
+            "name": "build",
+            "exit_code": 0,
+            "passed_count": null
+          },
+          {
+            "name": "product",
+            "exit_code": 0,
+            "passed_count": 14
+          },
+          {
+            "name": "python",
+            "exit_code": 0,
+            "passed_count": 17
+          }
+        ]
+      },
+      "outcome": "verifier_passed"
+    },
+    "actual_runtime": {
+      "task": "CF-DEV-MEDIA-08",
+      "scope": "actual private Cloudflare Container through service RPC; one fixed synthetic UI patch, no family session or app data",
+      "baseline": "a6a2661856ffa954f91faf4cb1e52425a60fcc10bf75e4782c3259703ce3b77e",
+      "patch_hash": "1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75",
+      "image_digest": "sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461",
+      "status": "passed",
+      "exit_code": 0,
+      "stages": [
+        {
+          "name": "syntax",
+          "exit_code": 0,
+          "passed_count": null,
+          "truncated": false
+        },
+        {
+          "name": "build",
+          "exit_code": 0,
+          "passed_count": null,
+          "truncated": false
+        },
+        {
+          "name": "product",
+          "exit_code": 0,
+          "passed_count": 14,
+          "truncated": false
+        },
+        {
+          "name": "python",
+          "exit_code": 0,
+          "passed_count": 17,
+          "truncated": false
+        }
+      ],
+      "temporary_probe_deleted": true,
+      "no_credentials_returned": true,
+      "no_database_or_R2_binding": true,
+      "actual_owner_UI_tested": false
+    },
+    "main_promotion": "independently_verified"
+  },
+  "main": {
+    "source_commit": "2e54f9bfce101158a92929fdac2f70a604f18205",
+    "version_id": "947ef19c-3d8f-4fe5-a3c7-14a54d11b2ea",
+    "deployment_id": "21986fef-b087-4241-837d-5fca720eb00e",
+    "traffic_percent": 100,
+    "version_number": 38,
+    "compatibility_date": "2026-11-07",
+    "pin": {
+      "baseline": "a6a2661856ffa954f91faf4cb1e52425a60fcc10bf75e4782c3259703ce3b77e",
+      "image_digest": "sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461"
+    }
+  },
+  "runner": {
+    "version_id": "5bada2a3-8bcd-4f5a-b502-487c4e0e2e01",
+    "deployment_id": "5ac5ac0d-0995-4ef4-8b64-3a760eb3f067",
+    "traffic_percent": 100,
+    "version_number": 25,
+    "pin": {
+      "baseline": "a6a2661856ffa954f91faf4cb1e52425a60fcc10bf75e4782c3259703ce3b77e",
+      "image_digest": "sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461"
+    }
+  },
+  "application": {
+    "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "name": "keto-companion-developer-runner",
+    "version": 24,
+    "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461",
+    "max_instances": 1,
+    "scheduling_policy": "default",
+    "network": {
+      "assign_ipv6": "none",
+      "assign_ipv4": "none",
+      "mode": "private"
+    },
+    "environment_variable_count": 0,
+    "authorized_key_count": 0
+  },
+  "active_configuration_equality": {
+    "main_runner_baseline": true,
+    "main_runner_image": true,
+    "runner_application_image": true,
+    "authority": "active deployments plus exact immutable version resources.bindings; generic settings recorded separately"
+  },
+  "azure": {
+    "changed_by_C26_release": false,
+    "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "deployment_id": "efdbcec8-a124-4ff0-b43e-8c43ce9c606a",
+    "runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+    "adoption_evidence": "docs/evidence/AGR_306_C25_FOLLOWUP_AZURE_ADOPTION_NATIVE_UI.json",
+    "C26_live_label_evidence": "docs/evidence/AGR_306_C26_LIVE_LABEL.json"
+  },
+  "expected_hosted_assets": {
+    "bundle_sha256": "06ec08e0d65b3206eb8718bd8c2c7ceba51a90c97d231b52a7b5bd2459bb624c",
+    "style_sha256": "1b823192035e8948058ca66336d57faf59b942e9365aec651f072509dd3764a2",
+    "served_hashes_verified_by_release_worker": false,
+    "reason": "Root owns authorized native-browser hosted verification; historical direct-public HTTP403 refusal preserved, no alternate transport used."
+  },
+  "ordinary_controls_restored": true,
+  "temporary_probes": [],
+  "active_instances": [],
+  "nonterminal_builds": [],
+  "pending_owned_jobs": [],
+  "uncertain_effects": [],
+  "build_count": 73,
+  "policy_changes": 0,
+  "new_accounts_or_role_grants": 0,
+  "provider_calls_by_release_worker": 0,
+  "family_product_or_diary_writes_by_release_worker": 0,
+  "browser_operations_by_release_worker": 0,
+  "source_ops_expansion_performed": false,
+  "evidence": {
+    "source": "docs/evidence/AGR_306_C26_SOURCE_ACCEPTANCE.json",
+    "native": "docs/evidence/AGR_306_C26_NATIVE_ACCEPTANCE.json",
+    "final_readback": "docs/evidence/AGR_306_C26_FINAL_READBACK.json",
+    "progress": "verification/C26/RELEASE_PROGRESS.json"
+  },
+  "historical_failures_preserved": [
+    "docs/evidence/AGR_306_C25_FOLLOWUP_ORDINARY_FAILURE_1.json",
+    "docs/evidence/AGR_306_C25_FOLLOWUP_RECOVERY_SETUP_FAILURE.json",
+    "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json"
+  ],
+  "limitations": [
+    "Hosted assets/UI/health and KETO-2 acceptance are root-owned pending checks.",
+    "No physical-phone camera acceptance or real family product/diary save claimed.",
+    "C25 online recipe content_filter remains unresolved; no provider request replayed.",
+    "This success does not identify the historical C25 readiness500 root cause; no hook or relaxed guard was introduced."
+  ],
+  "next_action": "Root verifies hosted exact assets and accepted barcode/label workflow through existing authorized native browser, then handles KETO-2/Linear/handoff."
+}

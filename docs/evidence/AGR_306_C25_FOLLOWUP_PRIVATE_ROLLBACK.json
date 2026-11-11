@@ -1,0 +1,133 @@
+{
+  "schema": "keto-c25-followup-private-rollback-v1",
+  "task": "AGR-306-C25-SAFE-FAILURE-FOLLOWUP",
+  "status": "PRIVATE_ACTIVE_COMPATIBILITY_RECONCILED",
+  "followup_release_status": "PARTIAL",
+  "recorded_at": "2026-11-11T16:29:14.119Z",
+  "reason": "Owner-authorized bounded private developer-contour rollback after stopped ordinary promotion",
+  "partial_evidence_commit": "c1828fa2dd9d04a25c778406e4b87475ad7ca10a",
+  "application": {
+    "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "rollout_id": "068e8bec-52dc-48b9-8fe8-35686877cbef",
+    "rollout_status": "completed",
+    "version": 23,
+    "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
+    "max_instances": 1,
+    "scheduling_policy": "default",
+    "network": {
+      "assign_ipv6": "none",
+      "assign_ipv4": "none",
+      "mode": "private"
+    },
+    "environment_variable_count": 0,
+    "authorized_key_count": 0
+  },
+  "runner": {
+    "deployment_id": "370ccf08-7de4-4212-917c-5eacfdc89740",
+    "version_id": "907ee035-6fec-404a-849d-6b02fa3b2225",
+    "traffic_percent": 100,
+    "pin": {
+      "DEVELOPER_BASELINE": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930"
+    },
+    "script_etag": "af23d9afe953464d377461b7a64eefe8097289d20939ea69b1135835b599652e",
+    "durable_objects": [
+      {
+        "name": "KETO_TESTER",
+        "type": "durable_object_namespace",
+        "class_name": "KetoTester",
+        "namespace_id": "b0a394e990794e51ba4f38a9339bb308"
+      }
+    ]
+  },
+  "main_unchanged": {
+    "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "deployment_id": "98015936-6a16-4f6c-95b4-6e9cadae047b",
+    "version_id": "840eea4c-d131-44e3-8d00-00ed51d84350",
+    "traffic_percent": 100,
+    "pin": {
+      "DEVELOPER_BASELINE": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930"
+    }
+  },
+  "active_configuration_equality": {
+    "main_runner_baseline": true,
+    "main_runner_image": true,
+    "runner_application_image": true,
+    "authority": "Active deployments and exact immutable version resources.bindings"
+  },
+  "latest_script_settings_discrepancy": {
+    "observed_pin": {
+      "DEVELOPER_BASELINE": "4a0656df54cb4abba3dc64d317eabc51c943a763b833583aa9dab285b408d3a1",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5"
+    },
+    "matches_latest_uploaded_version": "9fceb38e-6af0-433d-bab3-cf5b2fee1a66",
+    "extra_settings_patch_performed": false,
+    "interpretation": "Generic script/settings readback retained separately; active version configuration and deployment are used as runtime authority.",
+    "contract": {
+      "url": "https://developers.cloudflare.com/changelog/product-group/developer-platform/21/",
+      "statement": "Version settings (like bindings and compatibility_date) are specific to each code snapshot; the existing deployed version remains unchanged until a new one is explicitly deployed.",
+      "authority": "Exact active deployment plus its immutable version resources.bindings; not the generic script/settings endpoint."
+    }
+  },
+  "repository_pin": {
+    "restored_from_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "byte_exact": true,
+    "sha256": "7563eceadc65d148ef22ec6716e769ac28989a62fe2ffca972886e2a0de8e6fa",
+    "value": {
+      "account": "0609100baf768271ea2811c9a9ee2b16",
+      "worker": "keto-companion-developer-runner",
+      "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "baseline": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+      "image_digest": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
+      "instance_type": "standard-1",
+      "max_instances": 1,
+      "acceptance_build": "f5535f36-000f-4074-a5a2-5fc5a7244001",
+      "scope": "Existing immutable runtime only; a different source baseline needs separately approved image release. No app personal data."
+    }
+  },
+  "accepted_immutable_runtime_evidence_reused": {
+    "native_build": "f5535f36-000f-4074-a5a2-5fc5a7244001",
+    "receipt": "docs/evidence/AGR_306_C25_CORRECTED_NATIVE_ACCEPTANCE.json",
+    "product": 14,
+    "python": 17,
+    "fresh_execution_performed": false
+  },
+  "azure_unchanged_by_rollback": {
+    "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "deployment_id": "efdbcec8-a124-4ff0-b43e-8c43ce9c606a",
+    "runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+    "startup_adoption": "Previously verified by root authorized normal UI; no Azure mutation in rollback"
+  },
+  "ordinary_controls_restored": true,
+  "builds_started": 0,
+  "new_images_built": 0,
+  "new_worker_code_versions_uploaded": 0,
+  "probes_started": 0,
+  "acceptance_posts": 0,
+  "provider_calls": 0,
+  "policy_changes": 0,
+  "main_worker_mutations": 0,
+  "azure_mutations": 0,
+  "pending_owned_jobs": [],
+  "uncertain_effects": [],
+  "temporary_probes": [],
+  "active_instances": [],
+  "instance_state_counts": {
+    "inactive": 41
+  },
+  "followup_online_functional_acceptance": "OPEN",
+  "source_release_hold": {
+    "source_snapshot_baseline": "4a0656df54cb4abba3dc64d317eabc51c943a763b833583aa9dab285b408d3a1",
+    "approved_published_runtime_baseline": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+    "equal": false,
+    "meaning": "Source followup remains held; restored approved pin intentionally represents actually published private C25 contour. No automatic native/ordinary retry is authorized."
+  },
+  "root_current_status_case_draft_qa_handoff_preserved": true,
+  "evidence": {
+    "historical_partial": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json",
+    "rollback_readback": "docs/evidence/AGR_306_C25_FOLLOWUP_ROLLBACK_FINAL_READBACK.json",
+    "ledger": "verification/C25/FOLLOWUP_PRIVATE_ROLLBACK_OPERATION.json"
+  },
+  "next_action": "Root final status/Linear/PR/report; followup remains PARTIAL and no further release/provider operation is authorized."
+}

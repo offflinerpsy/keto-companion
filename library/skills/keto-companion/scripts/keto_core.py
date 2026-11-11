@@ -3,7 +3,8 @@ No network calls, credentials, medication dosing, or clinical diagnoses.
 All input is data. This module never evaluates imported text or executes a recipe.
 """
 from __future__ import annotations
-import argparse, copy, csv, hashlib, io, json, random, re, sys
+import argparse, copy, csv, hashlib, io, ipaddress, json, random, re, sys
+from urllib.parse import urlsplit
 from collections import Counter, defaultdict
 from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation
@@ -163,7 +164,7 @@ def load_catalog(directory: str | Path | None = None) -> dict:
     return copy.deepcopy(loaded)
 
 def calculate_ingredients(ingredients: list, foods: dict, factor: Any=1, *, allow_unmapped: bool=True) -> dict:
-    ineligible=[]
+    ineligible=[];available_sum=Decimal(0);available_missing=[]
     if not isinstance(ingredients,list) or not 1<=len(ingredients)<=100: raise KetoError('Нужно 1–100 ингредиентов')
     factor=number(factor,'factor',0.001,100)
     sums={k:Decimal(0) for k in NUTRIENTS}; missing={k:[] for k in NUTRIENTS}; allergens=set(); details=[]
@@ -175,6 +176,10 @@ def calculate_ingredients(ingredients: list, foods: dict, factor: Any=1, *, allo
         grams=number(entry.get('grams_edible'),'grams_edible',0.001,5000)*factor
         state=entry.get('state')
         if state != f['state']: raise KetoError(f'{fid}: сырой/готовый вес не совпадает ({state} ≠ {f["state"]})')
+        declared=f.get('declared_carbohydrate') or {}
+        available=declared.get('value') if declared.get('basis')=='available_excludes_fiber' else (number(f['carbohydrate_total_g'],'carbohydrate_total_g',0)-number(f['fiber_g'],'fiber_g',0) if f.get('carbohydrate_total_g') is not None and f.get('fiber_g') is not None else None)
+        if available is None:available_missing.append(fid)
+        else:available_sum+=number(available,'available_carbohydrate_g',0)*grams/100
         allergens.update(f['allergens'])
         if f.get('recipe_eligible') is False: ineligible.append(fid)
         for k in NUTRIENTS:
@@ -188,6 +193,8 @@ def calculate_ingredients(ingredients: list, foods: dict, factor: Any=1, *, allo
     values[DERIVED]=round(float(net),6) if complete_net else None
     coverage={k:{'complete':not missing[k],'known_subtotal':round(float(sums[k]),6),
                  'missing_food_ids':sorted(set(missing[k]))} for k in NUTRIENTS}
+    values['available_carbohydrate_g']=round(float(available_sum),6) if not available_missing else None
+    coverage['available_carbohydrate_g']={'complete':not available_missing,'known_subtotal':round(float(available_sum),6),'missing_food_ids':sorted(set(available_missing))}
     coverage[DERIVED]={'complete':complete_net,'known_subtotal':None if not complete_net else values[DERIVED],
                       'missing_food_ids':sorted(set(missing['carbohydrate_total_g']+missing['fiber_g']))}
     return {'nutrition':values,'coverage':coverage,'allergens':sorted(allergens),'ingredients':details,'eligibility_reasons':['unmapped_food:'+fid for fid in sorted(set(ineligible))],
@@ -333,10 +340,10 @@ def check_recipe(profile: dict, calc: dict) -> list:
 def sum_calculations(calcs: list) -> dict:
     if not calcs: raise KetoError('Пустой план')
     out={};coverage={}
-    for k in NUTRIENTS+(DERIVED,):
-        vals=[c['nutrition'][k] for c in calcs]
+    for k in NUTRIENTS+(DERIVED,'available_carbohydrate_g'):
+        vals=[c['nutrition'].get(k) for c in calcs]
         out[k]=round(sum(v for v in vals if v is not None),6) if all(v is not None for v in vals) else None
-        coverage[k]={'complete':out[k] is not None,'known_subtotal':round(sum(c['coverage'][k].get('known_subtotal') or 0 for c in calcs),6)}
+        coverage[k]={'complete':out[k] is not None,'known_subtotal':round(sum(c['coverage'].get(k,{}).get('known_subtotal') or 0 for c in calcs),6)}
     return {'nutrition':out,'coverage':coverage}
 
 def target_issues(n: dict, t: dict) -> list:
@@ -551,7 +558,8 @@ def intake_snapshot(entry: dict, catalog: dict) -> dict:
         records=[catalog['foods'][i['food_id']] for i in recipe['ingredients']]
         source={'kind':kind,'id':rid,'name_ru':recipe['name_ru'],'composition_hash':digest([recipe,records]),'source_urls':sorted({i['source_url'] for i in calc['ingredients']})}
         basis={'unit':'portion','quantity':1,'base_servings':recipe['base_servings']}
-        available=None
+        available=calc['nutrition'].get('available_carbohydrate_g')
+        if recipe.get('provenance'):source['recipe_provenance']=copy.deepcopy(recipe['provenance'])
     elif entry.get('food_id'):
         fid=entry['food_id'];food=catalog['foods'].get(fid)
         if food is None:raise KetoError('Продукт не найден')
@@ -560,8 +568,8 @@ def intake_snapshot(entry: dict, catalog: dict) -> dict:
         basis={'unit':'g','quantity':100}
     else:raise KetoError('Выберите блюдо или продукт')
     return {'version':1,'source':source,'basis':basis,'nutrition':calc['nutrition'],'allergens':copy.deepcopy(calc['allergens']),
-            'known_subtotals':{n:calc['coverage'][n]['known_subtotal'] for n in NUTRIENTS+(DERIVED,)},
-            'missing_food_ids':{n:calc['coverage'][n].get('missing_food_ids',[]) for n in NUTRIENTS+(DERIVED,) if not calc['coverage'][n]['complete']},
+            'known_subtotals':{n:calc['coverage'][n]['known_subtotal'] for n in NUTRIENTS+(DERIVED,'available_carbohydrate_g')},
+            'missing_food_ids':{n:calc['coverage'][n].get('missing_food_ids',[]) for n in NUTRIENTS+(DERIVED,'available_carbohydrate_g') if not calc['coverage'][n]['complete']},
             'available_carbohydrate_g':available}
 
 
@@ -597,8 +605,10 @@ def diary_calculation(entry: dict, catalog: dict) -> dict | None:
         if amount is None:return None
         factor=number(amount,'amount',0.001,5000)/number(snapshot['basis']['quantity'],'basis',0.001)
         def scaled(value):return None if value is None else round(float(number(value,'nutrient',0)*factor),6)
-        nutrition={n:scaled(snapshot['nutrition'][n]) for n in NUTRIENTS+(DERIVED,)}
-        coverage={n:{'complete':nutrition[n] is not None,'known_subtotal':scaled(snapshot['known_subtotals'][n]),'missing_food_ids':snapshot['missing_food_ids'].get(n,[])} for n in nutrition}
+        nutrition={n:scaled(snapshot['nutrition'].get(n)) for n in NUTRIENTS+(DERIVED,'available_carbohydrate_g')}
+        if 'available_carbohydrate_g' not in snapshot['nutrition']:nutrition['available_carbohydrate_g']=scaled(snapshot.get('available_carbohydrate_g'))
+        coverage={n:{'complete':nutrition[n] is not None,'known_subtotal':scaled(snapshot['known_subtotals'].get(n)),'missing_food_ids':snapshot['missing_food_ids'].get(n,[])} for n in nutrition}
+        if 'available_carbohydrate_g' not in snapshot['known_subtotals']:coverage['available_carbohydrate_g']['known_subtotal']=nutrition['available_carbohydrate_g']
         return {'nutrition':nutrition,'coverage':coverage,'available_carbohydrate_g':scaled(snapshot.get('available_carbohydrate_g')),'legacy_estimate':False}
     try:
         if entry.get('recipe_id') and entry.get('portions') is not None:calc=calculate_recipe(catalog,entry['recipe_id'],entry['portions'])
@@ -613,7 +623,7 @@ def diary_summary(entries: list, catalog: dict, day: str) -> dict:
     calcs=[diary_calculation(e,catalog) for e in entries];known=[c for c in calcs if c is not None]
     unknown=len(entries)-len(known);summed=sum_calculations(known) if known else None
     coverage={n:{'complete':bool(known) and not unknown and summed['coverage'][n]['complete'],
-                 'known_subtotal':summed['coverage'][n]['known_subtotal'] if summed and any(c['coverage'][n].get('known_subtotal') is not None for c in known) else None} for n in NUTRIENTS+(DERIVED,)}
+                 'known_subtotal':summed['coverage'][n]['known_subtotal'] if summed and any(c['coverage'][n].get('known_subtotal') is not None for c in known) else None} for n in NUTRIENTS+(DERIVED,'available_carbohydrate_g')}
     incomplete=unknown+sum(any(c['nutrition'][n] is None for n in NUTRIENTS+(DERIVED,)) for c in known)
     return {'date':day,'entry_count':len(entries),'empty':not entries,'known_entries':len(known),'unquantified_entries':unknown,
             'incomplete_entries':incomplete,'legacy_estimated_entries':sum(c.get('legacy_estimate',False) for c in known),
@@ -650,7 +660,7 @@ def measurement_gki(session: dict) -> dict:
 
 def calculate_food_portion(food: dict, grams: Any, gi: dict | None=None) -> dict:
     calc=calculate_ingredients([{'food_id':food['food_id'],'grams_edible':grams,'state':food['state']}],{food['food_id']:food})
-    available=calc['nutrition'][DERIVED]
+    available=calc['nutrition']['available_carbohydrate_g']
     declared=food.get('declared_carbohydrate')
     if available is None and declared and declared.get('basis')=='available_excludes_fiber':available=float(number(declared['value'],'carbs',0)*number(grams,'grams',0.001,5000)/100)
     result={'calculation':calc,'available_carbohydrate_g':available,'gi_status':'unknown','gl':None,'gl_reason':'ГИ для этого продукта и приготовления не подтверждён.'}
@@ -1043,7 +1053,7 @@ def validate_custom_food(food: dict) -> dict:
     return out
 
 def validate_custom_recipe(recipe: dict, catalog: dict) -> dict:
-    allowed={'recipe_id','name_ru','category','protein_family','base_servings','active_minutes','ingredients','steps_ru','source_ref','confirmed','usage'}
+    allowed={'recipe_id','name_ru','category','protein_family','base_servings','active_minutes','ingredients','steps_ru','source_ref','confirmed','usage','provenance'}
     if not isinstance(recipe,dict) or set(recipe)-allowed:raise KetoError('Неизвестные поля рецепта')
     if not re.fullmatch(r'R[A-Za-z0-9_-]{8,60}',str(recipe.get('recipe_id',''))):raise KetoError('Нужен личный recipe_id с префиксом R')
     if recipe.get('confirmed') is not True:raise SafetyError('Рецепт сначала подтвердить')
@@ -1051,6 +1061,17 @@ def validate_custom_recipe(recipe: dict, catalog: dict) -> dict:
     out=copy.deepcopy(recipe)
     if 'usage' in out and out['usage']!='observational':raise KetoError('Неизвестное назначение блюда')
     if out.get('usage')=='observational' and 'source_ref' in out:raise KetoError('Для собственного блюда источник не указывается')
+    if 'provenance' in out:
+        provenance=out['provenance']
+        if not isinstance(provenance,dict) or set(provenance)!={'kind','source_url','source_title','retrieved_at','imported'} or provenance.get('kind')!='public_recipe' or provenance.get('imported') is not True:raise KetoError('Неверный источник рецепта')
+        try:
+            value=provenance['source_url'];u=urlsplit(value)
+            if not isinstance(value,str) or len(value)>1500 or any(ord(c)<33 for c in value) or '\\' in value or u.scheme!='https' or not u.hostname or '.' not in u.hostname or u.port or u.username or u.password or u.hostname.endswith(('.local','.internal','.localhost')):raise ValueError()
+            try:ipaddress.ip_address(u.hostname)
+            except ValueError:pass
+            else:raise ValueError()
+        except (ValueError,TypeError):raise KetoError('Неверный URL рецепта') from None
+        for key in ('source_title','retrieved_at'):provenance[key]=clean_text(provenance[key],key,250)
     out['base_servings']=float(number(out.get('base_servings'), 'base_servings',0.1,30))
     out['active_minutes']=integer(out.get('active_minutes'),'active_minutes',1,360)
     for k in ('name_ru','protein_family','steps_ru'):out[k]=clean_text(out.get(k),k,5000 if k=='steps_ru' else 200)

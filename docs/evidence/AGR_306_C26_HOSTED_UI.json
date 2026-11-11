@@ -1,0 +1,75 @@
+{
+  "schema": "keto-c26-hosted-ui-v1",
+  "at": "2026-11-11T22:51:13.068Z",
+  "origin": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
+  "release": "2e54f9bfce101158a92929fdac2f70a604f18205",
+  "version": "947ef19c-3d8f-4fe5-a3c7-14a54d11b2ea",
+  "viewport": {
+    "width": 402,
+    "height": 874
+  },
+  "assets": [
+    {
+      "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/style.css",
+      "status": 200,
+      "sha256": "1b823192035e8948058ca66336d57faf59b942e9365aec651f072509dd3764a2"
+    },
+    {
+      "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/app.bundle.js",
+      "status": 200,
+      "sha256": "06ec08e0d65b3206eb8718bd8c2c7ceba51a90c97d231b52a7b5bd2459bb624c"
+    }
+  ],
+  "barcode": {
+    "code": "4810268031793",
+    "http": 200,
+    "headers_ms": 725.579,
+    "result": "TEOS/Савушкин 2%;66.8kcal,8protein,2fat,4.2carb;basis unknown;not saved"
+  },
+  "edit_during_lookup": {
+    "terminal": "Код изменён. Нажмите «Найти по штрихкоду» для нового поиска.",
+    "search_enabled": true,
+    "cancel_hidden": true
+  },
+  "restricted_code": {
+    "code": "2000000000008",
+    "http": 200,
+    "result": "OFF Pecorino candidate;RCN explanatory warning shown;not saved"
+  },
+  "combined_label": "docs/evidence/AGR_306_C26_HOSTED_LABEL.json",
+  "report": "docs/evidence/AGR_306_C26_KETO2_UPDATE.json",
+  "visual": {
+    "document_width": 402,
+    "form_x": 33,
+    "form_width": 336,
+    "no_horizontal_overflow": true,
+    "images": [
+      "LIVE_REVIEW_402.jpg",
+      "LIVE_NUTRIENTS_402.jpg",
+      "LIVE_LABEL_NUTRIENTS_402.jpg",
+      "LIVE_KETO2_READY_402.jpg"
+    ],
+    "repo_images": [
+      "docs/evidence/AGR_306_C26_LIVE_LABEL_402.jpg",
+      "docs/evidence/AGR_306_C26_KETO2_READY_402.jpg"
+    ]
+  },
+  "writes": {
+    "real_product": 0,
+    "diary": 0,
+    "profile": 0,
+    "bug_report": "KETO-2 ready"
+  },
+  "limitations": [
+    "Physical iPhone camera remains unverified",
+    "Original incident barcode unknown",
+    "C25 online recipe content_filter unresolved;no retry"
+  ],
+  "cleanup": {
+    "owned_tab_closed": true,
+    "owner_tab_preserved": true,
+    "viewport_reset": true,
+    "network_observer_disabled": true,
+    "cua_kernel_reset": "acknowledged"
+  }
+}

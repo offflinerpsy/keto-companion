@@ -1,0 +1,68 @@
+{
+  "task": "AGR-306-C25",
+  "at": "2026-11-11T15:32:41.015264+00:00",
+  "prior_hosted_job": "f014bdcdebbf41d4acdc7fa0b303dc9e",
+  "prior_job_reconciled_terminal": true,
+  "query": "сыр",
+  "public_only": true,
+  "family_data": false,
+  "automatic_retry": false,
+  "new_diagnostic_request": true,
+  "delivery": "delivered_unverified",
+  "source_sha256": "11438381cc84d73aa9bb80ebf369eaa8357f31bbd8cbede4873238526d3fa5de",
+  "payload_sha256": "738517936b397bb04cfb20dc805418ca10d94259451e12af8ad239743202aade",
+  "constraints": {
+    "model": "gpt-6.1-sol",
+    "reasoning": {
+      "effort": "high"
+    },
+    "max_output_tokens": 5000,
+    "max_tool_calls": 6,
+    "timeout_seconds": 48
+  },
+  "passed": false,
+  "audit": {
+    "role": "recipe_discovery",
+    "deployment": "gpt-6.1-sol",
+    "reasoning_effort": "high",
+    "attempted": true,
+    "status": "failed",
+    "stage": "provider_status",
+    "error_code": "DISCOVERY_PROVIDER_INCOMPLETE",
+    "http_status": 200,
+    "input_tokens": 4755,
+    "output_tokens": 60,
+    "usage_known": true,
+    "web_search_requests": 3,
+    "provider_status": "incomplete",
+    "provider_incomplete_reason": "content_filter",
+    "latency_ms": 10386
+  },
+  "error_code": "DISCOVERY_PROVIDER_INCOMPLETE",
+  "elapsed_seconds": 10.386,
+  "original_hosted_cause": "UNKNOWN: old adapter discarded exception code/provider metadata",
+  "confirmed_new_diagnostic_cause": {
+    "http_status": 200,
+    "provider_status": "incomplete",
+    "incomplete_reason": "content_filter",
+    "refusal_categories": "not captured; unknown",
+    "provider_error_code": "not captured; unknown",
+    "rejection_binding": true
+  },
+  "local_post_probe_change": {
+    "error_code": "DISCOVERY_CONTENT_FILTER",
+    "terminal_message": "precise safe service-filter message; no retry or policy/provider/payload change",
+    "persisted_failure_diagnostic": true
+  },
+  "checks": {
+    "focused_output": "........................................................................ [ 86%]\n...........                                                              [100%]\n83 passed in 3.11s",
+    "diff_check": 0
+  },
+  "runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+  "changed_hashes": {
+    "service/recipe_discovery.py": "63d6cd1c6d56c3bf743aa68eee580e9f49c00a2900c90b297bf62efd9e868644",
+    "service/kitchen.py": "fda49c15821f06616b723b432bde67a5c593b6de5c522705d1058040667a8890",
+    "tests/test_recipe_discovery.py": "a8cad10c6a3f2dc129968fff56bb00059fed698a6a22dd836764fdb7dbfe09cb"
+  },
+  "next_action": "Root read-only moderation documentation/owning metadata review; release honest failure handling if accepted. No retry or workaround of content-filter refusal."
+}

@@ -61,3 +61,29 @@ C9 wrap-up: native new-image build c296da43 and ordinary build 7ce93b5a both suc
 C24 source acceptance: dedicated report/schema/sender tests 5 passed; full Node 315 passed; Python 663 passed, 1 existing platform skip and 6 subtests passed; no-browser UI/OAuth checks, contract drift, specification and repository checks passed. Root owns rendered mobile acceptance, exact D1 migration, release and owner-device results. Source implementation is complete; no release or physical voice acceptance is claimed here.
 
 C24 bounded recovery follow-up: exact reviewed submitted payload survives reload in account-scoped session storage; explicit same-ID lookup precedes identical retry, with no automatic replay. Three additional regressions cover reload/not-delivered recovery, cross-account/legacy ID handling and late send/check completion after reset. Bundle-owned UI report version is 0.7.1-C24.
+
+
+## C25 — online recipe and regional completion
+
+- [x] T-C25-1 Bind owner continuation to AGR-306, existing spec/plan and current released source; recover actionable prior regional/import seams.
+- [x] T-C25-2 Prove same-route Azure Sol/high web_search with actual public query, search metadata, citations and receipt.
+- [x] T-C25-3 Implement sourced discovery/import contracts with existing quota/idempotency/consent lifecycle and safe source validation.
+- [x] T-C25-4 Carry recipe source and unresolved ingredient/quantity/state/yield review into arbitrary own-dish calculation/save/intake.
+- [x] T-C25-5 Integrate regional OFF search from normal ingredient/portion pickers and return confirmed products to the preserved draft.
+- [x] T-C25-6 Fix known available-carbohydrate aggregation/snapshot semantics with actual arithmetic and incomplete-coverage tests.
+- [x] T-C25-7 Accept actual-provider sourced result, synthetic search→review→calculation→save→intake and regional return at mobile viewport; complete project source checks.
+- [ ] T-C25-8 Release exact accepted backend/frontend through existing Azure/native/pinned gates; verify actual hosted discovery/region UI and record truthful limits.
+
+C24 remains released and accepted. C25 is explicitly authorized by the owner's new continuation; the prior instruction to await concrete feedback is satisfied by this request.
+
+
+C25 final technical checkpoint — 2026-11-11: regional normal-picker search/review is accepted on the hosted 402×873 UI; a full sourced recipe → calculation/save/intake is accepted on isolated actual components. The ordinary hosted ingredient query remains unaccepted after a handled failure; one separate public diagnostic returned incomplete/content_filter. Safe error handling is live in Azure48ac620; main remains accepted C25f86 with unchanged public bundle. Followup Worker promotion stopped before acceptancePOST, recovery setup was rejected, and private runner/app/pin were restored to compatible accepted published state. T-C25-8 stays unchecked. Evidence: docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json, AGR_306_C25_FOLLOWUP_PRIVATE_ROLLBACK.json and prepared AGR_306_C25_AZURE_SEARCH_CASE.md. Next required result is service-side diagnosis and actual ordinary hosted search acceptance; no automated retry, filter bypass or pending jobs.
+
+
+## C26 — barcode/label completion and form coherence
+
+- [x] T-C26-1 Inspect fresh owner report and actual mobile pixels; research official barcode/label and compatible maintained UI sources.
+- [x] T-C26-2 Implement bounded barcode/scan lifecycle, confirmed code, actionable label fallback and precise bug delivery/error context.
+- [x] T-C26-3 Unify form spacing, nutrition groups and primary actions across shop, own-dish and intake/report forms without breaking saved preferences.
+- [x] T-C26-4 Verify meaningful failure/cancellation/stale-response and synthetic save/reload cases, inspect mobile pixels and run project-required source gates.
+- [x] T-C26-5 Release exact accepted candidate through existing supported gates; inspect live assets/workflow, reconcile KETO-2 and report device limitations. Evidence: docs/evidence/AGR_306_C26_HOSTED_UI.json; KETO-2 ready, physical phone camera remains owner verification.

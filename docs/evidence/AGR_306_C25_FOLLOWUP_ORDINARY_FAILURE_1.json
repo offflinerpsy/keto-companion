@@ -1,0 +1,186 @@
+{
+  "schema": "keto-c25-followup-ordinary-failure-v1",
+  "status": "failed_reconciled",
+  "recorded_at": "2026-11-11T16:07:57.144Z",
+  "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+  "build_uuid": "2ef42065-0d43-4d00-b7c9-e5ef196dfbd0",
+  "terminal": {
+    "at": "2026-11-11T16:07:04.619Z",
+    "status": "stopped",
+    "outcome": "fail",
+    "stopped_on": "2026-11-11T16:06:25.776Z",
+    "cursor": "WzMsMTQ0Ml0",
+    "truncated": false,
+    "lines": 420,
+    "markers": [
+      "682 passed, 6 subtests passed in 79.70s (0:01:19)",
+      "KETO_GATE_PASSED all_python",
+      "KETO_GATE_START all_node",
+      "✔ an old delayed session error cannot clear a newer verified session (1.18015ms)",
+      "✔ auth transport includes same-origin cookies and preserves only safe machine errors (38.964379ms)",
+      "✔ failed storage writes and removal cannot resurrect a previous invitation (0.264003ms)",
+      "✔ a late popup after failed challenge never exchanges a token or signs out a newer attempt (4.505449ms)",
+      "✔ upstream timeout, network/error/oversize responses and invalid redirects fail without internal detail (8.381222ms)",
+      "✔ late food results and errors do not replace a newer query or its source page (0.667646ms)",
+      "✔ failed dish generation replaces checking text, enables action and never retries (9.487062ms)",
+      "✔ late rejection after session reset cannot restore previous checking or error text (1.981047ms)",
+      "✔ image decoding compresses to JPEG and closes bitmap; unsupported format gives useful error (1.595334ms)",
+      "✔ failed replacement retries from zero; failed continuation keeps its offset; old responses cannot mix scopes (2.809374ms)",
+      "✔ provider errors have safe timeout, network and HTTP classifications with no retries (5.795069ms)",
+      "✔ one original 100 ml column fills editable fields, preserves unknowns, and requires explicit carb review (2.403381ms)",
+      "✔ own dish opens with saved product name and no assumed grams (1.240371ms)",
+      "✔ image upload fails closed with no sanitizer and preserves no object or reservation (16.640318ms)",
+      "✔ transcription quotas, consent, CSRF and provider error accounting fail closed (1009.492242ms)",
+      "✔ intake bridge errors return fixed actionable text and release the private-state lock (904.466846ms)",
+      "ℹ tests 325",
+      "ℹ pass 325",
+      "ℹ fail 0",
+      "ℹ skipped 0",
+      "KETO_GATE_PASSED all_node",
+      "KETO_GATE_START legacy_ui",
+      "KETO_GATE_PASSED legacy_ui",
+      "KETO_GATE_START legacy_oauth_ui",
+      "KETO_GATE_PASSED legacy_oauth_ui",
+      "KETO_GATE_START contracts",
+      "KETO_GATE_PASSED contracts",
+      "KETO_GATE_START specification",
+      "KETO_GATE_PASSED specification",
+      "KETO_GATE_START web_build",
+      "KETO_GATE_PASSED web_build",
+      "KETO_GATE_START legacy_build",
+      "KETO_GATE_PASSED legacy_build",
+      "KETO_GATE_START hygiene",
+      "KETO_GATE_PASSED hygiene",
+      "KETO_GATE_START generated_assets_match",
+      "KETO_GATE_PASSED generated_assets_match",
+      "CLOUDFLARE_FULL_GATE_PASSED {\"checks\": [{\"name\": \"python_env\", \"exit\": 0}, {\"name\": \"python_dependencies\", \"exit\": 0}, {\"name\": \"node_dependencies\", \"exit\": 0}, {\"name\": \"container_sdk\", \"exit\": 0}, {\"name\": \"container_worker_build\", \"exit\": 0}, {\"name\": \"runtime_fonts\", \"exit\": 0}, {\"name\": \"all_python\", \"exit\": 0}, {\"name\": \"all_node\", \"exit\": 0}, {\"name\": \"legacy_ui\", \"exit\": 0}, {\"name\": \"legacy_oauth_ui\", \"exit\": 0}, {\"name\": \"contracts\", \"exit\": 0}, {\"name\": \"specification\", \"exit\": 0}, {\"name\": \"web_build\", \"exit\": 0}, {\"name\": \"legacy_build\", \"exit\": 0}, {\"name\": \"hygiene\", \"exit\": 0}, {\"name\": \"generated_assets_match\", \"exit\": 0}], \"seconds\": 185.58, \"scope\": \"trusted reviewed source; no real data or paid model calls\", \"github_actions_required\": false}",
+      "ℹ tests 12",
+      "ℹ pass 12",
+      "ℹ fail 0",
+      "ℹ skipped 0",
+      "KETO_ACCEPTANCE_HTTP {\"run_id\":\"a42df34b-3874-4097-bf48-55f299af4088\",\"probe_name\":\"keto-developer-check-76bfc84660\",\"job_id\":\"247c5fe1-9e2e-4671-a71f-5560859f4387\",\"upload\":\"delivered_unverified\",\"readiness\":\"invalid\",\"post\":\"not_delivered\",\"post_count\":0,\"cleanup\":\"delivered_unverified\",\"events\":[{\"method\":\"PUT\",\"status\":200,\"type\":\"json\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":500,\"type\":\"invalid\"},{\"method\":\"DELETE\",\"status\":200,\"type\":\"json\"}],\"outcome\":\"verifier_failed\"}",
+      "KETO_GUARDED_ACCEPTANCE_FAILED",
+      "if(test.error||test.status!==0)throw Error('PINNED_RUNTIME_ACCEPTANCE_FAILED');",
+      "Error: PINNED_RUNTIME_ACCEPTANCE_FAILED",
+      "Failed: error occurred while running deploy command"
+    ]
+  },
+  "source_gate": {
+    "passed": true,
+    "python": 682,
+    "python_subtests": 6,
+    "node": 325,
+    "ops": 12,
+    "source_stages": 16,
+    "seconds": 185.58,
+    "generated_assets_match": true
+  },
+  "failure": {
+    "code": "PINNED_RUNTIME_ACCEPTANCE_FAILED",
+    "phase": "probe_readiness_GET_before_container_POST",
+    "http_status": 500,
+    "readiness": "invalid",
+    "run_id": "a42df34b-3874-4097-bf48-55f299af4088",
+    "probe_name": "keto-developer-check-76bfc84660",
+    "job_id": "247c5fe1-9e2e-4671-a71f-5560859f4387",
+    "post": "not_delivered",
+    "post_count": 0,
+    "cleanup_delete_status": 200,
+    "reconciled": true,
+    "no_container_instance_for_job": true,
+    "probe_absent": true,
+    "main_worker_unchanged": true
+  },
+  "readback": {
+    "at": "2026-11-11T16:07:57.144Z",
+    "app": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "name": "keto-companion-developer-runner",
+      "version": 22,
+      "max_instances": 1,
+      "scheduling_policy": "default",
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5",
+      "environment_variable_count": 0,
+      "authorized_key_count": 0
+    },
+    "runner": {
+      "bindings": [
+        {
+          "name": "DEVELOPER_BASELINE",
+          "text": "4a0656df54cb4abba3dc64d317eabc51c943a763b833583aa9dab285b408d3a1"
+        },
+        {
+          "name": "DEVELOPER_IMAGE_DIGEST",
+          "text": "sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5"
+        }
+      ],
+      "binding_types": [
+        "plain_text",
+        "plain_text",
+        "durable_object_namespace"
+      ]
+    },
+    "instances": {
+      "count": 41,
+      "state_counts": {
+        "inactive": 41
+      },
+      "active": [],
+      "failed_job": []
+    },
+    "probes": [],
+    "main": {
+      "tags": [
+        "keto",
+        "staging",
+        "commit:f86fbe9731df80b4e2204d22057e8c80ab9c01e3"
+      ],
+      "deployments": [
+        {
+          "id": "98015936-6a16-4f6c-95b4-6e9cadae047b",
+          "versions": [
+            {
+              "version_id": "840eea4c-d131-44e3-8d00-00ed51d84350",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-11-11T15:18:33.033014Z"
+        }
+      ]
+    },
+    "trigger": [
+      {
+        "trigger_uuid": "88639670-f75a-46f5-ae89-85a2d8387a7c",
+        "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+        "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+        "modified_on": "2026-11-11T15:51:59.543Z"
+      }
+    ]
+  },
+  "azure": {
+    "deployment_id": "efdbcec8-a124-4ff0-b43e-8c43ce9c606a",
+    "startup_adoption": {
+      "task": "AGR-306-C25-FOLLOWUP",
+      "observed_at": "2026-11-11T15:59:12.699Z",
+      "surface": "native background Chrome PERSONAL Offliner extensiona1f97a64;current browser2;ownedtab1973326819",
+      "url": "https://keto-companion-ay-20261107.azurewebsites.net/status?cache_bypass=C25-followup",
+      "status": 200,
+      "cache_control": "no-store",
+      "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+      "runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+      "edge_signature": "Ed25519",
+      "authentication_required": true,
+      "medical_monitoring": false,
+      "expected_source": "48ac620091f392f07af9511be05dd27b499c680c",
+      "expected_runtime": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+      "passed": true,
+      "cleanup": {
+        "tab1973326819": "closed,absenceverified",
+        "viewport": "no override used",
+        "CUA": "summary acknowledged;resetnext"
+      }
+    }
+  },
+  "cause": "Temporary acceptance probe readiness GET returned500 with invalid/bounded body before any POST; exact underlying service exception unavailable. No application/container test stage or provider invocation occurred.",
+  "next_action": "Coordinator decides bounded retry only with new evidence; no automatic rebuild/retry or main publication."
+}

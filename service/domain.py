@@ -11,6 +11,7 @@ from . import planning
 from . import food_search
 from .kitchen import KitchenService, init as kitchen_init, invalidate as kitchen_invalidate
 from .recipe_brain import RecipeDesigner
+from .recipe_discovery import RecipeDiscovery
 from .intake import IntakeService
 from .chat_actions import ChatActionService,chat_context,check_chat_context
 ROOT=Path(__file__).resolve().parents[1]
@@ -64,7 +65,7 @@ def literal_guard(message):
     return None
 
 class Service(ChatActionService,IntakeService,KitchenService,MobileService,planning.PlanningService):
-    def __init__(self,store,brain,transcriber=None,recipe_designer=None):self.store=store;self.brain=brain;self.transcriber=transcriber;self.recipe_designer=recipe_designer or RecipeDesigner();self.base=k.load_catalog(ROOT/'library/skills/keto-menu/data')
+    def __init__(self,store,brain,transcriber=None,recipe_designer=None):self.store=store;self.brain=brain;self.transcriber=transcriber;self.recipe_designer=recipe_designer or RecipeDesigner();self.recipe_discovery=RecipeDiscovery();self.base=k.load_catalog(ROOT/'library/skills/keto-menu/data')
     def load(self,subject,kind='personal'):
         d,v=self.store.read(subject)
         if d is None:d=new_document(subject,kind)

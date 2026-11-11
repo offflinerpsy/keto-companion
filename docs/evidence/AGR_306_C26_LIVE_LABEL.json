@@ -1,0 +1,59 @@
+{
+  "request_id": "436cb962aba24d95b58afb0440f78cb1",
+  "network_request_id": "2563.25",
+  "started_at": "2026-11-11T22:15:51.806Z",
+  "origin": "existing staging",
+  "input": "SYNTHETIC_LABEL.png",
+  "input_only_synthetic": true,
+  "delivery": "independently_verified",
+  "product_save": false,
+  "http_status": 200,
+  "seconds": 5.320032000017818,
+  "candidate": {
+    "readability": "readable",
+    "name": "Йогурт",
+    "brand": null,
+    "barcode": null,
+    "basis": "per100g",
+    "serving_mass": null,
+    "serving_unit": null,
+    "nutrients": [
+      {
+        "name": "Энергия",
+        "value": 66.8,
+        "unit": "ккал",
+        "column": "на 100 г"
+      },
+      {
+        "name": "Белки",
+        "value": 8,
+        "unit": "г",
+        "column": "на 100 г"
+      },
+      {
+        "name": "Жиры",
+        "value": 2,
+        "unit": "г",
+        "column": "на 100 г"
+      },
+      {
+        "name": "Углеводы",
+        "value": 4.2,
+        "unit": "г",
+        "column": "на 100 г"
+      }
+    ],
+    "carbohydrate_basis": "unknown",
+    "carbohydrate_caption": "Углеводы",
+    "ingredients_text": "Состав: молоко, закваска.",
+    "allergen_statement_text": "Содержит молоко.",
+    "unresolved_fields": [
+      "brand",
+      "barcode",
+      "carbohydrate_basis"
+    ],
+    "reshoot_hint": null
+  },
+  "model_called": true,
+  "live_provider_result": true
+}

@@ -97,12 +97,12 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "ff52eb1368956ff9312fb1ff0c6d9f22d755e59c77d56075269b395eb34edc44",
-    "cloudflare-saas/public/index.html": "28bbf9be149553bee03d371db074ef27195c74a3277c23fa78840251ef026551",
+    "cloudflare-saas/public/app.css": "1b48e71b2e3b9641b4cf107a05d446c1668c2484a6ef5ee49c8d0888fd620667",
+    "cloudflare-saas/public/index.html": "9cc95d0b10c69b9b7b61ce8e4f707ff4e9e107531da49d9b4495697fb3123b34",
     "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
-    "cloudflare-saas/src/compute.mjs": "642ffef201362b66cdc5f25736e9900e9ac28220536309e419e8e8a1514a282e",
+    "cloudflare-saas/src/compute.mjs": "16039f2f1acd49831244dd53b170d009c8900f3a99f5c524b3742706e074d5ae",
     "cloudflare-saas/src/worker.mjs": "2dc1a809c961f367d5235e915ad6e701bc1d7dbef4faa64927187f6cc8231f04",
-    "service/app.py": "50844d11f147f6ec1438dc932080044d0eb1d8a0be10ce02ae37e9b98041b537"
+    "service/app.py": "8d8ce794bfb363832c5adaf71127afe145bab7330e783189ab5eddf7c35a6307"
   },
   "static_elements": [
     {
@@ -904,6 +904,10 @@
       "id": "recipe-minutes",
       "tag": "input",
       "type": "number"
+    },
+    {
+      "id": "recipe-discovery-root",
+      "tag": "div"
     },
     {
       "id": "own-dish-root",
