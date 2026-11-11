@@ -1,0 +1,174 @@
+{
+  "schema": "keto-c22-native-acceptance-v1",
+  "status": "accepted_main_release_pending",
+  "recorded_at": "2026-11-11T10:34:12.742Z",
+  "source_commit": "de8d079ce6c3f040f50530e6e08ef936e8e627ad",
+  "build": {
+    "build_uuid": "3841f7c2-3dfa-434c-bc0e-e0e64a63c01b",
+    "status": "stopped",
+    "build_outcome": "success",
+    "created_on": "2026-11-11T10:25:26.765Z",
+    "running_on": "2026-11-11T10:25:28.867Z",
+    "stopped_on": "2026-11-11T10:32:29.137Z",
+    "metadata": {
+      "commit_hash": "de8d079ce6c3f040f50530e6e08ef936e8e627ad",
+      "build_command": "python scripts/cloudflare_ci.py && node --test ops/runtime-acceptance-http.test.mjs && node --test --test-name-pattern='^(operator promotion is disabled without explicit native release flag|operator helper never publishes app or replaces image before isolated acceptance|exact pinned application detail wins over stale collection and retains all guards)$' ops/promotion.test.mjs",
+      "deploy_command": "KETO_NATIVE_RUNNER_RELEASE=1 KETO_APPROVED_ROLLOUT=1 .venv/bin/python scripts/deploy_developer_native.py",
+      "root_directory": "/"
+    }
+  },
+  "source_gate": {
+    "passed": true,
+    "python": 664,
+    "python_subtests": 6,
+    "node": 309,
+    "node_failed": 0,
+    "source_stages": 16,
+    "seconds": 135.31,
+    "native_ops_tests": [
+      8,
+      3
+    ],
+    "generated_assets_match": true
+  },
+  "runtime": {
+    "task": "CF-DEV-MEDIA-08",
+    "baseline": "7a2a349a9017091fe637534e6b16f18ec27aa93360ebf863a1539edacb0637db",
+    "image_digest": "sha256:dcb9ed1ab917860ed54d3a7dc6adf89ea717a875099241a0a8523e10457cadec",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "network_policy": "Container class enableInternet=false; no egress exceptions",
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "private_credentials_transported_to_agent": false,
+    "publication_broker": false,
+    "runtime_user_flow_tested": false,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true
+  },
+  "rollout": {
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "rollout_id": "8b7069d7-c878-40bd-8e6e-dd502b0c1e48",
+    "previous_digest": "sha256:ba8723e001e3036e7c46dede82bb3605af80cb50e65777175dfa3d8b06cb02ac",
+    "new_digest": "sha256:dcb9ed1ab917860ed54d3a7dc6adf89ea717a875099241a0a8523e10457cadec"
+  },
+  "ordinary_trigger_restored": true,
+  "controls_preserved": true,
+  "readback": {
+    "at": "2026-11-11T10:34:12.742Z",
+    "trigger": {
+      "trigger_uuid": "88639670-f75a-46f5-ae89-85a2d8387a7c",
+      "external_script_id": "35d20e3e19a74997aa077809e9839e38",
+      "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+      "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+      "root_directory": "/",
+      "branch_includes": [
+        "release/staging-0.3.0"
+      ],
+      "branch_excludes": [],
+      "path_includes": [
+        "cloudflare-saas/**",
+        "scripts/deploy_cloudflare_staging.mjs",
+        "artifacts/**",
+        "qa/firebase-public-config.json"
+      ],
+      "path_excludes": [],
+      "build_caching_enabled": true,
+      "modified_on": "2026-11-11T10:33:51.730Z",
+      "deleted_on": null
+    },
+    "build": {
+      "build_uuid": "3841f7c2-3dfa-434c-bc0e-e0e64a63c01b",
+      "status": "stopped",
+      "build_outcome": "success",
+      "created_on": "2026-11-11T10:25:26.765Z",
+      "running_on": "2026-11-11T10:25:28.867Z",
+      "stopped_on": "2026-11-11T10:32:29.137Z",
+      "metadata": {
+        "commit_hash": "de8d079ce6c3f040f50530e6e08ef936e8e627ad",
+        "build_command": "python scripts/cloudflare_ci.py && node --test ops/runtime-acceptance-http.test.mjs && node --test --test-name-pattern='^(operator promotion is disabled without explicit native release flag|operator helper never publishes app or replaces image before isolated acceptance|exact pinned application detail wins over stale collection and retains all guards)$' ops/promotion.test.mjs",
+        "deploy_command": "KETO_NATIVE_RUNNER_RELEASE=1 KETO_APPROVED_ROLLOUT=1 .venv/bin/python scripts/deploy_developer_native.py",
+        "root_directory": "/"
+      }
+    },
+    "runner": {
+      "bindings": [
+        {
+          "type": "plain_text",
+          "name": "DEVELOPER_BASELINE",
+          "text": "7a2a349a9017091fe637534e6b16f18ec27aa93360ebf863a1539edacb0637db"
+        },
+        {
+          "type": "plain_text",
+          "name": "DEVELOPER_IMAGE_DIGEST",
+          "text": "sha256:dcb9ed1ab917860ed54d3a7dc6adf89ea717a875099241a0a8523e10457cadec"
+        },
+        {
+          "type": "durable_object_namespace",
+          "name": "KETO_TESTER",
+          "class_name": "KetoTester",
+          "namespace_id": "b0a394e990794e51ba4f38a9339bb308"
+        }
+      ],
+      "tags": [
+        "keto",
+        "developer-isolated",
+        "baseline:7a2a349a9017091fe637534e6b16f18ec27aa93360ebf863a1539edacb0637db"
+      ],
+      "compatibility_date": "2026-11-07"
+    },
+    "app": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "name": "keto-companion-developer-runner",
+      "version": 18,
+      "max_instances": 1,
+      "scheduling_policy": "default",
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:dcb9ed1ab917860ed54d3a7dc6adf89ea717a875099241a0a8523e10457cadec",
+      "environment_variable_count": 0,
+      "authorized_key_count": 0,
+      "network": {
+        "assign_ipv6": "none",
+        "assign_ipv4": "none",
+        "mode": "private"
+      }
+    },
+    "temporary_probe_names": [],
+    "instance_readback": {
+      "returned_count": 32,
+      "state_counts": {
+        "inactive": 32
+      },
+      "active": [],
+      "note": "state=active request; active absence derived from actual returned state fields"
+    }
+  },
+  "limitations": [
+    "No main Worker deployment or application HTTP validation in this phase.",
+    "No Azure deployment, D1 mutation, family-data write or approved-runtime.json edit.",
+    "Image acceptance applies only to protected baseline 7a2a349a9017091fe637534e6b16f18ec27aa93360ebf863a1539edacb0637db; later source changes require a new accepted baseline."
+  ]
+}

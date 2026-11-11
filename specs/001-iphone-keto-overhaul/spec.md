@@ -56,3 +56,6 @@ Food; FoodCandidate; Source/provenance; GI observation; PantryItem; Dish/serving
 
 ## Assumptions
 Private family use; Russian default; spouse iPhone17ProMax primary, existing desktop remains usable. Existing accounts and infrastructure. iOS conventions are a reference, not redistribution permission for Apple fonts/assets. General GI coverage cannot be guaranteed for every branded product; sourced values and missing status are mandatory. No framework rewrite or speculative service split.
+
+## C21 — observed loading regression (2026-11-11)
+Owner reports pantry proposal stuck at checking products, workspace retry after successful Google login, and actual phone UI differing from previews. Preserve the current design; fix demonstrated failures. Acceptance: a failed/stalled request terminates visibly, cannot indefinitely block workspace retry, and is never automatically replayed; rendered actual mobile UI and loaded assets are checked separately from synthetic previews. Physical-device mismatch remains unverified until the exact page or screenshots are supplied.

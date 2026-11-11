@@ -97,7 +97,7 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "c0fce3a1324f2dfb49606a9605ced074ade51aa18f86f742003afcf1d84b3d28",
+    "cloudflare-saas/public/app.css": "7ad2e10ab6437a84823ab10156548cb24069800d07a3bd250abf11a7155986cb",
     "cloudflare-saas/public/index.html": "09e5c7d443c26787255a596df6e57e19970b7d135996721b40194063b299c0b8",
     "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
     "cloudflare-saas/src/compute.mjs": "642ffef201362b66cdc5f25736e9900e9ac28220536309e419e8e8a1514a282e",

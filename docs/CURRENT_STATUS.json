@@ -1,21 +1,21 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-11T08:02:23.555814+00:00",
+  "updated_at": "2026-11-11T10:45:06.322556+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": null,
-  "last_completed": "AGR-306-C19/C20: full code/logic/performance optimization, UI/UX & contextual Russian micro-guides upgrade, D1 0009 indexes, Azure compute & Cloudflare staging deployed and verified.",
+  "last_completed": "AGR-306-C21/C22: loading recovery and concrete mobile own-dish/search corrections deployed and checked in live mobile viewport.",
   "next_task": {
     "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
-    "status": "awaiting_device_observation"
+    "status": "owner_reload_and_observation_pending"
   },
   "staging": {
     "deployed": true,
     "compute_connected": true,
     "google_real_user_login_verified": true,
     "url": "https://keto-companion-saas-staging.offflinerpsy.workers.dev",
-    "source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "source_commit": "9afff2a2f3abf778121e3ab833c0a4dd15543d75",
     "http_checks_passed": 16,
     "synthetic_e2e_checks": 14,
     "synthetic_cleanup_verified": true,
@@ -28,7 +28,7 @@
     "developer_preview_runner_connected": true,
     "design_applied": "C19/C20 calm iOS-familiar hierarchy, translucent bars with reduced-transparency fallback, tabular-nums, and contextual Russian micro-guides (.ux-hint, .ux-callout, .ux-guide) across all screens.",
     "google_real_user_login_evidence": "docs/evidence/AGR_306_C18_REAL_LOGIN.json",
-    "worker_version_id": "8e27cf3e-6698-4511-8258-c5cadbf236f2",
+    "worker_version_id": "a1a493ac-e036-46cf-bc37-63e4d1be3e64",
     "current_C8_receipt": "/Users/alexyarosh/Documents/ChatGPT/keto/product-overhaul/verification/C8_LIVE_CONTROL.json",
     "synthetic_e2e_scope": "14 C17 browser scenarios (7 per engine) on real local HTTP/SQLite, separate from retained C16 evidence; not a new signed family transaction.",
     "current_C14_receipt": "docs/evidence/AGR_306_C14_RELEASE_RECEIPT.json",
@@ -36,16 +36,17 @@
     "current_C16_receipt": "docs/evidence/AGR_306_C16_RELEASE_RECEIPT.json",
     "current_C17_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
     "current_C18_receipt": "docs/evidence/AGR_306_C18_RELEASE_RECEIPT.json",
-    "current_C19_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json"
+    "current_C19_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json",
+    "current_C22_receipt": "docs/evidence/AGR_306_C22_RELEASE_RECEIPT.json"
   },
   "production": {
     "saas_deployed": false,
     "legacy_azure_plugin_preserved": true
   },
   "evidence": {
-    "python_tests": 663,
+    "python_tests": 664,
     "python_subtests": 6,
-    "node_synthetic_tests": 302,
+    "node_synthetic_tests": 309,
     "python_skipped": 1,
     "browser_scenarios": 91,
     "browser_unique_scenarios": 54,
@@ -57,15 +58,17 @@
     "full_source_stages": 16,
     "actual_runtime_product_tests": 14,
     "actual_runtime_python_tests": 17,
-    "current_live_http_checks": 16,
-    "served_asset_hashes": 6,
+    "current_live_http_checks": null,
+    "served_asset_hashes": null,
     "specification_links_checked": 879,
     "Cloudflare_full_gate": "C19_exact_release_commit_passed",
     "actual_cloud_compatibility_date": "2026-11-07",
-    "current_final_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json",
+    "current_final_receipt": "docs/evidence/AGR_306_C22_RELEASE_RECEIPT.json",
     "c18_source": "docs/evidence/AGR_306_C18_SOURCE_ACCEPTANCE.json",
     "c18_browser_scenarios": 38,
-    "c18_node": 296
+    "c18_node": 296,
+    "current_live_ui_receipt": "docs/evidence/AGR_306_C22_LIVE_UI.json",
+    "C19_historical_http_receipt": "docs/evidence/AGR_306_C19_LIVE_HTTP.json"
   },
   "not_verified": [
     "The physical iPhone17Pro Chrome failure was not reproduced; real Google login was verified in connected desktop Chrome and synthetic mobile cases in Chromium/WebKit.",
@@ -88,7 +91,7 @@
     "release_pull_request": 4,
     "release_merge_commit": "4661687931e263a9fd002239a4ec473aaaa8356e",
     "next_acceptance_issue": 10,
-    "current_canonical_branch": "main",
+    "current_canonical_branch": "codex/c21-loading-repair",
     "mobile_release_pr": 7,
     "mobile_merge_commit": "b92f1bfd58b93785c115874be923bbeec0a3b3dd",
     "onboarding_pr": 9,
@@ -99,11 +102,11 @@
     "active_release_pr": null,
     "developer_media_release_pr": 17,
     "developer_media_merge_commit": "11cd452920e1c450ad85672e55ab52fa41280bca",
-    "current_release_pr": 24,
-    "current_release_pr_url": "https://github.com/offflinerpsy/keto-companion/pull/24",
-    "deployed_source_commit": "577432672abbcde12c400ea5de4462aa97cf6166"
+    "current_release_pr": 26,
+    "current_release_pr_url": "https://github.com/offflinerpsy/keto-companion/pull/26",
+    "deployed_source_commit": "9afff2a2f3abf778121e3ab833c0a4dd15543d75"
   },
-  "mobile_acceptance": "C18: 24 auth plus 14 food Chromium/WebKit scenarios; fresh real desktop Google login/admin/reload accepted. Physical iPhone17Pro Chrome remains unverified.",
+  "mobile_acceptance": "C22 root actual live Chrome402x874: correct14px side padding, clear labels, cheese search1982ms for one sample, selected cheddar focuses blank grams; physical iPhone remains separate.",
   "mobile_source": {
     "task": "KETO-MOBILE-006",
     "status": "completed_locally",
@@ -114,7 +117,7 @@
     "real_device_audio_tested": false,
     "cloud_changes": false
   },
-  "mobile_stage": "C17_deployed_physical_iPhone_acceptance_pending",
+  "mobile_stage": "C22_deployed_live_mobile_browser_verified_physical_iPhone_pending",
   "mobile_receipt": "docs/evidence/MOBILE_RELEASE_RECEIPT.json",
   "owner_feedback": {
     "dictation": "user confirms works",

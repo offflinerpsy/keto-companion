@@ -45,3 +45,10 @@ Owner-requested audit 2026-11-09: T020 accepted by actual C8 build `8b737ad0-055
 - [x] T025 [US4] Apply accepted audit first-screen/navigation/type/copy/loading fixes on existing UI, review changed source independently, verify fresh 440/390 mobile pixels and complete meaningful regression/generated/full/native release gates for this integrated candidate. Preserve earlier receipts and leave physical T021 separate.
 
 C9 wrap-up: native new-image build c296da43 and ordinary build 7ce93b5a both succeeded; final release/device receipt `docs/evidence/AGR_306_C9_RELEASE_DEVICE.json`. T025 technical gates accepted. T021 remains partial: actual connected iPhone Chrome nav/library/native selection/help/steppers checked; software keyboard, hardware camera/voice and navigation-scroll observation remain. No new implementation cycle under the owner wrap-up request.
+
+## C21 — observed loading regression (2026-11-11)
+- [x] T026 [US4] Bound stalled serialized transport, show terminal pantry proposal status, verify workspace recovery without auth reset or automatic mutation replay; focused behavioral regressions.
+- [x] T027 [US4] Verify actual deployed mobile UI and asset identity; run required exact-source release gates for the minimal repair and retain physical iPhone acceptance separately.
+
+## C22 — own-dish and search clarity (2026-11-11)
+- [x] T028 Fix own-dish body padding and ambiguous cooking instructions, focus selected ingredient mass, make USDA an explicitly supplementary search, and clarify catalog counts. Verify actual mobile pixels and meaningful lookup/selection regressions.

@@ -16,6 +16,13 @@ test('verified admin survives bootstrap 503 and recovers without a new Google lo
  assert.equal(h.controller.phase,'workspace-error');assert.equal(h.controller.identity.user.role,'admin');assert.equal(h.identities.at(-1),active);assert.equal(h.opened.length,0);
  h.load=async()=>({state:{synthetic:true}});await h.controller.retry();assert.equal(h.controller.phase,'ready');assert.equal(h.google,0);assert.equal(h.opened.length,1);assert.equal(h.requests.filter(x=>x==='/api/session').length,2);
 });
+test('workspace bootstrap accepts a 40-second bridge response without discarding verified sign-in',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});const gate=deferred(),opened=[];
+ const auth=createAuthSession({api:async path=>path==='/auth/config'?{provider:'direct_google'}:active,authenticate:()=>{throw Error('unexpected Google login')},loadWorkspace:()=>gate.promise,openWorkspace:data=>opened.push(data),identityChanged(){},view(){}});
+ const opening=auth.start();await new Promise(setImmediate);assert.equal(auth.phase,'loading');
+ t.mock.timers.tick(40000);await new Promise(setImmediate);assert.equal(auth.phase,'loading');
+ gate.resolve({state:{synthetic:true}});await opening;assert.equal(auth.phase,'ready');assert.equal(auth.identity,active);assert.equal(opened.length,1);
+});
 test('missing session and temporarily unavailable session are different states',async()=>{
  const h=harness({user:null});await h.controller.start();assert.equal(h.controller.phase,'signed-out');assert.equal(h.controller.identity,null);
  h.api=async path=>{if(path==='/auth/config')return {provider:'direct_google'};throw new AuthError('SERVER_UNAVAILABLE',{status:503})};await h.controller.start();assert.equal(h.controller.phase,'session-error');assert.equal(h.google,0);assert.equal(h.opened.length,0);

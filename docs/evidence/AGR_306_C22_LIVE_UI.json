@@ -1,0 +1,25 @@
+{
+  "target": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/#recipes",
+  "checkedAt": "2026-11-11T10:43:39.156Z",
+  "workspaceOpened": true,
+  "newLabelsVisible": true,
+  "cheeseSearchMs": 1982,
+  "searchScope": "one observed live browser sample, including UI automation overhead; not physical iPhone latency guarantee",
+  "localCheeseResults": 5,
+  "USDAExplicit": true,
+  "geometry": {
+    "focused": "Граммы съедобной части: Сыр чеддер",
+    "grams": "",
+    "height": 874,
+    "overflow": false,
+    "padding": "12px 14px",
+    "width": 402
+  },
+  "screenshot": "docs/evidence/AGR_306_C22_BUILDER_LIVE.png",
+  "realFamilyDataWrites": false,
+  "cleanup": {
+    "ownedTabClosed": true,
+    "viewportReset": true,
+    "cua_reset": true
+  }
+}
