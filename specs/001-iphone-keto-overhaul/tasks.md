@@ -86,4 +86,4 @@ C25 final technical checkpoint — 2026-11-11: regional normal-picker search/rev
 - [x] T-C26-2 Implement bounded barcode/scan lifecycle, confirmed code, actionable label fallback and precise bug delivery/error context.
 - [x] T-C26-3 Unify form spacing, nutrition groups and primary actions across shop, own-dish and intake/report forms without breaking saved preferences.
 - [x] T-C26-4 Verify meaningful failure/cancellation/stale-response and synthetic save/reload cases, inspect mobile pixels and run project-required source gates.
-- [ ] T-C26-5 Release exact accepted candidate through existing supported gates; inspect live assets/workflow, reconcile KETO-2 and report device limitations.
+- [x] T-C26-5 Release exact accepted candidate through existing supported gates; inspect live assets/workflow, reconcile KETO-2 and report device limitations. Evidence: docs/evidence/AGR_306_C26_HOSTED_UI.json; KETO-2 ready, physical phone camera remains owner verification.

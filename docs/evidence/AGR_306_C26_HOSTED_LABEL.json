@@ -1,0 +1,59 @@
+{
+  "at": "2026-11-11T22:48:45.159Z",
+  "stage": "C26 hosted combined barcode-to-label acceptance",
+  "image": "SYNTHETIC_LABEL.png",
+  "barcode": "2000000000008",
+  "delivery": "independently_verified",
+  "save_product": false,
+  "reason": "New published frontend; prior OCR acceptance used earlier frontend",
+  "http": 200,
+  "headers_ms": 6127.408,
+  "request_id": "a2c0afb55fb74b24b2bb3135fd4f2e0d",
+  "candidate": {
+    "readability": "readable",
+    "name": "Йогурт",
+    "brand": null,
+    "barcode": null,
+    "basis": "per100g",
+    "serving_mass": null,
+    "serving_unit": null,
+    "nutrients": [
+      {
+        "name": "Энергия",
+        "value": 66.8,
+        "unit": "ккал",
+        "column": "на 100 г"
+      },
+      {
+        "name": "Белки",
+        "value": 8,
+        "unit": "г",
+        "column": "на 100 г"
+      },
+      {
+        "name": "Жиры",
+        "value": 2,
+        "unit": "г",
+        "column": "на 100 г"
+      },
+      {
+        "name": "Углеводы",
+        "value": 4.2,
+        "unit": "г",
+        "column": "на 100 г"
+      }
+    ],
+    "carbohydrate_basis": "unknown",
+    "carbohydrate_caption": "Углеводы",
+    "ingredients_text": "Состав: молоко, закваска.",
+    "allergen_statement_text": "Содержит молоко.",
+    "unresolved_fields": [
+      "brand",
+      "barcode",
+      "carbohydrate_basis"
+    ],
+    "reshoot_hint": null
+  },
+  "ui": "per100g;66.8kcal/8protein/2fat/4.2carb;barcode2000000000008 retained as provisional;OFF provenance removed;fiber unknown;product not saved",
+  "model_called": true
+}

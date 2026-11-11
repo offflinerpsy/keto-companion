@@ -1,0 +1,11 @@
+{
+  "target": "KETO-2",
+  "before": "new/revision1",
+  "after": "ready",
+  "fix_version": "0.7.1-C26 · 2e54f9b",
+  "author_close": false,
+  "delivery": "independently_verified",
+  "at": "2026-11-11T22:50:10.399Z",
+  "readback": "Own reports fetched after admin write;KETO-2 ready with version/evidence;reporter close control available, not clicked",
+  "closed": false
+}
