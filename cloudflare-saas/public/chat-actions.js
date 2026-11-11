@@ -15,6 +15,10 @@ export function setupChatActions({el,call,getState,epoch,getContext=()=>null,ref
   if(!actions.length)return wrapper;
   const group=el('div','message-actions');group.setAttribute('aria-label','Действия после ответа');
   const status=el('p','message-action-status');status.setAttribute('role','status');
+  function explainDisabled(){
+   if(status.textContent.trim()||!Array.from(group.children).every(control=>control.disabled))return;
+   status.textContent=[...new Set(actions.map(action=>action.reason||STATUS[action.status]||STATUS.unavailable))].join(' ');
+  }
   for(const action of actions){
    const button=el('button','secondary',action.label);button.type='button';button.dataset.actionId=action.id;
    if(action.type==='open_recipe'&&typeof action.fit_note==='string')button.append(el('span','message-action-note',action.fit_note));
@@ -44,12 +48,11 @@ export function setupChatActions({el,call,getState,epoch,getContext=()=>null,ref
      else throw Error('Это действие больше недоступно.');
      status.textContent='';
     }catch(error){if(token===serial&&stamp===epoch()&&context===getContext()){status.textContent=error.message||'Не удалось открыть. Попробуйте ещё раз.';if(refresh){const retry=el('button','text-btn','Обновить разговор');retry.type='button';retry.onclick=()=>run(async()=>{retry.disabled=true;try{await refresh();if(token===serial&&stamp===epoch())status.textContent='Разговор обновлён. Нажмите нужное действие ещё раз.'}finally{retry.disabled=false}});status.append(retry)}}}
-    finally{if(token===serial&&stamp===epoch()){resolving=false;for(const control of group.children){const original=actions.find(a=>a.id===control.dataset.actionId);control.disabled=original?.status!=='available'||control.dataset.unavailable==='true'}}}
+    finally{if(token===serial&&stamp===epoch()){resolving=false;for(const control of group.children){const original=actions.find(a=>a.id===control.dataset.actionId);control.disabled=original?.status!=='available'||control.dataset.unavailable==='true'}explainDisabled()}}
    });
    group.append(button);
   }
-  const unavailable=actions.filter(a=>a.status!=='available');
-  if(unavailable.length===actions.length)status.textContent=unavailable[0].reason||STATUS[unavailable[0].status]||STATUS.unavailable;
+  explainDisabled();
   wrapper.append(group,status);return wrapper;
  }
  return {render,reset(){serial++;resolving=false}};

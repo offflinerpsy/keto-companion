@@ -8,3 +8,22 @@ export function linkSlider(element,inputs,{min,max,step,labels,localWindow=false
  const listeners=inputs.map((input,i)=>{const fn=()=>{try{const v=numeric(input.value,{min,max});const current=api.get(true);if(Array.isArray(current)){current[i]=v;reframe(current);api.set(current)}else{reframe([v]);api.set(v)};input.setCustomValidity('')}catch(e){input.setCustomValidity(e.message)}};input.addEventListener('change',fn);return fn});
  return {destroy(){alive=false;inputs.forEach((input,i)=>input.removeEventListener('change',listeners[i]));api.destroy()}};
 }
+
+// Reuse field descriptions created by mobile-ui; keep their accessible IDs.
+export function setupHints({$,el}){
+ document.querySelectorAll('#settings-form .field-help,#profile-form .field-help,#targets-form .field-help').forEach(hint=>hint.classList.add('ux-hint'));
+ for(const [id,text] of [
+  ['meals_per_day','Число приёмов пищи влияет на новые расчётные меню; сохранённое меню нужно пересчитать отдельно.'],
+  ['max_active_minutes','Время активной готовки ограничивает выбор блюд в новых расчётных меню; медицинские ограничения сохраняются.'],
+  ['medications','Перечислите названия через запятую. Пустое поле не означает подтверждённое отсутствие приёма лекарств; это проверяется отдельным ответом.']
+ ]){
+  const input=$(id),label=input.closest('label');let hint=label.querySelector('.ux-hint');
+  if(!hint){hint=el('p','ux-hint');hint.id='setup-help-'+id;label.insertAdjacentElement('afterend',hint);input.setAttribute('aria-describedby',[input.getAttribute('aria-describedby'),hint.id].filter(Boolean).join(' '));}
+  hint.textContent=text;
+ }
+ $('medications').placeholder='Названия через запятую, если принимаете';
+ $('settings-form').append(el('p','ux-hint','«Посмотреть изменения» открывает проверку выбранных настроек; они сохранятся только после подтверждения.'));
+ const stopNote=$('revoke').closest('.panel').querySelector('p.muted');stopNote.className='ux-hint';stopNote.textContent='Остановка обработки прекращает обработку и новые записи, но не удаляет ранее сохранённый дневник; удаление профиля и дневника — отдельное действие.';
+ const activityNote=$('activity-choices').parentElement.querySelector('p');activityNote.className='ux-hint';activityNote.textContent='Активность задаёт приблизительный множитель расчётной формулы, а не измеренный расход энергии. Ручной индивидуальный план доступен в разделе «Ваш план питания»; медицинские ограничения сохраняются.';
+ $('allergy-options').insertAdjacentElement('afterend',el('p','ux-hint','Нелюбимые продукты — пожелания к меню; они не заменяют медицинские аллергии, которые нужно указать здесь.'));
+}

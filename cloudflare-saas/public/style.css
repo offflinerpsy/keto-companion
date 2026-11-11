@@ -530,11 +530,36 @@ body.large .diary-macros{grid-template-columns:repeat(2,minmax(0,1fr))}body.larg
 .diary-macros{gap:12px 10px}.diary-macro .macro-value{line-height:1.2}.diary-macro.energy{padding-bottom:10px}.diary-macro.energy .macro-value{font-size:1.45em;line-height:1.2}.diary-macro.fiber{padding-top:10px}
 #diary-entries>.diary-meal:first-child{margin-top:14px}.diary-discuss{margin-top:4px}
 
+/* Shared, optional explanations keep the main action in view. */
+.ux-hint,.ux-callout,.ux-guide,.ux-guide-body{font-size:max(.85em,14px);line-height:1.5;overflow-wrap:anywhere;min-width:0;max-width:100%}
+.ux-hint{color:var(--muted);margin:8px 0 14px}.check:has(.ux-hint){flex-wrap:wrap}.check>.ux-hint{flex:0 0 100%;margin:4px 0 0}
+.ux-callout{color:var(--ink);background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:11px 14px;margin:12px 0}
+.ux-guide{color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:2px 14px;margin:12px 0}
+.panel .ux-guide,dialog .ux-guide{background:var(--bg)}
+.ux-guide>summary{min-height:44px;padding:10px 0;font-size:inherit;font-weight:600;line-height:1.45;color:var(--accent);cursor:pointer;overflow-wrap:anywhere}
+.ux-guide>summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
+.ux-guide-body{font-size:inherit;color:var(--muted);padding:2px 0 12px;border-top:1px solid var(--line)}
+.ux-guide-body p{margin:8px 0}.ux-guide-body p:last-child{margin-bottom:0}
+.ux-hint:empty,.ux-callout:empty,.ux-guide:empty,.ux-guide>summary:empty,.ux-guide-body:empty{display:none}
+.macro-value,.macro-target,.intake-nutrients,.own-nutrition,#saved-targets,#target-preview,#portion-result{font-variant-numeric:tabular-nums}
+.secondary:not(:disabled){color:var(--accent);background:var(--paper);border-color:var(--line)}
+.panel,.recipe-card{box-shadow:0 1px 2px rgb(0 0 0 / .025)}
+
+/* Material changes paint only; flex sizing and safe areas stay in app.css. */
+.top,#nav{background:var(--paper);-webkit-backdrop-filter:none;backdrop-filter:none}
+@supports (backdrop-filter:blur(18px)) or (-webkit-backdrop-filter:blur(18px)){
+ .top,#nav{background:rgb(255 255 255 / .88);-webkit-backdrop-filter:saturate(160%) blur(18px);backdrop-filter:saturate(160%) blur(18px)}
+ body.dark .top,body.dark #nav{background:rgb(28 30 36 / .9)}
+}
+@media (prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ .top,#nav,body.dark .top,body.dark #nav{background:var(--paper);-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+
 /*! Animate UI v2.4.3 native/CSS adaptation. Copyright (c) 2025 Elliot Sutton.
  * MIT + Commons Clause. Full license and pinned sources: vendor/animate-ui/.
  * Native close remains synchronous; phone dialogs use the shorter menu gate,
  * no tilt/overshoot, and resting transform:none. No app/scroll wrapper moves. */
-:root{--motion-soft:cubic-bezier(.215,.61,.355,1);--motion-out:cubic-bezier(.23,1,.32,1);--motion-draw:cubic-bezier(0,0,.58,1);--motion-color:cubic-bezier(.25,.1,.25,1);--motion-menu:220ms;--motion-overlay:400ms;--motion-disclosure:350ms;--motion-check:300ms;--motion-fade:200ms;--motion-swap:150ms}
+:root{--motion-soft:cubic-bezier(.215,.61,.355,1);--motion-out:cubic-bezier(.23,1,.32,1);--motion-draw:cubic-bezier(0,0,.58,1);--motion-color:cubic-bezier(.25,.1,.25,1);--motion-menu:220ms;--motion-overlay:210ms;--motion-disclosure:220ms;--motion-check:300ms;--motion-fade:160ms;--motion-swap:120ms}
 .saved-check{display:inline-flex;flex:0 0 22px;width:22px;height:22px;align-items:center;justify-content:center;color:var(--accent)}.saved-check svg{display:block;width:22px;height:22px}.saved-check path{stroke-dasharray:1;stroke-dashoffset:0}
 @keyframes keto-dialog-in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
 @keyframes keto-fade-in{from{opacity:0}to{opacity:1}}
@@ -550,9 +575,9 @@ body.large .diary-macros{grid-template-columns:repeat(2,minmax(0,1fr))}body.larg
 }
 /* Animate UI's native disclosure recipe; unsupported engines keep native details. */
 @supports selector(details::details-content) and (interpolate-size:allow-keywords){
- details:not(.diary-entry-more){interpolate-size:allow-keywords}
- details:not(.diary-entry-more)::details-content{height:0;overflow:clip;overflow-clip-margin:6px;opacity:0;transition:height var(--motion-disclosure) var(--motion-soft),opacity var(--motion-disclosure) var(--motion-soft),content-visibility var(--motion-disclosure) var(--motion-soft) allow-discrete}
- details[open]:not(.diary-entry-more)::details-content{height:auto;opacity:1}
+ details:not(.diary-entry-more):not(dialog details){interpolate-size:allow-keywords}
+ details:not(.diary-entry-more):not(dialog details)::details-content{height:0;overflow:clip;overflow-clip-margin:6px;opacity:0;transition:height var(--motion-disclosure) var(--motion-soft),opacity var(--motion-disclosure) var(--motion-soft),content-visibility var(--motion-disclosure) var(--motion-soft) allow-discrete}
+ details[open]:not(.diary-entry-more):not(dialog details)::details-content{height:auto;opacity:1}
  @media(prefers-reduced-motion:reduce){details::details-content{transition:none!important}}
 }
 @media(prefers-reduced-motion:reduce){

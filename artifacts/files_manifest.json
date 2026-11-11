@@ -4,32 +4,32 @@
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "9bca28780a5bea988762e3f07fc0b2dd26defbb31bca111d651893290916d213",
-      "bytes": 1560805,
+      "sha256": "c5ed36cb6feab2d6781cc20c2d3760f1edb8975a014269ac6751deccae5ebef5",
+      "bytes": 1628404,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "d714e2445af0fd0ddf11b32fb80c8c25f59b6166ddebe0318f07d6e061483619",
-      "bytes": 171131,
+      "sha256": "d7f0b9190aebcd680d03ea2956cb82dd064b34d995c120f3bbefcd926bba30d8",
+      "bytes": 174836,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/assets/index.html",
-      "sha256": "32981b580b24c8c104a39bdb5ec000e61ec1171a10ed21777cb332251fb0a758",
-      "bytes": 55177,
+      "sha256": "09e5c7d443c26787255a596df6e57e19970b7d135996721b40194063b299c0b8",
+      "bytes": 60476,
       "mime": "text/plain",
       "module_name": "assets/index.html",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "5f69bb4a6957ba5ceb2ec157e1d32447ced165f53f7360c5b6b0781784b91b41",
-      "bytes": 797542,
+      "sha256": "a48471cf76ad9ae370b9cd2d3c05bc44e5a3d487270648b4af9cbbb82257903d",
+      "bytes": 834734,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"
@@ -44,16 +44,16 @@
     },
     {
       "path": "cloudflare-saas/dist/assets/style.css",
-      "sha256": "c567201ece42e93a0e80759474aa36ea903618e5e1bedcfe082ca651aa1d1312",
-      "bytes": 87836,
+      "sha256": "dcaed452323fc54afce01fb5c39eb28ec7d32a8ecdf390cec45864620913ea00",
+      "bytes": 90066,
       "mime": "text/plain",
       "module_name": "assets/style.css",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/help.html",
-      "sha256": "b94508cc3cefe90a08213584bf31acf943e17b1b65c103f89b0be8a371f64574",
-      "bytes": 3528,
+      "sha256": "91d00b58bf0898acc08bac06ad1abfa6fb80f5272fba17425c42c0de22d3a7b2",
+      "bytes": 5003,
       "mime": "text/plain",
       "module_name": "assets/help.html",
       "module_type": "text"

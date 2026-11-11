@@ -26,6 +26,7 @@ export function nutritionOverview(summary,state={}){
    progress:complete&&hasTarget&&denominator>0?Math.min(1,value/denominator):null};
  });
  return {count,agreed,stale,paused,net,cards,incomplete:summary?.incomplete_entries||0,
+  incompleteNote:count&&(summary?.incomplete_entries>0||cards.some(card=>!card.complete))?'«Учтено» показывает известную часть состава; полный итог за день может быть больше.':'',
   targetsNote:paused?'Сравнение с ориентирами приостановлено. Проверьте ограничения в профиле.':stale?'Ориентиры нужно обновить после изменений профиля.':agreed?'Сравнение с текущими сохранёнными ориентирами.':'Личные ориентиры пока не согласованы.'};
 }
 
