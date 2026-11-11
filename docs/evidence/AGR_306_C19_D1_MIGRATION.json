@@ -1,0 +1,59 @@
+{
+  "issue": "AGR-306",
+  "source_commit": "2484a22404da0c9fc883f68bff407e18a51b9d46",
+  "checked_at": "2026-11-11T07:29:15.000Z",
+  "account": "0609100baf768271ea2811c9a9ee2b16",
+  "database": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+  "migration": "0009_indexes.sql",
+  "sha256": "7c9fba6573e60cda411972171531a1c90b7581d09fd403a394a29be1d7ab5e91",
+  "state": "independently_verified",
+  "indexes": [
+    {
+      "name": "dev_events_job",
+      "tbl_name": "dev_events",
+      "sql": "CREATE INDEX dev_events_job ON dev_events(job_id)"
+    },
+    {
+      "name": "dev_jobs_active_expiry",
+      "tbl_name": "dev_jobs",
+      "sql": "CREATE INDEX dev_jobs_active_expiry ON dev_jobs(expires_at) WHERE state<>'expired'"
+    },
+    {
+      "name": "dev_jobs_owner_session_created",
+      "tbl_name": "dev_jobs",
+      "sql": "CREATE INDEX dev_jobs_owner_session_created ON dev_jobs(owner_id,session_hash,created_at DESC)"
+    },
+    {
+      "name": "invites_created",
+      "tbl_name": "invites",
+      "sql": "CREATE INDEX invites_created ON invites(created_at DESC)"
+    },
+    {
+      "name": "jobs_user_status_created",
+      "tbl_name": "jobs",
+      "sql": "CREATE INDEX jobs_user_status_created ON jobs(user_id,status,created_at)"
+    },
+    {
+      "name": "oauth_attempts_expiry",
+      "tbl_name": "oauth_attempts",
+      "sql": "CREATE INDEX oauth_attempts_expiry ON oauth_attempts(expires_at)"
+    },
+    {
+      "name": "sessions_expiry",
+      "tbl_name": "sessions",
+      "sql": "CREATE INDEX sessions_expiry ON sessions(expires_at)"
+    },
+    {
+      "name": "shop_public_cache_expiry",
+      "tbl_name": "shop_public_cache",
+      "sql": "CREATE INDEX shop_public_cache_expiry ON shop_public_cache(expires_at)"
+    }
+  ],
+  "migration_record": [
+    {
+      "name": "0009_indexes.sql",
+      "applied_at": "2026-11-11 07:29:12"
+    }
+  ],
+  "private_state_rows_read_or_changed": false
+}

@@ -3,7 +3,7 @@
  * MIT + Commons Clause. Full license and pinned sources: vendor/animate-ui/.
  * Native close remains synchronous; phone dialogs use the shorter menu gate,
  * no tilt/overshoot, and resting transform:none. No app/scroll wrapper moves. */
-:root{--motion-soft:cubic-bezier(.215,.61,.355,1);--motion-out:cubic-bezier(.23,1,.32,1);--motion-draw:cubic-bezier(0,0,.58,1);--motion-color:cubic-bezier(.25,.1,.25,1);--motion-menu:220ms;--motion-overlay:400ms;--motion-disclosure:350ms;--motion-check:300ms;--motion-fade:200ms;--motion-swap:150ms}
+:root{--motion-soft:cubic-bezier(.215,.61,.355,1);--motion-out:cubic-bezier(.23,1,.32,1);--motion-draw:cubic-bezier(0,0,.58,1);--motion-color:cubic-bezier(.25,.1,.25,1);--motion-menu:220ms;--motion-overlay:210ms;--motion-disclosure:220ms;--motion-check:300ms;--motion-fade:160ms;--motion-swap:120ms}
 .saved-check{display:inline-flex;flex:0 0 22px;width:22px;height:22px;align-items:center;justify-content:center;color:var(--accent)}.saved-check svg{display:block;width:22px;height:22px}.saved-check path{stroke-dasharray:1;stroke-dashoffset:0}
 @keyframes keto-dialog-in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
 @keyframes keto-fade-in{from{opacity:0}to{opacity:1}}
@@ -19,9 +19,9 @@
 }
 /* Animate UI's native disclosure recipe; unsupported engines keep native details. */
 @supports selector(details::details-content) and (interpolate-size:allow-keywords){
- details:not(.diary-entry-more){interpolate-size:allow-keywords}
- details:not(.diary-entry-more)::details-content{height:0;overflow:clip;overflow-clip-margin:6px;opacity:0;transition:height var(--motion-disclosure) var(--motion-soft),opacity var(--motion-disclosure) var(--motion-soft),content-visibility var(--motion-disclosure) var(--motion-soft) allow-discrete}
- details[open]:not(.diary-entry-more)::details-content{height:auto;opacity:1}
+ details:not(.diary-entry-more):not(dialog details){interpolate-size:allow-keywords}
+ details:not(.diary-entry-more):not(dialog details)::details-content{height:0;overflow:clip;overflow-clip-margin:6px;opacity:0;transition:height var(--motion-disclosure) var(--motion-soft),opacity var(--motion-disclosure) var(--motion-soft),content-visibility var(--motion-disclosure) var(--motion-soft) allow-discrete}
+ details[open]:not(.diary-entry-more):not(dialog details)::details-content{height:auto;opacity:1}
  @media(prefers-reduced-motion:reduce){details::details-content{transition:none!important}}
 }
 @media(prefers-reduced-motion:reduce){

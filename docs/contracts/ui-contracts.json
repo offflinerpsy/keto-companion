@@ -14,6 +14,7 @@
       "--color-spruce-teal": "#005FCC",
       "--color-verdant-mint": "#43A08A",
       "--container": "428px",
+      "--control-line": "#868B95",
       "--font-plus-jakarta-sans": "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
       "--grid-gap": "12px",
       "--ink": "var(--color-deep-charcoal)",
@@ -57,6 +58,7 @@
     "body.dark": {
       "--accent": "#83B8FF",
       "--bg": "#111318",
+      "--control-line": "#78808F",
       "--ink": "#F2F3F5",
       "--line": "#606977",
       "--muted": "#C3C7D0",
@@ -95,12 +97,12 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "be9c5b27d3ad5d4422f37f527d13d131bfa31c7538499783342e7e3a15db0262",
-    "cloudflare-saas/public/index.html": "f36ccec086a0270e4073ed0c0b4ac98038e05249d806286a834d929892ea025e",
+    "cloudflare-saas/public/app.css": "c0fce3a1324f2dfb49606a9605ced074ade51aa18f86f742003afcf1d84b3d28",
+    "cloudflare-saas/public/index.html": "09e5c7d443c26787255a596df6e57e19970b7d135996721b40194063b299c0b8",
     "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
-    "cloudflare-saas/src/compute.mjs": "50dbeb05fce25d51b1141d3c974fd9774976ce912da8f7d074f8c296041ea97d",
-    "cloudflare-saas/src/worker.mjs": "f6617cec4f70a8f2328da93dd2aa86fef106d05134c231e653990bed400f9eb6",
-    "service/app.py": "6b27c065f17dddd300e4b6dd41a725d233cea2c65327da3445c583cd7e012cc0"
+    "cloudflare-saas/src/compute.mjs": "642ffef201362b66cdc5f25736e9900e9ac28220536309e419e8e8a1514a282e",
+    "cloudflare-saas/src/worker.mjs": "7874a71b4a3b9f578015f0f4212f5645cc1ef0e3216b044890c10c2cf756cc54",
+    "service/app.py": "50844d11f147f6ec1438dc932080044d0eb1d8a0be10ce02ae37e9b98041b537"
   },
   "static_elements": [
     {
@@ -1479,6 +1481,10 @@
       "tag": "dialog"
     },
     {
+      "id": "source-recipe-heading",
+      "tag": "h2"
+    },
+    {
       "id": "source-recipe-form",
       "tag": "form"
     },
@@ -1659,6 +1665,10 @@
     {
       "id": "help-dialog",
       "tag": "dialog"
+    },
+    {
+      "id": "help-heading",
+      "tag": "h2"
     },
     {
       "id": "help-search",

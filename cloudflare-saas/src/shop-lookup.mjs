@@ -19,6 +19,7 @@ export async function lookup(barcode,env,h,fetcher=fetch){
  let cached=await h.dbfirst(env,'SELECT payload FROM shop_public_cache WHERE barcode=? AND expires_at>?',barcode,t);if(cached)return JSON.parse(cached.payload);
  const paused=await h.dbfirst(env,'SELECT until_at FROM shop_provider_backoff WHERE provider=? AND until_at>?','off',t);if(paused)h.fail(503,'PROVIDER_BACKOFF');
  await h.dbrun(env,'DELETE FROM shop_provider_requests WHERE requested_at<=?',t-60);
+ await h.dbrun(env,'DELETE FROM shop_public_cache WHERE barcode IN (SELECT barcode FROM shop_public_cache WHERE expires_at<=? LIMIT 32)',t);
  const reservation=await h.dbrun(env,'INSERT INTO shop_provider_requests(requested_at) SELECT ? WHERE (SELECT COUNT(*) FROM shop_provider_requests WHERE requested_at>?)<15',t,t-60);
  if(reservation.meta.changes!==1)h.fail(429,'PROVIDER_THROTTLED');
  let r;try{r=await fetcher('https://world.openfoodfacts.org/api/v2/product/'+barcode+'?fields=code,product_name,product_name_ru,brands,ingredients_text,ingredients_text_ru,nutriments',{headers:{'User-Agent':'KetoCompanion/0.7 (https://github.com/offflinerpsy/keto-companion)','Accept':'application/json'},redirect:'manual',signal:AbortSignal.timeout(8000)})}catch(error){h.fail(503,['AbortError','TimeoutError'].includes(error?.name)?'PROVIDER_TIMEOUT':'PROVIDER_NETWORK_ERROR')}
@@ -44,6 +45,7 @@ export async function searchProducts(query,wide,env,h,fetcher=fetch){
  const cached=await h.dbfirst(env,'SELECT payload FROM shop_public_cache WHERE barcode=? AND expires_at>?',key,t);if(cached)return JSON.parse(cached.payload);
  if(await h.dbfirst(env,'SELECT until_at FROM shop_provider_backoff WHERE provider=? AND until_at>?','off',t))h.fail(503,'PROVIDER_BACKOFF');
  await h.dbrun(env,'DELETE FROM shop_provider_requests WHERE requested_at<=?',t-60);
+ await h.dbrun(env,'DELETE FROM shop_public_cache WHERE barcode IN (SELECT barcode FROM shop_public_cache WHERE expires_at<=? LIMIT 32)',t);
  const reservation=await h.dbrun(env,'INSERT INTO shop_provider_requests(requested_at) SELECT ? WHERE (SELECT COUNT(*) FROM shop_provider_requests WHERE requested_at>?)<8',t,t-60);if(reservation.meta.changes!==1)h.fail(429,'PROVIDER_THROTTLED');
  let r;try{r=await fetcher('https://search.openfoodfacts.org/search',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','User-Agent':'KetoCompanion/0.7 (https://github.com/offflinerpsy/keto-companion)'},body:JSON.stringify({q,langs:['ru','en'],page:1,page_size:10,fields:['code','product_name','product_name_ru','brands','countries_tags']}),redirect:'manual',signal:AbortSignal.timeout(8000)})}catch(e){h.fail(503,['AbortError','TimeoutError'].includes(e?.name)?'PROVIDER_TIMEOUT':'PROVIDER_NETWORK_ERROR')}
  if(r.status===429||r.status===503){await h.dbrun(env,'INSERT INTO shop_provider_backoff(provider,until_at) VALUES(?,?) ON CONFLICT(provider) DO UPDATE SET until_at=MAX(until_at,excluded.until_at)','off',t+60);h.fail(503,'PROVIDER_BACKOFF')}

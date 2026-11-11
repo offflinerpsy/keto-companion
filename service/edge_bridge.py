@@ -40,6 +40,7 @@ class EdgeBridge:
    if not isinstance(secret,str) or len(secret.encode())<32:raise RuntimeError('Edge bridge requires authentication')
    self.secret=secret.encode()
   self.replay=replay_store;self.brain=brain;self.tool_map=tool_map;self.image_clean=image_clean;self.clock=clock or time.time
+  self._last_prune_at=0
  def execute(self,method,path,stamp,nonce,signature,body):
   if method!='POST' or path!=PATH or not isinstance(body,bytes) or len(body)>LIMIT:raise BridgeError('invalid request')
   if not isinstance(stamp,str) or not re.fullmatch(r'[0-9]{10}',stamp) or not isinstance(nonce,str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}',nonce):raise BridgeError('invalid request')
@@ -57,7 +58,8 @@ class EdgeBridge:
   digest=hashlib.sha256(nonce.encode()).hexdigest();key='edge_replay_'+digest
   try:self.replay.write(key,{'nonce_hash':digest,'expires_at':max(now,int(stamp))+121},None)
   except Conflict:raise BridgeError('replay') from None
-  if hasattr(self.replay,'prune_edge_replay'):
+  if hasattr(self.replay,'prune_edge_replay') and abs(now-self._last_prune_at)>=60:
+   self._last_prune_at=now
    try:self.replay.prune_edge_replay(now)
    except Exception:pass  # best-effort operational metadata cleanup
   try:
@@ -97,7 +99,7 @@ class EdgeBridge:
     if not set(template)<=set(doc) or type(doc.get('revision')) is not int or type(doc.get('processing_consent')) is not bool:raise ValueError()
    store=MemoryStore(subject,doc);svc=Service(store,self.brain)
    if op=='open':result=svc.opened(subject)
-   elif op=='recipes':result=svc.catalog(subject,args.get('query',''),args.get('limit',12),include_food_ids=args.get('include_food_ids'),exclude_food_ids=args.get('exclude_food_ids'),max_minutes=args.get('max_minutes'))
+   elif op=='recipes':result=svc.catalog(subject,args.get('query',''),args.get('limit',12),include_food_ids=args.get('include_food_ids'),exclude_food_ids=args.get('exclude_food_ids'),max_minutes=args.get('max_minutes'),offset=args.get('offset',0),category=args.get('category'))
    elif op=='consent':result=svc.consent(subject,args['processing'],args['storage'],args['health'],args['confirmed'])
    elif op=='propose':result=svc.propose(subject,args['event_type'],args['payload'],args['expected_revision'])
    elif op=='apply':result=svc.apply(subject,args['proposal_id'],args['expected_revision'],args['approved'])

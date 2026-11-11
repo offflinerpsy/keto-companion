@@ -1,5 +1,6 @@
 {
   "direct_route_paths": [
+    "/",
     "/api/admin/invites",
     "/api/admin/invites/revoke",
     "/api/admin/members/status",
@@ -30,7 +31,7 @@
   ],
   "notice": "Inventory from literal routes and OPS, not full OpenAPI. Dynamic admin/source/upload/deletion routes and all authorization conditions must be read in source.",
   "schema": "keto-worker-inventory-v1",
-  "source_sha256": "f6617cec4f70a8f2328da93dd2aa86fef106d05134c231e653990bed400f9eb6",
+  "source_sha256": "7874a71b4a3b9f578015f0f4212f5645cc1ef0e3216b044890c10c2cf756cc54",
   "tool_operations": {
     "keto_apply_proposal": "apply",
     "keto_chat": "chat",

@@ -36,7 +36,7 @@ export function intakeReviewNodes(el,preview){
 
 export function setupIntake({$,el,call,getState,accept,notify,run,openDialog,closeDialog,setView,epoch,isDiaryActive,propose}){
  let selection=null,submitting=false,generation=0,historyGeneration=0,day='',allDates=false,rows=[],historyRevision=null,loadedKey=null,loadingKey=null,loading=false,hasMore=false,receiptEntry=null,summary=null,displayKey=null,navigation=null,navigationAccount=null,zoneProposal=null,nextOffset=0,summaryContext=null;
- const form=$('intake-form');
+ const form=$('intake-form'),summaryHelp=el('div','diary-summary-explanation'),incompleteNoteEl=el('p','ux-callout'),netGuide=el('details','ux-guide'),netBody=el('div','ux-guide-body');summaryHelp.id='diary-summary-explanation';summaryHelp.hidden=true;incompleteNoteEl.hidden=true;netBody.append(el('p','','Общие углеводы включают клетчатку. Net-углеводы («чистые») — расчёт после вычитания известной клетчатки; если по продукту нет данных о клетчатке, приложение не приравнивает её к нулю.'),el('p','','Полиолы автоматически не вычитаются. Итоги складываются из записей выбранного дня; для жиров нет искусственной «обязательной квоты».'));netGuide.append(el('summary','','Как считаются чистые (Net) углеводы и итоги?'),netBody);summaryHelp.append(incompleteNoteEl,netGuide);$('diary-summary').insertAdjacentElement?.('afterend',summaryHelp);
  function deviceZone(){return Intl.DateTimeFormat().resolvedOptions().timeZone}
  function stateDay(){return profileClock(getState()?.profile?.timezone)?.date||profileClock(deviceZone())?.date||new Date().toISOString().slice(0,10)}
  function rememberNavigation(){navigation?.save(day,allDates)}
@@ -98,9 +98,11 @@ export function setupIntake({$,el,call,getState,accept,notify,run,openDialog,clo
   finally{if(stamp===epoch()){submitting=false;buttons()}}
  })};
  function renderSummary(summary){
-  const box=$('diary-summary');box.replaceChildren();box.hidden=allDates;
-  if(allDates||!summary)return;
+  const box=$('diary-summary');box.replaceChildren();box.hidden=allDates;summaryHelp.hidden=allDates;
+  if(allDates)return;
   const overview=nutritionOverview(summary,summaryContext||getState());
+  incompleteNoteEl.textContent=overview.incompleteNote||'';incompleteNoteEl.hidden=!overview.incompleteNote;
+  if(!summary)return;
   if(!overview.count)return;
   const heading=el('div','diary-summary-heading');heading.append(el('h2','','Питание за день'),el('span','muted','По записям'));box.append(heading);
   const grid=el('div','diary-macros');
@@ -135,7 +137,7 @@ export function setupIntake({$,el,call,getState,accept,notify,run,openDialog,clo
    if(calc?.nutrition){const nutrients=el('div','entry-nutrients');for(const [key,label,unit] of NUTRIENTS.slice(0,4)){const value=calc.nutrition[key],complete=value!=null&&calc.coverage?.[key]?.complete!==false;nutrients.append(el('span','',`${key==='energy_kcal'?'':label+' '}${complete?number(value,key==='energy_kcal'?0:1)+' '+unit:'—'}`))}card.append(nutrients)}
    if(!entry.complete)card.append(el('p','entry-coverage','Состав известен не полностью'));
    if(entry.legacy_estimate)card.append(el('p','muted','Состав пересчитан по текущему справочнику.'));
-   const actions=el('div','diary-actions');for(const [label,operation]of [['Исправить','update'],['Повторить','repeat']]){const b=el('button','text-btn',label);b.type='button';b.onclick=()=>open({operation,entry,revision:historyRevision});actions.append(b)}
+   const actions=el('div','diary-actions');for(const [label,operation]of [['Исправить','update'],['Повторить','repeat']]){const b=el('button','text-btn',label);b.type='button';if(operation==='repeat'){b.title='Откроется новая запись с этим блюдом — проверьте количество и дату';b.setAttribute('aria-description',b.title)}b.onclick=()=>open({operation,entry,revision:historyRevision});actions.append(b)}
    const more=el('details','diary-entry-more'),toggle=el('summary','icon-only');toggle.dataset.icon='more';toggle.setAttribute('aria-label','Ещё: '+intakeName(entry));more.append(toggle);const del=el('button','text-btn danger-button','Удалить запись');del.type='button';del.onclick=()=>run(()=>propose('diary.delete',{entry_id:entry.entry_id},historyRevision));more.append(del);actions.append(more);card.append(actions);group.append(card);
    }box.append(group);
   }
@@ -152,14 +154,16 @@ export function setupIntake({$,el,call,getState,accept,notify,run,openDialog,clo
    if(receiptEntry&&result.revision<historyRevision)throw Error('История ещё обновляется. Сохранённая запись остаётся на экране.');
    $('diary-refresh').hidden=true;rows=[...new Map((append?[...rows,...result.entries]:result.entries).map(entry=>[entry.entry_id,entry])).values()];historyRevision=result.revision;loadedKey=key;hasMore=result.has_more;nextOffset=(result.offset||0)+result.entries.length;loading=false;summary=result.summary;summaryContext=result.nutrition_context||((result.revision===getState()?.revision)?null:{profile:{}});
    renderSummary(summary);renderRows();$('diary-status').textContent=allDates&&rows.length?`Показано ${rows.length} из ${result.total}`:'';
-  }catch(error){if(!current())return;loading=false;loadedKey=null;hasMore=false;$('diary-status').textContent=(rows.length?'Не удалось обновить историю. Показаны уже полученные записи. ':'Не удалось загрузить записи. ')+error.message;renderRows();$('diary-more').hidden=true;$('diary-refresh').hidden=false}
+   }catch(error){if(!current())return;loading=false;loadedKey=null;hasMore=false;$('diary-status').textContent=(rows.length?'Не удалось обновить историю. Показаны уже полученные записи. ':'Не удалось загрузить записи. ')+error.message;renderRows();$('diary-more').hidden=true;$('diary-refresh').hidden=false}
+   finally{if(current()){loading=false;loadingKey=null;if($('diary-status').textContent.startsWith('Загружаем'))$('diary-status').textContent=''}}
  }
  function historyKey(){return [day,allDates,getState()?.revision].join('|')}
  function render(){
   ensureNavigation();if(summaryContext&&getState()?.revision>historyRevision)summaryContext=null;
   if(!day)day=stateDay();$('diary-day').value=day;$('diary-day-label').textContent=dayLabel(day);$('diary-all').textContent=allDates?'К выбранному дню':'Вся история';$('diary-day-controls').hidden=allDates;
-  $('diary-zone-note').textContent=profileClock(getState()?.profile?.timezone)?'':'Дата просмотра — по времени устройства.';
-  if(displayKey===[day,allDates].join('|'))renderSummary(summary);
+  const zone=getState()?.profile?.timezone;$('diary-zone-note').textContent=[profileClock(zone)?`День дневника — по часовому поясу профиля: ${zone}.`:'Дата просмотра — по времени устройства.',allDates?'Показаны записи за разные даты. Дневные итоги рассчитываются при выборе одного дня.':''].filter(Boolean).join(' ');
+  if(!loading&&$('diary-status').textContent.startsWith('Загружаем'))$('diary-status').textContent='';
+  renderSummary(displayKey===[day,allDates].join('|')?summary:null);
   if(isDiaryActive()&&loadedKey!==historyKey()&&(!loading||loadingKey!==historyKey()))run(()=>load());
  }
  function selectDate(next){if(!validDiaryDay(next)){render();return}day=next;allDates=false;loadedKey=null;rememberNavigation();$('diary-receipt').hidden=receiptEntry?.date!==day;render();if(!isDiaryActive())setView('diary')}
@@ -174,9 +178,9 @@ export function setupIntake({$,el,call,getState,accept,notify,run,openDialog,clo
   if(zoneProposal&&result?.state&&!result.state.pending?.some(p=>p.id===zoneProposal)){zoneProposal=null;if(selection){selection.revision=result.state.revision;zoneControls();if(selection.generation_id&&result.receipt?.type==='profile.update'){$('intake-choice').hidden=false;form.hidden=true;$('intake-name').textContent='Часовой пояс сохранён. Подбор обновился — выберите блюдо заново.';selection=null;openDialog('intake','intake-recipe')}else openDialog('intake','intake-date')}}
   if(!result?.receipt)return;
   summaryContext=null;loadedKey=null;if(result.receipt.type==='diary.delete'){$('diary-receipt').hidden=true;receiptEntry=null;historyGeneration++;loading=false;rows=rows.filter(entry=>entry.entry_id!==result.deleted_entry_id);historyRevision=result.receipt.revision;if(result.diary_summary?.date===day)summary=result.diary_summary;else summary=null;renderSummary(summary);renderRows()}
-  if(result.entry){historyGeneration++;loading=false;receiptEntry={...result.entry,receiptRevision:result.receipt.revision};day=result.entry.date;allDates=false;rememberNavigation();rows=[result.entry,...rows.filter(entry=>entry.date===day&&entry.entry_id!==result.entry.entry_id)];historyRevision=result.receipt.revision;summary=result.diary_summary;displayKey=[day,allDates].join('|');hasMore=false;renderSummary(summary);renderRows();const box=$('diary-receipt');box.hidden=false;const text=el('p','receipt-heading');text.append(savedCheck(el),el('span','','Сохранено в дневнике · '+dayLabel(day)));box.replaceChildren(text,el('p','receipt-food',intakeName(result.entry)+' · '+amountLabel(intakeAmount(result.entry))));setView('diary');$('content').scrollTop=0}
+  if(result.entry){historyGeneration++;loading=false;receiptEntry={...result.entry,receiptRevision:result.receipt.revision};day=result.entry.date;allDates=false;rememberNavigation();rows=[result.entry,...rows.filter(entry=>entry.date===day&&entry.entry_id!==result.entry.entry_id)];historyRevision=result.receipt.revision;summary=result.diary_summary;displayKey=[day,allDates].join('|');hasMore=false;renderSummary(summary);renderRows();const box=$('diary-receipt');box.hidden=false;const text=el('p','receipt-heading');text.append(savedCheck(el),el('span','','Сохранено в дневнике · '+dayLabel(day)));box.replaceChildren(text,el('p','receipt-food',intakeName(result.entry)+' · '+amountLabel(intakeAmount(result.entry))));setView('diary',{resetScroll:true});$('content').scrollTop=0}
   render();
  }
- function reset(){generation++;historyGeneration++;navigation?.clear();navigation=null;navigationAccount=null;zoneProposal=null;selection=null;submitting=false;day='';allDates=false;rows=[];summary=null;summaryContext=null;displayKey=null;historyRevision=null;loadedKey=null;loadingKey=null;loading=false;hasMore=false;receiptEntry=null;form.reset();showStatus('');$('intake-name').textContent='';$('intake-zone').textContent='';$('diary-summary').replaceChildren();$('diary-receipt').replaceChildren();$('diary-receipt').hidden=true;$('diary-status').textContent='';$('diary-day').value='';$('diary-more').hidden=true;$('diary-discuss').hidden=true;buttons()}
+ function reset(){generation++;historyGeneration++;navigation?.clear();navigation=null;navigationAccount=null;zoneProposal=null;selection=null;submitting=false;day='';allDates=false;rows=[];summary=null;summaryContext=null;displayKey=null;historyRevision=null;loadedKey=null;loadingKey=null;loading=false;hasMore=false;receiptEntry=null;form.reset();showStatus('');$('intake-name').textContent='';$('intake-zone').textContent='';$('diary-summary').replaceChildren();incompleteNoteEl.textContent='';incompleteNoteEl.hidden=true;netGuide.open=false;summaryHelp.hidden=true;$('diary-receipt').replaceChildren();$('diary-receipt').hidden=true;$('diary-status').textContent='';$('diary-day').value='';$('diary-more').hidden=true;$('diary-discuss').hidden=true;buttons()}
  return {open,render,afterApplied,reset,selectDate,reload:()=>load(),get selectedDate(){return day}};
 }

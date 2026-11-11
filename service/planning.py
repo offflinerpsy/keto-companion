@@ -1,5 +1,5 @@
 """Auditable starter policy v1. All canonical arithmetic stays on the server."""
-import copy,hashlib,json,math
+import copy,hashlib,json
 from datetime import datetime,timezone
 from decimal import Decimal,ROUND_HALF_UP,ROUND_FLOOR,ROUND_CEILING
 POLICY='starter-v1'

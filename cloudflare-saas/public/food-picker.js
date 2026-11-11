@@ -9,7 +9,8 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
  review.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target?.tagName==='INPUT')event.preventDefault();});
  const button=(label,fn,cls='secondary')=>{const b=el('button',cls,label);b.type='button';b.onclick=()=>run(fn);return b};
  const more=button('Ещё продукты из справочника',()=>loadSource(true));more.hidden=true;more.setAttribute('data-icon','plus');
- source.append(el('h3','','Большой справочник'),el('p','field-help','Состав USDA на 100 г. Перед добавлением проверьте запись.'),sourceStatus,sourceRows,more);root.append(status,hint,list,source,review);
+ const catalogueHint=el('p','ux-hint','Основной каталог — подобранные продукты и ваши сохранённые личные продукты.');
+ source.append(el('h3','','Большой справочник'),el('p','ux-hint','Широкий справочник состава на 100 г — выберите продукт, чтобы сверить данные и добавить его в личный список.'),sourceStatus,sourceRows,more);root.append(status,catalogueHint,hint,list,source,review);
  const current=(stamp,screen,q)=>stamp===version&&screen===epoch()&&q===input.value.trim();
  function invalidate(){version++;detailVersion++;clearTimeout(timer);cursor=null;sourceBusy=false;review.hidden=true;review.replaceChildren();list.replaceChildren();hint.replaceChildren();sourceRows.replaceChildren();source.hidden=true;more.hidden=true;status.textContent='';}
  function select(food){invalidate();onSelect(food);input.value=food.name_ru;status.textContent='Выбран продукт: '+food.name_ru;status.focus?.({preventScroll:true});}
@@ -59,7 +60,7 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
   const a=el('a','','Источник USDA');a.href=candidate.source_url;a.target='_blank';a.rel='noopener noreferrer';review.append(a);
   const nutrients=el('dl','intake-nutrients');
   for(const [key,label,unit] of [['energy_kcal','Энергия','ккал'],['protein_g','Белки','г'],['fat_g','Жиры','г'],['carbohydrate_total_g','Общие углеводы','г'],['fiber_g','Клетчатка','г']])nutrients.append(el('dt','',label),el('dd','',candidate[key]==null?'нет данных':new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(candidate[key])+' '+unit));
-  review.append(el('p','field-help','На 100 г. Состояние и аллергены нужно проверить; ГИ неизвестен.'),nutrients);
+  review.append(el('p','ux-hint','На 100 г. Проверьте название, состояние и аллергены по упаковке; USDA не подтверждает её состав и аллергены. ГИ неизвестен.'),nutrients);
   const field=(label,control)=>{const box=el('label','',label);box.append(control);review.append(box);return control};
   const name=field('Название продукта',el('input'));name.value=candidate.name_ru_unofficial||candidate.name_en;name.maxLength=200;
   const state=field('Состояние продукта',el('select'));

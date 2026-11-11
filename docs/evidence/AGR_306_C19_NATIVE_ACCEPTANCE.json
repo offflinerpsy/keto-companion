@@ -1,0 +1,63 @@
+{
+  "schema": "keto-c19-native-acceptance-v1",
+  "status": "accepted_main_release_pending",
+  "recorded_at": "2026-11-11T07:41:47.202026+00:00",
+  "build": {
+    "id": "d0ae6630-f0b1-40bc-a11f-aa7d1ea93920",
+    "status": "stopped",
+    "outcome": "success",
+    "commit": "2484a22404da0c9fc883f68bff407e18a51b9d46",
+    "stopped": "2026-11-11T07:38:14.426Z",
+    "build_command": "python scripts/cloudflare_ci.py && node --test ops/runtime-acceptance-http.test.mjs && node --test --test-name-pattern='^(operator promotion is disabled without explicit native release flag|operator helper never publishes app or replaces image before isolated acceptance|exact pinned application detail wins over stale collection and retains all guards)$' ops/promotion.test.mjs",
+    "deploy_command": "KETO_NATIVE_RUNNER_RELEASE=1 KETO_APPROVED_ROLLOUT=1 .venv/bin/python scripts/deploy_developer_native.py"
+  },
+  "source_gate": {
+    "passed": true,
+    "stages": 16,
+    "seconds": 105.79,
+    "scope": "trusted reviewed source; no real data or paid model calls"
+  },
+  "runtime": {
+    "task": "CF-DEV-MEDIA-08",
+    "baseline": "612ca0d65e8940979a917578d1e29f937afc9c74471b65b850755ff15127f8ef",
+    "image_digest": "sha256:936aeff225a6f661c2cd87fbfdc84100c059532eac8b661e9937cc837c625db7",
+    "rollout_id": "c36e0948-7a1c-4f77-938d-c8ef5d0c2e14",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "network_policy": "Container class enableInternet=false; no egress exceptions",
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "private_credentials_transported_to_agent": false,
+    "publication_broker": false,
+    "runtime_user_flow_tested": false,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true
+  },
+  "ordinary_trigger_restored": true,
+  "temporary_probes": [],
+  "active_instances": []
+}

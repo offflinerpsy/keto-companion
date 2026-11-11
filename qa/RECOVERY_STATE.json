@@ -1,11 +1,28 @@
 {
   "schema": "keto-continuation-state-v2",
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
-  "workspace_root": "/Users/alexyarosh/Projects/keto-companion-c18-qa",
+  "workspace_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-10T16:49:29.981Z",
+  "updated_at": "2026-11-11T08:02:23.555814+00:00",
   "active_task": null,
   "last_completed": {
+    "id": "AGR-306-C19-C20-RELEASE",
+    "linear_issue": "AGR-306",
+    "status": "completed",
+    "scope": "full code/logic/security/performance optimization, UI/UX & Russian micro-guides upgrade, D1 0009 indexes, Azure compute & Cloudflare staging release",
+    "source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "backend_source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "release_receipt": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json",
+    "native_build": "d0ae6630-f0b1-40bc-a11f-aa7d1ea93920",
+    "ordinary_build": "4f22f49d-b54c-4df6-abef-15deb9c6f31d",
+    "azure_deployment": "7715054e-5022-480d-8f1e-3c4622802b24",
+    "d1_migration": "0009_indexes.sql",
+    "build_status": "success",
+    "worker_version": "8e27cf3e-6698-4511-8258-c5cadbf236f2",
+    "pull_request": 25,
+    "product_acceptance": "physical_iPhone_17_Pro_pending"
+  },
+  "previous_completed": {
     "id": "AGR-306-C18-RELEASE",
     "linear_issue": "AGR-306",
     "status": "completed",
@@ -23,27 +40,10 @@
     "admin_access_verified": true,
     "product_acceptance": "physical_iPhone_17_Pro_pending; real_desktop_google_verified"
   },
-  "previous_completed": {
-    "id": "AGR-306-C17-RELEASE",
-    "linear_issue": "AGR-306",
-    "status": "completed",
-    "scope": "technical_private_family_release",
-    "source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "backend_source_commit": "745c5b4eef9484949dc2f381c1aa1d16ec96c319",
-    "release_receipt": "docs/evidence/AGR_306_C17_RELEASE_RECEIPT.json",
-    "report_ru": "docs/evidence/AGR_306_C17_SEARCH_RESULT_RU.md",
-    "native_build": "ab053a65-d9c0-4066-8644-46f2a621d7b9",
-    "ordinary_build": "c2d02177-7204-457f-b345-eae5e538aaa8",
-    "build_status": "success",
-    "azure_deployment": "b9ad2675-dba1-4900-8ce0-007da5b8a76e",
-    "worker_version": "28fd21df-78d8-40b0-91f4-56785dc9ad22",
-    "pull_request": 23,
-    "product_acceptance": "physical_iPhone_17_Pro_pending"
-  },
   "next_task": {
     "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
     "status": "awaiting_device_observation",
-    "action": "Technical release complete; physical iPhone feedback is separate. Do not restart completed builds or tests without a new concrete failure."
+    "action": "Owner observation on physical iPhone 17 Pro against https://keto-companion-saas-staging.offflinerpsy.workers.dev (Cyrillic input, camera/barcode/photo, microphone dictation, live tactile scroll)."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -117,7 +117,7 @@
     "accepted_runtime_baseline": "bf113ad3f95532f7a5d9e73f1063be68d6f8517cd0d8084ffcf4fd552f4a51f5",
     "accepted_runtime_image": "sha256:2e7ca6e2448f156e5e0ba8d3d31f324c7bced900bf3774fbf061d847adce8345",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
-    "new_runtime_image_required": false,
+    "new_runtime_image_required": "yes before cloud staging promotion (baseline changed to 6a9891513514a0905eb0c09435f0bf1a372b60e20ac44921d3d0f495b8a02b28; ops/approved-runtime.json intentionally left at accepted C18 cloud pin until native Cloudflare acceptance)",
     "implementation_writer": "root",
     "temporary_trigger_commands": "ordinary commands restored and verified"
   },
@@ -142,15 +142,19 @@
     "No new live family signed food-write, device keyboard, camera, microphone or clinical acceptance is claimed."
   ],
   "source_completed": {
-    "id": "AGR-306-C18-AUTH",
-    "status": "completed",
-    "source_commit": "f53e12fffd86ed6ad67cd2d95448d6646e9baeac",
+    "id": "AGR-306-C19-REVIEW-OPTIMIZATION",
+    "status": "completed_source_locally",
+    "base_commit": "30fbec34381b6f243e1214de7a234feafed09766",
+    "branch": "codex/full-review-optimization-c19",
+    "runtime_code_sha256": "a7625ec1b6488ec742277592e8d89dae278ebb3768539cf1f3c8baca52d4704f",
+    "developer_snapshot_baseline": "6a9891513514a0905eb0c09435f0bf1a372b60e20ac44921d3d0f495b8a02b28",
     "checks": {
-      "python": 655,
-      "node": 296,
-      "browser": 38
+      "python": 663,
+      "node": 302,
+      "contracts": 7,
+      "specification_docs": 25
     },
-    "evidence": "docs/evidence/AGR_306_C18_SOURCE_ACCEPTANCE.json"
+    "evidence": "docs/evidence/AGR_306_C19_SOURCE_ACCEPTANCE.json"
   },
   "previous_source_completed": {
     "id": "AGR-306-C17-SEARCH",
