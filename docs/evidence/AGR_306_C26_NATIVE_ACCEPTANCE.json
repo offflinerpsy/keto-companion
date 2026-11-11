@@ -1,0 +1,138 @@
+{
+  "schema": "keto-c26-native-acceptance-v1",
+  "task": "AGR-306-C26",
+  "status": "native_accepted_ordinary_pending",
+  "source_commit": "16030614d4efe03c0b9444a45cc0fd963e64eabe",
+  "build": {
+    "build_uuid": "8aed5f86-1383-4c5d-8d70-14d348996424",
+    "status": "stopped",
+    "outcome": "success",
+    "stopped_on": "2026-11-11T22:37:02.380Z",
+    "commit_hash": "16030614d4efe03c0b9444a45cc0fd963e64eabe"
+  },
+  "accepted": {
+    "task": "CF-DEV-MEDIA-08",
+    "baseline": "a6a2661856ffa954f91faf4cb1e52425a60fcc10bf75e4782c3259703ce3b77e",
+    "image_digest": "sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "network_policy": "Container class enableInternet=false; no egress exceptions",
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "private_credentials_transported_to_agent": false,
+    "publication_broker": false,
+    "runtime_user_flow_tested": false,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true
+  },
+  "source_checks": {
+    "python": 682,
+    "python_subtests": 6,
+    "node": 338,
+    "stages": 16,
+    "seconds": 352.12,
+    "native_http": 8,
+    "native_promotion": 3,
+    "generated_assets_match": true
+  },
+  "readback": {
+    "at": "2026-11-11T22:37:24.317Z",
+    "build": {
+      "build_uuid": "8aed5f86-1383-4c5d-8d70-14d348996424",
+      "status": "stopped",
+      "outcome": "success",
+      "stopped_on": "2026-11-11T22:37:02.380Z",
+      "commit_hash": "16030614d4efe03c0b9444a45cc0fd963e64eabe"
+    },
+    "runner": {
+      "deployment": {
+        "id": "5ac5ac0d-0995-4ef4-8b64-3a760eb3f067",
+        "source": "api",
+        "strategy": "percentage",
+        "author_email": "offflinerpsy@gmail.com",
+        "annotations": {
+          "workers/message": "Automatic deployment on upload.",
+          "workers/triggered_by": "upload"
+        },
+        "versions": [
+          {
+            "version_id": "5bada2a3-8bcd-4f5a-b502-487c4e0e2e01",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-11-11T22:36:24.516276Z"
+      },
+      "id": "5bada2a3-8bcd-4f5a-b502-487c4e0e2e01",
+      "number": 25,
+      "bindings": [
+        {
+          "name": "DEVELOPER_BASELINE",
+          "type": "plain_text",
+          "text": "a6a2661856ffa954f91faf4cb1e52425a60fcc10bf75e4782c3259703ce3b77e"
+        },
+        {
+          "name": "DEVELOPER_IMAGE_DIGEST",
+          "type": "plain_text",
+          "text": "sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461"
+        },
+        {
+          "name": "KETO_TESTER",
+          "type": "durable_object_namespace",
+          "class_name": "KetoTester",
+          "namespace_id": "b0a394e990794e51ba4f38a9339bb308"
+        }
+      ]
+    },
+    "app": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "version": 24,
+      "name": "keto-companion-developer-runner",
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:6134728bd86df9de5901f10c5a151d1ab475f763dce6443faf2a9216a25d7461",
+      "max_instances": 1,
+      "scheduling_policy": "default",
+      "network": {
+        "assign_ipv6": "none",
+        "assign_ipv4": "none",
+        "mode": "private"
+      },
+      "env_count": 0,
+      "key_count": 0
+    },
+    "active_instances": [],
+    "probes": []
+  },
+  "ordinary_commands_restored": true,
+  "azure": {
+    "unchanged": true,
+    "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "reason": "C26 frontend-only deployed source; existing live label extraction accepted by root"
+  },
+  "limits": [
+    "No family product/diary writes, provider calls or browser operations by release worker.",
+    "Native acceptance is exact immutable image acceptance; main Worker promotion remains pending."
+  ]
+}
