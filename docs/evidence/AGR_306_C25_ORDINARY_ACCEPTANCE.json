@@ -1,0 +1,293 @@
+{
+  "schema": "keto-c25-ordinary-acceptance-v1",
+  "status": "passed",
+  "recorded_at": "2026-11-11T15:19:41.230Z",
+  "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+  "build": {
+    "build_uuid": "8a0fc597-d2dd-4258-81c4-d76841263235",
+    "status": "stopped",
+    "build_outcome": "success",
+    "created_on": "2026-11-11T15:10:15.281Z",
+    "running_on": "2026-11-11T15:10:36.648Z",
+    "stopped_on": "2026-11-11T15:18:36.237Z",
+    "metadata": {
+      "commit_hash": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+      "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+      "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+      "root_directory": "/"
+    }
+  },
+  "source_gate": {
+    "passed": true,
+    "python": 673,
+    "python_subtests": 6,
+    "node": 325,
+    "ops": 12,
+    "source_stages": 16,
+    "seconds": 245.88,
+    "generated_assets_match": true
+  },
+  "runtime": {
+    "baseline": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+    "image_digest": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "actual_container": {
+    "task": "CF-DEV-MEDIA-08",
+    "scope": "actual private Cloudflare Container through service RPC; one fixed synthetic UI patch, no family session or app data",
+    "baseline": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+    "patch_hash": "1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75",
+    "image_digest": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
+    "status": "passed",
+    "exit_code": 0,
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "temporary_probe_deleted": true,
+    "no_credentials_returned": true,
+    "no_database_or_R2_binding": true,
+    "actual_owner_UI_tested": false
+  },
+  "deployment": {
+    "task": "CF-DEV-MEDIA-08",
+    "worker": "keto-companion-saas-staging",
+    "account": "0609100baf768271ea2811c9a9ee2b16",
+    "commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "version_id": "840eea4c-d131-44e3-8d00-00ed51d84350",
+    "tag": "35d20e3e19a74997aa077809e9839e38",
+    "main_module_sha256": "37f44d07f88d23915e7650e747a8de0ff10d8a6d732be347f59e458974351552",
+    "modules": 20,
+    "compute_configured": true,
+    "private_source": true,
+    "deployment_id": "98015936-6a16-4f6c-95b4-6e9cadae047b",
+    "traffic_percent": 100
+  },
+  "azure_adoption_preceded_promotion": true,
+  "azure_startup": {
+    "task": "AGR-306-C25",
+    "observed_at": "2026-11-11T15:08:02.710Z",
+    "surface": "native Chrome PERSONAL Offliner existing authorized normal UI route; no direct-public HTTP probe",
+    "url": "https://keto-companion-ay-20261107.azurewebsites.net/status?cache_bypass=C25",
+    "status": 200,
+    "cache_control": "no-store",
+    "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "runtime_code_sha256": "70ce2226af25afdc9ef6e87cd6c6e4a07f13f63c0321ae2db36df48fe40609a9",
+    "edge_signature": "Ed25519",
+    "authentication_required": true,
+    "medical_monitoring": false,
+    "expected_source": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "expected_runtime": "70ce2226af25afdc9ef6e87cd6c6e4a07f13f63c0321ae2db36df48fe40609a9",
+    "header_evidence": "tab-scoped Network.responseReceived after normal page reload; only status and Cache-Control selected",
+    "passed": true
+  },
+  "ordinary_trigger_preserved": true,
+  "image_rebuilt": false,
+  "readback": {
+    "at": "2026-11-11T15:19:41.230Z",
+    "trigger": {
+      "trigger_uuid": "88639670-f75a-46f5-ae89-85a2d8387a7c",
+      "external_script_id": "35d20e3e19a74997aa077809e9839e38",
+      "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+      "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+      "root_directory": "/",
+      "branch_includes": [
+        "release/staging-0.3.0"
+      ],
+      "branch_excludes": [],
+      "path_includes": [
+        "cloudflare-saas/**",
+        "scripts/deploy_cloudflare_staging.mjs",
+        "artifacts/**",
+        "qa/firebase-public-config.json"
+      ],
+      "path_excludes": [],
+      "build_caching_enabled": true,
+      "modified_on": "2026-11-11T14:58:06.571Z",
+      "deleted_on": null
+    },
+    "build": {
+      "build_uuid": "8a0fc597-d2dd-4258-81c4-d76841263235",
+      "status": "stopped",
+      "build_outcome": "success",
+      "created_on": "2026-11-11T15:10:15.281Z",
+      "running_on": "2026-11-11T15:10:36.648Z",
+      "stopped_on": "2026-11-11T15:18:36.237Z",
+      "metadata": {
+        "commit_hash": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+        "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+        "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+        "root_directory": "/"
+      }
+    },
+    "main": {
+      "bindings": [
+        {
+          "name": "AUTH_PROVIDER",
+          "type": "plain_text",
+          "text": "firebase_google"
+        },
+        {
+          "name": "DB",
+          "type": "d1",
+          "database_id": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4"
+        },
+        {
+          "name": "DEVELOPER_BASELINE",
+          "type": "plain_text",
+          "text": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c"
+        },
+        {
+          "name": "DEVELOPER_IMAGE_DIGEST",
+          "type": "plain_text",
+          "text": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930"
+        },
+        {
+          "name": "DEVELOPER_RUNNER",
+          "type": "service",
+          "service": "keto-companion-developer-runner",
+          "entrypoint": "DeveloperRunner"
+        },
+        {
+          "name": "FIREBASE_AUTH_HELPER_MODE",
+          "type": "plain_text",
+          "text": "same-origin"
+        },
+        {
+          "name": "FIREBASE_PUBLIC_CONFIG_JSON",
+          "type": "plain_text"
+        },
+        {
+          "name": "KETO_EDGE_BRIDGE_URL",
+          "type": "plain_text",
+          "text": "https://keto-companion-ay-20261107.azurewebsites.net/internal/keto/compute"
+        },
+        {
+          "name": "KETO_EDGE_SIGNING_JWK",
+          "type": "secret_text"
+        },
+        {
+          "name": "OWNER_GOOGLE_EMAIL",
+          "type": "plain_text"
+        },
+        {
+          "name": "PUBLIC_ORIGIN",
+          "type": "plain_text",
+          "text": "https://keto-companion-saas-staging.offflinerpsy.workers.dev"
+        },
+        {
+          "name": "SESSION_HMAC_KEY",
+          "type": "secret_text"
+        },
+        {
+          "name": "UPLOADS",
+          "type": "r2_bucket",
+          "bucket_name": "keto-companion-private-staging"
+        }
+      ],
+      "firebase_project_id": "keto-companion-auth-261107",
+      "tags": [
+        "keto",
+        "staging",
+        "commit:f86fbe9731df80b4e2204d22057e8c80ab9c01e3"
+      ],
+      "compatibility_date": "2026-11-07",
+      "logpush": false
+    },
+    "deployments": [
+      {
+        "id": "98015936-6a16-4f6c-95b4-6e9cadae047b",
+        "source": "api",
+        "strategy": "percentage",
+        "versions": [
+          {
+            "version_id": "840eea4c-d131-44e3-8d00-00ed51d84350",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-11-11T15:18:33.033014Z"
+      }
+    ],
+    "runner": {
+      "bindings": [
+        {
+          "type": "plain_text",
+          "name": "DEVELOPER_BASELINE",
+          "text": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c"
+        },
+        {
+          "type": "plain_text",
+          "name": "DEVELOPER_IMAGE_DIGEST",
+          "text": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930"
+        },
+        {
+          "type": "durable_object_namespace",
+          "name": "KETO_TESTER",
+          "class_name": "KetoTester",
+          "namespace_id": "b0a394e990794e51ba4f38a9339bb308"
+        }
+      ],
+      "tags": [
+        "keto",
+        "developer-isolated",
+        "baseline:2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c"
+      ],
+      "compatibility_date": "2026-11-07"
+    },
+    "app": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "name": "keto-companion-developer-runner",
+      "version": 21,
+      "max_instances": 1,
+      "scheduling_policy": "default",
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
+      "environment_variable_count": 0,
+      "authorized_key_count": 0,
+      "network": {
+        "assign_ipv6": "none",
+        "assign_ipv4": "none",
+        "mode": "private"
+      }
+    },
+    "temporary_probe_names": [],
+    "instance_readback": {
+      "returned_count": 40,
+      "state_counts": {
+        "inactive": 40
+      },
+      "active": []
+    }
+  },
+  "limitations": [
+    "No direct public HTTP probes by release worker; Azure serving adoption independently observed by coordinator authorized native UI.",
+    "No family diary/profile/consent or bug-report test writes by release worker.",
+    "Root owns hosted plain-query discovery and regional live UI acceptance."
+  ]
+}

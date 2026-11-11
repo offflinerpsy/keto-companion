@@ -1,0 +1,46 @@
+{
+  "task": "AGR-306-C25",
+  "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "9fc2cf1fdb83a03a6b222baab5f4d2155116850f3fb5aef8fe13731ea6d57c22",
+  "archive_bytes": 1559955,
+  "member_count": 73,
+  "expected_runtime_code_sha256": "70ce2226af25afdc9ef6e87cd6c6e4a07f13f63c0321ae2db36df48fe40609a9",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "model_settings_preserved": true,
+  "schema": "keto-c25-azure-deployment-v1",
+  "status": 4,
+  "complete": true,
+  "deployment_id": "ebbf73ef-b8ea-4ff3-8d9d-6e3ade1eaa20",
+  "checked_at": "2026-11-11T15:04:06.369436+00:00",
+  "startup_adoption": "passed",
+  "startup_readback_boundary": "No direct-public403 retry or browser in release worker; root authorized status readback required if current worker route unavailable.",
+  "startup_readback": {
+    "task": "AGR-306-C25",
+    "observed_at": "2026-11-11T15:08:02.710Z",
+    "surface": "native Chrome PERSONAL Offliner existing authorized normal UI route; no direct-public HTTP probe",
+    "url": "https://keto-companion-ay-20261107.azurewebsites.net/status?cache_bypass=C25",
+    "status": 200,
+    "cache_control": "no-store",
+    "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "runtime_code_sha256": "70ce2226af25afdc9ef6e87cd6c6e4a07f13f63c0321ae2db36df48fe40609a9",
+    "edge_signature": "Ed25519",
+    "authentication_required": true,
+    "medical_monitoring": false,
+    "expected_source": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "expected_runtime": "70ce2226af25afdc9ef6e87cd6c6e4a07f13f63c0321ae2db36df48fe40609a9",
+    "header_evidence": "tab-scoped Network.responseReceived after normal page reload; only status and Cache-Control selected",
+    "passed": true
+  },
+  "independent_deployment_metadata": [
+    {
+      "active": true,
+      "complete": true,
+      "end_time": "2026-11-11T15:04:04.1396872Z",
+      "id": "ebbf73ef-b8ea-4ff3-8d9d-6e3ade1eaa20",
+      "received_time": "2026-11-11T15:03:12.9447864Z",
+      "status": 4
+    }
+  ]
+}
