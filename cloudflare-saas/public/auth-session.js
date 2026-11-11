@@ -41,7 +41,7 @@ export function authDiagnostic(phase,error){
  const code=Object.hasOwn(messages,error?.code)?error.code:({COMPUTE_UNAVAILABLE:true,BRIDGE_NOT_CONFIGURED:true,BUSY_OR_CONSENT_OR_LIMIT:true,REQUEST_PENDING:true,STATE_CHANGED:true,CSRF:true}[error?.code]?'SERVICE_UNAVAILABLE':'REQUEST_FAILED');
  return [phase,code,...(Number.isInteger(error?.status)&&error.status>=400&&error.status<=599?[error.status]:[])].join(' · ');
 }
-export function createAuthSession({api,authenticate,loadWorkspace,openWorkspace,identityChanged,view,timeoutMs=15000,workspaceTimeoutMs=30000}){
+export function createAuthSession({api,authenticate,loadWorkspace,openWorkspace,identityChanged,view,timeoutMs=15000,workspaceTimeoutMs=65000}){
  let generation=0,operation=null,identity=null,config=null,configError=null,configFlight=null,loginFlight=null,phase='checking',lastError=null;
  const emit=(next,error=null)=>{phase=next;lastError=error;view({phase,identity,config,error})};
  const current=job=>job.id===generation&&!job.controller.signal.aborted;

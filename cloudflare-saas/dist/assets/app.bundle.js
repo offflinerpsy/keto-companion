@@ -366,8 +366,291 @@ function setupChatActions({ el: el2, call: call2, getState, epoch, getContext = 
   } };
 }
 
+// cloudflare-saas/public/auth-session.js
+var AuthError = class extends Error {
+  constructor(code, { status = 0, ambiguous = false } = {}) {
+    super(code);
+    this.name = "AuthError";
+    this.code = code;
+    this.status = status;
+    this.ambiguous = ambiguous;
+  }
+};
+function transientStorage(readStorage) {
+  const memory = /* @__PURE__ */ new Map();
+  return {
+    getItem(key) {
+      if (memory.has(key)) return memory.get(key);
+      try {
+        const value = readStorage().getItem(key);
+        if (value !== null) {
+          memory.set(key, value);
+          return value;
+        }
+      } catch {
+      }
+      return null;
+    },
+    setItem(key, value) {
+      memory.set(key, String(value));
+      try {
+        readStorage().setItem(key, String(value));
+      } catch {
+      }
+    },
+    removeItem(key) {
+      memory.set(key, null);
+      try {
+        readStorage().removeItem(key);
+      } catch {
+      }
+    }
+  };
+}
+function bounded(operation, { signal, timeoutMs = 15e3 } = {}) {
+  const controller = new AbortController();
+  let timer, rejectPending;
+  const stopped = new Promise((_, reject) => {
+    rejectPending = reject;
+  });
+  const abort = () => {
+    controller.abort();
+    rejectPending(new AuthError("CANCELLED"));
+  };
+  if (signal?.aborted) {
+    controller.abort();
+    return Promise.reject(new AuthError("CANCELLED"));
+  }
+  signal?.addEventListener("abort", abort, { once: true });
+  timer = setTimeout(() => {
+    controller.abort();
+    rejectPending(new AuthError("NETWORK_TIMEOUT"));
+  }, timeoutMs);
+  let task;
+  try {
+    task = operation(controller.signal);
+  } catch (error) {
+    task = Promise.reject(error);
+  }
+  return Promise.race([task, stopped]).finally(() => {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", abort);
+    controller.abort();
+  });
+}
+async function authJson(fetcher, path, { method = "GET", body, signal, csrf: csrf2 } = {}) {
+  let response;
+  try {
+    response = await fetcher(path, { method, credentials: "same-origin", cache: "no-store", signal, headers: { ...body !== void 0 ? { "Content-Type": "application/json" } : {}, ...csrf2 && method !== "GET" ? { "X-CSRF-Token": csrf2 } : {} }, body: body === void 0 ? void 0 : JSON.stringify(body) });
+  } catch {
+    throw new AuthError(signal?.aborted ? "CANCELLED" : "NETWORK_ERROR");
+  }
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new AuthError("INVALID_RESPONSE", { status: response.status });
+  }
+  if (!response.ok) throw new AuthError(typeof data?.error === "string" && /^[A-Z][A-Z0-9_]{0,63}$/.test(data.error) ? data.error : "REQUEST_FAILED", { status: response.status });
+  return data;
+}
+var messages = {
+  NETWORK_ERROR: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0432\u044F\u0437\u0430\u0442\u044C\u0441\u044F \u0441 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435\u043C. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435.",
+  NETWORK_TIMEOUT: "\u041E\u0442\u0432\u0435\u0442 \u043D\u0435 \u043F\u0440\u0438\u0448\u0451\u043B \u0432\u043E\u0432\u0440\u0435\u043C\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  INVALID_RESPONSE: "\u041F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0432\u0435\u0440\u043D\u0443\u043B\u043E \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u0439 \u043E\u0442\u0432\u0435\u0442. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443.",
+  SETUP_REQUIRED: "\u0412\u0445\u043E\u0434 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u043F\u043E\u0437\u0436\u0435.",
+  LOGIN_UNAVAILABLE: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043D\u0430\u0447\u0430\u0442\u044C \u0432\u0445\u043E\u0434. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u043F\u044B\u0442\u043A\u0443.",
+  LOGIN_BUSY: "\u0421\u043B\u0438\u0448\u043A\u043E\u043C \u043C\u043D\u043E\u0433\u043E \u043F\u043E\u043F\u044B\u0442\u043E\u043A \u0432\u0445\u043E\u0434\u0430. \u041F\u043E\u0434\u043E\u0436\u0434\u0438\u0442\u0435 \u043D\u0435\u043C\u043D\u043E\u0433\u043E \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  INVALID_CHALLENGE: "\u041F\u043E\u043F\u044B\u0442\u043A\u0430 \u0432\u0445\u043E\u0434\u0430 \u0443\u0441\u0442\u0430\u0440\u0435\u043B\u0430. \u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u0432\u0445\u043E\u0434 \u0435\u0449\u0451 \u0440\u0430\u0437.",
+  SESSION_LIMIT: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u043E\u0437\u0434\u0430\u0442\u044C \u0441\u0435\u0430\u043D\u0441: \u0434\u043E\u0441\u0442\u0438\u0433\u043D\u0443\u0442 \u043B\u0438\u043C\u0438\u0442 \u0432\u0445\u043E\u0434\u043E\u0432. \u0412\u044B\u0439\u0434\u0438\u0442\u0435 \u0438\u0437 KETO \u043D\u0430 \u0434\u0440\u0443\u0433\u043E\u043C \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  SIGN_IN_BLOCKED: "\u0414\u043E\u0441\u0442\u0443\u043F \u044D\u0442\u043E\u0433\u043E \u0430\u043A\u043A\u0430\u0443\u043D\u0442\u0430 \u043F\u0440\u0438\u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0439 \u0430\u043A\u043A\u0430\u0443\u043D\u0442.",
+  INVITATION_REQUIRED: "\u0414\u043B\u044F \u044D\u0442\u043E\u0439 \u043F\u043E\u0447\u0442\u044B \u043D\u0443\u0436\u043D\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0449\u0435\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0451\u043D\u043D\u044B\u0439 \u0430\u043A\u043A\u0430\u0443\u043D\u0442 \u0438\u043B\u0438 \u043E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0441\u0441\u044B\u043B\u043A\u0443 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u044F.",
+  INVITE_NOT_AVAILABLE: "\u041F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u043D\u043E\u0432\u0443\u044E \u0441\u0441\u044B\u043B\u043A\u0443 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u044F.",
+  SESSION_NOT_SAVED: "Google \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u043B \u0432\u0445\u043E\u0434, \u043D\u043E \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0438\u043B\u043E \u0441\u0435\u0430\u043D\u0441. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 cookie \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0441\u0430\u0439\u0442\u0430 \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.",
+  SIGN_IN: "\u0421\u0435\u0430\u043D\u0441 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D. \u0412\u043E\u0439\u0434\u0438\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.",
+  "auth/popup-closed-by-user": "\u0412\u0445\u043E\u0434 \u043E\u0442\u043C\u0435\u043D\u0451\u043D. \u041C\u043E\u0436\u043D\u043E \u043F\u043E\u043F\u0440\u043E\u0431\u043E\u0432\u0430\u0442\u044C \u0435\u0449\u0451 \u0440\u0430\u0437.",
+  "auth/cancelled-popup-request": "\u0412\u0445\u043E\u0434 \u043E\u0442\u043C\u0435\u043D\u0451\u043D. \u041C\u043E\u0436\u043D\u043E \u043F\u043E\u043F\u0440\u043E\u0431\u043E\u0432\u0430\u0442\u044C \u0435\u0449\u0451 \u0440\u0430\u0437.",
+  "auth/popup-blocked": "\u0411\u0440\u0430\u0443\u0437\u0435\u0440 \u0437\u0430\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u043B \u043E\u043A\u043D\u043E Google. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0432\u0441\u043F\u043B\u044B\u0432\u0430\u044E\u0449\u0438\u0435 \u043E\u043A\u043D\u0430 \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0441\u0430\u0439\u0442\u0430 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  "auth/network-request-failed": "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0432\u044F\u0437\u0430\u0442\u044C\u0441\u044F \u0441 Google. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
+  "auth/unauthorized-domain": "Google-\u0432\u0445\u043E\u0434 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0430\u0434\u0440\u0435\u0441\u0430 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F.",
+  "auth/operation-not-supported-in-this-environment": "\u0411\u0440\u0430\u0443\u0437\u0435\u0440 \u043D\u0435 \u0441\u043C\u043E\u0433 \u043E\u0442\u043A\u0440\u044B\u0442\u044C Google-\u0432\u0445\u043E\u0434. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 KETO \u0432 \u043E\u0431\u044B\u0447\u043D\u043E\u0439 \u0432\u043A\u043B\u0430\u0434\u043A\u0435 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0430."
+};
+function authMessage(error) {
+  return messages[error?.code] || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0432\u0445\u043E\u0434. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u043F\u044B\u0442\u043A\u0443.";
+}
+function authDiagnostic(phase, error) {
+  const code = Object.hasOwn(messages, error?.code) ? error.code : { COMPUTE_UNAVAILABLE: true, BRIDGE_NOT_CONFIGURED: true, BUSY_OR_CONSENT_OR_LIMIT: true, REQUEST_PENDING: true, STATE_CHANGED: true, CSRF: true }[error?.code] ? "SERVICE_UNAVAILABLE" : "REQUEST_FAILED";
+  return [phase, code, ...Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? [error.status] : []].join(" \xB7 ");
+}
+function createAuthSession({ api, authenticate, loadWorkspace, openWorkspace, identityChanged, view: view2, timeoutMs = 15e3, workspaceTimeoutMs = 65e3 }) {
+  let generation = 0, operation = null, identity = null, config = null, configError = null, configFlight = null, loginFlight = null, phase = "checking", lastError = null;
+  const emit = (next, error = null) => {
+    phase = next;
+    lastError = error;
+    view2({ phase, identity, config, error });
+  };
+  const current = (job) => job.id === generation && !job.controller.signal.aborted;
+  const begin = () => {
+    operation?.controller.abort();
+    const job = { id: ++generation, controller: new AbortController() };
+    operation = job;
+    return job;
+  };
+  const drop = () => {
+    identity = null;
+    identityChanged(null);
+  };
+  function configuration() {
+    if (config) return Promise.resolve(config);
+    if (configFlight) return configFlight;
+    configFlight = bounded((signal) => api("/auth/config", { signal }), { timeoutMs }).then((value) => {
+      if (!["firebase_google", "direct_google"].includes(value?.provider)) throw new AuthError("SETUP_REQUIRED");
+      config = value;
+      configError = null;
+      return config;
+    }).catch((error) => {
+      configError = error;
+      return null;
+    }).finally(() => {
+      configFlight = null;
+      if (phase === "signed-out") emit(phase, lastError || configError);
+    });
+    return configFlight;
+  }
+  async function workspace(job) {
+    emit("loading");
+    try {
+      const data = await bounded((signal) => loadWorkspace(signal), { signal: job.controller.signal, timeoutMs: workspaceTimeoutMs });
+      if (!current(job)) return;
+      if (!data?.state) throw new AuthError("INVALID_RESPONSE");
+      openWorkspace(data);
+      if (current(job)) emit("ready");
+    } catch (error) {
+      if (!current(job)) return;
+      if (error.status === 401 && error.code === "SIGN_IN") {
+        drop();
+        emit("signed-out", error);
+        configuration();
+      } else emit("workspace-error", error);
+    }
+  }
+  async function restore(job, { afterLogin = false, loginError = null } = {}) {
+    emit("checking");
+    try {
+      const value = await bounded((signal) => api("/api/session", { signal }), { signal: job.controller.signal, timeoutMs });
+      if (!current(job)) return;
+      if (!value?.csrf || !["active", "pending"].includes(value.user?.status) || !["admin", "member"].includes(value.user?.role)) throw new AuthError("INVALID_RESPONSE");
+      identity = value;
+      identityChanged(value);
+      if (value.user.status === "pending") {
+        emit("pending");
+        return;
+      }
+      await workspace(job);
+    } catch (error) {
+      if (!current(job)) return;
+      if (error.status === 401 && error.code === "SIGN_IN") {
+        drop();
+        emit("signed-out", afterLogin ? loginError || new AuthError("SESSION_NOT_SAVED") : null);
+        configuration();
+      } else emit("session-error", error);
+    }
+  }
+  function start2() {
+    const job = begin();
+    configuration();
+    return restore(job);
+  }
+  function retry() {
+    if (["checking", "loading", "signing-in", "finishing", "signing-out", "claiming"].includes(phase)) return Promise.resolve();
+    const job = begin();
+    configuration();
+    return restore(job);
+  }
+  function login(invite = "") {
+    if (loginFlight) return loginFlight;
+    if (phase !== "signed-out" || !config) return Promise.resolve();
+    const job = begin();
+    emit("signing-in");
+    let task;
+    try {
+      task = authenticate(config, invite, { signal: job.controller.signal, onPhase: (next) => {
+        if (current(job)) emit(next);
+      } });
+    } catch (error) {
+      task = Promise.reject(error);
+    }
+    loginFlight = (async () => {
+      try {
+        const result = await task;
+        if (!current(job) || result?.redirect) return;
+        await restore(job, { afterLogin: true });
+      } catch (error) {
+        if (!current(job)) return;
+        if (error.ambiguous) await restore(job, { afterLogin: true, loginError: error });
+        else emit("signed-out", error);
+      }
+    })().finally(() => {
+      loginFlight = null;
+    });
+    return loginFlight;
+  }
+  async function logout() {
+    if (phase === "signing-out") return;
+    const job = begin();
+    emit("signing-out");
+    try {
+      await bounded((signal) => api("/api/logout", { method: "POST", body: {}, signal }), { signal: job.controller.signal, timeoutMs });
+      if (!current(job)) return;
+      drop();
+      emit("signed-out");
+      configuration();
+    } catch (error) {
+      if (!current(job)) return;
+      if (error.status === 401 && error.code === "SIGN_IN") {
+        drop();
+        emit("signed-out");
+        configuration();
+      } else emit("logout-error", error);
+    }
+  }
+  async function claim(token) {
+    if (phase !== "pending") return;
+    const job = begin();
+    emit("claiming");
+    try {
+      await bounded((signal) => api("/api/invites/claim", { method: "POST", body: { token }, signal }), { signal: job.controller.signal, timeoutMs });
+      if (current(job)) await restore(job);
+    } catch (error) {
+      if (!current(job)) return;
+      if (error.status === 401 && error.code === "SIGN_IN") {
+        drop();
+        emit("signed-out", error);
+        configuration();
+      } else if (!error.status || error.status >= 500 || error.code === "INVALID_RESPONSE") {
+        await restore(job);
+        if (current(job) && phase === "pending") emit("pending", error);
+      } else emit("pending", error);
+    }
+  }
+  function signedOut(error = null) {
+    begin();
+    drop();
+    emit("signed-out", error);
+    configuration();
+  }
+  function expired() {
+    signedOut(new AuthError("SIGN_IN"));
+  }
+  return { start: start2, retry, login, logout, claim, expired, signedOut, get phase() {
+    return phase;
+  }, get identity() {
+    return identity;
+  } };
+}
+
 // cloudflare-saas/public/recipe-page-calls.js
-function createRecipePageCalls({ call: call2, epoch }) {
+function createRecipePageCalls({ call: call2, epoch, timeoutMs = 65e3 }) {
   let tail = Promise.resolve(), session2 = epoch();
   const pending = /* @__PURE__ */ new Set();
   function invoke(...args) {
@@ -381,7 +664,10 @@ function createRecipePageCalls({ call: call2, epoch }) {
     }).then(() => {
       if (stamp !== epoch()) throw Object.assign(Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D."), { code: "STALE_SESSION" });
       if (args[2]?.signal?.aborted) throw Object.assign(Error("\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u043E."), { name: "AbortError" });
-      return call2(...args);
+      return bounded((signal) => call2(args[0], args[1], { ...args[2], signal }), { signal: args[2]?.signal, timeoutMs }).catch((error) => {
+        if (error.code === "NETWORK_TIMEOUT") error.message = "\u041E\u0442\u0432\u0435\u0442 \u043D\u0435 \u043F\u0440\u0438\u0448\u0451\u043B \u0432\u043E\u0432\u0440\u0435\u043C\u044F. \u0417\u0430\u043F\u0440\u043E\u0441 \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u0451\u043D. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043F\u0435\u0440\u0435\u0434 \u043D\u043E\u0432\u044B\u043C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435\u043C.";
+        throw error;
+      });
     });
     tail = result;
     pending.add(result);
@@ -2244,8 +2530,11 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         accept2(d2);
         show(d2);
         generateStatus.textContent = d2.message || "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043D\u043D\u044B\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B.";
+      } catch (error) {
+        if (e2 === epoch() && token === localEpoch) generateStatus.textContent = error.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u0430. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F.";
+        throw error;
       } finally {
-        if (e2 === epoch()) {
+        if (e2 === epoch() && token === localEpoch) {
           busy2 = false;
           generate.disabled = false;
         }
@@ -2423,6 +2712,9 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
         if (e !== epoch() || token !== savedToken) return;
         accept2(d2);
         show(d2, output);
+      } catch (error) {
+        if (e === epoch() && token === savedToken) output.replaceChildren(el2("p", "notice", error.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u0434\u043E\u0431\u0440\u0430\u0442\u044C \u0431\u043B\u044E\u0434\u0430. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F."));
+        throw error;
       } finally {
         if (e === epoch()) {
           busy2 = false;
@@ -2498,6 +2790,7 @@ function setupKitchen({ $: $3, el: el2, call: call2, getState, accept: accept2, 
     dirty = false;
     specDirty = false;
     busy2 = false;
+    generate.disabled = false;
     parsing = false;
     parseButton.disabled = false;
     parseNumber++;
@@ -11044,289 +11337,6 @@ var ce = getExperimentalSetting("authIdTokenMaxAge") || 300;
     }
   })(r)), registerVersion(oe, ae, "esm2020");
 })("Browser");
-
-// cloudflare-saas/public/auth-session.js
-var AuthError = class extends Error {
-  constructor(code, { status = 0, ambiguous = false } = {}) {
-    super(code);
-    this.name = "AuthError";
-    this.code = code;
-    this.status = status;
-    this.ambiguous = ambiguous;
-  }
-};
-function transientStorage(readStorage) {
-  const memory = /* @__PURE__ */ new Map();
-  return {
-    getItem(key) {
-      if (memory.has(key)) return memory.get(key);
-      try {
-        const value = readStorage().getItem(key);
-        if (value !== null) {
-          memory.set(key, value);
-          return value;
-        }
-      } catch {
-      }
-      return null;
-    },
-    setItem(key, value) {
-      memory.set(key, String(value));
-      try {
-        readStorage().setItem(key, String(value));
-      } catch {
-      }
-    },
-    removeItem(key) {
-      memory.set(key, null);
-      try {
-        readStorage().removeItem(key);
-      } catch {
-      }
-    }
-  };
-}
-function bounded(operation, { signal, timeoutMs = 15e3 } = {}) {
-  const controller = new AbortController();
-  let timer, rejectPending;
-  const stopped = new Promise((_, reject) => {
-    rejectPending = reject;
-  });
-  const abort = () => {
-    controller.abort();
-    rejectPending(new AuthError("CANCELLED"));
-  };
-  if (signal?.aborted) {
-    controller.abort();
-    return Promise.reject(new AuthError("CANCELLED"));
-  }
-  signal?.addEventListener("abort", abort, { once: true });
-  timer = setTimeout(() => {
-    controller.abort();
-    rejectPending(new AuthError("NETWORK_TIMEOUT"));
-  }, timeoutMs);
-  let task;
-  try {
-    task = operation(controller.signal);
-  } catch (error) {
-    task = Promise.reject(error);
-  }
-  return Promise.race([task, stopped]).finally(() => {
-    clearTimeout(timer);
-    signal?.removeEventListener("abort", abort);
-    controller.abort();
-  });
-}
-async function authJson(fetcher, path, { method = "GET", body, signal, csrf: csrf2 } = {}) {
-  let response;
-  try {
-    response = await fetcher(path, { method, credentials: "same-origin", cache: "no-store", signal, headers: { ...body !== void 0 ? { "Content-Type": "application/json" } : {}, ...csrf2 && method !== "GET" ? { "X-CSRF-Token": csrf2 } : {} }, body: body === void 0 ? void 0 : JSON.stringify(body) });
-  } catch {
-    throw new AuthError(signal?.aborted ? "CANCELLED" : "NETWORK_ERROR");
-  }
-  let data;
-  try {
-    data = await response.json();
-  } catch {
-    throw new AuthError("INVALID_RESPONSE", { status: response.status });
-  }
-  if (!response.ok) throw new AuthError(typeof data?.error === "string" && /^[A-Z][A-Z0-9_]{0,63}$/.test(data.error) ? data.error : "REQUEST_FAILED", { status: response.status });
-  return data;
-}
-var messages = {
-  NETWORK_ERROR: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0432\u044F\u0437\u0430\u0442\u044C\u0441\u044F \u0441 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435\u043C. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435.",
-  NETWORK_TIMEOUT: "\u041E\u0442\u0432\u0435\u0442 \u043D\u0435 \u043F\u0440\u0438\u0448\u0451\u043B \u0432\u043E\u0432\u0440\u0435\u043C\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
-  INVALID_RESPONSE: "\u041F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0432\u0435\u0440\u043D\u0443\u043B\u043E \u043D\u0435\u043F\u043E\u043B\u043D\u044B\u0439 \u043E\u0442\u0432\u0435\u0442. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443.",
-  SETUP_REQUIRED: "\u0412\u0445\u043E\u0434 \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u043F\u043E\u0437\u0436\u0435.",
-  LOGIN_UNAVAILABLE: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043D\u0430\u0447\u0430\u0442\u044C \u0432\u0445\u043E\u0434. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u043F\u044B\u0442\u043A\u0443.",
-  LOGIN_BUSY: "\u0421\u043B\u0438\u0448\u043A\u043E\u043C \u043C\u043D\u043E\u0433\u043E \u043F\u043E\u043F\u044B\u0442\u043E\u043A \u0432\u0445\u043E\u0434\u0430. \u041F\u043E\u0434\u043E\u0436\u0434\u0438\u0442\u0435 \u043D\u0435\u043C\u043D\u043E\u0433\u043E \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
-  INVALID_CHALLENGE: "\u041F\u043E\u043F\u044B\u0442\u043A\u0430 \u0432\u0445\u043E\u0434\u0430 \u0443\u0441\u0442\u0430\u0440\u0435\u043B\u0430. \u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u0432\u0445\u043E\u0434 \u0435\u0449\u0451 \u0440\u0430\u0437.",
-  SESSION_LIMIT: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u043E\u0437\u0434\u0430\u0442\u044C \u0441\u0435\u0430\u043D\u0441: \u0434\u043E\u0441\u0442\u0438\u0433\u043D\u0443\u0442 \u043B\u0438\u043C\u0438\u0442 \u0432\u0445\u043E\u0434\u043E\u0432. \u0412\u044B\u0439\u0434\u0438\u0442\u0435 \u0438\u0437 KETO \u043D\u0430 \u0434\u0440\u0443\u0433\u043E\u043C \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
-  SIGN_IN_BLOCKED: "\u0414\u043E\u0441\u0442\u0443\u043F \u044D\u0442\u043E\u0433\u043E \u0430\u043A\u043A\u0430\u0443\u043D\u0442\u0430 \u043F\u0440\u0438\u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0439 \u0430\u043A\u043A\u0430\u0443\u043D\u0442.",
-  INVITATION_REQUIRED: "\u0414\u043B\u044F \u044D\u0442\u043E\u0439 \u043F\u043E\u0447\u0442\u044B \u043D\u0443\u0436\u043D\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0449\u0435\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0451\u043D\u043D\u044B\u0439 \u0430\u043A\u043A\u0430\u0443\u043D\u0442 \u0438\u043B\u0438 \u043E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0441\u0441\u044B\u043B\u043A\u0443 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u044F.",
-  INVITE_NOT_AVAILABLE: "\u041F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u043D\u043E\u0432\u0443\u044E \u0441\u0441\u044B\u043B\u043A\u0443 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u044F.",
-  SESSION_NOT_SAVED: "Google \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u043B \u0432\u0445\u043E\u0434, \u043D\u043E \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0438\u043B\u043E \u0441\u0435\u0430\u043D\u0441. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 cookie \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0441\u0430\u0439\u0442\u0430 \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.",
-  SIGN_IN: "\u0421\u0435\u0430\u043D\u0441 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D. \u0412\u043E\u0439\u0434\u0438\u0442\u0435 \u0441\u043D\u043E\u0432\u0430.",
-  "auth/popup-closed-by-user": "\u0412\u0445\u043E\u0434 \u043E\u0442\u043C\u0435\u043D\u0451\u043D. \u041C\u043E\u0436\u043D\u043E \u043F\u043E\u043F\u0440\u043E\u0431\u043E\u0432\u0430\u0442\u044C \u0435\u0449\u0451 \u0440\u0430\u0437.",
-  "auth/cancelled-popup-request": "\u0412\u0445\u043E\u0434 \u043E\u0442\u043C\u0435\u043D\u0451\u043D. \u041C\u043E\u0436\u043D\u043E \u043F\u043E\u043F\u0440\u043E\u0431\u043E\u0432\u0430\u0442\u044C \u0435\u0449\u0451 \u0440\u0430\u0437.",
-  "auth/popup-blocked": "\u0411\u0440\u0430\u0443\u0437\u0435\u0440 \u0437\u0430\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u043B \u043E\u043A\u043D\u043E Google. \u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0432\u0441\u043F\u043B\u044B\u0432\u0430\u044E\u0449\u0438\u0435 \u043E\u043A\u043D\u0430 \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0441\u0430\u0439\u0442\u0430 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
-  "auth/network-request-failed": "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0432\u044F\u0437\u0430\u0442\u044C\u0441\u044F \u0441 Google. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435.",
-  "auth/unauthorized-domain": "Google-\u0432\u0445\u043E\u0434 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0434\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0430\u0434\u0440\u0435\u0441\u0430 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F.",
-  "auth/operation-not-supported-in-this-environment": "\u0411\u0440\u0430\u0443\u0437\u0435\u0440 \u043D\u0435 \u0441\u043C\u043E\u0433 \u043E\u0442\u043A\u0440\u044B\u0442\u044C Google-\u0432\u0445\u043E\u0434. \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 KETO \u0432 \u043E\u0431\u044B\u0447\u043D\u043E\u0439 \u0432\u043A\u043B\u0430\u0434\u043A\u0435 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0430."
-};
-function authMessage(error) {
-  return messages[error?.code] || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0432\u0445\u043E\u0434. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u043F\u044B\u0442\u043A\u0443.";
-}
-function authDiagnostic(phase, error) {
-  const code = Object.hasOwn(messages, error?.code) ? error.code : { COMPUTE_UNAVAILABLE: true, BRIDGE_NOT_CONFIGURED: true, BUSY_OR_CONSENT_OR_LIMIT: true, REQUEST_PENDING: true, STATE_CHANGED: true, CSRF: true }[error?.code] ? "SERVICE_UNAVAILABLE" : "REQUEST_FAILED";
-  return [phase, code, ...Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? [error.status] : []].join(" \xB7 ");
-}
-function createAuthSession({ api, authenticate, loadWorkspace, openWorkspace, identityChanged, view: view2, timeoutMs = 15e3, workspaceTimeoutMs = 3e4 }) {
-  let generation = 0, operation = null, identity = null, config = null, configError = null, configFlight = null, loginFlight = null, phase = "checking", lastError = null;
-  const emit = (next, error = null) => {
-    phase = next;
-    lastError = error;
-    view2({ phase, identity, config, error });
-  };
-  const current = (job) => job.id === generation && !job.controller.signal.aborted;
-  const begin = () => {
-    operation?.controller.abort();
-    const job = { id: ++generation, controller: new AbortController() };
-    operation = job;
-    return job;
-  };
-  const drop = () => {
-    identity = null;
-    identityChanged(null);
-  };
-  function configuration() {
-    if (config) return Promise.resolve(config);
-    if (configFlight) return configFlight;
-    configFlight = bounded((signal) => api("/auth/config", { signal }), { timeoutMs }).then((value) => {
-      if (!["firebase_google", "direct_google"].includes(value?.provider)) throw new AuthError("SETUP_REQUIRED");
-      config = value;
-      configError = null;
-      return config;
-    }).catch((error) => {
-      configError = error;
-      return null;
-    }).finally(() => {
-      configFlight = null;
-      if (phase === "signed-out") emit(phase, lastError || configError);
-    });
-    return configFlight;
-  }
-  async function workspace(job) {
-    emit("loading");
-    try {
-      const data = await bounded((signal) => loadWorkspace(signal), { signal: job.controller.signal, timeoutMs: workspaceTimeoutMs });
-      if (!current(job)) return;
-      if (!data?.state) throw new AuthError("INVALID_RESPONSE");
-      openWorkspace(data);
-      if (current(job)) emit("ready");
-    } catch (error) {
-      if (!current(job)) return;
-      if (error.status === 401 && error.code === "SIGN_IN") {
-        drop();
-        emit("signed-out", error);
-        configuration();
-      } else emit("workspace-error", error);
-    }
-  }
-  async function restore(job, { afterLogin = false, loginError = null } = {}) {
-    emit("checking");
-    try {
-      const value = await bounded((signal) => api("/api/session", { signal }), { signal: job.controller.signal, timeoutMs });
-      if (!current(job)) return;
-      if (!value?.csrf || !["active", "pending"].includes(value.user?.status) || !["admin", "member"].includes(value.user?.role)) throw new AuthError("INVALID_RESPONSE");
-      identity = value;
-      identityChanged(value);
-      if (value.user.status === "pending") {
-        emit("pending");
-        return;
-      }
-      await workspace(job);
-    } catch (error) {
-      if (!current(job)) return;
-      if (error.status === 401 && error.code === "SIGN_IN") {
-        drop();
-        emit("signed-out", afterLogin ? loginError || new AuthError("SESSION_NOT_SAVED") : null);
-        configuration();
-      } else emit("session-error", error);
-    }
-  }
-  function start2() {
-    const job = begin();
-    configuration();
-    return restore(job);
-  }
-  function retry() {
-    if (["checking", "loading", "signing-in", "finishing", "signing-out", "claiming"].includes(phase)) return Promise.resolve();
-    const job = begin();
-    configuration();
-    return restore(job);
-  }
-  function login(invite = "") {
-    if (loginFlight) return loginFlight;
-    if (phase !== "signed-out" || !config) return Promise.resolve();
-    const job = begin();
-    emit("signing-in");
-    let task;
-    try {
-      task = authenticate(config, invite, { signal: job.controller.signal, onPhase: (next) => {
-        if (current(job)) emit(next);
-      } });
-    } catch (error) {
-      task = Promise.reject(error);
-    }
-    loginFlight = (async () => {
-      try {
-        const result = await task;
-        if (!current(job) || result?.redirect) return;
-        await restore(job, { afterLogin: true });
-      } catch (error) {
-        if (!current(job)) return;
-        if (error.ambiguous) await restore(job, { afterLogin: true, loginError: error });
-        else emit("signed-out", error);
-      }
-    })().finally(() => {
-      loginFlight = null;
-    });
-    return loginFlight;
-  }
-  async function logout() {
-    if (phase === "signing-out") return;
-    const job = begin();
-    emit("signing-out");
-    try {
-      await bounded((signal) => api("/api/logout", { method: "POST", body: {}, signal }), { signal: job.controller.signal, timeoutMs });
-      if (!current(job)) return;
-      drop();
-      emit("signed-out");
-      configuration();
-    } catch (error) {
-      if (!current(job)) return;
-      if (error.status === 401 && error.code === "SIGN_IN") {
-        drop();
-        emit("signed-out");
-        configuration();
-      } else emit("logout-error", error);
-    }
-  }
-  async function claim(token) {
-    if (phase !== "pending") return;
-    const job = begin();
-    emit("claiming");
-    try {
-      await bounded((signal) => api("/api/invites/claim", { method: "POST", body: { token }, signal }), { signal: job.controller.signal, timeoutMs });
-      if (current(job)) await restore(job);
-    } catch (error) {
-      if (!current(job)) return;
-      if (error.status === 401 && error.code === "SIGN_IN") {
-        drop();
-        emit("signed-out", error);
-        configuration();
-      } else if (!error.status || error.status >= 500 || error.code === "INVALID_RESPONSE") {
-        await restore(job);
-        if (current(job) && phase === "pending") emit("pending", error);
-      } else emit("pending", error);
-    }
-  }
-  function signedOut(error = null) {
-    begin();
-    drop();
-    emit("signed-out", error);
-    configuration();
-  }
-  function expired() {
-    signedOut(new AuthError("SIGN_IN"));
-  }
-  return { start: start2, retry, login, logout, claim, expired, signedOut, get phase() {
-    return phase;
-  }, get identity() {
-    return identity;
-  } };
-}
 
 // cloudflare-saas/public/firebase-flow.js
 async function firebaseFlow(sdk, config, invite, request, { signal, timeoutMs = 12e4, requestTimeoutMs = 15e3, onPhase = () => {
