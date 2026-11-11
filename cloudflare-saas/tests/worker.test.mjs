@@ -10,7 +10,7 @@ import worker from '../src/worker.mjs';
 
 const origin='https://pilot.example.test', encoder=new TextEncoder();
 class D1{
- constructor(){this.db=new DatabaseSync(':memory:');this.db.exec(readFileSync(new URL('../migrations/0001_initial.sql',import.meta.url),'utf8'));this.db.exec(readFileSync(new URL('../migrations/0002_integration.sql',import.meta.url),'utf8'));this.db.exec(readFileSync(new URL('../migrations/0003_global_usage.sql',import.meta.url),'utf8'));this.db.exec(readFileSync(new URL('../migrations/0004_firebase_challenges.sql',import.meta.url),'utf8'))}
+ constructor(){this.db=new DatabaseSync(':memory:');this.db.exec(readFileSync(new URL('../migrations/0001_initial.sql',import.meta.url),'utf8'));this.db.exec(readFileSync(new URL('../migrations/0002_integration.sql',import.meta.url),'utf8'));this.db.exec(readFileSync(new URL('../migrations/0003_global_usage.sql',import.meta.url),'utf8'));this.db.exec(readFileSync(new URL('../migrations/0004_firebase_challenges.sql',import.meta.url),'utf8'));this.db.exec(readFileSync(new URL('../migrations/0010_bug_reports.sql',import.meta.url),'utf8'))}
  prepare(sql){const db=this.db;return {bind(...args){const stmt=db.prepare(sql);return {first:()=>stmt.get(...args)??null,all:()=>({results:stmt.all(...args)}),run:()=>({meta:{changes:Number(stmt.run(...args).changes)}})}}}}
  batch(stmts){this.db.exec('BEGIN');try{let r=stmts.map(x=>x.run());this.db.exec('COMMIT');return r}catch(e){this.db.exec('ROLLBACK');throw e}}
 }
@@ -95,12 +95,14 @@ test('suspension during model call blocks the commit',async()=>{
 
 test('deletion retries R2 failure, revokes sessions and deletes only owner prefix',async()=>{
  let e=env(),owner=(await login(e)).cookie,a=await member(e,owner,'delete@example.test','del'),b=await member(e,owner,'other@example.test','other');let ua=e.DB.db.prepare("SELECT id FROM users WHERE email='delete@example.test'").get().id,ub=e.DB.db.prepare("SELECT id FROM users WHERE email='other@example.test'").get().id;
+ const reportBody={client_id:'synthetic-delete-report-001',description:'Техническая ошибка',block_id:'page',technical_only:true,context:{route:'products',version:'test',viewport:{width:390,height:844},error_code:''}};assert.equal((await mutate(e,a,'/api/bug-reports',reportBody)).status,201);assert.equal((await mutate(e,b,'/api/bug-reports',reportBody)).status,201);
  await e.UPLOADS.put('private/'+ua+'/orphan',new Uint8Array([1]));await e.UPLOADS.put('private/'+ub+'/keep',new Uint8Array([2]));
  let begin=await mutate(e,a,'/api/personal/delete',{confirm:'DELETE_MY_DATA'});assert.equal(begin.status,202);let receipt=(await begin.json()).receipt;assert.equal((await session(e,a)).response.status,401);
  assert.equal((await mutate(e,owner,'/api/admin/members/status',{id:ua,status:'active'})).status,404);
  let bad=await request(e,'/api/deletion/status',{method:'POST',body:{receipt:'Z'.repeat(43)}});assert.equal(bad.status,404);
  let realDelete=e.UPLOADS.delete.bind(e.UPLOADS),failed=false;e.UPLOADS.delete=async k=>{if(!failed){failed=true;throw Error('synthetic failure')}return realDelete(k)};
  let next=()=>request(e,'/api/deletion/continue',{method:'POST',body:{receipt}});let first=await next();assert.equal((await first.json()).status,'pending');let second=await next();assert.equal((await second.json()).status,'pending');let third=await next();assert.equal((await third.json()).status,'complete');
+ assert.equal(e.DB.db.prepare('SELECT COUNT(*) n FROM bug_reports WHERE user_id=?').get(ua).n,0);assert.equal(e.DB.db.prepare('SELECT COUNT(*) n FROM bug_reports WHERE user_id=?').get(ub).n,1);
  assert(e.UPLOADS.objects.has('private/'+ub+'/keep'));assert(!e.UPLOADS.objects.has('private/'+ua+'/orphan'));assert.equal(e.DB.db.prepare('SELECT email FROM users WHERE id=?').get(ua).email,'');assert.equal((await session(e,b)).response.status,200);
 });
 test('deletion waits for in-flight upload and removes it after cancellation',async()=>{
@@ -383,3 +385,5 @@ test('intake bridge errors return fixed actionable text and release the private-
   const outside=await tool(e,a,'keto_kitchen',{action:'status'});assert.equal(outside.status,422);assert.deepEqual(await outside.json(),{error:'VALIDATION_FAILED'});
  }finally{globalThis.fetch=original}
 });
+
+test('bug reports use actual active-session, origin/CSRF and admin boundary without compute consent',async()=>{const e=env(),owner=(await login(e)).cookie,m=await member(e,owner,'reporter@example.test','reporter'),s=await session(e,m);const body={client_id:'synthetic-report-client-001',description:'Кнопка не отвечает',block_id:'page',technical_only:true,context:{route:'products',version:'test',viewport:{width:390,height:844},error_code:''}};assert.equal((await request(e,'/api/bug-reports',{method:'POST',cookie:m,body})).status,403);assert.equal((await request(e,'/api/bug-reports',{method:'POST',cookie:m,csrf:s.csrf,customOrigin:'https://evil.test',body})).status,403);const added=await request(e,'/api/bug-reports',{method:'POST',cookie:m,csrf:s.csrf,body});assert.equal(added.status,201);assert.equal((await request(e,'/api/admin/bug-reports',{cookie:m})).status,403);assert.equal((await request(e,'/api/bug-reports')).status,401);e.DB.db.prepare("UPDATE users SET status='suspended' WHERE email=?").run('reporter@example.test');assert.equal((await request(e,'/api/bug-reports',{cookie:m})).status,401)});

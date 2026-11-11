@@ -1,0 +1,53 @@
+{
+  "issue": "AGR-306",
+  "increment": "C24",
+  "observed_at": "2026-11-11T11:54:42.796575+00:00",
+  "surface": "native background Chrome PERSONAL Offliner; loopback synthetic fixture; no real family records",
+  "viewport_css": {
+    "width": 402,
+    "height": 873
+  },
+  "accepted": [
+    "top button and report dialog visible on mobile",
+    "screen tap selects/highlights own-dish block without expanding it",
+    "plain Russian preview after removing raw JSON",
+    "actual handler/SQLite submit and reload persistence",
+    "lost response after save:explicit lookup finds same KETO-2;exactly two total rows for two submissions",
+    "admin ready_to_verify with fix evidence;reporter closes then reopens;KETO-2 revision4 in_progress",
+    "no horizontal overflow"
+  ],
+  "recovery_followup": {
+    "root_code_review": "passed",
+    "root_focused_tests": 8,
+    "worker_changed_boundary_tests": 40,
+    "case": "not-delivered payload survives reload/account scope, explicit lookup before same-ID retry, late results isolated",
+    "rendered_client_revision": "0.7.1-C24"
+  },
+  "screenshots": [
+    "verification/C24/selected-block.png",
+    "verification/C24/closed-report.png"
+  ],
+  "resource_cleanup": {
+    "tab1973326802": "closed and absence verified",
+    "viewport": "reset",
+    "CUA": "completion summary then reset acknowledged",
+    "servers": [
+      {
+        "session": 63392,
+        "port": 8898,
+        "exit": 0
+      },
+      {
+        "session": 11799,
+        "port": 8899,
+        "exit": 130
+      }
+    ],
+    "ports": "no listeners confirmed"
+  },
+  "limitations": [
+    "Physical iPhone keyboard dictation not exercised",
+    "No automatic screenshot capture or Linear task creation",
+    "Initial visual lifecycle preceded final pending-payload recovery; changed case checked with actual module/SQLite tests"
+  ]
+}

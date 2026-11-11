@@ -1,0 +1,166 @@
+{
+  "schema": "keto-source-acceptance-v1",
+  "issue": "AGR-306",
+  "increment": "C24",
+  "updated_at": "2026-11-11T11:53:50.179987+00:00",
+  "scope": "Contextual technical report intake, no deployment/browser/device acceptance by implementation worker",
+  "checks": {
+    "focused_report_handler_schema_sender": {
+      "passed": 5,
+      "failed": 0
+    },
+    "full_node": {
+      "passed": 315,
+      "failed": 0
+    },
+    "full_python": {
+      "passed": 663,
+      "skipped": 1,
+      "subtests_passed": 6
+    },
+    "actual_worker": {
+      "passed": 78,
+      "includes": "active member / origin / CSRF / admin boundary; full suite also validates deletion isolation"
+    },
+    "vm_repair_recheck": {
+      "passed": 37,
+      "failed": 0
+    },
+    "no_browser_ui": "passed",
+    "oauth_ui": "passed",
+    "builders": [
+      "node cloudflare-saas/build.cjs",
+      "node scripts/build_legacy_ui.cjs"
+    ],
+    "contract_drift": "passed after supported exporter regeneration",
+    "specification": {
+      "passed": true,
+      "documents_checked": 25,
+      "local_links_checked": 879
+    },
+    "repository": {
+      "passed": true,
+      "checked_files": 679
+    },
+    "git_diff_check": "passed"
+  },
+  "failed_approaches": [
+    {
+      "check": "initial full Node",
+      "passed": 297,
+      "failed": 18,
+      "cause": "Three existing VM test harnesses omitted the new module stub; no product failure",
+      "resolution": "Added isolated setupBugReports stubs; focused37 and subsequent full315 passed"
+    }
+  ],
+  "boundaries": [
+    "No browser, deploy, commit or external task contact by worker",
+    "No direct Linear integration credential exists; existing canonical issue may be linked manually",
+    "Keyboard dictation is the voice path; no paid model/transcription call",
+    "No screenshot upload or automatic screenshot capture",
+    "Root applies exact additive migration before promoting Worker",
+    "Root owns mobile pixels, release and physical-device acceptance",
+    "Only the already-reviewed submitted minimal payload persists per account in session storage until a confirmed receipt; unsubmitted drafts stay in memory.",
+    "Reload restores the immutable submitted payload; a missing same-ID lookup enables an explicit retry with identical ID/payload. No automatic replay.",
+    "Legacy ID-only pending state can reconcile a receipt but cannot reconstruct the old text; UI says so."
+  ],
+  "next_action": "Coordinator commits the frozen source and dispatches authorized release; apply migration 0010 once before Worker promotion. No worker source writes pending.",
+  "sha256": {
+    "cloudflare-saas/migrations/0010_bug_reports.sql": "4dfef8a0f3ad60a233fc91e5393aa1748b49cf5ac6d52ed323f3b75c3ecb4c6e",
+    "cloudflare-saas/public/bug-report-contract.js": "908a280eaee7ecbc948c5a3b560269a9f796b4ad0bce2095dac7b8cb893c5b04",
+    "cloudflare-saas/public/bug-reports.js": "9e4d9a59cd59f4ca55b4147ec7853b01b2d732e8d43aed9395f88bc34714f9fb",
+    "cloudflare-saas/public/app.js": "4fdacecbab06916621bdd63421462bc1d5b87c7f13580878765edacc2a2bfc0b",
+    "cloudflare-saas/public/app.css": "ff52eb1368956ff9312fb1ff0c6d9f22d755e59c77d56075269b395eb34edc44",
+    "cloudflare-saas/public/index.html": "28bbf9be149553bee03d371db074ef27195c74a3277c23fa78840251ef026551",
+    "cloudflare-saas/src/bug-reports.mjs": "7eec2a6b1879effea6fdf0ac34999980fec4866a4d2bd30d155ee75c1c8e11be",
+    "cloudflare-saas/src/worker.mjs": "2dc1a809c961f367d5235e915ad6e701bc1d7dbef4faa64927187f6cc8231f04",
+    "cloudflare-saas/src/deletion.mjs": "3033641e82ff2b691786b67f97a2419d4716b323a3ee73d27ee15d4cf291dceb",
+    "cloudflare-saas/tests/bug-reports.test.mjs": "fa93122c060f5fc10d51c69fdab49e27f6e0b282b11418c453034a2993c0f30c",
+    "cloudflare-saas/tests/worker.test.mjs": "7b10c5a27f85c956b3a755193c4bb84d572881ea62e05a797b232b538d9effa8",
+    "tests/browser/bug_report_server.mjs": "851d8d252fd0b0bc1cefb71574d011ce2923e3161227314994971bb904a4ac25",
+    "cloudflare-saas/public/app.bundle.js": "00e5df8372fe2f60fd0f5cbd367695ac30aa5c5defc1db398c7611ada7ac818b",
+    "cloudflare-saas/public/style.css": "2423e7678080fe278c04f937767676d44cc51bf6f2c36d537faa72e8a9f44947",
+    "cloudflare-saas/dist/worker-modules.mjs": "e1bf6c7ca07621df4bcab2e927d20b7bb98fc7e37b7fa54d1a2cdd75b24715c8"
+  },
+  "changed_paths": [
+    "artifacts/files_manifest.json",
+    "cloudflare-saas/dist/assets/app.bundle.js",
+    "cloudflare-saas/dist/assets/index.html",
+    "cloudflare-saas/dist/assets/style.css",
+    "cloudflare-saas/dist/worker-modules.mjs",
+    "cloudflare-saas/dist/worker.mjs",
+    "cloudflare-saas/generated/developer-snapshot.mjs",
+    "cloudflare-saas/public/app.bundle.js",
+    "cloudflare-saas/public/app.css",
+    "cloudflare-saas/public/app.js",
+    "cloudflare-saas/public/index.html",
+    "cloudflare-saas/public/style.css",
+    "cloudflare-saas/src/deletion.mjs",
+    "cloudflare-saas/src/embedded-assets.mjs",
+    "cloudflare-saas/src/worker.mjs",
+    "cloudflare-saas/tests/c19-review-regressions.test.mjs",
+    "cloudflare-saas/tests/static.test.mjs",
+    "cloudflare-saas/tests/tranquil-design.test.mjs",
+    "cloudflare-saas/tests/worker.test.mjs",
+    "docs/contracts/database-schema.json",
+    "docs/contracts/ui-contracts.json",
+    "docs/contracts/worker-api-inventory.json",
+    "specs/001-iphone-keto-overhaul/contracts/flows.md",
+    "specs/001-iphone-keto-overhaul/plan.md",
+    "specs/001-iphone-keto-overhaul/spec.md",
+    "specs/001-iphone-keto-overhaul/tasks.md",
+    "cloudflare-saas/migrations/0010_bug_reports.sql",
+    "cloudflare-saas/public/bug-report-contract.js",
+    "cloudflare-saas/public/bug-reports.js",
+    "cloudflare-saas/src/bug-reports.mjs",
+    "cloudflare-saas/tests/bug-reports.test.mjs",
+    "docs/evidence/AGR_306_C24_SOURCE_CHECKS.json",
+    "tests/browser/bug_report_server.mjs"
+  ],
+  "coordinator_owned_unmodified_by_worker": [
+    "qa/RECOVERY_STATE.json",
+    "/Users/alexyarosh/Documents/ChatGPT/keto/TASK_HANDOFF.json"
+  ],
+  "report_ui_version": {
+    "value": "0.7.1-C24",
+    "owning_source": "cloudflare-saas/public/bug-report-contract.js REPORT_UI_VERSION",
+    "meaning": "Rendered C24 client revision; deliberately independent of server /api/session static release label",
+    "source_mapping": "Exact source and bundle SHA256 values in this receipt"
+  },
+  "recovery_followup": {
+    "reason": "Coordinator review found that ID-only persistence could not recover a never-delivered submission after reload.",
+    "implementation": "Persist and validate exact reviewed minimal payload; hydrate immutable sender; explicit receipt lookup gates explicit retry; generation checks guard sender persistence and UI success/failure/check continuations.",
+    "checks": {
+      "focused_report_tests": {
+        "passed": 8,
+        "failed": 0
+      },
+      "changed_boundary_vm_checks": {
+        "passed": 40,
+        "failed": 0,
+        "scope": "report module, full-state rendering, static client, C19 regressions"
+      },
+      "public_builder": "passed",
+      "contract_drift": "passed",
+      "specification": "passed25 documents/879 links",
+      "repository": "passed680 files",
+      "no_browser_ui": "passed",
+      "oauth_ui": "passed",
+      "git_diff_check": "passed",
+      "coordinator_independent_focused": "8 passed, reported by coordinator"
+    },
+    "unchanged_checks_reused": [
+      "Full Python663+6 subtests/1 existing skip",
+      "Actual Worker78 and full Node315 baseline; backend/report schema unchanged"
+    ],
+    "fixture_never_delivered_control": "POST /__test__/bug-not-delivered {} then next report POST returns503 before handler; reload, check delivery, explicitly retry identical payload."
+  },
+  "final_build": {
+    "developer_snapshot_baseline": "fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77",
+    "developer_snapshot_archive_sha256": "a7e0d1c61ad4a5c61805b13ea463818b5688727912ec31ec1c1f7dd2ad8406cf",
+    "public_bundle_sha256": "00e5df8372fe2f60fd0f5cbd367695ac30aa5c5defc1db398c7611ada7ac818b",
+    "worker_modules_sha256": "e1bf6c7ca07621df4bcab2e927d20b7bb98fc7e37b7fa54d1a2cdd75b24715c8",
+    "standalone_worker_bytes": 1686315,
+    "modular_worker_bytes": 182649
+  }
+}

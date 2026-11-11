@@ -4,32 +4,32 @@
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "8f9bbf9d10d8c5ad94145571eceecfbb77bcc8b6557d494bf468c722efc27c6d",
-      "bytes": 1634863,
+      "sha256": "a7f3f3928a95c55b386f9e60f97c0ef2172a6e2beecd25bcfabf0ddd68e35c1e",
+      "bytes": 1686315,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "909da2b5283de6ba9a0b3030bb98d6708735eb30547ff2581d12515a91982505",
-      "bytes": 174838,
+      "sha256": "e1bf6c7ca07621df4bcab2e927d20b7bb98fc7e37b7fa54d1a2cdd75b24715c8",
+      "bytes": 182649,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/assets/index.html",
-      "sha256": "09e5c7d443c26787255a596df6e57e19970b7d135996721b40194063b299c0b8",
-      "bytes": 60476,
+      "sha256": "28bbf9be149553bee03d371db074ef27195c74a3277c23fa78840251ef026551",
+      "bytes": 63971,
       "mime": "text/plain",
       "module_name": "assets/index.html",
       "module_type": "text"
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "7d9f5f3313ce4d3fdc590750757a90e943cbb04ef4877251c232a91ac7750729",
-      "bytes": 840439,
+      "sha256": "00e5df8372fe2f60fd0f5cbd367695ac30aa5c5defc1db398c7611ada7ac818b",
+      "bytes": 870972,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"
@@ -44,8 +44,8 @@
     },
     {
       "path": "cloudflare-saas/dist/assets/style.css",
-      "sha256": "3d0631e1ebd27ff932a7a7c09cee63ee45ece666af2145bcacc4a4940451f81c",
-      "bytes": 90068,
+      "sha256": "2423e7678080fe278c04f937767676d44cc51bf6f2c36d537faa72e8a9f44947",
+      "bytes": 91504,
       "mime": "text/plain",
       "module_name": "assets/style.css",
       "module_type": "text"
@@ -222,6 +222,14 @@
       "path": "cloudflare-saas/migrations/0009_indexes.sql",
       "sha256": "7c9fba6573e60cda411972171531a1c90b7581d09fd403a394a29be1d7ab5e91",
       "bytes": 667,
+      "mime": "application/sql",
+      "module_name": null,
+      "module_type": null
+    },
+    {
+      "path": "cloudflare-saas/migrations/0010_bug_reports.sql",
+      "sha256": "4dfef8a0f3ad60a233fc91e5393aa1748b49cf5ac6d52ed323f3b75c3ecb4c6e",
+      "bytes": 811,
       "mime": "application/sql",
       "module_name": null,
       "module_type": null

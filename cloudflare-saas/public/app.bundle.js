@@ -1,3 +1,434 @@
+// cloudflare-saas/public/bug-report-contract.js
+var REPORT_UI_VERSION = "0.7.1-C24";
+var REPORT_ROUTES = ["chat", "today", "diary", "recipes", "products", "more", "settings", "admin", "developer", "memory", "sources", "targets", "knowledge", "setup", "setup-consent", "setup-about", "setup-restrictions", "setup-targets"];
+var REPORT_BLOCKS = { page: { label: "\u0412\u0435\u0441\u044C \u044D\u043A\u0440\u0430\u043D", selector: null }, navigation: { label: "\u0412\u0435\u0440\u0445\u043D\u0435\u0435 \u043C\u0435\u043D\u044E \u0438 \u043D\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044F", selector: ".top" }, chat: { label: "\u0427\u0430\u0442 \u0438 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u0430 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F", selector: '[data-page="chat"]' }, recipes: { label: "\u041F\u043E\u0438\u0441\u043A \u0438 \u0441\u043F\u0438\u0441\u043E\u043A \u0440\u0435\u0446\u0435\u043F\u0442\u043E\u0432", selector: '[data-testid="recipe-library"]' }, own_dish: { label: "\u0421\u0432\u043E\u0451 \u0431\u043B\u044E\u0434\u043E", selector: "#own-dish-root" }, pantry: { label: "\u0414\u043E\u043C\u0430\u0448\u043D\u0438\u0435 \u0437\u0430\u043F\u0430\u0441\u044B", selector: "#kitchen-studio" }, shop: { label: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0430", selector: "#shop-root" }, diary: { label: "\u0417\u0430\u043F\u0438\u0441\u044C \u0435\u0434\u044B \u0438 \u0434\u043D\u0435\u0432\u043D\u0438\u043A", selector: '[data-page="diary"]' }, profile: { label: "\u041F\u0440\u043E\u0444\u0438\u043B\u044C \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438", selector: '[data-page="more"]' }, setup: { label: "\u0417\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E \u0438 \u043E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F", selector: '[data-page="setup"]' }, proposal: { label: "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0439", selector: "#proposal-dialog" } };
+var REPORT_STATUSES = { new: "\u041F\u043E\u043B\u0443\u0447\u0435\u043D\u043E", in_progress: "\u0412 \u0440\u0430\u0431\u043E\u0442\u0435", ready_to_verify: "\u041C\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C", closed: "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \u0438 \u0437\u0430\u043A\u0440\u044B\u0442\u043E" };
+var REPORT_ERRORS = ["SERVICE_UNAVAILABLE", "COMPUTE_UNAVAILABLE", "REQUEST_PENDING", "REQUEST_FAILED", "STATE_CHANGED", "BUSY_OR_CONSENT_OR_LIMIT", "VALIDATION_FAILED", "NETWORK_TIMEOUT", "NETWORK_ERROR"];
+function reportContext({ route, version: version2, width, height, errorCode = "" }) {
+  return { route: REPORT_ROUTES.includes(route) ? route : "more", version: typeof version2 === "string" && /^[a-zA-Z0-9._-]{1,80}$/.test(version2) ? version2 : "unknown", viewport: { width: Math.max(1, Math.min(1e4, Math.round(width) || 1)), height: Math.max(1, Math.min(1e4, Math.round(height) || 1)) }, error_code: REPORT_ERRORS.includes(errorCode) ? errorCode : "" };
+}
+
+// cloudflare-saas/public/bug-reports.js
+var reportNumber = (n) => "KETO-" + n;
+function restorePendingReport(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).sort().join() !== "block_id,client_id,context,description,technical_only" || typeof value.client_id !== "string" || !/^[a-zA-Z0-9_-]{16,80}$/.test(value.client_id) || typeof value.description !== "string" || !value.description.trim() || value.description.length > 4e3 || typeof value.block_id !== "string" || !Object.hasOwn(REPORT_BLOCKS, value.block_id) || value.technical_only !== true) return null;
+  const c2 = value.context;
+  if (!c2 || Object.keys(c2).sort().join() !== "error_code,route,version,viewport" || !REPORT_ROUTES.includes(c2.route) || typeof c2.version !== "string" || !/^[a-zA-Z0-9._-]{1,80}$/.test(c2.version) || !c2.viewport || Object.keys(c2.viewport).sort().join() !== "height,width" || ![c2.viewport.width, c2.viewport.height].every((n) => Number.isInteger(n) && n > 0 && n <= 1e4) || !(c2.error_code === "" || REPORT_ERRORS.includes(c2.error_code))) return null;
+  return JSON.parse(JSON.stringify(value));
+}
+function createReportSender({ api, makeID = () => crypto.randomUUID(), remember = () => {
+} }) {
+  let pending = null, generation = 0, retryAllowed = false;
+  async function deliver() {
+    const payload = pending, g = generation;
+    retryAllowed = false;
+    const result = await api("/api/bug-reports", { method: "POST", body: payload });
+    if (g === generation && pending === payload) {
+      pending = null;
+      remember(null);
+    }
+    return result.report;
+  }
+  return { get pending() {
+    return pending;
+  }, reset() {
+    generation++;
+    pending = null;
+    retryAllowed = false;
+  }, hydrate(value) {
+    const restored = restorePendingReport(value);
+    if (!restored) return false;
+    generation++;
+    pending = restored;
+    retryAllowed = false;
+    return true;
+  }, async send(draft) {
+    if (pending) throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0443 \u043F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0435\u0433\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F.");
+    pending = restorePendingReport({ ...draft, client_id: makeID() });
+    if (!pending) throw Error("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u043E\u0448\u0438\u0431\u043A\u0438.");
+    remember(pending);
+    return deliver();
+  }, async retry() {
+    if (!pending) throw Error("\u0427\u0435\u0440\u043D\u043E\u0432\u0438\u043A \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D.");
+    if (!retryAllowed) throw Error("\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0443 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F.");
+    return deliver();
+  }, async check(id = pending?.client_id) {
+    if (!id) return null;
+    const g = generation, payload = pending, result = await api("/api/bug-reports?client_id=" + encodeURIComponent(id));
+    if (g === generation && pending === payload) {
+      if (result.report) {
+        pending = null;
+        remember(null);
+      } else if (payload?.client_id === id) retryAllowed = true;
+    }
+    return result.report;
+  } };
+}
+function setupBugReports({ $: $3, el: el2, api, epoch, getSession, getRoute, storage = globalThis.sessionStorage, root = globalThis.document, viewport = () => ({ width: innerWidth, height: innerHeight }) }) {
+  const routeLabel = (route) => ({ chat: "\u0427\u0430\u0442", today: "\u041C\u043E\u0451 \u043C\u0435\u043D\u044E", diary: "\u0414\u043D\u0435\u0432\u043D\u0438\u043A", recipes: "\u0420\u0435\u0446\u0435\u043F\u0442\u044B", products: "\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B", more: "\u041F\u0440\u043E\u0444\u0438\u043B\u044C", settings: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438", admin: "\u0423\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0434\u043E\u0441\u0442\u0443\u043F\u043E\u043C", developer: "\u0420\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u043A\u0430", memory: "\u041F\u0430\u043C\u044F\u0442\u044C", sources: "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0438", targets: "\u041F\u043B\u0430\u043D \u043F\u0438\u0442\u0430\u043D\u0438\u044F", knowledge: "\u0411\u0430\u0437\u0430 \u0437\u043D\u0430\u043D\u0438\u0439", setup: "\u0417\u043D\u0430\u043A\u043E\u043C\u0441\u0442\u0432\u043E", "setup-consent": "\u0421\u043E\u0433\u043B\u0430\u0441\u0438\u044F", "setup-about": "\u041E \u0432\u0430\u0441", "setup-restrictions": "\u041E\u0433\u0440\u0430\u043D\u0438\u0447\u0435\u043D\u0438\u044F", "setup-targets": "\u041E\u0440\u0438\u0435\u043D\u0442\u0438\u0440\u044B" })[route] || "\u042D\u043A\u0440\u0430\u043D \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F";
+  const dialog = $3("bug-dialog"), description = $3("bug-description"), block = $3("bug-block"), status = $3("bug-status"), review = $3("bug-review"), form = $3("bug-form"), list = $3("bug-list");
+  let generation = 0, lastError = "", context = null, reviewed = null, ownBefore = null, adminBefore = null, highlight = null, picking = false, pendingKey = "", pendingID = "";
+  const read = (key) => {
+    try {
+      return storage?.getItem(key) || "";
+    } catch {
+      return "";
+    }
+  }, remember = (payload) => {
+    pendingID = payload?.client_id || "";
+    try {
+      if (pendingKey) {
+        if (payload) storage?.setItem(pendingKey, JSON.stringify(payload));
+        else storage?.removeItem(pendingKey);
+      }
+    } catch {
+    }
+  };
+  const sender = createReportSender({ api, remember });
+  const current = (g, e) => g === generation && e === epoch();
+  function message(text) {
+    status.textContent = text;
+  }
+  function cleanHighlight() {
+    highlight?.classList.remove("bug-highlight");
+    highlight = null;
+    picking = false;
+    $3("bug-selection").hidden = true;
+    root.removeEventListener("click", pick, true);
+    root.removeEventListener("keydown", escapePick, true);
+  }
+  function openModal() {
+    if (!dialog.open) dialog.showModal();
+  }
+  function visible(node) {
+    return node && !node.closest("[hidden]") && (!node.closest("dialog") || node.closest("dialog").open);
+  }
+  function choices() {
+    block.replaceChildren();
+    for (const [id, item] of Object.entries(REPORT_BLOCKS)) {
+      if (id === "page" || visible(root.querySelector(item.selector))) {
+        const option = el2("option", "", item.label);
+        option.value = id;
+        block.append(option);
+      }
+    }
+  }
+  function frozen(on) {
+    $3("bug-retry").hidden = true;
+    description.disabled = on;
+    block.disabled = on;
+    $3("bug-technical").disabled = on;
+    $3("bug-prepare").hidden = on;
+    $3("bug-send").hidden = true;
+    $3("bug-edit").hidden = true;
+    $3("bug-pick").disabled = on;
+    $3("bug-show").disabled = on;
+    $3("bug-check").hidden = !on;
+  }
+  function displayReceipt(report) {
+    $3("bug-inbox").open = true;
+    remember(null);
+    reviewed = null;
+    review.hidden = true;
+    frozen(false);
+    description.value = "";
+    $3("bug-technical").checked = false;
+    message("\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 " + reportNumber(report.number) + " \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u043E. \u0421\u0442\u0430\u0442\u0443\u0441: " + REPORT_STATUSES[report.status] + ".");
+    void load(false, false);
+  }
+  async function action(fn) {
+    const g = generation, e = epoch();
+    try {
+      const value = await fn();
+      if (!current(g, e)) return;
+      return value;
+    } catch (error) {
+      if (current(g, e)) message(error.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435.");
+      return null;
+    }
+  }
+  function renderReview(payload) {
+    const c2 = payload.context, exact = $3("bug-exact");
+    exact.replaceChildren();
+    for (const [label, value] of [["\u0411\u043B\u043E\u043A", REPORT_BLOCKS[payload.block_id].label], ["\u0427\u0442\u043E \u043F\u0440\u043E\u0438\u0437\u043E\u0448\u043B\u043E", payload.description], ["\u0420\u0430\u0437\u0434\u0435\u043B", routeLabel(c2.route)], ["\u0412\u0435\u0440\u0441\u0438\u044F", c2.version === "unknown" ? "\u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430" : c2.version], ["\u0420\u0430\u0437\u043C\u0435\u0440 \u043E\u043A\u043D\u0430", c2.viewport.width + " \xD7 " + c2.viewport.height], ...c2.error_code ? [["\u041A\u043E\u0434 \u043E\u0448\u0438\u0431\u043A\u0438", c2.error_code]] : []]) {
+      const line = el2("p"), name2 = el2("strong", "", label + ": ");
+      line.append(name2, el2("span", "", value));
+      exact.append(line);
+    }
+    review.hidden = false;
+  }
+  async function open() {
+    if (!getSession()) return;
+    cleanHighlight();
+    choices();
+    pendingKey = "keto_bug_pending_" + getSession().user.email;
+    const stored = read(pendingKey);
+    let restored;
+    try {
+      restored = restorePendingReport(JSON.parse(stored));
+    } catch {
+    }
+    if (!sender.pending && restored) sender.hydrate(restored);
+    pendingID = sender.pending?.client_id || (/^[a-zA-Z0-9_-]{16,80}$/.test(stored) ? stored : "");
+    context = reportContext({ route: getRoute(), version: REPORT_UI_VERSION, ...viewport(), errorCode: lastError });
+    reviewed = null;
+    review.hidden = true;
+    frozen(Boolean(pendingID));
+    if (sender.pending) {
+      const payload = sender.pending;
+      context = payload.context;
+      description.value = payload.description;
+      if (![...block.options].some((option) => option.value === payload.block_id)) {
+        const option = el2("option", "", REPORT_BLOCKS[payload.block_id].label);
+        option.value = payload.block_id;
+        block.append(option);
+      }
+      block.value = payload.block_id;
+      $3("bug-technical").checked = true;
+      renderReview(payload);
+    }
+    $3("bug-admin-controls").hidden = getSession().user.role !== "admin";
+    openModal();
+    message(pendingID ? sender.pending ? "\u041E\u0442\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u043D\u044B\u0439 \u0442\u0435\u043A\u0441\u0442 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D. \u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0443; \u043F\u043E\u0432\u0442\u043E\u0440 \u0432\u043E\u0437\u043C\u043E\u0436\u0435\u043D \u0442\u043E\u043B\u044C\u043A\u043E \u0441 \u0442\u0435\u043C \u0436\u0435 \u043A\u043E\u0434\u043E\u043C \u0438 \u0442\u0435\u043A\u0441\u0442\u043E\u043C." : "\u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u043A\u043E\u0434 \u0441\u0442\u0430\u0440\u043E\u0439 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u0438 \u0431\u0435\u0437 \u0442\u0435\u043A\u0441\u0442\u0430. \u041C\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0443; \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0439 \u0442\u0435\u043A\u0441\u0442 \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C." : "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0431\u043B\u043E\u043A \u0438 \u043E\u043F\u0438\u0448\u0438\u0442\u0435, \u0447\u0442\u043E \u043F\u0440\u043E\u0438\u0437\u043E\u0448\u043B\u043E \u0438 \u0447\u0435\u0433\u043E \u0432\u044B \u043E\u0436\u0438\u0434\u0430\u043B\u0438.");
+    if (pendingID) $3("bug-check").focus();
+    else description.focus();
+    await load(false, false);
+  }
+  function close() {
+    cleanHighlight();
+    if (dialog.open) dialog.close();
+    $3("bug-open").focus();
+  }
+  function showBlock() {
+    cleanHighlight();
+    const item = REPORT_BLOCKS[block.value];
+    highlight = item.selector ? root.querySelector(item.selector) : root.querySelector('[data-page="' + context.route.split("setup-")[0] + '"]:not([hidden])');
+    if (!visible(highlight)) {
+      message("\u042D\u0442\u043E\u0442 \u0431\u043B\u043E\u043A \u0441\u0435\u0439\u0447\u0430\u0441 \u043D\u0435 \u0432\u0438\u0434\u0435\u043D. \u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u043E\u0439 \u0431\u043B\u043E\u043A.");
+      highlight = null;
+      return;
+    }
+    dialog.close();
+    highlight.classList.add("bug-highlight");
+    highlight.scrollIntoView({ block: "center", behavior: "smooth" });
+    $3("bug-selection-text").textContent = "\u0412\u044B\u0431\u0440\u0430\u043D \u0431\u043B\u043E\u043A: " + item.label;
+    $3("bug-selection").hidden = false;
+    $3("bug-selection-done").focus();
+  }
+  function pick(event) {
+    if (event.target.closest("#bug-selection")) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    let match = "page";
+    for (const [id, item] of Object.entries(REPORT_BLOCKS)) {
+      if (item.selector && event.target.closest(item.selector) && visible(event.target.closest(item.selector))) match = id;
+    }
+    block.value = match;
+    cleanHighlight();
+    openModal();
+    showBlock();
+  }
+  function escapePick(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cleanHighlight();
+      openModal();
+    }
+  }
+  $3("bug-open").onclick = () => void action(open);
+  $3("bug-close").onclick = close;
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    close();
+  });
+  $3("bug-show").onclick = showBlock;
+  $3("bug-selection-done").onclick = () => {
+    cleanHighlight();
+    openModal();
+    description.focus();
+  };
+  $3("bug-pick").onclick = () => {
+    cleanHighlight();
+    dialog.close();
+    picking = true;
+    $3("bug-selection-text").textContent = "\u041A\u043E\u0441\u043D\u0438\u0442\u0435\u0441\u044C \u0431\u043B\u043E\u043A\u0430 \u0441 \u043E\u0448\u0438\u0431\u043A\u043E\u0439. \u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u0432 \u043D\u0451\u043C \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u0441\u044F.";
+    $3("bug-selection").hidden = false;
+    root.addEventListener("click", pick, true);
+    root.addEventListener("keydown", escapePick, true);
+  };
+  form.onsubmit = (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    reviewed = { description: description.value.trim(), block_id: block.value, context, technical_only: $3("bug-technical").checked };
+    renderReview(reviewed);
+    $3("bug-pick").disabled = true;
+    $3("bug-show").disabled = true;
+    $3("bug-send").hidden = false;
+    $3("bug-edit").hidden = false;
+    $3("bug-prepare").hidden = true;
+    description.disabled = true;
+    block.disabled = true;
+    $3("bug-technical").disabled = true;
+    message("\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0442\u0435\u043A\u0441\u0442 \u0438 \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0435 \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F. \u041E\u0442\u043F\u0440\u0430\u0432\u043A\u0430 \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442 \u0438\u0445 \u0432 \u0437\u0430\u043A\u0440\u044B\u0442\u043E\u043C \u0436\u0443\u0440\u043D\u0430\u043B\u0435 \u043E\u0448\u0438\u0431\u043E\u043A.");
+    $3("bug-send").focus();
+  };
+  $3("bug-edit").onclick = () => {
+    reviewed = null;
+    review.hidden = true;
+    frozen(false);
+    description.focus();
+  };
+  let sending = false;
+  async function send2(retry = false) {
+    if (sending) return;
+    const g = generation, e = epoch();
+    sending = true;
+    $3("bug-send").disabled = true;
+    $3("bug-retry").hidden = true;
+    frozen(true);
+    try {
+      const report = await (retry ? sender.retry() : sender.send(reviewed));
+      if (current(g, e)) displayReceipt(report);
+    } catch (error) {
+      if (current(g, e)) message("\u0414\u043E\u0441\u0442\u0430\u0432\u043A\u0430 \u043D\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0430. \u041E\u0442\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u043D\u044B\u0439 \u0442\u0435\u043A\u0441\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D; \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \xAB\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0443\xBB. \u0410\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u043F\u043E\u0432\u0442\u043E\u0440\u0430 \u043D\u0435\u0442.");
+    } finally {
+      if (current(g, e)) {
+        sending = false;
+        $3("bug-send").disabled = false;
+      }
+    }
+  }
+  $3("bug-send").onclick = () => void send2();
+  $3("bug-retry").onclick = () => void send2(true);
+  $3("bug-check").onclick = () => void action(async () => {
+    const g = generation, e = epoch(), report = await sender.check(pendingID);
+    if (!current(g, e)) return;
+    if (report) {
+      displayReceipt(report);
+      return;
+    }
+    message(sender.pending ? "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041C\u043E\u0436\u043D\u043E \u0435\u0449\u0451 \u0440\u0430\u0437 \u043E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0442\u043E\u0442 \u0436\u0435 \u0442\u0435\u043A\u0441\u0442 \u0441 \u0442\u0435\u043C \u0436\u0435 \u043A\u043E\u0434\u043E\u043C." : "\u041F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E. \u041E\u0442 \u0441\u0442\u0430\u0440\u043E\u0439 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u043E\u0434: \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0439 \u0442\u0435\u043A\u0441\u0442 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u043B\u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u043D\u0435\u043B\u044C\u0437\u044F. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0436\u0443\u0440\u043D\u0430\u043B \u0441 \u0430\u0434\u043C\u0438\u043D\u0438\u0441\u0442\u0440\u0430\u0442\u043E\u0440\u043E\u043C.");
+    $3("bug-retry").hidden = !sender.pending;
+  });
+  function row(report, isAdmin) {
+    const card = el2("article", "panel bug-report");
+    card.append(el2("h3", "", reportNumber(report.number) + " \xB7 " + REPORT_STATUSES[report.status]), el2("p", "", REPORT_BLOCKS[report.block_id]?.label || "\u042D\u043A\u0440\u0430\u043D"), el2("p", "bug-report-description", report.description), el2("p", "muted", "\u0420\u0430\u0437\u0434\u0435\u043B: " + routeLabel(report.context.route) + " \xB7 \u0432\u0435\u0440\u0441\u0438\u044F " + report.context.version + " \xB7 " + report.context.viewport.width + " \xD7 " + report.context.viewport.height));
+    if (report.fix_version || report.evidence) card.append(el2("p", "", "\u0418\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435: " + report.fix_version + "\n\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430: " + report.evidence));
+    if (report.issue_url) {
+      const a2 = el2("a", "", "\u0417\u0430\u0434\u0430\u0447\u0430 \u0432 Linear");
+      a2.href = report.issue_url;
+      a2.target = "_blank";
+      a2.rel = "noopener noreferrer";
+      card.append(a2);
+    }
+    const history2 = el2("details"), summary = el2("summary", "", "\u0418\u0441\u0442\u043E\u0440\u0438\u044F \u0441\u0442\u0430\u0442\u0443\u0441\u043E\u0432");
+    history2.append(summary);
+    for (const event of report.history) history2.append(el2("p", "muted", new Date(event.at * 1e3).toLocaleString("ru") + " \xB7 " + REPORT_STATUSES[event.status] + " \xB7 " + (event.actor === "admin" ? "\u0430\u0434\u043C\u0438\u043D\u0438\u0441\u0442\u0440\u0430\u0442\u043E\u0440" : "\u0430\u0432\u0442\u043E\u0440 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F")));
+    card.append(history2);
+    const update = (path, body) => void action(async () => {
+      await api(path, { method: "POST", body: { number: report.number, revision: report.revision, ...body } });
+      await load(isAdmin, false);
+    });
+    if (!isAdmin && ["ready_to_verify", "closed"].includes(report.status)) {
+      if (report.status === "ready_to_verify") {
+        const yes = el2("button", "", "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u043B: \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u043E");
+        yes.onclick = () => update("/api/bug-reports/verify", { resolved: true });
+        card.append(yes);
+      }
+      const no = el2("button", "", "\u041E\u0448\u0438\u0431\u043A\u0430 \u043E\u0441\u0442\u0430\u043B\u0430\u0441\u044C");
+      no.onclick = () => update("/api/bug-reports/verify", { resolved: false });
+      card.append(no);
+    }
+    if (isAdmin && report.status !== "closed") {
+      const editor = el2("form", "bug-triage"), label = (caption, input) => {
+        const l2 = el2("label", "", caption);
+        l2.append(input);
+        editor.append(l2);
+      }, select = el2("select");
+      for (const id of ["new", "in_progress", "ready_to_verify"]) {
+        const o2 = el2("option", "", REPORT_STATUSES[id]);
+        o2.value = id;
+        select.append(o2);
+      }
+      select.value = report.status;
+      label("\u0421\u0442\u0430\u0442\u0443\u0441", select);
+      const fix = el2("input");
+      fix.value = report.fix_version;
+      fix.maxLength = 100;
+      label("\u0412\u0435\u0440\u0441\u0438\u044F \u0441 \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435\u043C", fix);
+      const evidence = el2("textarea");
+      evidence.value = report.evidence;
+      evidence.maxLength = 2e3;
+      label("\u0427\u0442\u043E \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u043E \u0438 \u043A\u0430\u043A \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E", evidence);
+      const issue = el2("input");
+      issue.type = "url";
+      issue.value = report.issue_url;
+      issue.maxLength = 300;
+      issue.placeholder = "https://linear.app/...";
+      label("\u0421\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u044E\u0449\u0443\u044E \u0437\u0430\u0434\u0430\u0447\u0443 Linear (\u043D\u0435\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E)", issue);
+      const save = el2("button", "", "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0440\u0430\u0437\u0431\u043E\u0440");
+      save.type = "submit";
+      editor.append(save);
+      editor.onsubmit = (e) => {
+        e.preventDefault();
+        if (select.value === "ready_to_verify" && (!fix.value.trim() || !evidence.value.trim())) {
+          message("\u0414\u043B\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 \u0443\u043A\u0430\u0436\u0438\u0442\u0435 \u0432\u0435\u0440\u0441\u0438\u044E \u0438 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F.");
+          return;
+        }
+        update("/api/admin/bug-reports/update", { status: select.value, fix_version: fix.value.trim(), evidence: evidence.value.trim(), issue_url: issue.value.trim() });
+      };
+      card.append(editor);
+    }
+    return card;
+  }
+  let listAdmin = false, listBusy = false;
+  async function load(admin2 = false, more = false) {
+    if (listBusy) return;
+    listBusy = true;
+    const g = generation, e = epoch();
+    try {
+      const before = more ? admin2 ? adminBefore : ownBefore : null, result = await api((admin2 ? "/api/admin/bug-reports" : "/api/bug-reports") + (before ? "?before=" + before : ""));
+      if (!current(g, e)) return;
+      listAdmin = admin2;
+      if (!more) list.replaceChildren();
+      for (const report of result.reports) list.append(row(report, admin2));
+      if (!more && !result.reports.length) list.append(el2("p", "", "\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442."));
+      if (admin2) adminBefore = result.next_before;
+      else ownBefore = result.next_before;
+      $3("bug-more").hidden = !result.next_before;
+      $3("bug-list-heading").textContent = admin2 ? "\u0416\u0443\u0440\u043D\u0430\u043B \u043E\u0448\u0438\u0431\u043E\u043A \u0441\u0435\u043C\u044C\u0438" : "\u041C\u043E\u0438 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F";
+    } finally {
+      if (current(g, e)) listBusy = false;
+    }
+  }
+  $3("bug-own").onclick = () => void action(() => load(false, false));
+  $3("bug-admin").onclick = () => void action(() => load(true, false));
+  $3("bug-more").onclick = () => void action(() => load(listAdmin, true));
+  return { reset() {
+    generation++;
+    sending = false;
+    listBusy = false;
+    cleanHighlight();
+    sender.reset();
+    pendingID = "";
+    pendingKey = "";
+    reviewed = null;
+    context = null;
+    $3("bug-retry").hidden = true;
+    description.value = "";
+    $3("bug-technical").checked = false;
+    list.replaceChildren();
+    review.hidden = true;
+    if (dialog.open) dialog.close();
+    lastError = "";
+  }, leave() {
+    cleanHighlight();
+    if (dialog.open) dialog.close();
+  }, recordError(code) {
+    lastError = code;
+  } };
+}
+
 // cloudflare-saas/public/food-picker.js
 function createFoodPicker({ root, input, el: el2, call: call2, getState, accept: accept2, run: run2, epoch, foodState: foodState2, onSelect, selectionMessage, allergens = [], debounce = 220 }) {
   let version2 = 0, detailVersion = 0, timer = null, query = "", foods = [], page = 0, cursor = null, sourceBusy = false, pending = null;
@@ -11541,6 +11972,7 @@ async function run(fn) {
   try {
     return await fn();
   } catch (e) {
+    bugReports.recordError(e.code);
     if (["STALE_SESSION", "CANCELLED", "SIGN_IN"].includes(e.code) || e.name === "AbortError") return null;
     notify(e.message || "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435.");
     return null;
@@ -11602,6 +12034,7 @@ function renderTranquilSummary(next) {
   host.hidden = false;
 }
 function clearScreen() {
+  bugReports.reset();
   document.querySelectorAll(".catalog-saved-receipt").forEach((node) => node.remove());
   dialogs.reset();
   chatActions.reset();
@@ -11694,6 +12127,7 @@ function setRecipeReadLoading(loading) {
   $2("kitchen-studio").setAttribute("aria-busy", String(loading));
 }
 function renderView(next, { reason = "user", origin = "more", depth = 0 } = {}) {
+  bugReports.leave();
   presentationEpoch++;
   if (next === "developer" && (!session || session.user.role !== "admin" || image || attachedSource || recipeSource)) {
     notify("\u0420\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u043A\u0430 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430 \u0432\u043B\u0430\u0434\u0435\u043B\u044C\u0446\u0443 \u0431\u0435\u0437 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u043B\u0451\u043D\u043D\u044B\u0445 \u0444\u043E\u0442\u043E \u0438\u043B\u0438 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u043E\u0432.");
@@ -12543,14 +12977,14 @@ $2("delete-data").onclick = () => run(async () => {
 });
 $2("logout").onclick = () => run(() => authSession.logout());
 $2("diary-date").value = $2("menu-start").value = localDate();
-async function cfApi(path, { method = "GET", body } = {}) {
+async function cfApi(path, { method = "GET", body, signal } = {}) {
   const epoch = screenEpoch;
-  const r = await fetch(path, { method, headers: { ...body ? { "Content-Type": "application/json" } : {}, ...session && method !== "GET" ? { "X-CSRF-Token": session.csrf } : {} }, body: body ? JSON.stringify(body) : void 0 });
+  const r = await fetch(path, { method, signal, headers: { ...body ? { "Content-Type": "application/json" } : {}, ...session && method !== "GET" ? { "X-CSRF-Token": session.csrf } : {} }, body: body ? JSON.stringify(body) : void 0 });
   const d2 = await r.json();
   if (epoch !== screenEpoch) throw Object.assign(Error("\u0421\u0435\u0430\u043D\u0441 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u044D\u043A\u0440\u0430\u043D."), { code: "STALE_SESSION" });
   if (!r.ok) {
     if (r.status === 401 && d2.error === "SIGN_IN") authSession.expired();
-    throw Object.assign(Error({ SETUP_REQUIRED: "\u0412\u0445\u043E\u0434 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", INVITATION_REQUIRED: "\u041D\u0443\u0436\u043D\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0449\u0435\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u043F\u043E\u0447\u0442\u044B.", INVITE_NOT_AVAILABLE: "\u041F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E.", CONSENT_REQUIRED: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0440\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435.", IMAGE_PROCESSING_UNAVAILABLE: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430.", TOO_LARGE: "\u0424\u0430\u0439\u043B \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0439.", DEVELOPER_NOT_CONFIGURED: "\u0420\u0430\u043D\u043D\u0435\u0440 \u0438\u043B\u0438 \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0439 snapshot \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", DEVELOPER_QUOTA_OR_REPLAY: "\u041B\u0438\u043C\u0438\u0442 \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0439 \u0438\u0441\u0447\u0435\u0440\u043F\u0430\u043D \u0438\u043B\u0438 \u0437\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0441\u044F.", DEVELOPER_GENERATION_OR_TEST_FAILED: "\u0413\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F \u0438\u043B\u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043D\u0435 \u043F\u0440\u043E\u0448\u043B\u0430. \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u044B \u0442\u043E\u043B\u044C\u043A\u043E \u0441\u0442\u0438\u043B\u0438, \u0441\u043F\u0440\u0430\u0432\u043A\u0430 \u0438 UI-\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435; \u0441\u0435\u0440\u0432\u0435\u0440\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u0437\u0430\u0434\u0430\u0447\u0438.", DEVELOPER_BUSY_OR_DISABLED: "\u041F\u0438\u043B\u043E\u0442 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D \u0438\u043B\u0438 \u0434\u0440\u0443\u0433\u0430\u044F \u0437\u0430\u0434\u0430\u0447\u0430 \u0435\u0449\u0451 \u043E\u0442\u043A\u0440\u044B\u0442\u0430.", DEVELOPER_CANCELLED_OR_EXPIRED: "\u0417\u0430\u0434\u0430\u0447\u0430 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430 \u0438\u043B\u0438 \u0441\u0440\u043E\u043A \u0438\u0441\u0442\u0451\u043A.", IMAGE_LINK_UNSUPPORTED: "\u042D\u0442\u043E\u0442 \u0430\u0434\u0440\u0435\u0441 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0441\u044F. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B, \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442 \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B.", IMAGE_LINK_PRIVATE_QUERY: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0441\u043E\u0434\u0435\u0440\u0436\u0438\u0442 \u043D\u0435\u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043C\u044B\u0435 \u043F\u0430\u0440\u0430\u043C\u0435\u0442\u0440\u044B. \u0421\u043A\u0430\u0447\u0430\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0438 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B.", IMAGE_UPLOAD_REQUIRED: "\u0414\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0440\u0430\u0437\u043C\u0435\u0440\u0430 \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0438 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B: \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0441\u043E\u0436\u043C\u0451\u0442 \u0435\u0433\u043E \u043F\u0435\u0440\u0435\u0434 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u043E\u0439.", IMAGE_NOT_DIRECT: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0432\u0435\u0434\u0451\u0442 \u043D\u0435 \u043D\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B \u0438\u043B\u0438 \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442.", IMAGE_DNS_REJECTED: "\u0410\u0434\u0440\u0435\u0441 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u0440\u043E\u0448\u0451\u043B \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B.", IMAGE_TOO_LARGE: "\u0424\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 4 \u041C\u0411. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B \u0434\u043B\u044F \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0441\u0436\u0430\u0442\u0438\u044F." }[d2.error] || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E."), { status: r.status, code: d2.error });
+    throw Object.assign(Error({ SETUP_REQUIRED: "\u0412\u0445\u043E\u0434 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", INVITATION_REQUIRED: "\u041D\u0443\u0436\u043D\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0449\u0435\u0435 \u043F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u0434\u043B\u044F \u044D\u0442\u043E\u0439 \u043F\u043E\u0447\u0442\u044B.", INVITE_NOT_AVAILABLE: "\u041F\u0440\u0438\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u0435 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E.", CONSENT_REQUIRED: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0440\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435.", IMAGE_PROCESSING_UNAVAILABLE: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430.", TOO_LARGE: "\u0424\u0430\u0439\u043B \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0431\u043E\u043B\u044C\u0448\u043E\u0439.", DEVELOPER_NOT_CONFIGURED: "\u0420\u0430\u043D\u043D\u0435\u0440 \u0438\u043B\u0438 \u0438\u0441\u0445\u043E\u0434\u043D\u044B\u0439 snapshot \u043D\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D.", DEVELOPER_QUOTA_OR_REPLAY: "\u041B\u0438\u043C\u0438\u0442 \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0439 \u0438\u0441\u0447\u0435\u0440\u043F\u0430\u043D \u0438\u043B\u0438 \u0437\u0430\u043F\u0440\u043E\u0441 \u0443\u0436\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0441\u044F.", DEVELOPER_GENERATION_OR_TEST_FAILED: "\u0413\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F \u0438\u043B\u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043D\u0435 \u043F\u0440\u043E\u0448\u043B\u0430. \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u044B \u0442\u043E\u043B\u044C\u043A\u043E \u0441\u0442\u0438\u043B\u0438, \u0441\u043F\u0440\u0430\u0432\u043A\u0430 \u0438 UI-\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435; \u0441\u0435\u0440\u0432\u0435\u0440\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0442\u0440\u0435\u0431\u0443\u044E\u0442 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u0437\u0430\u0434\u0430\u0447\u0438.", DEVELOPER_BUSY_OR_DISABLED: "\u041F\u0438\u043B\u043E\u0442 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D \u0438\u043B\u0438 \u0434\u0440\u0443\u0433\u0430\u044F \u0437\u0430\u0434\u0430\u0447\u0430 \u0435\u0449\u0451 \u043E\u0442\u043A\u0440\u044B\u0442\u0430.", DEVELOPER_CANCELLED_OR_EXPIRED: "\u0417\u0430\u0434\u0430\u0447\u0430 \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430 \u0438\u043B\u0438 \u0441\u0440\u043E\u043A \u0438\u0441\u0442\u0451\u043A.", IMAGE_LINK_UNSUPPORTED: "\u042D\u0442\u043E\u0442 \u0430\u0434\u0440\u0435\u0441 \u043D\u0435 \u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0441\u044F. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B, \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442 \u0438\u043B\u0438 \u0442\u0435\u043A\u0441\u0442 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B.", IMAGE_LINK_PRIVATE_QUERY: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0441\u043E\u0434\u0435\u0440\u0436\u0438\u0442 \u043D\u0435\u043F\u043E\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043C\u044B\u0435 \u043F\u0430\u0440\u0430\u043C\u0435\u0442\u0440\u044B. \u0421\u043A\u0430\u0447\u0430\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0438 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B.", IMAGE_UPLOAD_REQUIRED: "\u0414\u043B\u044F \u044D\u0442\u043E\u0433\u043E \u0440\u0430\u0437\u043C\u0435\u0440\u0430 \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435 \u0444\u043E\u0442\u043E \u0438 \u043F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B: \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0441\u043E\u0436\u043C\u0451\u0442 \u0435\u0433\u043E \u043F\u0435\u0440\u0435\u0434 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u043E\u0439.", IMAGE_NOT_DIRECT: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0432\u0435\u0434\u0451\u0442 \u043D\u0435 \u043D\u0430 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B \u0438\u043B\u0438 \u0441\u043A\u0440\u0438\u043D\u0448\u043E\u0442.", IMAGE_DNS_REJECTED: "\u0410\u0434\u0440\u0435\u0441 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u0440\u043E\u0448\u0451\u043B \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B.", REPORT_CHANGED: "\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u0443\u0436\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u043E\u0441\u044C. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0441\u043F\u0438\u0441\u043E\u043A.", REPORT_TRANSITION: "\u042D\u0442\u043E\u0442 \u0441\u0442\u0430\u0442\u0443\u0441 \u0443\u0436\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0441\u044F. \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0441\u043F\u0438\u0441\u043E\u043A.", INVALID_REPORT: "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u043E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0438 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u044B\u0439 \u0431\u043B\u043E\u043A.", REPORT_LIMIT: "\u0421\u0435\u0433\u043E\u0434\u043D\u044F \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u043E \u043C\u043D\u043E\u0433\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u043E\u0437\u0436\u0435.", INVALID_ISSUE_URL: "\u041D\u0443\u0436\u043D\u0430 \u0441\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u044E\u0449\u0443\u044E \u0437\u0430\u0434\u0430\u0447\u0443 Linear.", REPORT_ID_CONFLICT: "\u042D\u0442\u043E\u0442 \u043A\u043E\u0434 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u0438 \u0443\u0436\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0443.", IMAGE_TOO_LARGE: "\u0424\u043E\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435 4 \u041C\u0411. \u041F\u0440\u0438\u043A\u0440\u0435\u043F\u0438\u0442\u0435 \u0444\u0430\u0439\u043B \u0434\u043B\u044F \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0441\u0436\u0430\u0442\u0438\u044F." }[d2.error] || "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E."), { status: r.status, code: d2.error });
   }
   return d2;
 }
@@ -12714,6 +13148,15 @@ function start() {
   $2("deletion-code").value = transient.getItem("keto_deletion_receipt") || "";
   return authSession.start();
 }
+var bugReports = setupBugReports({ $: $2, el, api: async (path, options = {}) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2e4);
+  try {
+    return await cfApi(path, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}, epoch: () => screenEpoch, getSession: () => session, getRoute: () => renderedRoute, storage: transient });
 var mobile = setupMobile({ $: $2, el, call, accept, getState: () => state, setView, run, notify, openDialog: (kind, focus) => dialogs.open(kind, focus), closeDialog: () => dialogs.close(), epoch: () => screenEpoch, setImage: (value) => image = value, getImage: () => image, loadImageLink: async (url) => (await cfApi("/api/media/image-link", { method: "POST", body: { url, remote_request_acknowledged: true } })).image_data_url });
 var developer = setupDeveloper({ $: $2, el, api: cfApi, preview: async (path) => {
   const stamp = screenEpoch, r = await fetch(path, { credentials: "same-origin" });
@@ -12802,6 +13245,7 @@ var authSession = createAuthSession({
     });
   },
   identityChanged: (next) => {
+    $2("bug-open").hidden = !next || next.user.status !== "active";
     if (!next) {
       state = null;
       session = null;

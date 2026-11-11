@@ -97,11 +97,11 @@
   ],
   "schema": "keto-ui-contract-v1",
   "source_files": {
-    "cloudflare-saas/public/app.css": "7ad2e10ab6437a84823ab10156548cb24069800d07a3bd250abf11a7155986cb",
-    "cloudflare-saas/public/index.html": "09e5c7d443c26787255a596df6e57e19970b7d135996721b40194063b299c0b8",
+    "cloudflare-saas/public/app.css": "ff52eb1368956ff9312fb1ff0c6d9f22d755e59c77d56075269b395eb34edc44",
+    "cloudflare-saas/public/index.html": "28bbf9be149553bee03d371db074ef27195c74a3277c23fa78840251ef026551",
     "cloudflare-saas/public/routes.js": "c1248559c4ebb28100be89b4a722e0a98aafb0a60543994868a09c4c2524396c",
     "cloudflare-saas/src/compute.mjs": "642ffef201362b66cdc5f25736e9900e9ac28220536309e419e8e8a1514a282e",
-    "cloudflare-saas/src/worker.mjs": "7874a71b4a3b9f578015f0f4212f5645cc1ef0e3216b044890c10c2cf756cc54",
+    "cloudflare-saas/src/worker.mjs": "2dc1a809c961f367d5235e915ad6e701bc1d7dbef4faa64927187f6cc8231f04",
     "service/app.py": "50844d11f147f6ec1438dc932080044d0eb1d8a0be10ce02ae37e9b98041b537"
   },
   "static_elements": [
@@ -130,6 +130,11 @@
       "data-testid": "nav-back",
       "id": "nav-back",
       "tag": "button"
+    },
+    {
+      "id": "bug-open",
+      "tag": "button",
+      "type": "button"
     },
     {
       "id": "connection",
@@ -1380,6 +1385,128 @@
     {
       "id": "version",
       "tag": "span"
+    },
+    {
+      "id": "bug-selection",
+      "tag": "aside"
+    },
+    {
+      "id": "bug-selection-text",
+      "tag": "p"
+    },
+    {
+      "id": "bug-selection-done",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-dialog",
+      "tag": "dialog"
+    },
+    {
+      "id": "bug-heading",
+      "tag": "h2"
+    },
+    {
+      "aria-label": "Закрыть сообщение об ошибке",
+      "id": "bug-close",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-form",
+      "tag": "form"
+    },
+    {
+      "id": "bug-block",
+      "tag": "select"
+    },
+    {
+      "id": "bug-pick",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-show",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-description",
+      "tag": "textarea"
+    },
+    {
+      "id": "bug-technical",
+      "tag": "input",
+      "type": "checkbox"
+    },
+    {
+      "id": "bug-prepare",
+      "tag": "button",
+      "type": "submit"
+    },
+    {
+      "id": "bug-review",
+      "tag": "section"
+    },
+    {
+      "id": "bug-exact",
+      "tag": "div"
+    },
+    {
+      "id": "bug-send",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-edit",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-status",
+      "tag": "p"
+    },
+    {
+      "id": "bug-check",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-retry",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-inbox",
+      "tag": "details"
+    },
+    {
+      "id": "bug-own",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-admin-controls",
+      "tag": "span"
+    },
+    {
+      "id": "bug-admin",
+      "tag": "button",
+      "type": "button"
+    },
+    {
+      "id": "bug-list-heading",
+      "tag": "h3"
+    },
+    {
+      "id": "bug-list",
+      "tag": "div"
+    },
+    {
+      "id": "bug-more",
+      "tag": "button",
+      "type": "button"
     },
     {
       "id": "proposal-dialog",

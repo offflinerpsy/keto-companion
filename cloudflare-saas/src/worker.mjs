@@ -1,3 +1,4 @@
+import {handleBugReports} from './bug-reports.mjs';
 import {handleShopLookup,handleShopSearch} from './shop-lookup.mjs';
 import {handleDeveloper,expireDeveloper} from './developer.mjs';
 import {handleImageLink} from './image-link.mjs';
@@ -125,6 +126,7 @@ async function handle(req,env){
  if(path==='/auth/firebase/complete'&&method==='POST'&&env.AUTH_PROVIDER==='firebase_google')return firebaseComplete(req,env);
  if(path==='/auth/google/start'&&method==='POST'&&env.AUTH_PROVIDER==='direct_google')return oauthStart(req,env);
  if(path==='/auth/google/callback'&&method==='GET'&&env.AUTH_PROVIDER==='direct_google')return oauthCallback(req,env);
+ if(path==='/api/bug-reports'||path==='/api/bug-reports/verify'||path==='/api/admin/bug-reports'||path==='/api/admin/bug-reports/update')return handleBugReports(req,env,{auth,bodyJson,json,fail,dbfirst,dbrun,dball,sha});
  if(path.startsWith('/api/developer'))return handleDeveloper(req,env,{auth,bodyJson,json,fail,Fail,dbfirst,dbrun,sha});
  if(path==='/api/shop/search'&&method==='POST')return handleShopSearch(req,env,{auth,bodyJson,json,fail,dbfirst,dbrun,sha,readBounded});
  if(path==='/api/shop/barcode'&&method==='POST')return handleShopLookup(req,env,{auth,bodyJson,json,fail,dbfirst,dbrun,sha,readBounded});

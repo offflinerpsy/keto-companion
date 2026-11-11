@@ -3,8 +3,23 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-11T10:45:06.322556+00:00",
-  "active_task": null,
+  "updated_at": "2026-11-11T11:54:42.796575+00:00",
+  "active_task": {
+    "id": "AGR-306-C24-BUG-REPORTS",
+    "status": "in_progress",
+    "stage": "source_and_mobile_accepted_release_pending",
+    "writer": "root",
+    "scope": "Contextual private bug report intake, explicit review/status/verification; no automatic Linear or screenshot integration",
+    "acceptance": [
+      "Authenticated own/admin scope",
+      "Safe allowlisted context and review before send",
+      "Stable submission identity and uncertain-send reconciliation",
+      "Mobile UI and real persistence tests",
+      "Required source/cloud gates and exact release verification"
+    ],
+    "source_receipt": "docs/evidence/AGR_306_C24_SOURCE_CHECKS.json",
+    "ui_receipt": "docs/evidence/AGR_306_C24_UI_ACCEPTANCE.json"
+  },
   "last_completed": {
     "id": "AGR-306-C21-C22-RELEASE",
     "linear_issue": "AGR-306",
@@ -39,9 +54,8 @@
     "product_acceptance": "physical_iPhone_17_Pro_pending; real_desktop_google_verified"
   },
   "next_task": {
-    "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
-    "status": "awaiting_owner_observation",
-    "action": "Reload existing phone page and verify own-dish spacing, ingredient selection and search; investigate only a concrete remaining failure."
+    "id": "AGR-306-C24-RELEASE",
+    "action": "Freeze exact source, native acceptance, additive0010 migration, ordinary promotion and live UI check."
   },
   "no_relaunch": {
     "recorded_local_jobs": [

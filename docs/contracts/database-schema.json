@@ -27,6 +27,10 @@
     {
       "path": "cloudflare-saas/migrations/0009_indexes.sql",
       "sha256": "7c9fba6573e60cda411972171531a1c90b7581d09fd403a394a29be1d7ab5e91"
+    },
+    {
+      "path": "cloudflare-saas/migrations/0010_bug_reports.sql",
+      "sha256": "4dfef8a0f3ad60a233fc91e5393aa1748b49cf5ac6d52ed323f3b75c3ecb4c6e"
     }
   ],
   "notice": "Actual SQLite-compatible D1 migration result; no user data or database connection.",
@@ -72,6 +76,125 @@
       ],
       "foreign_keys": [],
       "table": "audit"
+    },
+    {
+      "columns": [
+        {
+          "default": null,
+          "name": "number",
+          "not_null": false,
+          "primary_key_order": 1,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "user_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "client_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "payload_hash",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "description",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "block_id",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "context_json",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "'new'",
+          "name": "status",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "1",
+          "name": "revision",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": "''",
+          "name": "fix_version",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "''",
+          "name": "evidence",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "''",
+          "name": "issue_url",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": "'[]'",
+          "name": "history_json",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "TEXT"
+        },
+        {
+          "default": null,
+          "name": "created_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        },
+        {
+          "default": null,
+          "name": "updated_at",
+          "not_null": true,
+          "primary_key_order": 0,
+          "type": "INTEGER"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "user_id",
+          "on_delete": "CASCADE",
+          "on_update": "NO ACTION",
+          "table": "users",
+          "to": "id"
+        }
+      ],
+      "table": "bug_reports"
     },
     {
       "columns": [
