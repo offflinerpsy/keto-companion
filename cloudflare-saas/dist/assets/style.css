@@ -246,7 +246,7 @@ body:not(:has(#app)) main{font-size:17px;line-height:1.5}
 .kitchen-food-row strong{font-weight:600;font-size:1em}.kitchen-food-row .muted{font-size:.875em;line-height:1.35;font-weight:400}
 #recipe-kitchen-disclosure,#own-dish-root>details.panel{padding:0;margin:0 0 8px;box-shadow:none;border-radius:12px}
 #recipe-kitchen-disclosure>summary,#own-dish-root>details>summary{box-sizing:border-box;min-height:48px;padding:10px 14px;font-size:1em;font-weight:600;line-height:1.4}
-#recipe-kitchen-slot,#own-dish-root>details>form{padding:12px 14px}
+#recipe-kitchen-slot,.own-dish-content{padding:12px 14px;min-width:0}
 [data-testid="recipe-library"]>.inline-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:end}
 [data-testid="recipe-library"]>.inline-form>label{margin:0;min-width:0}#recipe-note{font-size:.875em;line-height:1.4}
 

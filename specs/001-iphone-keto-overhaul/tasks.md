@@ -49,3 +49,6 @@ C9 wrap-up: native new-image build c296da43 and ordinary build 7ce93b5a both suc
 ## C21 — observed loading regression (2026-11-11)
 - [x] T026 [US4] Bound stalled serialized transport, show terminal pantry proposal status, verify workspace recovery without auth reset or automatic mutation replay; focused behavioral regressions.
 - [ ] T027 [US4] Verify actual deployed mobile UI and asset identity; run required exact-source release gates for the minimal repair and retain physical iPhone acceptance separately.
+
+## C22 — own-dish and search clarity (2026-11-11)
+- [x] T028 Fix own-dish body padding and ambiguous cooking instructions, focus selected ingredient mass, make USDA an explicitly supplementary search, and clarify catalog counts. Verify actual mobile pixels and meaningful lookup/selection regressions.

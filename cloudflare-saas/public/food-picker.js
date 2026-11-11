@@ -1,6 +1,6 @@
 // One accessible picker for prepared foods and reviewed reference candidates.
 // Plain buttons keep native keyboard semantics; selecting never records intake.
-export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,foodState,onSelect,allergens=[],debounce=220}){
+export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,foodState,onSelect,selectionMessage,allergens=[],debounce=220}){
  let version=0,detailVersion=0,timer=null,query='',foods=[],page=0,cursor=null,sourceBusy=false,pending=null;
  const status=el('p','food-search-status'),hint=el('div','food-search-hint'),list=el('div','food-result-list'),source=el('section','food-reference'),sourceStatus=el('p','muted'),sourceRows=el('div','food-result-list'),review=el('section','food-source-review');
  status.setAttribute('role','status');status.setAttribute('tabindex','-1');sourceStatus.setAttribute('role','status');list.setAttribute('aria-label','Найденные продукты');source.setAttribute('aria-label','Большой справочник продуктов');review.hidden=source.hidden=true;
@@ -9,11 +9,12 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
  review.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target?.tagName==='INPUT')event.preventDefault();});
  const button=(label,fn,cls='secondary')=>{const b=el('button',cls,label);b.type='button';b.onclick=()=>run(fn);return b};
  const more=button('Ещё продукты из справочника',()=>loadSource(true));more.hidden=true;more.setAttribute('data-icon','plus');
- const catalogueHint=el('p','ux-hint','Основной каталог — подобранные продукты и ваши сохранённые личные продукты.');
- source.append(el('h3','','Большой справочник'),el('p','ux-hint','Широкий справочник состава на 100 г — выберите продукт, чтобы сверить данные и добавить его в личный список.'),sourceStatus,sourceRows,more);root.append(status,catalogueHint,hint,list,source,review);
+ const wide=button('Искать в USDA — дополнительном справочнике',()=>loadSource(false));wide.hidden=true;
+ const catalogueHint=el('p','ux-hint','Основной каталог — отобранные справочные и ваши личные продукты. Для конкретной упаковки в России или Беларуси сверяйте состав с её этикеткой.');
+ source.append(el('h3','','Дополнительный справочник USDA'),el('p','ux-hint','USDA — справочник состава продуктов США. Это дополнительный источник на 100 г, а не данные вашей упаковки в России или Беларуси. Перед добавлением сверяйте продукт, состояние и состав с этикеткой.'),sourceStatus,sourceRows,more);root.append(status,catalogueHint,hint,list,wide,source,review);
  const current=(stamp,screen,q)=>stamp===version&&screen===epoch()&&q===input.value.trim();
- function invalidate(){version++;detailVersion++;clearTimeout(timer);cursor=null;sourceBusy=false;review.hidden=true;review.replaceChildren();list.replaceChildren();hint.replaceChildren();sourceRows.replaceChildren();source.hidden=true;more.hidden=true;status.textContent='';}
- function select(food){invalidate();onSelect(food);input.value=food.name_ru;status.textContent='Выбран продукт: '+food.name_ru;status.focus?.({preventScroll:true});}
+ function invalidate(){version++;detailVersion++;clearTimeout(timer);cursor=null;sourceBusy=false;review.hidden=true;review.replaceChildren();list.replaceChildren();hint.replaceChildren();sourceRows.replaceChildren();source.hidden=true;wide.hidden=true;more.hidden=true;status.textContent='';}
+ function select(food){invalidate();const next=onSelect(food);input.value=food.name_ru;status.textContent=selectionMessage?selectionMessage(food):'Выбран продукт: '+food.name_ru;if(next?.focus){next.focus({preventScroll:true});next.scrollIntoView?.({block:'nearest'});}else status.focus?.({preventScroll:true});}
  function option(name,subtitle,fn){const b=button('',fn,'food-option');b.append(el('strong','',name),el('span','muted',subtitle));b.setAttribute('aria-label',name+' · '+subtitle);return b;}
  function drawFoods(){
   list.replaceChildren();const start=page*8;
@@ -31,13 +32,13 @@ export function createFoodPicker({root,input,el,call,getState,accept,run,epoch,f
    foods=result.foods||[];page=0;drawFoods();status.textContent=foods.length?`В ваших продуктах и базовом каталоге: ${foods.length}. Выберите продукт.`:'В базовом каталоге и ваших продуктах совпадений нет.';
    if(result.search?.label)hint.append(el('span','field-help',result.search.label));
    for(const alternative of result.search?.alternatives||[])hint.append(button(alternative.label,()=>{input.value=alternative.query;return search({reveal:true})},'text-btn'));
-   await loadSource(false);
+   wide.hidden=false;
    if(reveal&&current(stamp,screen,q)&&(!root.getClientRects||root.getClientRects().length)){status.focus?.({preventScroll:true});root.scrollIntoView?.({block:'start',behavior:'instant'});}
   }catch(error){if(current(stamp,screen,q)){status.textContent='Не удалось загрузить продукты. Попробуйте снова.';list.append(button('Повторить поиск',()=>search({reveal:true})));}}
  }
  async function loadSource(append){
   if(sourceBusy||!query||query!==input.value.trim()||(append&&!cursor))return;
-  const stamp=version,screen=epoch(),q=query,next=append?cursor:null;sourceBusy=true;source.hidden=false;more.hidden=true;sourceStatus.textContent='Ищем в большом справочнике…';
+  const stamp=version,screen=epoch(),q=query,next=append?cursor:null;sourceBusy=true;source.hidden=false;wide.hidden=true;more.hidden=true;sourceStatus.textContent='Ищем в дополнительном справочнике USDA…';
   try{
    const result=await call('keto_kitchen',{action:'source_search',query:q,values:{cursor:next,limit:8}});if(!current(stamp,screen,q))return;
    if(!append)sourceRows.replaceChildren();sourceStatus.textContent=result.total?`Совпадений в справочнике: ${result.total}`:'В справочнике совпадений нет. Уточните название или добавьте продукт по этикетке.';
