@@ -1,0 +1,228 @@
+{
+  "schema": "keto-c24-d1-migration-v1",
+  "issue": "AGR-306",
+  "source_commit": "7bcbb19048b4d41d0f64587df7d3613f7b9b776a",
+  "checked_at": "2026-11-11T12:08:30.810Z",
+  "account": "0609100baf768271ea2811c9a9ee2b16",
+  "database": "981e963a-d4c1-4db0-b9a7-bf62eb0fede4",
+  "migration": "0010_bug_reports.sql",
+  "sha256": "4dfef8a0f3ad60a233fc91e5393aa1748b49cf5ac6d52ed323f3b75c3ecb4c6e",
+  "state": "independently_verified",
+  "apply_results": [
+    {
+      "success": true,
+      "results": [],
+      "changes": 0
+    },
+    {
+      "success": true,
+      "results": [],
+      "changes": 0
+    },
+    {
+      "success": true,
+      "results": [],
+      "changes": 1
+    }
+  ],
+  "sqlite_master": [
+    {
+      "name": "bug_reports",
+      "type": "table",
+      "sql": "CREATE TABLE bug_reports (\n number INTEGER PRIMARY KEY AUTOINCREMENT,\n user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n client_id TEXT NOT NULL,\n payload_hash TEXT NOT NULL,\n description TEXT NOT NULL,\n block_id TEXT NOT NULL,\n context_json TEXT NOT NULL,\n status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new','in_progress','ready_to_verify','closed')),\n revision INTEGER NOT NULL DEFAULT 1,\n fix_version TEXT NOT NULL DEFAULT '',\n evidence TEXT NOT NULL DEFAULT '',\n issue_url TEXT NOT NULL DEFAULT '',\n history_json TEXT NOT NULL DEFAULT '[]',\n created_at INTEGER NOT NULL,\n updated_at INTEGER NOT NULL,\n UNIQUE(user_id,client_id)\n)"
+    },
+    {
+      "name": "bug_reports_owner_number",
+      "type": "index",
+      "sql": "CREATE INDEX bug_reports_owner_number ON bug_reports(user_id,number DESC)"
+    },
+    {
+      "name": "sqlite_autoindex_bug_reports_1",
+      "type": "index",
+      "sql": null
+    }
+  ],
+  "columns": [
+    {
+      "cid": 0,
+      "name": "number",
+      "type": "INTEGER",
+      "notnull": 0,
+      "dflt_value": null,
+      "pk": 1
+    },
+    {
+      "cid": 1,
+      "name": "user_id",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": null,
+      "pk": 0
+    },
+    {
+      "cid": 2,
+      "name": "client_id",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": null,
+      "pk": 0
+    },
+    {
+      "cid": 3,
+      "name": "payload_hash",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": null,
+      "pk": 0
+    },
+    {
+      "cid": 4,
+      "name": "description",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": null,
+      "pk": 0
+    },
+    {
+      "cid": 5,
+      "name": "block_id",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": null,
+      "pk": 0
+    },
+    {
+      "cid": 6,
+      "name": "context_json",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": null,
+      "pk": 0
+    },
+    {
+      "cid": 7,
+      "name": "status",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": "'new'",
+      "pk": 0
+    },
+    {
+      "cid": 8,
+      "name": "revision",
+      "type": "INTEGER",
+      "notnull": 1,
+      "dflt_value": "1",
+      "pk": 0
+    },
+    {
+      "cid": 9,
+      "name": "fix_version",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": "''",
+      "pk": 0
+    },
+    {
+      "cid": 10,
+      "name": "evidence",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": "''",
+      "pk": 0
+    },
+    {
+      "cid": 11,
+      "name": "issue_url",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": "''",
+      "pk": 0
+    },
+    {
+      "cid": 12,
+      "name": "history_json",
+      "type": "TEXT",
+      "notnull": 1,
+      "dflt_value": "'[]'",
+      "pk": 0
+    },
+    {
+      "cid": 13,
+      "name": "created_at",
+      "type": "INTEGER",
+      "notnull": 1,
+      "dflt_value": null,
+      "pk": 0
+    },
+    {
+      "cid": 14,
+      "name": "updated_at",
+      "type": "INTEGER",
+      "notnull": 1,
+      "dflt_value": null,
+      "pk": 0
+    }
+  ],
+  "foreign_keys": [
+    {
+      "id": 0,
+      "seq": 0,
+      "table": "users",
+      "from": "user_id",
+      "to": "id",
+      "on_update": "NO ACTION",
+      "on_delete": "CASCADE",
+      "match": "NONE"
+    }
+  ],
+  "indexes": [
+    {
+      "seq": 0,
+      "name": "bug_reports_owner_number",
+      "unique": 0,
+      "origin": "c",
+      "partial": 0
+    },
+    {
+      "seq": 1,
+      "name": "sqlite_autoindex_bug_reports_1",
+      "unique": 1,
+      "origin": "u",
+      "partial": 0
+    }
+  ],
+  "owner_index_columns": [
+    {
+      "seqno": 0,
+      "cid": 1,
+      "name": "user_id",
+      "desc": 0,
+      "coll": "BINARY",
+      "key": 1
+    },
+    {
+      "seqno": 1,
+      "cid": 0,
+      "name": "number",
+      "desc": 1,
+      "coll": "BINARY",
+      "key": 1
+    },
+    {
+      "seqno": 2,
+      "cid": -1,
+      "name": null,
+      "desc": 0,
+      "coll": "BINARY",
+      "key": 0
+    }
+  ],
+  "migration_record": [
+    {
+      "name": "0010_bug_reports.sql",
+      "applied_at": "2026-11-11 12:08:07"
+    }
+  ],
+  "private_state_rows_read_or_changed": false
+}
