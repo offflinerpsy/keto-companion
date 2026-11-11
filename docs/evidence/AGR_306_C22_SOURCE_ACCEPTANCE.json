@@ -1,0 +1,41 @@
+{
+  "task": "AGR-306-C21-C22",
+  "source_baseline": "7a2a349a9017091fe637534e6b16f18ec27aa93360ebf863a1539edacb0637db",
+  "root_review": "Application diff reviewed; narrow padding/labels/selection focus/explicit USDA changes accepted. No backend/data changes.",
+  "checks": {
+    "node": 309,
+    "ui_oauth": "passed",
+    "contracts": 7,
+    "specification_docs": 25,
+    "links": 879,
+    "repository_files": 666,
+    "diff_check": "passed"
+  },
+  "root_browser": {
+    "before": "live staging builder body hints have no side padding",
+    "after": "exact current local app against existing synthetic SQLite fixture",
+    "css_viewport": {
+      "width": 365,
+      "height": 794
+    },
+    "content_padding": "12px 14px",
+    "horizontal_overflow": false,
+    "local_cheese_results": 5,
+    "USDA_before_click": "not displayed; explicit supplementary action present",
+    "selected_cheddar": "empty grams input receives focus; clear next action",
+    "calculation": "50g cheddar custom dish renders202kcal and per-portion/full-dish result; no save/write to family data",
+    "screenshots": [
+      "builder-before.png",
+      "builder-after.png"
+    ],
+    "owned_tab_closed": true,
+    "viewport_reset": true,
+    "cua_reset": true
+  },
+  "limitations": [
+    "Original one-minute live delay not measured/reproduced; unnecessary automatic USDA calls removed.",
+    "Base catalog unchanged108recipes/85foods; сыр15 recipes, курица9.",
+    "Physical iPhone still separate."
+  ],
+  "time": "2026-11-11T10:23:37.857144+00:00"
+}

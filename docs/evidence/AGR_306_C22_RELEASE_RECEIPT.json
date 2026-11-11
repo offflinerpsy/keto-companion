@@ -1,0 +1,98 @@
+{
+  "schema": "keto-c21-c22-release-v1",
+  "status": "technical_release_verified_physical_device_pending",
+  "recorded_at": "2026-11-11T10:45:06.322556+00:00",
+  "task": "AGR-306-C21-C22",
+  "source_commit": "9afff2a2f3abf778121e3ab833c0a4dd15543d75",
+  "application_source_commit": "de8d079ce6c3f040f50530e6e08ef936e8e627ad",
+  "worker_version": "a1a493ac-e036-46cf-bc37-63e4d1be3e64",
+  "deployment_id": "c03e4cf6-36d4-4e44-9d3f-4580d2937800",
+  "traffic_percent": 100,
+  "baseline": "7a2a349a9017091fe637534e6b16f18ec27aa93360ebf863a1539edacb0637db",
+  "image_digest": "sha256:dcb9ed1ab917860ed54d3a7dc6adf89ea717a875099241a0a8523e10457cadec",
+  "native_build": "3841f7c2-3dfa-434c-bc0e-e0e64a63c01b",
+  "ordinary_build": "8fb9295f-6c97-4a45-8640-1f797d8e60bb",
+  "azure": {
+    "changed": false,
+    "backend_source_commit_retained": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "runtime_code_sha256_retained": "a7625ec1b6488ec742277592e8d89dae278ebb3768539cf1f3c8baca52d4704f",
+    "identity_evidence": "docs/evidence/AGR_306_C19_RELEASE_RECEIPT.json",
+    "live_azure_reverification": false
+  },
+  "checks": {
+    "passed": true,
+    "python": 664,
+    "python_subtests": 6,
+    "node": 309,
+    "ops": 12,
+    "source_stages": 16,
+    "seconds": 166.98,
+    "generated_assets_match": true
+  },
+  "runtime_product_tests": 14,
+  "runtime_python_tests": 17,
+  "live_ui": {
+    "target": "https://keto-companion-saas-staging.offflinerpsy.workers.dev/#recipes",
+    "checkedAt": "2026-11-11T10:43:39.156Z",
+    "workspaceOpened": true,
+    "newLabelsVisible": true,
+    "cheeseSearchMs": 1982,
+    "searchScope": "one observed live browser sample, including UI automation overhead; not physical iPhone latency guarantee",
+    "localCheeseResults": 5,
+    "USDAExplicit": true,
+    "geometry": {
+      "focused": "Граммы съедобной части: Сыр чеддер",
+      "grams": "",
+      "height": 874,
+      "overflow": false,
+      "padding": "12px 14px",
+      "width": 402
+    },
+    "screenshot": "docs/evidence/AGR_306_C22_BUILDER_LIVE.png",
+    "realFamilyDataWrites": false,
+    "cleanup": {
+      "ownedTabClosed": true,
+      "viewportReset": true,
+      "cua_reset": true
+    }
+  },
+  "catalog": {
+    "foods_total": 85,
+    "recipes_total": 108,
+    "queries": {
+      "сыр": {
+        "recipes": 15,
+        "foods": 5,
+        "food_names": [
+          "Сыр чеддер",
+          "Сыр фета",
+          "Сливочный сыр",
+          "Моцарелла из цельного молока",
+          "Сыр плавленый швейцарский"
+        ],
+        "local_search_ms": 2.35
+      },
+      "курица": {
+        "recipes": 9,
+        "foods": 3,
+        "food_names": [
+          "Куриная грудка без кожи, запечённая",
+          "Печень куриная",
+          "Куриная грудка без кожи и костей, сырая"
+        ],
+        "local_search_ms": 0.71
+      }
+    }
+  },
+  "pull_request": "https://github.com/offflinerpsy/keto-companion/pull/26",
+  "limitations": [
+    "One live Mac Chrome mobile-viewport search sample is not a physical iPhone or universal network-latency guarantee.",
+    "Underlying cause of original intermittent minute-long network delay remains unproven; stalled waits and unnecessary automatic USDA requests corrected.",
+    "Catalog remains108 recipes/85 base foods.",
+    "Direct HTTP probes returned403 and were not replayed; live UI and cloud deployment identity were independently checked instead of claiming served-asset hash verification."
+  ],
+  "ordinary_controls_restored": true,
+  "temporary_probes": [],
+  "active_instances": [],
+  "family_data_test_writes": false
+}
