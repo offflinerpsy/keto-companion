@@ -4,7 +4,7 @@
   "linear_issue": "AGR-306",
   "base_commit": "30fbec34381b6f243e1214de7a234feafed09766",
   "branch": "codex/full-review-optimization-c19",
-  "checked_at": "2026-11-10T21:49:08.117149+00:00",
+  "checked_at": "2026-11-11T07:41:47.202943+00:00",
   "runtime_code_sha256": "a7625ec1b6488ec742277592e8d89dae278ebb3768539cf1f3c8baca52d4704f",
   "developer_snapshot_baseline": "6a9891513514a0905eb0c09435f0bf1a372b60e20ac44921d3d0f495b8a02b28",
   "checks": {
@@ -63,5 +63,19 @@
     "legacy_plugin_0_2_1_untouched": true,
     "browser_or_cua_invoked": false,
     "cloud_or_family_data_mutated": false
-  }
+  },
+  "source_commit": "2484a22404da0c9fc883f68bff407e18a51b9d46",
+  "protected_source_baseline": "612ca0d65e8940979a917578d1e29f937afc9c74471b65b850755ff15127f8ef",
+  "runtime_archive_sha256": "4891e50f43e09d7048d6716d33ec03ccaf79c2454f57888ccd709c57e561a52b",
+  "browser_runs": {
+    "total_runs": 91,
+    "configs_passed": 5,
+    "engines": [
+      "Chromium",
+      "WebKit"
+    ],
+    "failed": 0,
+    "flaky": 0
+  },
+  "ui_ux_upgrade": "Contextual Russian micro-guides (.ux-hint, .ux-callout, .ux-guide), translucent bar material with accessibility fallbacks, tabular-nums, and 7/7 independent review fixes applied."
 }
