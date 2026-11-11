@@ -52,3 +52,12 @@ C9 wrap-up: native new-image build c296da43 and ordinary build 7ce93b5a both suc
 
 ## C22 — own-dish and search clarity (2026-11-11)
 - [x] T028 Fix own-dish body padding and ambiguous cooking instructions, focus selected ingredient mass, make USDA an explicitly supplementary search, and clarify catalog counts. Verify actual mobile pixels and meaningful lookup/selection regressions.
+
+## C24 — contextual bug reports
+- [x] T029 Add safe block/route context and top-menu choose/highlight, editable keyboard-dictation text, review/send and same-ID uncertain receipt reconciliation.
+- [x] T030 Add authenticated own/admin D1 report inbox, stable number/status/history, CAS triage with fix evidence, reporter verify/reopen and private-data deletion. Preserve canonical Linear linkage without automatic integration claims.
+- [x] T031 Verify actual handler/schema/privacy/idempotency/transitions and sender behavior; rebuild via supported scripts and run required source checks. Root accepts actual mobile pixels and separate release/device results.
+
+C24 source acceptance: dedicated report/schema/sender tests 5 passed; full Node 315 passed; Python 663 passed, 1 existing platform skip and 6 subtests passed; no-browser UI/OAuth checks, contract drift, specification and repository checks passed. Root owns rendered mobile acceptance, exact D1 migration, release and owner-device results. Source implementation is complete; no release or physical voice acceptance is claimed here.
+
+C24 bounded recovery follow-up: exact reviewed submitted payload survives reload in account-scoped session storage; explicit same-ID lookup precedes identical retry, with no automatic replay. Three additional regressions cover reload/not-delivered recovery, cross-account/legacy ID handling and late send/check completion after reset. Bundle-owned UI report version is 0.7.1-C24.

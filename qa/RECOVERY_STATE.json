@@ -3,22 +3,21 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-11T10:45:06.322556+00:00",
+  "updated_at": "2026-11-11T12:36:24.315849+00:00",
   "active_task": null,
   "last_completed": {
-    "id": "AGR-306-C21-C22-RELEASE",
+    "id": "AGR-306-C24-RELEASE",
     "linear_issue": "AGR-306",
     "status": "completed",
-    "scope": "Bounded loading recovery; own-dish padding, clear labels and ingredient mass focus; explicit supplementary USDA lookup",
-    "source_commit": "9afff2a2f3abf778121e3ab833c0a4dd15543d75",
-    "backend_source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
-    "release_receipt": "docs/evidence/AGR_306_C22_RELEASE_RECEIPT.json",
-    "native_build": "3841f7c2-3dfa-434c-bc0e-e0e64a63c01b",
-    "ordinary_build": "8fb9295f-6c97-4a45-8640-1f797d8e60bb",
-    "build_status": "success",
-    "worker_version": "a1a493ac-e036-46cf-bc37-63e4d1be3e64",
-    "pull_request": 26,
-    "product_acceptance": "physical_iPhone_after_reload_pending"
+    "scope": "Contextual private bug reporting and verified report lifecycle",
+    "source_commit": "cd3d6463f109a531b752472f0153e3abc5fe94e2",
+    "release_receipt": "docs/evidence/AGR_306_C24_RELEASE_RECEIPT.json",
+    "native_build": "71a06dd4-e885-4073-9462-fd6915c84751",
+    "ordinary_build": "773baac3-14ac-494c-8b60-9794feb41e7c",
+    "worker_version": "e281e7e8-9215-46e9-b51a-69b9f7557afd",
+    "live_ui": "docs/evidence/AGR_306_C24_LIVE_UI.json",
+    "pull_request": 27,
+    "product_acceptance": "live report lifecycle verified; physical phone dictation remains owner observation"
   },
   "previous_completed": {
     "id": "AGR-306-C18-RELEASE",
@@ -39,9 +38,8 @@
     "product_acceptance": "physical_iPhone_17_Pro_pending; real_desktop_google_verified"
   },
   "next_task": {
-    "id": "AGR-306-PHYSICAL-DEVICE-ACCEPTANCE",
-    "status": "awaiting_owner_observation",
-    "action": "Reload existing phone page and verify own-dish spacing, ingredient selection and search; investigate only a concrete remaining failure."
+    "id": "AGR-306-OWNER-REPORT-TRIAGE",
+    "action": "Owner reloads current app and reports concrete remaining failures; triage selected report with source/version before new implementation."
   },
   "no_relaunch": {
     "recorded_local_jobs": [
@@ -112,8 +110,8 @@
     "temporary_probes": [],
     "active_container_instances": [],
     "accepted_runtime_pin": "ops/approved-runtime.json",
-    "accepted_runtime_baseline": "7a2a349a9017091fe637534e6b16f18ec27aa93360ebf863a1539edacb0637db",
-    "accepted_runtime_image": "sha256:dcb9ed1ab917860ed54d3a7dc6adf89ea717a875099241a0a8523e10457cadec",
+    "accepted_runtime_baseline": "fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77",
+    "accepted_runtime_image": "sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f",
     "default_trigger": "full Cloudflare source CI + pinned existing runtime acceptance + staging deploy",
     "new_runtime_image_required": false,
     "implementation_writer": null,
@@ -213,5 +211,20 @@
       "specification_docs": 25
     },
     "evidence": "docs/evidence/AGR_306_C19_SOURCE_ACCEPTANCE.json"
+  },
+  "previous_C21_C22_completed": {
+    "id": "AGR-306-C21-C22-RELEASE",
+    "linear_issue": "AGR-306",
+    "status": "completed",
+    "scope": "Bounded loading recovery; own-dish padding, clear labels and ingredient mass focus; explicit supplementary USDA lookup",
+    "source_commit": "9afff2a2f3abf778121e3ab833c0a4dd15543d75",
+    "backend_source_commit": "dc8e449587ead3102ab4719053ce32ab08a20958",
+    "release_receipt": "docs/evidence/AGR_306_C22_RELEASE_RECEIPT.json",
+    "native_build": "3841f7c2-3dfa-434c-bc0e-e0e64a63c01b",
+    "ordinary_build": "8fb9295f-6c97-4a45-8640-1f797d8e60bb",
+    "build_status": "success",
+    "worker_version": "a1a493ac-e036-46cf-bc37-63e4d1be3e64",
+    "pull_request": 26,
+    "product_acceptance": "physical_iPhone_after_reload_pending"
   }
 }

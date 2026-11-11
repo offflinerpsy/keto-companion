@@ -501,3 +501,17 @@ details>summary[data-icon]::before{color:var(--accent)}
 .auth-actions{display:grid;gap:10px;min-width:0}.login .auth-actions button{width:100%;min-height:48px;margin:0;white-space:normal;overflow-wrap:anywhere}
 .auth-account{color:var(--accent);font-weight:600}.login #cf-login-message{min-height:1.5em;line-height:1.55;overflow-wrap:anywhere}
 .auth-detail{margin-block:16px}.auth-detail p{font-size:.85em;overflow-wrap:anywhere}.login #deletion-recovery{margin-top:28px;font-size:.9em}.login #deletion-recovery label{margin-top:14px}
+
+/* Contextual technical reports: no automatic screenshots or private DOM export. */
+.top .head-actions .bug-open{width:auto;min-width:5.5rem;font-size:.78rem;line-height:1.15;max-width:7.5rem;white-space:normal;min-height:44px}
+#bug-dialog{width:min(640px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:20px}
+#bug-exact{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;background:var(--surface-soft,#f4f6f8);padding:12px;border-radius:10px}
+#bug-dialog textarea,#bug-dialog select,#bug-dialog input:not([type=checkbox]){width:100%;box-sizing:border-box}
+#bug-dialog label{display:block;margin-block:12px}
+#bug-dialog .check{display:flex}
+.bug-report{margin-block:12px}.bug-report-description{white-space:pre-wrap;overflow-wrap:anywhere}.bug-triage{border-top:1px solid #d8dfe7;margin-top:12px;padding-top:8px}
+.bug-highlight{outline:4px solid #d8690c!important;outline-offset:3px}
+.bug-selection{position:fixed;z-index:100;inset:auto 12px calc(12px + env(safe-area-inset-bottom));background:#fff;color:#172b42;box-shadow:0 2px 20px #0003;border:2px solid #d8690c;border-radius:14px;padding:12px;max-width:620px;margin-inline:auto}
+@media(max-width:480px){.top .head-actions{gap:3px}.bug-open{max-width:6.1rem;font-size:.72rem;padding-inline:5px}#bug-dialog{padding:16px}}
+
+#bug-exact p{margin-block:8px;white-space:pre-wrap;overflow-wrap:anywhere}#bug-inbox>summary{min-height:44px;padding-block:10px}

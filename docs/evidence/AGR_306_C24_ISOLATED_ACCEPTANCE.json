@@ -1,0 +1,120 @@
+{
+  "schema": "keto-c24-isolated-pinned-acceptance-v1",
+  "status": "passed",
+  "source_commit": "cd3d6463f109a531b752472f0153e3abc5fe94e2",
+  "build_uuid": "2fc9bdc8-e6af-4545-beea-4903a905e606",
+  "terminal": {
+    "at": "2026-11-11T12:20:25.384Z",
+    "status": "stopped",
+    "outcome": "success",
+    "stopped_on": "2026-11-11T12:19:55.351Z",
+    "cursor": "WzEsNDk5XQ",
+    "truncated": false,
+    "lines": 25,
+    "markers": [
+      "{\"baseline\": \"fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77\", \"files\": 260, \"archive_sha256\": \"a7e0d1c61ad4a5c61805b13ea463818b5688727912ec31ec1c1f7dd2ad8406cf\"}",
+      "KETO_ACCEPTANCE_HTTP {\"run_id\":\"4c52886f-8efd-4e46-b89d-e8ac2603569c\",\"probe_name\":\"keto-developer-check-d832ecd8bf\",\"job_id\":\"cc270a8a-2a74-4d03-a1e5-74647c828332\",\"upload\":\"delivered_unverified\",\"readiness\":\"known_handler_shape\",\"post\":\"delivered_unverified\",\"post_count\":1,\"cleanup\":\"not_attempted\",\"events\":[{\"method\":\"PUT\",\"status\":200,\"type\":\"json\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":404,\"type\":\"known_handler_shape\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"}],\"post_result\":{\"status\":\"passed\",\"baseline\":\"fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77\",\"patch_hash\":\"1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75\",\"image_digest\":\"sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f\",\"exit_code\":0,\"stages\":[{\"name\":\"syntax\",\"exit_code\":0,\"passed_count\":null},{\"name\":\"build\",\"exit_code\":0,\"passed_count\":null},{\"name\":\"product\",\"exit_code\":0,\"passed_count\":14},{\"name\":\"python\",\"exit_code\":0,\"passed_count\":17}]}}",
+      "KETO_ACCEPTANCE_HTTP {\"run_id\":\"4c52886f-8efd-4e46-b89d-e8ac2603569c\",\"probe_name\":\"keto-developer-check-d832ecd8bf\",\"job_id\":\"cc270a8a-2a74-4d03-a1e5-74647c828332\",\"upload\":\"delivered_unverified\",\"readiness\":\"known_handler_shape\",\"post\":\"delivered_unverified\",\"post_count\":1,\"cleanup\":\"possibly_delivered\",\"events\":[{\"method\":\"PUT\",\"status\":200,\"type\":\"json\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":404,\"type\":\"known_handler_shape\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"}],\"post_result\":{\"status\":\"passed\",\"baseline\":\"fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77\",\"patch_hash\":\"1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75\",\"image_digest\":\"sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f\",\"exit_code\":0,\"stages\":[{\"name\":\"syntax\",\"exit_code\":0,\"passed_count\":null},{\"name\":\"build\",\"exit_code\":0,\"passed_count\":null},{\"name\":\"product\",\"exit_code\":0,\"passed_count\":14},{\"name\":\"python\",\"exit_code\":0,\"passed_count\":17}]}}",
+      "KETO_ACCEPTANCE_HTTP {\"run_id\":\"4c52886f-8efd-4e46-b89d-e8ac2603569c\",\"probe_name\":\"keto-developer-check-d832ecd8bf\",\"job_id\":\"cc270a8a-2a74-4d03-a1e5-74647c828332\",\"upload\":\"delivered_unverified\",\"readiness\":\"known_handler_shape\",\"post\":\"delivered_unverified\",\"post_count\":1,\"cleanup\":\"delivered_unverified\",\"events\":[{\"method\":\"PUT\",\"status\":200,\"type\":\"json\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":404,\"type\":\"known_handler_shape\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"},{\"method\":\"DELETE\",\"status\":200,\"type\":\"json\"}],\"post_result\":{\"status\":\"passed\",\"baseline\":\"fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77\",\"patch_hash\":\"1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75\",\"image_digest\":\"sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f\",\"exit_code\":0,\"stages\":[{\"name\":\"syntax\",\"exit_code\":0,\"passed_count\":null},{\"name\":\"build\",\"exit_code\":0,\"passed_count\":null},{\"name\":\"product\",\"exit_code\":0,\"passed_count\":14},{\"name\":\"python\",\"exit_code\":0,\"passed_count\":17}]}}",
+      "KETO_CLOUD_CONTAINER_ACCEPTED {\"task\":\"CF-DEV-MEDIA-08\",\"scope\":\"actual private Cloudflare Container through service RPC; one fixed synthetic UI patch, no family session or app data\",\"baseline\":\"fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77\",\"patch_hash\":\"1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75\",\"image_digest\":\"sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f\",\"status\":\"passed\",\"exit_code\":0,\"stages\":[{\"name\":\"syntax\",\"exit_code\":0,\"passed_count\":null,\"truncated\":false},{\"name\":\"build\",\"exit_code\":0,\"passed_count\":null,\"truncated\":false},{\"name\":\"product\",\"exit_code\":0,\"passed_count\":14,\"truncated\":false},{\"name\":\"python\",\"exit_code\":0,\"passed_count\":17,\"truncated\":false}],\"temporary_probe_deleted\":true,\"no_credentials_returned\":true,\"no_database_or_R2_binding\":true,\"actual_owner_UI_tested\":false}",
+      "KETO_ACCEPTANCE_HTTP {\"run_id\":\"4c52886f-8efd-4e46-b89d-e8ac2603569c\",\"probe_name\":\"keto-developer-check-d832ecd8bf\",\"job_id\":\"cc270a8a-2a74-4d03-a1e5-74647c828332\",\"upload\":\"delivered_unverified\",\"readiness\":\"known_handler_shape\",\"post\":\"delivered_unverified\",\"post_count\":1,\"cleanup\":\"delivered_unverified\",\"events\":[{\"method\":\"PUT\",\"status\":200,\"type\":\"json\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":200,\"type\":\"json\"},{\"method\":\"GET\",\"status\":404,\"type\":\"known_handler_shape\"},{\"method\":\"POST\",\"status\":200,\"type\":\"json\"},{\"method\":\"DELETE\",\"status\":200,\"type\":\"json\"}],\"post_result\":{\"status\":\"passed\",\"baseline\":\"fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77\",\"patch_hash\":\"1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75\",\"image_digest\":\"sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f\",\"exit_code\":0,\"stages\":[{\"name\":\"syntax\",\"exit_code\":0,\"passed_count\":null},{\"name\":\"build\",\"exit_code\":0,\"passed_count\":null},{\"name\":\"product\",\"exit_code\":0,\"passed_count\":14},{\"name\":\"python\",\"exit_code\":0,\"passed_count\":17}]},\"outcome\":\"verifier_passed\"}",
+      "KETO_PINNED_RUNTIME_READY {\"baseline\":\"fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77\",\"image_digest\":\"sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f\",\"application_id\":\"a0328d47-d862-4cc2-be96-42e925e4e3ab\",\"max_instances\":1,\"actual_cloud_container_acceptance\":true,\"temporary_probe_deleted\":true,\"rebuild\":false,\"publication_broker\":false}"
+    ]
+  },
+  "runtime": {
+    "baseline": "fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77",
+    "image_digest": "sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f",
+    "application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "max_instances": 1,
+    "actual_cloud_container_acceptance": true,
+    "temporary_probe_deleted": true,
+    "rebuild": false,
+    "publication_broker": false
+  },
+  "actual_container": {
+    "task": "CF-DEV-MEDIA-08",
+    "scope": "actual private Cloudflare Container through service RPC; one fixed synthetic UI patch, no family session or app data",
+    "baseline": "fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77",
+    "patch_hash": "1e29a63d4e3ec25897644da5af17751a75afc31a2c76b4fd8545ba70c4434d75",
+    "image_digest": "sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f",
+    "status": "passed",
+    "exit_code": 0,
+    "stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "temporary_probe_deleted": true,
+    "no_credentials_returned": true,
+    "no_database_or_R2_binding": true,
+    "actual_owner_UI_tested": false
+  },
+  "readback": {
+    "at": "2026-11-11T12:21:09.068Z",
+    "commands": {
+      "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+      "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs"
+    },
+    "probes": [],
+    "instances": {
+      "count": 36,
+      "state_counts": {
+        "inactive": 36
+      },
+      "active": [],
+      "diagnostic_job": [
+        {
+          "id": "94e6e4d45b5a42acbc11bceabdb8eeee81e9129f7036e2bb577360e16be2a344",
+          "name": "cc270a8a-2a74-4d03-a1e5-74647c828332",
+          "status": {
+            "state": "inactive",
+            "updated_at": "2026-11-11T12:19:53Z"
+          }
+        }
+      ]
+    },
+    "app": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "version": 19,
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f",
+      "max_instances": 1,
+      "scheduling_policy": "default"
+    },
+    "runner_pin": [
+      {
+        "name": "DEVELOPER_BASELINE",
+        "text": "fd45c786a3908d1919108dfde83e7d4ce36e65a5fcdc839d7640c9b72fcc2c77"
+      },
+      {
+        "name": "DEVELOPER_IMAGE_DIGEST",
+        "text": "sha256:586b8680e92f2af1685bf379e2601c97d0f6e47bffa80f72cafba20ed5c30c7f"
+      }
+    ]
+  },
+  "ordinary_commands_restored": true,
+  "source_and_image_unchanged": true,
+  "main_worker_deployed": false,
+  "diagnosis": "Prior same-image RPC/container-start failure was transient: subsequent isolated acceptance passed every stage after prior job cleanup. Exact underlying start/RPC exception remains unavailable in guarded terminal logs.",
+  "next_action": "Same-source final ordinary release may be retried once after coordinator decision; no image rebuild."
+}
