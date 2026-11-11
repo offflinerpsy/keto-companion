@@ -1,0 +1,50 @@
+{
+  "task": "AGR-306-C25",
+  "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+  "azure_app": "keto-companion-ay-20261107",
+  "archive_sha256": "82129780663676c97cd5d577c19a6a04e5e74ff3f8cff368385e67cfaa5ecba2",
+  "archive_bytes": 1560819,
+  "member_count": 73,
+  "expected_runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+  "public_key_only_transferred": true,
+  "personal_state_migration": false,
+  "model_settings_preserved": true,
+  "schema": "keto-c25-azure-deployment-v1",
+  "status": 4,
+  "complete": true,
+  "deployment_id": "efdbcec8-a124-4ff0-b43e-8c43ce9c606a",
+  "checked_at": "2026-11-11T15:56:24.725470+00:00",
+  "startup_adoption": "passed",
+  "startup_readback_boundary": "No direct-public403 retry or browser in release worker; root authorized status readback required if current worker route unavailable.",
+  "startup_readback": {
+    "task": "AGR-306-C25-FOLLOWUP",
+    "observed_at": "2026-11-11T15:59:12.699Z",
+    "surface": "native background Chrome PERSONAL Offliner extensiona1f97a64;current browser2;ownedtab1973326819",
+    "url": "https://keto-companion-ay-20261107.azurewebsites.net/status?cache_bypass=C25-followup",
+    "status": 200,
+    "cache_control": "no-store",
+    "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+    "edge_signature": "Ed25519",
+    "authentication_required": true,
+    "medical_monitoring": false,
+    "expected_source": "48ac620091f392f07af9511be05dd27b499c680c",
+    "expected_runtime": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+    "passed": true,
+    "cleanup": {
+      "tab1973326819": "closed,absenceverified",
+      "viewport": "no override used",
+      "CUA": "summary acknowledged;resetnext"
+    }
+  },
+  "independent_deployment_metadata": [
+    {
+      "active": true,
+      "complete": true,
+      "end_time": "2026-11-11T15:56:22.0192208Z",
+      "id": "efdbcec8-a124-4ff0-b43e-8c43ce9c606a",
+      "received_time": "2026-11-11T15:55:31.331078Z",
+      "status": 4
+    }
+  ]
+}

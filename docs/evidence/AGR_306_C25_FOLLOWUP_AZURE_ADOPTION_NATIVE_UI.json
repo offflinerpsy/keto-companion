@@ -1,0 +1,21 @@
+{
+  "task": "AGR-306-C25-FOLLOWUP",
+  "observed_at": "2026-11-11T15:59:12.699Z",
+  "surface": "native background Chrome PERSONAL Offliner extensiona1f97a64;current browser2;ownedtab1973326819",
+  "url": "https://keto-companion-ay-20261107.azurewebsites.net/status?cache_bypass=C25-followup",
+  "status": 200,
+  "cache_control": "no-store",
+  "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+  "runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+  "edge_signature": "Ed25519",
+  "authentication_required": true,
+  "medical_monitoring": false,
+  "expected_source": "48ac620091f392f07af9511be05dd27b499c680c",
+  "expected_runtime": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+  "passed": true,
+  "cleanup": {
+    "tab1973326819": "closed,absenceverified",
+    "viewport": "no override used",
+    "CUA": "summary acknowledged;resetnext"
+  }
+}

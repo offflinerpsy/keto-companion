@@ -1,0 +1,108 @@
+{
+  "at": "2026-11-11T16:17:30.613Z",
+  "trigger": {
+    "trigger_uuid": "88639670-f75a-46f5-ae89-85a2d8387a7c",
+    "build_command": "python scripts/cloudflare_ci.py && node --test ops/*.test.mjs",
+    "deploy_command": "KETO_PINNED_RUNNER_RELEASE=1 node ops/promote_existing_runtime.mjs && node scripts/deploy_cloudflare_staging.mjs",
+    "root_directory": "/",
+    "branch_includes": [
+      "release/staging-0.3.0"
+    ],
+    "branch_excludes": [],
+    "path_includes": [
+      "cloudflare-saas/**",
+      "scripts/deploy_cloudflare_staging.mjs",
+      "artifacts/**",
+      "qa/firebase-public-config.json"
+    ],
+    "path_excludes": [],
+    "build_caching_enabled": true,
+    "modified_on": "2026-11-11T15:51:59.543Z"
+  },
+  "builds": {
+    "count": 71,
+    "nonterminal": []
+  },
+  "main": {
+    "tags": [
+      "keto",
+      "staging",
+      "commit:f86fbe9731df80b4e2204d22057e8c80ab9c01e3"
+    ],
+    "developer_service": [
+      {
+        "name": "DEVELOPER_RUNNER",
+        "type": "service",
+        "service": "keto-companion-developer-runner",
+        "entrypoint": "DeveloperRunner"
+      }
+    ],
+    "pin": {
+      "DEVELOPER_BASELINE": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
+      "KETO_EDGE_BRIDGE_URL": "https://keto-companion-ay-20261107.azurewebsites.net/internal/keto/compute"
+    },
+    "deployment": [
+      {
+        "id": "98015936-6a16-4f6c-95b4-6e9cadae047b",
+        "versions": [
+          {
+            "version_id": "840eea4c-d131-44e3-8d00-00ed51d84350",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-11-11T15:18:33.033014Z"
+      }
+    ]
+  },
+  "runner": {
+    "pin": {
+      "DEVELOPER_BASELINE": "4a0656df54cb4abba3dc64d317eabc51c943a763b833583aa9dab285b408d3a1",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5"
+    },
+    "bindings": [
+      {
+        "name": "DEVELOPER_BASELINE",
+        "type": "plain_text"
+      },
+      {
+        "name": "DEVELOPER_IMAGE_DIGEST",
+        "type": "plain_text"
+      },
+      {
+        "name": "KETO_TESTER",
+        "type": "durable_object_namespace",
+        "class_name": "KetoTester",
+        "namespace_id": "b0a394e990794e51ba4f38a9339bb308"
+      }
+    ],
+    "compatibility_date": "2026-11-07"
+  },
+  "observed_main_runner_pin_equality": {
+    "baseline": false,
+    "image": false
+  },
+  "app": {
+    "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+    "name": "keto-companion-developer-runner",
+    "version": 22,
+    "max_instances": 1,
+    "scheduling_policy": "default",
+    "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5",
+    "environment_variable_count": 0,
+    "authorized_key_count": 0,
+    "network": {
+      "assign_ipv6": "none",
+      "assign_ipv4": "none",
+      "mode": "private"
+    }
+  },
+  "probes": [],
+  "instances": {
+    "count": 41,
+    "state_counts": {
+      "inactive": 41
+    },
+    "active": []
+  }
+}

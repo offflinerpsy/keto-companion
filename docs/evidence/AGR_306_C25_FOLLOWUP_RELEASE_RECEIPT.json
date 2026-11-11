@@ -1,0 +1,196 @@
+{
+  "schema": "keto-c25-safe-failure-followup-release-v1",
+  "task": "AGR-306-C25-SAFE-FAILURE-FOLLOWUP",
+  "status": "PARTIAL",
+  "recorded_at": "2026-11-11T16:17:30.613Z",
+  "coordinator_decision": "STOP further release branch; no new checked-in ops hook/controller/source cycle",
+  "scope": "Safe classification/persisted diagnostics/content-filter terminal message only; existing recipe request payload/provider/high/auth/budget/timeout/filter settings unchanged",
+  "handwritten_source_commit": "e858f867477be40fd2c0542e00ce244a0a913ead",
+  "generated_candidate": "16228022417987fa11e848a6dad9be53b707dfc2",
+  "release_pin_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+  "backend": {
+    "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+    "deployment_id": "efdbcec8-a124-4ff0-b43e-8c43ce9c606a",
+    "status": 4,
+    "complete": true,
+    "active_metadata_verified": true,
+    "startup_adoption": {
+      "task": "AGR-306-C25-FOLLOWUP",
+      "observed_at": "2026-11-11T15:59:12.699Z",
+      "surface": "native background Chrome PERSONAL Offliner extensiona1f97a64;current browser2;ownedtab1973326819",
+      "url": "https://keto-companion-ay-20261107.azurewebsites.net/status?cache_bypass=C25-followup",
+      "status": 200,
+      "cache_control": "no-store",
+      "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+      "runtime_code_sha256": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+      "edge_signature": "Ed25519",
+      "authentication_required": true,
+      "medical_monitoring": false,
+      "expected_source": "48ac620091f392f07af9511be05dd27b499c680c",
+      "expected_runtime": "f960275c7a988eaa552d458f94c843099d45ca5d5d9c2cb9cc999e5d85280d4b",
+      "passed": true,
+      "cleanup": {
+        "tab1973326819": "closed,absenceverified",
+        "viewport": "no override used",
+        "CUA": "summary acknowledged;resetnext"
+      }
+    },
+    "zip_sha256": "82129780663676c97cd5d577c19a6a04e5e74ff3f8cff368385e67cfaa5ecba2",
+    "zip_bytes": 1560819,
+    "zip_members": 73
+  },
+  "native": {
+    "build_uuid": "a232b86b-6bfb-440b-8a71-62444b8b3744",
+    "status": "stopped",
+    "outcome": "success",
+    "baseline": "4a0656df54cb4abba3dc64d317eabc51c943a763b833583aa9dab285b408d3a1",
+    "image_digest": "sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5",
+    "checks": {
+      "passed": true,
+      "python": 682,
+      "python_subtests": 6,
+      "node": 325,
+      "node_failed": 0,
+      "source_stages": 16,
+      "seconds": 168.02,
+      "native_ops_tests": [
+        8,
+        3
+      ],
+      "generated_assets_match": true
+    },
+    "actual_container_stages": [
+      {
+        "name": "syntax",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "build",
+        "exit_code": 0,
+        "passed_count": null,
+        "truncated": false
+      },
+      {
+        "name": "product",
+        "exit_code": 0,
+        "passed_count": 14,
+        "truncated": false
+      },
+      {
+        "name": "python",
+        "exit_code": 0,
+        "passed_count": 17,
+        "truncated": false
+      }
+    ],
+    "accepted_application_id": "a0328d47-d862-4cc2-be96-42e925e4e3ab"
+  },
+  "ordinary": {
+    "build_uuid": "2ef42065-0d43-4d00-b7c9-e5ef196dfbd0",
+    "status": "stopped",
+    "outcome": "fail",
+    "source_gate": {
+      "passed": true,
+      "python": 682,
+      "python_subtests": 6,
+      "node": 325,
+      "ops": 12,
+      "source_stages": 16,
+      "seconds": 185.58,
+      "generated_assets_match": true
+    },
+    "failure": {
+      "code": "PINNED_RUNTIME_ACCEPTANCE_FAILED",
+      "phase": "probe_readiness_GET_before_container_POST",
+      "http_status": 500,
+      "readiness": "invalid",
+      "run_id": "a42df34b-3874-4097-bf48-55f299af4088",
+      "probe_name": "keto-developer-check-76bfc84660",
+      "job_id": "247c5fe1-9e2e-4671-a71f-5560859f4387",
+      "post": "not_delivered",
+      "post_count": 0,
+      "cleanup_delete_status": 200,
+      "reconciled": true,
+      "no_container_instance_for_job": true,
+      "probe_absent": true,
+      "main_worker_unchanged": true
+    },
+    "main_worker_promotion_delivery": "not_delivered",
+    "receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_ORDINARY_FAILURE_1.json"
+  },
+  "recovery_setup": {
+    "attempted_forms": 2,
+    "result": "both PATCH command argument validation rejected HTTP400 code12002; original ordinary controls independently unchanged",
+    "mutable_effect_delivery": "not_delivered",
+    "isolated_build_started": false,
+    "acceptance_post_started": false,
+    "ordinary_retry_started": false,
+    "receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RECOVERY_SETUP_FAILURE.json"
+  },
+  "main_worker": {
+    "source_commit": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
+    "version_id": "840eea4c-d131-44e3-8d00-00ed51d84350",
+    "deployment_id": "98015936-6a16-4f6c-95b4-6e9cadae047b",
+    "traffic_percent": 100,
+    "public_bundle_sha256": "bc18a8a5a45433efa28009e99ae2c03804289ab34095981e071d60a7370e5011",
+    "pin": {
+      "DEVELOPER_BASELINE": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:fa7d56b82c49238455a4c51ce522b67a512a1542a651faf58ba4fe35fd0a1930",
+      "KETO_EDGE_BRIDGE_URL": "https://keto-companion-ay-20261107.azurewebsites.net/internal/keto/compute"
+    }
+  },
+  "runner": {
+    "pin": {
+      "DEVELOPER_BASELINE": "4a0656df54cb4abba3dc64d317eabc51c943a763b833583aa9dab285b408d3a1",
+      "DEVELOPER_IMAGE_DIGEST": "sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5"
+    },
+    "application": {
+      "id": "a0328d47-d862-4cc2-be96-42e925e4e3ab",
+      "name": "keto-companion-developer-runner",
+      "version": 22,
+      "max_instances": 1,
+      "scheduling_policy": "default",
+      "image": "registry.cloudflare.com/0609100baf768271ea2811c9a9ee2b16/keto-developer-runner@sha256:85e3cf4dd79bf04bdc59a99b905db4f04bf1502701be7fcdc5b7844b59d288f5",
+      "environment_variable_count": 0,
+      "authorized_key_count": 0,
+      "network": {
+        "assign_ipv6": "none",
+        "assign_ipv4": "none",
+        "mode": "private"
+      }
+    }
+  },
+  "observed_main_runner_compatibility": {
+    "baseline_equal": false,
+    "image_equal": false,
+    "developer_execution_verified": false,
+    "impact": "Not established; observed main binding values differ from current runner metadata, and no corrective effect or developer-mode execution was performed."
+  },
+  "ordinary_controls_restored": true,
+  "temporary_probes": [],
+  "active_instances": [],
+  "nonterminal_builds": [],
+  "pending_owned_jobs": [],
+  "uncertain_effects": [],
+  "recipe_or_provider_probe_calls_by_release_worker": 0,
+  "policy_changes": 0,
+  "new_accounts_or_role_grants": 0,
+  "root_current_status_qa_handoff_preserved": true,
+  "online_functional_acceptance": "OPEN; no successful hosted discovery established by this followup",
+  "evidence": {
+    "native": "docs/evidence/AGR_306_C25_FOLLOWUP_NATIVE_ACCEPTANCE.json",
+    "azure": "docs/evidence/AGR_306_C25_FOLLOWUP_AZURE_DEPLOYMENT.json",
+    "azure_startup": "docs/evidence/AGR_306_C25_FOLLOWUP_AZURE_ADOPTION_NATIVE_UI.json",
+    "ordinary_failure": "docs/evidence/AGR_306_C25_FOLLOWUP_ORDINARY_FAILURE_1.json",
+    "recovery_setup_failure": "docs/evidence/AGR_306_C25_FOLLOWUP_RECOVERY_SETUP_FAILURE.json",
+    "final_readback": "docs/evidence/AGR_306_C25_FOLLOWUP_FINAL_READBACK.json"
+  },
+  "limits": [
+    "Azure safe failure followup is adopted/live; main Worker remains prior C25 release.",
+    "Neither failed readiness nor setup validation changes the accepted source/native/Azure receipts into failures.",
+    "No weaker guard, alternate controller/auth, policy workaround, blind replay or further release effect was used."
+  ]
+}
