@@ -400,13 +400,15 @@ class KitchenService:
 
     def own_dish(self,d,payload):
         k=core();cat=self.kitchen_catalog(d)
-        if not isinstance(payload,dict) or set(payload)!={'recipe_id','name_ru','category','base_servings','active_minutes','ingredients','steps_ru'}:raise ValueError('Проверьте состав блюда')
-        if not isinstance(payload['ingredients'],list) or not 1<=len(payload['ingredients'])<=20 or any(not isinstance(i,dict) or set(i)!={'food_id','grams_edible','state'} for i in payload['ingredients']):raise ValueError('Проверьте ингредиенты блюда')
-        recipe=k.validate_custom_recipe(dict(payload,protein_family='other',usage='observational',confirmed=True),cat)
+        if not isinstance(payload,dict) or set(payload)-{'recipe_id','name_ru','category','base_servings','active_minutes','ingredients','steps_ru','provenance','source_review_confirmed'} or not {'recipe_id','name_ru','category','base_servings','active_minutes','ingredients','steps_ru'}<=set(payload):raise ValueError('Проверьте состав блюда')
+        if not isinstance(payload['ingredients'],list) or not 1<=len(payload['ingredients'])<=30 or any(not isinstance(i,dict) or set(i)!={'food_id','grams_edible','state'} for i in payload['ingredients']):raise ValueError('Проверьте ингредиенты блюда')
+        if payload.get('provenance') and payload.get('source_review_confirmed') is not True:raise ValueError('Уточните пропуски источника и подтвердите проверку состава')
+        if payload.get('provenance') and not any(payload['provenance']==recipe.get('provenance') for request in init(d)['requests'].values() if request.get('status')=='completed' for recipe in request.get('response',{}).get('recipes',[])):raise ValueError('Источник не найден в ваших проверенных результатах поиска')
+        recipe=k.validate_custom_recipe(dict({key:value for key,value in payload.items() if key!='source_review_confirmed'},protein_family='other',usage='observational',confirmed=True),cat)
         cat['recipes'][recipe['recipe_id']]=recipe
         batch=k.calculate_recipe(cat,recipe['recipe_id'],recipe['base_servings'])
         portion=k.calculate_recipe(cat,recipe['recipe_id'],1)
-        return recipe,{'whole_batch':batch,'per_portion':portion,'issues':k.check_recipe(d['core']['profile'],batch),'usage':'observational','servings':recipe['base_servings'],'steps_ru':recipe['steps_ru']}
+        return recipe,{'whole_batch':batch,'per_portion':portion,'issues':k.check_recipe(d['core']['profile'],batch),'usage':'observational','servings':recipe['base_servings'],'steps_ru':recipe['steps_ru'],**({'provenance':recipe['provenance']} if recipe.get('provenance') else {})}
 
     def kitchen_proposal_preview(self,d,action,payload):
         if action=='intake':return self.intake_preview(d,payload)
@@ -431,7 +433,7 @@ class KitchenService:
 
     def kitchen_snapshot(self,d):
         block=init(d);cat=self.kitchen_catalog(d)
-        return {'version':block['version'],'diary_recipe_names':{e['recipe_id']:e.get('nutrition_snapshot',{}).get('source',{}).get('name_ru') or cat['recipes'].get(e['recipe_id'],{}).get('name_ru','Сохранённое блюдо') for e in d['core']['diary'] if e.get('recipe_id')},'pantry':[dict(i,name_ru=cat['foods'][i['food_id']]['name_ru']) for i in block['pantry'] if i['food_id'] in cat['foods']],'preferences':copy.deepcopy(block['preferences']),'ratings':copy.deepcopy(block['ratings']),'own_recipes':[{'recipe_id':rid,'name_ru':rec['name_ru']} for rid,rec in d['core'].get('custom_recipes',{}).items() if rec.get('usage')=='observational'],'saved_recipes':[rid for rid in d['core'].get('custom_recipes',{}) if rid.startswith('RK')],'memory_limits':'Только подтверждённые факты и до 5 собственных цитат; не безграничная память. Удаление темы не удаляет общие факты.','region':POLICY['region'],'today_summary':daily_summary(d,cat),
+        return {'version':block['version'],'diary_recipe_names':{e['recipe_id']:e.get('nutrition_snapshot',{}).get('source',{}).get('name_ru') or cat['recipes'].get(e['recipe_id'],{}).get('name_ru','Сохранённое блюдо') for e in d['core']['diary'] if e.get('recipe_id')},'pantry':[dict(i,name_ru=cat['foods'][i['food_id']]['name_ru']) for i in block['pantry'] if i['food_id'] in cat['foods']],'preferences':copy.deepcopy(block['preferences']),'ratings':copy.deepcopy(block['ratings']),'own_recipes':[{'recipe_id':rid,'name_ru':rec['name_ru']} for rid,rec in d['core'].get('custom_recipes',{}).items() if rec.get('usage')=='observational'],'saved_recipes':[rid for rid in d['core'].get('custom_recipes',{}) if rid.startswith('RK')],'discovery':next((dict(request_id=rid,query=req['public_query'],expected_revision=req.get('public_revision'),status=req['status'],response=req.get('response')) for rid,req in reversed(list(block['requests'].items())) if 'public_query' in req),None),'memory_limits':'Только подтверждённые факты и до 5 собственных цитат; не безграничная память. Удаление темы не удаляет общие факты.','region':POLICY['region'],'today_summary':daily_summary(d,cat),
             'pantry_origin':next(({'origin':'explicit_user_confirmation','at':r['at']} for r in reversed(list(d['receipts'].values())) if r['type']=='kitchen.pantry'),None),
             'legacy_disliked':[{'food_id':fid,'name_ru':cat['foods'][fid]['name_ru']} for fid in d['core']['profile']['settings']['disliked_food_ids'] if fid not in {fid for pref in block['preferences'] for fid in pref['food_ids']}],
             'favorites_details':[{'recipe_id':rid,'name_ru':cat['recipes'][rid]['name_ru']} for rid in d['core']['profile']['settings']['favorites'] if rid in cat['recipes']]}
@@ -539,7 +541,7 @@ class KitchenService:
             self.intake_apply(d,self.legacy_intake_payload(d,action,payload),proposal_id)
         elif action=='own_dish_save':
             recipe,_=self.own_dish(d,payload)
-            d['core']=k.apply_event(d['core'],{'event_id':'own_'+proposal_id,'type':'catalog.recipe.add','payload':dict(payload,protein_family='other',usage='observational',confirmed=True),'confirmed':True},d['core']['state_revision'],d['core']['owner_account_id'],self.kitchen_catalog(d))
+            d['core']=k.apply_event(d['core'],{'event_id':'own_'+proposal_id,'type':'catalog.recipe.add','payload':dict({key:value for key,value in payload.items() if key!='source_review_confirmed'},protein_family='other',usage='observational',confirmed=True),'confirmed':True},d['core']['state_revision'],d['core']['owner_account_id'],self.kitchen_catalog(d))
         elif action=='source_import':
             food=self.source_import_food(d,payload)
             d['core']=k.apply_event(d['core'],{'event_id':'source_'+proposal_id,'type':'catalog.food.add','payload':food,'confirmed':True},d['core']['state_revision'],d['core']['owner_account_id'],self.kitchen_catalog(d))
@@ -679,6 +681,47 @@ class KitchenService:
         if require_valid and issues:raise k.SafetyError('День не принят: '+', '.join(issues))
         return {'plan':plan,'accepted':False,'status':'calculated_draft' if not issues else 'partial_not_accepted','issues':issues,'shopping':missing,'inventory_for_servings':spec['servings']}
 
+    def discover_recipes(self,subject,d,v,query,request_id,expected_revision,kind):
+        k=core()
+        if not isinstance(query,str) or not 2<=len(query.strip())<=200 or any(ord(c)<32 for c in query):raise ValueError('Укажите публичный запрос о блюде, до 200 символов')
+        if not isinstance(request_id,str) or not re.fullmatch(r'[A-Za-z0-9_-]{8,100}',request_id):raise ValueError('Неверный request_id')
+        block=init(d);fingerprint=k.digest(['public_recipe',query.strip()]);old=block['requests'].get(request_id)
+        if old:
+            if old['hash']!=fingerprint:raise Conflict('request_id повторно использован с другим запросом')
+            if old['status']!='completed':raise Conflict('Запрос уже начат; автоматически не повторяется')
+            return {**copy.deepcopy(old['response']),'state':self.snapshot(d),'replayed':True,'model_called':False}
+        if expected_revision!=d['revision']:raise Conflict('Устаревший экран поиска')
+        today=datetime.now(timezone.utc).date().isoformat();usage=d['usage']
+        if usage.get('day')!=today:usage.clear();usage.update(day=today,calls=0,input_tokens=0,output_tokens=0)
+        if usage['calls']>=int(os.getenv('KETO_DAILY_REQUEST_LIMIT','60')):raise ValueError('Дневной лимит Azure достигнут')
+        usage['calls']+=1;block['requests'][request_id]={'hash':fingerprint,'status':'pending','public_query':query.strip(),'public_revision':expected_revision};block['requests']=dict(list(block['requests'].items())[-100:]);v=self.save(subject,d,v)
+        try:recipes,audit=self.recipe_discovery.discover(query.strip())
+        except RecipeUnavailable as exc:
+            latest,version=self.load(subject,kind)
+            if version!=v:raise Conflict('Состояние изменилось; результат поиска не подтверждён') from None
+            init(latest)['requests'][request_id]['status']='failed'
+            if not exc.attempted:latest['usage']['calls']-=1
+            result={'discovery_failed':True,'recipes':[],'query':query.strip(),'model_called':bool(exc.attempted),'model_roles':[exc.audit], 'message':'Внешний поиск не завершён. Автоматического повтора нет; можно пользоваться сохранёнными рецептами.'}
+            self.save(subject,latest,version)
+            return {**result,'state':self.snapshot(latest)}
+        latest,version=self.load(subject,kind)
+        from .domain import storage_consent
+        if version!=v or not storage_consent(latest) or not latest['processing_consent']:raise Conflict('Состояние или согласие изменилось; результат отброшен')
+        cat=self.kitchen_catalog(latest);at=k.utc_now()
+        for recipe in recipes:
+            recipe['provenance']={'kind':'public_recipe','source_url':recipe.pop('source_url'),'source_title':recipe.pop('source_title'),'retrieved_at':at,'imported':True}
+            for ingredient in recipe['ingredients']:
+                if '+' in ingredient['amount']:ingredient['grams']=None
+                compiled=food_search.compile_query(ingredient['name']);hits=[]
+                for food in cat['foods'].values():
+                    score=food_search.food_score(compiled,food)
+                    if score is not None:hits.append((score,food))
+                hits.sort(key=lambda item:(-item[0],item[1]['food_id']))
+                ingredient['matches']=[{key:f[key] for key in ('food_id','name_ru','state')} for _,f in hits[:5]]
+        result={'recipes':recipes,'query':query.strip(),'retrieved_at':at,'model_called':True,'model_roles':[audit],'message':'Найдены публичные рецепты. Проверьте все ингредиенты, массы и состояния перед расчётом.' if recipes else 'Прочитать полный рецепт не удалось. Уточните запрос или используйте свой текст.'}
+        latest['usage']['input_tokens']+=audit['input_tokens'];latest['usage']['output_tokens']+=audit['output_tokens'];init(latest)['requests'][request_id].update(status='completed',response=copy.deepcopy(result));self.save(subject,latest,version)
+        return {**result,'state':self.snapshot(latest)}
+
     def kitchen(self,subject,action='status',spec=None,request_id=None,thread_id=None,query='',recipe_id=None,values=None,expected_revision=None,kind='personal',recipe_timeout=None,chat_context=None):
         from .domain import storage_consent
         k=core();d,v=self.load(subject,kind);block=init(d);cat=self.kitchen_catalog(d);tid=thread_id or d['active_thread'];t={} if action in ('intake','intake_preview','diary_history') else topic(d,tid)
@@ -712,6 +755,7 @@ class KitchenService:
             matches=[{key:f[key] for key in ('food_id','name_ru','state','source_url')} for _,f in ranked]
             return {'foods':matches,'total':len(matches),'parsed':parsed,'search':food_search.search_info(search),'model_called':False}
         if not storage_consent(d) or not d['processing_consent']:raise ValueError('Сначала разрешите личное хранение и обработку; справочник доступен отдельно')
+        if action=='discover':return self.discover_recipes(subject,d,v,query,request_id,expected_revision,kind)
         if action=='diary_history':return self.diary_history(d,values,expected_revision)
         if action in ('intake_preview','intake'):
             if expected_revision is not None and expected_revision!=d['revision']:raise Conflict('Устаревший экран дневника')
@@ -733,7 +777,7 @@ class KitchenService:
             opts=values or {}
             if set(opts)!={'recipe_id'} or opts['recipe_id'] not in d['core'].get('custom_recipes',{}) or d['core']['custom_recipes'][opts['recipe_id']].get('usage')!='observational':raise ValueError('Сохранённое блюдо не найдено')
             rec=d['core']['custom_recipes'][opts['recipe_id']];batch=k.calculate_recipe(cat,rec['recipe_id'],rec['base_servings']);portion=k.calculate_recipe(cat,rec['recipe_id'],1)
-            return {'preview':{'whole_batch':batch,'per_portion':portion,'issues':k.check_recipe(d['core']['profile'],batch),'usage':'observational','servings':rec['base_servings'],'steps_ru':rec['steps_ru']},'model_called':False}
+            return {'preview':{'whole_batch':batch,'per_portion':portion,'issues':k.check_recipe(d['core']['profile'],batch),'usage':'observational','servings':rec['base_servings'],'steps_ru':rec['steps_ru'],**({'provenance':rec['provenance']} if rec.get('provenance') else {})},'model_called':False}
         if action=='own_dish_calculate':
             _,preview=self.own_dish(d,values or {})
             return {'preview':preview,'model_called':False}

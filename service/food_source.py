@@ -72,7 +72,8 @@ def search(query, cursor, limit, seed_ids=()):
         primary=has_required and search_query.score(head_en) is not None
         cheese=cheese_only and is_cheese_prefix
         derivative=cheese and is_derivative_cheese
-        hits.append(((-int(cheese),int(derivative),-int(primary),-score,norm_en,r['fdc_id']),r))
+        olive=search_query.required==('olive',) and norm_en.startswith('olives,')
+        hits.append(((-int(olive),-int(cheese),int(derivative),-int(primary),-score,norm_en,r['fdc_id']),r))
     hits=[r for _,r in sorted(hits,key=lambda x:x[0])]
     if offset>len(hits):raise ValueError('Курсор поиска вне диапазона')
     page=hits[offset:offset+limit];n=offset+len(page)

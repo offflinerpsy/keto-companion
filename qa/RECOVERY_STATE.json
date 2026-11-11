@@ -3,8 +3,17 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-11T12:36:24.315849+00:00",
-  "active_task": null,
+  "updated_at": "2026-11-11T14:28:36.099023+00:00",
+  "active_task": {
+    "id": "AGR-306-C25-ONLINE-RECIPES",
+    "status": "in_progress",
+    "stage": "source_and_mobile_accepted_release_pending",
+    "writer": "root",
+    "scope": "Actual sourced external recipe discovery→review→calculation→personal save/intake; regional package search from normal picker and available-carb propagation",
+    "actual_capability": "Same Azure Sol/high web_search probe completed23.058s with search/open_page/citations; no new provider/account",
+    "source_receipt": "docs/evidence/AGR_306_C25_SOURCE_ACCEPTANCE.json",
+    "ui_receipt": "docs/evidence/AGR_306_C25_UI_ACCEPTANCE.json"
+  },
   "last_completed": {
     "id": "AGR-306-C24-RELEASE",
     "linear_issue": "AGR-306",
@@ -38,8 +47,8 @@
     "product_acceptance": "physical_iPhone_17_Pro_pending; real_desktop_google_verified"
   },
   "next_task": {
-    "id": "AGR-306-OWNER-REPORT-TRIAGE",
-    "action": "Owner reloads current app and reports concrete remaining failures; triage selected report with source/version before new implementation."
+    "id": "AGR-306-C25-RELEASE",
+    "action": "Freeze source, native actual-runtime acceptance, exact Azure ZIP/digest adoption, then ordinary Worker promotion and hosted online search."
   },
   "no_relaunch": {
     "recorded_local_jobs": [

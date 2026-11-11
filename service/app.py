@@ -38,6 +38,7 @@ RUNTIME_CODE_FILES=(
     'service/planning.py',
     'service/portion_search.py',
     'service/recipe_brain.py',
+    'service/recipe_discovery.py',
     'service/speech.py',
     'service/store.py',
 )
@@ -90,7 +91,7 @@ TOOLS.extend([
 ])
 TOOLS.append(tool('keto_label_extract','Прочитать этикетку','Только неподтверждённый черновик; без сохранения.',{'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'image_data_url':{'type':'string','maxLength':1500000},'note':{'type':'string','maxLength':500},'thread_id':{'type':'string','maxLength':80}},['request_id','image_data_url']))
 MOBILE_HTTP_TOOLS={'keto_guidance','keto_topics','keto_reminders','keto_transcribe','keto_label_extract'}
-TOOLS.append(tool('keto_kitchen','Что приготовим','Единая кладовая, рецепты и память. Генерация может вызвать Azure Sol high; сохранения только через отдельное подтверждение.',{'action':{'type':'string','enum':['status','foods','source_search','source_detail','source_import','chat_action','intake_preview','intake','diary_history','food_portion','own_dish_calculate','own_dish_detail','own_dish_save','own_dish_diary','parse','generate','select','memory','pantry','remember','forget','save','favorite','rate','diary','accept_day']},'spec':O,'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'thread_id':{'type':'string','maxLength':80},'query':{'type':'string','maxLength':1000},'recipe_id':{'type':'string','maxLength':80},'values':O,'expected_revision':I},['action']))
+TOOLS.append(tool('keto_kitchen','Что приготовим','Единая кладовая, рецепты и память. Генерация может вызвать Azure Sol high; сохранения только через отдельное подтверждение.',{'action':{'type':'string','enum':['status','foods','source_search','source_detail','source_import','chat_action','intake_preview','intake','diary_history','food_portion','own_dish_calculate','own_dish_detail','own_dish_save','own_dish_diary','parse','generate','discover','select','memory','pantry','remember','forget','save','favorite','rate','diary','accept_day']},'spec':O,'request_id':{'type':'string','pattern':'^[A-Za-z0-9_-]{8,100}$'},'thread_id':{'type':'string','maxLength':80},'query':{'type':'string','maxLength':1000},'recipe_id':{'type':'string','maxLength':80},'values':O,'expected_revision':I},['action']))
 TOOL_MAP={x['name']:x for x in TOOLS}
 
 # Only these fixed domain failures may cross the private compute boundary.

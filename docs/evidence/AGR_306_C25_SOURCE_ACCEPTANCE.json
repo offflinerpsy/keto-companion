@@ -1,0 +1,98 @@
+{
+  "issue": "AGR-306",
+  "increment": "C25",
+  "stage": "source_and_synthetic_mobile_accepted",
+  "at": "2026-11-11T14:28:36.099023+00:00",
+  "base": "03eed6451b4aa21581c04440a1513a9f511bff05",
+  "branch": "codex/c25-online-recipes",
+  "runtime_code_sha256": "8bf3704c9c0d78fcb23bdfb4aca8de0f40a8616a29028fb20b141c58babf1d34",
+  "source_hashes": {
+    "service/recipe_discovery.py": "f7bab60bc62428e8e8e1358b9d4b6e10a8682489abf37b0f34bff71384090a1e",
+    "service/kitchen.py": "7fe2d7e5c4a263f96e1164a5974afcf5aa143f622088e33f2f9cc3ff423ad776",
+    "service/domain.py": "d6a23d5f37ce6dbd095732a062b9f381cd56ab1965bf1e231285e3e377c091bd",
+    "service/app.py": "8d8ce794bfb363832c5adaf71127afe145bab7330e783189ab5eddf7c35a6307",
+    "service/food_search.py": "6e46e8a597a714e0a715e6916590a79d7adc49a6dc13bdaad966f3d4191f6170",
+    "service/food_source.py": "2de22f317bf0deeefd109dbe7b929a55c2f8b4e46d2706514f8b916d805ce0f3",
+    "library/skills/keto-companion/scripts/keto_core.py": "88f875af5aa5a9f430480f6a4af2f6f720e26bce7fcd1ef5005bc2155fd47356",
+    "cloudflare-saas/src/compute.mjs": "16039f2f1acd49831244dd53b170d009c8900f3a99f5c524b3742706e074d5ae",
+    "cloudflare-saas/src/shop-lookup.mjs": "ad43fafa55d9509a967168cd452314ef18db1f5cd9546c1d5b4224d94f82f7c5",
+    "cloudflare-saas/public/app.js": "7045c033ced900058d4cb27964976d63bb311395f8336d428973222f3bb88aef",
+    "cloudflare-saas/public/recipe-discovery.js": "03895b12f49d35dc008ad49b4850ceaf58e7c382df0abb8a320199f1adbbbae9",
+    "cloudflare-saas/public/own-dish.js": "816559dd15774a1b9d4dc576e3b04358d8ad8b105facf4a8b86e1c3de3b3f5da",
+    "cloudflare-saas/public/food-picker.js": "35e615051cd6069ba876ceceef5682bdc5a815db613c39680de57af4efc19051",
+    "cloudflare-saas/public/shop-ui.js": "7586abe5377e20f33ccd9cb026accfe50c65cdfb9f541753a87b20d1bdbd5b2e",
+    "cloudflare-saas/public/intake-ui.js": "253e73212aef30529bd4fbe8957b65f3f83d430bfe17158097bd777dc311c7a5",
+    "cloudflare-saas/public/index.html": "9cc95d0b10c69b9b7b61ce8e4f707ff4e9e107531da49d9b4495697fb3123b34"
+  },
+  "source_checks": {
+    "checks": [
+      {
+        "name": "python",
+        "exit": 0,
+        "seconds": 35.907,
+        "log": "/Users/alexyarosh/Documents/ChatGPT/keto/verification/C25/SOURCE_FINAL_python.log",
+        "summary": ".................................................................. [ 41%]\n.s...................................................................... [ 52%]\n........................................................................ [ 63%]\n........................................................................ [ 73%]\n........................................................................ [ 84%]\n........................................................................ [ 95%]\n...............................                                          [100%]\n672 passed, 1 skipped, 6 subtests passed in 35.13s"
+      },
+      {
+        "name": "node",
+        "exit": 0,
+        "seconds": 28.844,
+        "log": "/Users/alexyarosh/Documents/ChatGPT/keto/verification/C25/SOURCE_FINAL_node.log",
+        "summary": "ℹ tests 325\nℹ suites 0\nℹ pass 325\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 28765.894084"
+      },
+      {
+        "name": "legacy_ui",
+        "exit": 0,
+        "seconds": 0.08,
+        "log": "/Users/alexyarosh/Documents/ChatGPT/keto/verification/C25/SOURCE_FINAL_legacy_ui.log",
+        "summary": "UI no-browser checks passed: account switch and late response, stale plan, expired preview, translations, consent, navigation, inline feedback"
+      },
+      {
+        "name": "legacy_oauth",
+        "exit": 0,
+        "seconds": 0.064,
+        "log": "/Users/alexyarosh/Documents/ChatGPT/keto/verification/C25/SOURCE_FINAL_legacy_oauth.log",
+        "summary": "OAuth UI no-browser checks passed: explicit consent, account switch, no profile data, callback"
+      },
+      {
+        "name": "contracts",
+        "exit": 0,
+        "seconds": 0.358,
+        "log": "/Users/alexyarosh/Documents/ChatGPT/keto/verification/C25/SOURCE_FINAL_contracts.log",
+        "summary": "{\"mode\": \"check\", \"files\": [\"azure-openapi.json\", \"database-schema.json\", \"developer-media-contract.json\", \"kitchen-capabilities.json\", \"tool-schemas.json\", \"ui-contracts.json\", \"worker-api-inventory.json\"], \"passed\": true, \"drift\": [], \"no_cloud_or_user_state\": true}"
+      },
+      {
+        "name": "specification",
+        "exit": 0,
+        "seconds": 0.078,
+        "log": "/Users/alexyarosh/Documents/ChatGPT/keto/verification/C25/SOURCE_FINAL_specification.log",
+        "summary": "{\n  \"passed\": true,\n  \"documents_checked\": 25,\n  \"local_links_checked\": 879,\n  \"findings\": [],\n  \"scope\": \"Required files, relative links, declared source paths and exact route-name inventory; not semantic or clinical certification\"\n}"
+      },
+      {
+        "name": "hygiene",
+        "exit": 0,
+        "seconds": 0.51,
+        "log": "/Users/alexyarosh/Documents/ChatGPT/keto/verification/C25/SOURCE_FINAL_hygiene.log",
+        "summary": "{\n  \"checked_files\": 697,\n  \"build_artifacts\": 29,\n  \"passed\": true,\n  \"findings\": [],\n  \"scope\": \"High-confidence patterns and path allowlist, not exhaustive secret detection or clinical/security validation\"\n}"
+      }
+    ],
+    "passed": true,
+    "seconds": 65.841,
+    "scope": "local source checks; no deploy/device/clinical claim"
+  },
+  "ui_acceptance": "docs/evidence/AGR_306_C25_UI_ACCEPTANCE.json",
+  "actual_provider_receipts": {
+    "web_search": "verification/C25/WEB_SEARCH_PROBE.json",
+    "structured_initial": "verification/C25/STRUCTURED_DISCOVERY_PROBE.json",
+    "constrained_empty": "verification/C25/STRUCTURED_DISCOVERY_PROBE_FINAL.json",
+    "final_working_salad": "verification/C25/FINAL_PAYLOAD_SALAD_ACCEPTANCE.json",
+    "regional": "verification/C25/REGIONAL_DIAGNOSIS.json"
+  },
+  "actual_final_provider": "same AzureSol/high;1full8ingredient/5steprecipe;41.214s;2billedsearches;noinventedgrams",
+  "regional_fix": "Unquoted escaped brand tokens preservecountryfilter;realquoted0→49Savushkin/83Prostokvashino",
+  "independent_review": "3blockersfixed;boundedindependentrecheck3Python+2Node passed;unchanged backend accepted",
+  "snapshot_baseline": "0f212c3b0cbaf76dab85e534c2851ab681c7faef6edb5b67553ffa70169e7420",
+  "public_bundle_sha256": "08079557c9144a21589a45a7126128991f6adfb9aaf92423bb825ae82b44bf2d",
+  "release": false,
+  "next_action": "Freeze source and existing native acceptance→exact Azure ZIP adoption→ordinary Worker release;then hosted public-query search and regional UI"
+}

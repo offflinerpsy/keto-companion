@@ -39,9 +39,9 @@ export async function handleShopLookup(req,env,h){
 // Explicit name search returns identifiers only; choosing a hit performs the separate barcode review.
 export async function searchProducts(query,wide,env,h,fetcher=fetch){
  if(typeof query!=='string'||query.trim().length<2||query.trim().length>80||typeof wide!=='boolean'||/[\u0000-\u001f\u007f]/u.test(query))h.fail(400,'INVALID_SEARCH');
- const term=query.trim();const literal='"'+term.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"';
+ const term=query.trim();const literal=term.split(/\s+/u).map(token=>/^(AND|OR|NOT)$/i.test(token)?'"'+token+'"':token.replace(/([+\-=&|!(){}\[\]^"~*?:\\/<>])/g,'\\$1')).join(' AND ');
  const q=literal+(wide?'':' AND (countries_tags:"en:russia" OR countries_tags:"en:belarus")');
- const key='search:'+await h.sha(JSON.stringify([term,wide]));const t=now();
+ const key='search:'+await h.sha(JSON.stringify(['unquoted-v2',term,wide]));const t=now();
  const cached=await h.dbfirst(env,'SELECT payload FROM shop_public_cache WHERE barcode=? AND expires_at>?',key,t);if(cached)return JSON.parse(cached.payload);
  if(await h.dbfirst(env,'SELECT until_at FROM shop_provider_backoff WHERE provider=? AND until_at>?','off',t))h.fail(503,'PROVIDER_BACKOFF');
  await h.dbrun(env,'DELETE FROM shop_provider_requests WHERE requested_at<=?',t-60);

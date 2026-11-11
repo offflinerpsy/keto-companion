@@ -1,0 +1,79 @@
+{
+  "issue": "AGR-306",
+  "increment": "C25",
+  "observed_at": "2026-11-11T14:28:36.099023+00:00",
+  "surface": "native background Chrome PERSONAL Offliner extensiona1f97a64;isolated loopback127.0.0.1:8898;actual Service/SQLite/core/proposals/intake",
+  "viewport_css": {
+    "width": 402,
+    "height": 873
+  },
+  "provider_scope": "Browser discovery used captured actual final Azure recipe and deterministic captured OFF-shaped fixture;0 live provider calls during UI test",
+  "source_recipe": {
+    "url": "https://calorizator.ru/recipe/61032",
+    "title": "Кето-салат с оливками и сыром фета",
+    "ingredients": 8,
+    "servings": 6,
+    "steps": 5,
+    "all_source_rows_preserved": true,
+    "food_review": [
+      "explicit5basefood/state matches",
+      "USDA review/confirmed personal imports:rawPekingcabbage,rawspringonion,rawlemonjuice"
+    ],
+    "explicit_synthetic_grams": [
+      300,
+      150,
+      100,
+      15,
+      3,
+      100,
+      40,
+      15
+    ],
+    "unknown_piece_tablespoon_weights": "explicit test inputs,not automatic source conversion",
+    "source_review_gate": "calculation blocked until reviewed",
+    "calculation_ui": {
+      "whole_kcal_rounded": 813,
+      "portion_kcal_rounded": 136,
+      "half_portion_kcal_rounded": 68
+    },
+    "saved_and_confirmed_intake": "same sourced recipe,0.5portion,2026-11-11,Europe/Minsk;visible after reload"
+  },
+  "regional": {
+    "origin_draft": "Региональная проверка C25;2servings;10minutes;steps;100g cucumber",
+    "cancel_preserved_draft": true,
+    "query": "Савушкин",
+    "exact_barcode": "4810268031793",
+    "confirmed_return": "one product added,blank grams,original title/steps/100g retained",
+    "synthetic_review": "100g basis/available-excludes-fiber explicitly chosen in fixture;not claimed actual physical TEOS label verification",
+    "mixed_calculation_ui": {
+      "available_batch_g": 11.5,
+      "available_portion_g": 5.8,
+      "total_net_fiber": "unknown with known subtotals;notzero"
+    },
+    "half_intake_ui": {
+      "kcal": 37,
+      "available_g": 2.9,
+      "total_fiber": "incomplete"
+    },
+    "save_intake_reload": "regional secondrecipe preserved after reload"
+  },
+  "copy_updates": "6focused+3focused UIchecks and supportedbuilders accepted after human-readable labels/clean source link/neutral cached-source status;backend unchanged",
+  "screenshots": [
+    "docs/evidence/AGR_306_C25_DISCOVERY.png",
+    "docs/evidence/AGR_306_C25_DIARY.png",
+    "docs/evidence/AGR_306_C25_REGIONAL_PORTION.png"
+  ],
+  "cleanup": {
+    "tab1973326811": "closed,absence verified",
+    "viewport": "reset",
+    "CUA": "completion summary+reset acknowledged",
+    "server47922": "exit0",
+    "port8898": "no listener"
+  },
+  "limitations": [
+    "Not a physical iPhone/camera/voice test",
+    "UI provider calls fixture-only; actual Azure and OFF receipts separate",
+    "No real family health writes",
+    "Hosted C25 provider/edge behavior still release acceptance"
+  ]
+}

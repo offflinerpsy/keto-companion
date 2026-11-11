@@ -120,3 +120,9 @@ test('another-method navigation keeps manual fallback and invalidates pending re
  n['shop-other-method'].onclick();assert.equal(n['shop-methods'].hidden,false);assert.equal(n['shop-form'].hidden,true);n['shop-manual'].onclick();assert.equal(n['shop-form'].hidden,false);assert.equal(f.name.value,'Сохраняемый черновик');
  resolve({review_candidate:candidate('Поздняя упаковка',[row('Protein',3)])});await waiting;assert.equal(f.name.value,'Сохраняемый черновик');assert.equal(n['shop-candidate'].children.length,0);assert.equal(n['shop-methods'].hidden,true);
 });
+
+test('C25 package flow returns only a confirmed product to a still-live origin; cancel never injects',async()=>{
+ const {n,f,ui}=shopHarness({call:async()=>({proposal:{id:'regional'}})});n['shop-search-form'].requestSubmit=()=>{};let live=true,selected=[],backs=0;const origin={valid:()=>live,select:f=>selected.push(f),back:()=>backs++};ui.openSearch({query:'Савушкин',origin});assert.equal(n['shop-query'].value,'Савушкин');const controls=n['shop-root'].children[0].children;assert.equal(controls[0].hidden,true);
+ n['shop-manual'].onclick();f.name.value='Савушкин TEOS';f.state.value='ready_to_eat';f.unit_basis.value='per100g';f.basis.value='available_excludes_fiber';f.carb.value='3,2';f.confirm.checked=true;n['shop-form'].onsubmit({preventDefault(){}});await tick();ui.afterApplied({receipt:{id:'regional',type:'catalog.food.add'}});assert.equal(selected.length,0);controls[0].onclick();assert.equal(selected.length,1);assert.equal(selected[0].name_ru,'Савушкин TEOS');assert.equal(backs,1);
+ ui.openSearch({query:'Другая упаковка',origin});controls[1].onclick();assert.equal(selected.length,1);assert.equal(backs,2);ui.openSearch({query:'Савушкин',origin});live=false;controls[0].onclick();assert.equal(selected.length,1);
+});
