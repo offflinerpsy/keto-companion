@@ -11,9 +11,11 @@ def response(recipe=None):return {'status':'completed','output':[{'type':'web_se
 def test_grounded_boundary_and_public_payload():
  captured=[]
  def transport(p):captured.append(p);return response()
- r,a=RecipeDiscovery(transport).discover('кабачок яйцо')
+ r,a=RecipeDiscovery(transport).discover('сыр')
  assert r[0]['ingredients'][1]['grams'] is None and a['web_search_requests']==1
- assert captured[0]['input'][0]['content'][0]['text']=='кабачок яйцо'
+ assert captured[0]['input'][0]['content'][0]['text']=='сыр'
+ assert 'кето- или низкоуглеводные рецепты' in captured[0]['instructions'] and 'обязательная тема поиска по умолчанию' in captured[0]['instructions']
+ assert 'ничего не удаляй ради кето' in captured[0]['instructions'] and 'не объявляй блюдо безопасным' in captured[0]['instructions']
  assert 'context' not in captured[0] and captured[0]['tools']==[{'type':'web_search'}]
  for mutate in (lambda r:r['output'].pop(0),lambda r:r['output'][0]['action']['sources'].clear()):
   bad=response();mutate(bad)

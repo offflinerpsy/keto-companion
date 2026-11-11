@@ -5,9 +5,9 @@
   "at": "2026-11-11T14:28:36.099023+00:00",
   "base": "03eed6451b4aa21581c04440a1513a9f511bff05",
   "branch": "codex/c25-online-recipes",
-  "runtime_code_sha256": "8bf3704c9c0d78fcb23bdfb4aca8de0f40a8616a29028fb20b141c58babf1d34",
+  "runtime_code_sha256": "70ce2226af25afdc9ef6e87cd6c6e4a07f13f63c0321ae2db36df48fe40609a9",
   "source_hashes": {
-    "service/recipe_discovery.py": "f7bab60bc62428e8e8e1358b9d4b6e10a8682489abf37b0f34bff71384090a1e",
+    "service/recipe_discovery.py": "3202ef10b26708cad431e19f8aae9cfaa0291462b97057c16f07a621ab3d7778",
     "service/kitchen.py": "7fe2d7e5c4a263f96e1164a5974afcf5aa143f622088e33f2f9cc3ff423ad776",
     "service/domain.py": "d6a23d5f37ce6dbd095732a062b9f381cd56ab1965bf1e231285e3e377c091bd",
     "service/app.py": "8d8ce794bfb363832c5adaf71127afe145bab7330e783189ab5eddf7c35a6307",
@@ -22,7 +22,8 @@
     "cloudflare-saas/public/food-picker.js": "35e615051cd6069ba876ceceef5682bdc5a815db613c39680de57af4efc19051",
     "cloudflare-saas/public/shop-ui.js": "7586abe5377e20f33ccd9cb026accfe50c65cdfb9f541753a87b20d1bdbd5b2e",
     "cloudflare-saas/public/intake-ui.js": "253e73212aef30529bd4fbe8957b65f3f83d430bfe17158097bd777dc311c7a5",
-    "cloudflare-saas/public/index.html": "9cc95d0b10c69b9b7b61ce8e4f707ff4e9e107531da49d9b4495697fb3123b34"
+    "cloudflare-saas/public/index.html": "9cc95d0b10c69b9b7b61ce8e4f707ff4e9e107531da49d9b4495697fb3123b34",
+    "cloudflare-saas/public/bug-report-contract.js": "0d9f524d17412945236578748273c6770a6616f7e95c2f9808085c4a3ffd66b7"
   },
   "source_checks": {
     "checks": [
@@ -91,8 +92,20 @@
   "actual_final_provider": "same AzureSol/high;1full8ingredient/5steprecipe;41.214s;2billedsearches;noinventedgrams",
   "regional_fix": "Unquoted escaped brand tokens preservecountryfilter;realquoted0→49Savushkin/83Prostokvashino",
   "independent_review": "3blockersfixed;boundedindependentrecheck3Python+2Node passed;unchanged backend accepted",
-  "snapshot_baseline": "0f212c3b0cbaf76dab85e534c2851ab681c7faef6edb5b67553ffa70169e7420",
-  "public_bundle_sha256": "08079557c9144a21589a45a7126128991f6adfb9aaf92423bb825ae82b44bf2d",
+  "snapshot_baseline": "2f826862e54d63440ed73f4d26240951e2a22f771ac66db581a165f1e7c3894c",
+  "public_bundle_sha256": "bc18a8a5a45433efa28009e99ae2c03804289ab34095981e071d60a7370e5011",
   "release": false,
-  "next_action": "Freeze source and existing native acceptance→exact Azure ZIP adoption→ordinary Worker release;then hosted public-query search and regional UI"
+  "next_action": "Freeze source and existing native acceptance→exact Azure ZIP adoption→ordinary Worker release;then hosted public-query search and regional UI",
+  "previous_source_candidate": "54d71fcc991d7bc674b7a5f3110df8d2dbf6c9fb",
+  "thematic_version_correction": {
+    "receipt": "verification/C25/THEMATIC_VERSION_PATCH.json",
+    "focused_python": 36,
+    "focused_node": 11,
+    "paid_calls": 0,
+    "explicit_theme_for_plain_queries": true,
+    "report_ui_version": "0.7.1-C25",
+    "previous_native": "5492f31d-87a9-4c62-b3df-7996fc3c93db accepted oldsource;Azure/mainhold beforeeffects",
+    "same_source_UI_journeys": "unchanged;reused",
+    "actual_provider_scope": "earlier same Azure/schema/extraction proof retained;new explicit theme wording gets actualhosted genericquery acceptance afterrelease"
+  }
 }

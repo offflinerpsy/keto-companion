@@ -1,4 +1,4 @@
-export const REPORT_UI_VERSION='0.7.1-C24';
+export const REPORT_UI_VERSION='0.7.1-C25';
 // Stable technical identifiers only. Never derive context from DOM text or URLs.
 export const REPORT_ROUTES=['chat','today','diary','recipes','products','more','settings','admin','developer','memory','sources','targets','knowledge','setup','setup-consent','setup-about','setup-restrictions','setup-targets'];
 export const REPORT_BLOCKS={page:{label:'Весь экран',selector:null},navigation:{label:'Верхнее меню и навигация',selector:'.top'},chat:{label:'Чат и отправка сообщения',selector:'[data-page="chat"]'},recipes:{label:'Поиск и список рецептов',selector:'[data-testid="recipe-library"]'},own_dish:{label:'Своё блюдо',selector:'#own-dish-root'},pantry:{label:'Домашние запасы',selector:'#kitchen-studio'},shop:{label:'Проверка продукта',selector:'#shop-root'},diary:{label:'Запись еды и дневник',selector:'[data-page="diary"]'},profile:{label:'Профиль и настройки',selector:'[data-page="more"]'},setup:{label:'Знакомство и ограничения',selector:'[data-page="setup"]'},proposal:{label:'Подтверждение изменений',selector:'#proposal-dialog'}};
