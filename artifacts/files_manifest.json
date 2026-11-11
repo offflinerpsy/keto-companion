@@ -4,16 +4,16 @@
   "files": [
     {
       "path": "cloudflare-saas/dist/worker.mjs",
-      "sha256": "49e545184244f229a5e059665b370bd151fa7a507fd64da145a517cc45a4dd66",
-      "bytes": 1709201,
+      "sha256": "1d9c1c1099363694a223a6524a8b15c689f99d821d27d15028de683ecd7ad9bc",
+      "bytes": 1723631,
       "mime": "application/javascript+module",
       "module_name": "worker.mjs",
       "module_type": "esm"
     },
     {
       "path": "cloudflare-saas/dist/worker-modules.mjs",
-      "sha256": "01a79b2d23a703b95219653b2d7b9f796bb136c2167fed6a42e1ee6a35ace19a",
-      "bytes": 182779,
+      "sha256": "19279bfc727964b6adbf480dddef6d6b8180bc5abe5eda3bf785fbb068705b2e",
+      "bytes": 177390,
       "mime": "application/javascript+module",
       "module_name": "worker-modules.mjs",
       "module_type": "esm"
@@ -28,8 +28,8 @@
     },
     {
       "path": "cloudflare-saas/dist/assets/app.bundle.js",
-      "sha256": "bc18a8a5a45433efa28009e99ae2c03804289ab34095981e071d60a7370e5011",
-      "bytes": 891780,
+      "sha256": "06ec08e0d65b3206eb8718bd8c2c7ceba51a90c97d231b52a7b5bd2459bb624c",
+      "bytes": 908151,
       "mime": "text/plain",
       "module_name": "assets/app.bundle.js",
       "module_type": "text"
@@ -44,8 +44,8 @@
     },
     {
       "path": "cloudflare-saas/dist/assets/style.css",
-      "sha256": "2423e7678080fe278c04f937767676d44cc51bf6f2c36d537faa72e8a9f44947",
-      "bytes": 91504,
+      "sha256": "1b823192035e8948058ca66336d57faf59b942e9365aec651f072509dd3764a2",
+      "bytes": 93861,
       "mime": "text/plain",
       "module_name": "assets/style.css",
       "module_type": "text"

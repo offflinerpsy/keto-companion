@@ -3,19 +3,13 @@
   "project_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "workspace_root": "/Users/alexyarosh/Projects/keto-companion-azure",
   "source_version": "0.7.1-tranquil-dev-pilot",
-  "updated_at": "2026-11-11T16:31:35.648634+00:00",
+  "updated_at": "2026-11-11T22:19:45.949263+00:00",
   "active_task": {
-    "id": "AGR-306-C25-ONLINE-RECIPES",
+    "id": "AGR-306-C26-BARCODE-LABEL",
     "status": "in_progress",
-    "stage": "online_search_service_filter_case_prepared;regional_and_backend_handling_live",
-    "writer": "root",
-    "scope": "Actual sourced external recipe discovery→review→calculation→personal save/intake; regional package search from normal picker and available-carb propagation",
-    "actual_capability": "Same Azure Sol/high web_search probe completed23.058s with search/open_page/citations; no new provider/account",
-    "source_receipt": "docs/evidence/AGR_306_C25_SOURCE_ACCEPTANCE.json",
-    "ui_receipt": "docs/evidence/AGR_306_C25_UI_ACCEPTANCE.json",
-    "hosted_evidence": "docs/evidence/AGR_306_C25_LIVE_UI.json",
-    "release_receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json",
-    "service_case": "docs/evidence/AGR_306_C25_AZURE_SEARCH_CASE.md"
+    "stage": "source_and_mobile_accepted_release_pending",
+    "source_receipt": "docs/evidence/AGR_306_C26_SOURCE_ACCEPTANCE.json",
+    "next_action": "Freeze exact source and run existing native acceptance then pinned ordinary release; no new recovery hook."
   },
   "last_completed": {
     "id": "AGR-306-C24-RELEASE",
@@ -247,5 +241,18 @@
     "main_source": "f86fbe9731df80b4e2204d22057e8c80ab9c01e3",
     "main_and_private_active_pins": "matched prior acceptedC25;appv23;latestuploadedsettings discrepancy retained",
     "receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json"
+  },
+  "previous_c25_partial": {
+    "id": "AGR-306-C25-ONLINE-RECIPES",
+    "status": "in_progress",
+    "stage": "online_search_service_filter_case_prepared;regional_and_backend_handling_live",
+    "writer": "root",
+    "scope": "Actual sourced external recipe discovery→review→calculation→personal save/intake; regional package search from normal picker and available-carb propagation",
+    "actual_capability": "Same Azure Sol/high web_search probe completed23.058s with search/open_page/citations; no new provider/account",
+    "source_receipt": "docs/evidence/AGR_306_C25_SOURCE_ACCEPTANCE.json",
+    "ui_receipt": "docs/evidence/AGR_306_C25_UI_ACCEPTANCE.json",
+    "hosted_evidence": "docs/evidence/AGR_306_C25_LIVE_UI.json",
+    "release_receipt": "docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json",
+    "service_case": "docs/evidence/AGR_306_C25_AZURE_SEARCH_CASE.md"
   }
 }

@@ -1,0 +1,80 @@
+{
+  "task": "AGR-306-C26",
+  "reviewer": "c26_review",
+  "status": "PASS_WITH_LIMITS",
+  "reviewed_at_utc": "2026-11-11T22:09:48.867917+00:00",
+  "base": "ae59c0a",
+  "scope": "Independent read-only review of changed shop UI/scanner, API signal seam, bug-report contract, affected save schema and shared-form CSS. No browser/network/cloud or source edits.",
+  "findings": [],
+  "resolved_findings": [
+    {
+      "title": "Dirty-field ownership survived product barcode reset",
+      "severity": "P2",
+      "initial_lines": "cloudflare-saas/public/shop-ui.js:46,52,55,57,60,61",
+      "initial_reproduction": "Manual edit name+protein, change barcode, select/read photo: new OCR name+protein incorrectly became empty because stale editedFields restored cleared values.",
+      "resolution": "Barcode input and explicit lookup now release dirty-field ownership. Independently rechecked both entry points with real setupShop and deferred/mock transport harness. Expected new photo name and 12g protein retained; tentative barcode preserved."
+    },
+    {
+      "title": "Manual replacement retained OFF attribution",
+      "severity": "P2",
+      "initial_lines": "cloudflare-saas/public/shop-ui.js:48,64",
+      "initial_reproduction": "OFF candidate -> manual fallback -> replace name/protein -> proposal incorrectly remained open_food_facts with old URL. Underlying source retention pre-existed, newly exposed C26 fallback directly affected.",
+      "resolution": "Manual method now sets source=null. Independently rechecked proposal as personal_label, null license/barcode, personal-label source_ref and manually supplied protein2."
+    }
+  ],
+  "independent_checks": [
+    {
+      "name": "dirty ownership after barcode input edit",
+      "result": "PASS"
+    },
+    {
+      "name": "dirty ownership after explicit lookup",
+      "result": "PASS"
+    },
+    {
+      "name": "manual replacement payload provenance",
+      "result": "PASS"
+    },
+    {
+      "name": "save-schema compatibility",
+      "result": "PASS_BY_INSPECTION",
+      "evidence": "library/skills/keto-companion/scripts/keto_core.py:1010-1035 accepts exact personal_label provenance/null fields; basis/mass/declared carbohydrate validation retained."
+    },
+    {
+      "name": "shared hidden form safety",
+      "result": "PASS_BY_INSPECTION",
+      "evidence": "public/style.css global [hidden]{display:none!important} remains; C26 grid rules cannot unhide forms."
+    },
+    {
+      "name": "report technical allowlist",
+      "result": "PASS_BY_INSPECTION",
+      "evidence": "src/bug-reports.mjs imports REPORT_ERRORS from public/bug-report-contract.js, so UI/server allowlist stays shared."
+    }
+  ],
+  "reused_checks": [
+    {
+      "result": "61 focused tests PASS",
+      "source": "Parent relayed sole writer receipt; not rerun by reviewer to avoid duplicate accepted execution."
+    }
+  ],
+  "limits": [
+    "Root owns rendered mobile screenshots, real OFF hit/miss, synthetic save/reload, full required source/release gates and exact live readback.",
+    "Physical phone camera permission/decoding remains outside this static/module review.",
+    "No new external provider or paid OCR requests were dispatched."
+  ],
+  "source_sha256": {
+    "cloudflare-saas/public/app.css": "cb7380c9d2e63c777bda3b777348d81ee03c30cb411c56b7520f7a8eabc3f441",
+    "cloudflare-saas/public/app.js": "75c99527aa2d0683d1faad667da52f6d7419251120b1a0fc95be52f1320ecf22",
+    "cloudflare-saas/public/bug-report-contract.js": "176b752a630498eb20163d55c2d1b6d4a2dea86fcc8267620e01ecaf3dd9d270",
+    "cloudflare-saas/public/bug-reports.js": "f95fe7d208cf3dbbb6446f505758216443e1757ed5a457b406d968356e06bf66",
+    "cloudflare-saas/public/shop-scanner.js": "0fb9f4c4b295f34bbd06f6ff9bb21eec5d4c1a8154c1692b5042abbd22137f23",
+    "cloudflare-saas/public/shop-ui.js": "a06e961475149c012af69598983b07c6b0b2337f6f9b957e929ed41e148cd735",
+    "cloudflare-saas/public/style.css": "1b823192035e8948058ca66336d57faf59b942e9365aec651f072509dd3764a2",
+    "cloudflare-saas/tests/shop-scanner.test.mjs": "ac4439bf3f3fbed3049c45c87619387a1f9c095244232a8f00f55cbd7d860464",
+    "cloudflare-saas/tests/shop-ui.test.mjs": "cb32ffd6a4b945aac41f46e37f2095bbc9a01410d8bad580ec31efcbe7ba6216",
+    "specs/001-iphone-keto-overhaul/plan.md": "cd11a9f0a8adabdf06b939c9559b16a7d7d150a3a345bfb7478c1dc0da529307",
+    "specs/001-iphone-keto-overhaul/spec.md": "570fdfaa88e750a742a252638e6378fc58cf585dafe821a4e65a30c55c8c4ca0",
+    "specs/001-iphone-keto-overhaul/tasks.md": "69c8c6885eccd4c48a7c050a90b575edf5e6631301b152de12c01053a47863e3"
+  },
+  "next_action": "Root integrates reviewer PASS against exact hashes with its current visual/synthetic acceptance and release gate receipts."
+}

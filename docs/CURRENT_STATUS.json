@@ -1,15 +1,15 @@
 {
   "schema": "keto-project-status-v1",
-  "updated_at": "2026-11-11T16:31:35.648634+00:00",
+  "updated_at": "2026-11-11T22:19:45.949809+00:00",
   "source_version": "0.7.1-tranquil-dev-pilot",
   "plugin_version": "0.2.1",
   "data_version": "0.1.1+verified-food-extension-2026-11-08",
   "active_task": {
-    "id": "AGR-306-C25-ONLINE-RECIPES",
+    "id": "AGR-306-C26-BARCODE-LABEL",
     "status": "in_progress",
-    "stage": "regional_accepted;backend_error_handling_live;online_search_acceptance_open",
-    "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
-    "exact_next_action": "Obtain service-side diagnosis for the prepared Azure content_filter case without replaying the refused request or weakening policy. No automatic jobs pending."
+    "stage": "source_and_mobile_accepted_release_pending",
+    "source_receipt": "docs/evidence/AGR_306_C26_SOURCE_ACCEPTANCE.json",
+    "next_action": "Freeze exact source and run existing native acceptance then pinned ordinary release; no new recovery hook."
   },
   "last_completed": "C24 contextual bug reports released;C25 regional picker/search/review accepted on actual hosted402x873;online recipe discovery remains unaccepted after real failures.",
   "next_task": {
@@ -339,5 +339,12 @@
     "region_hosted_accepted": true,
     "precise_failurehandling_backend_released": true,
     "main_worker_followup_promoted": false
+  },
+  "previous_c25_partial": {
+    "id": "AGR-306-C25-ONLINE-RECIPES",
+    "status": "in_progress",
+    "stage": "regional_accepted;backend_error_handling_live;online_search_acceptance_open",
+    "source_commit": "48ac620091f392f07af9511be05dd27b499c680c",
+    "exact_next_action": "Obtain service-side diagnosis for the prepared Azure content_filter case without replaying the refused request or weakening policy. No automatic jobs pending."
   }
 }

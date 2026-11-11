@@ -1,4 +1,4 @@
-import {REPORT_BLOCKS,REPORT_ROUTES,REPORT_ERRORS} from '../public/bug-report-contract.js';
+import {REPORT_BLOCK_IDS,REPORT_ROUTES,REPORT_ERRORS} from '../public/bug-report-contract.js';
 const now=()=>Math.floor(Date.now()/1000),clientID=/^[a-zA-Z0-9_-]{16,80}$/;
 const columns='number,client_id,description,block_id,context_json,status,revision,fix_version,evidence,issue_url,history_json,created_at,updated_at';
 const present=r=>({...r,context:JSON.parse(r.context_json),history:JSON.parse(r.history_json),context_json:undefined,history_json:undefined});
@@ -6,7 +6,7 @@ function text(x,max,required,h){if(typeof x!=='string'||x.length>max||(required&
 function keys(x,list,h){if(!x||Array.isArray(x)||typeof x!=='object'||Object.keys(x).sort().join()!==list.split(',').sort().join())h.fail(400,'INVALID_REPORT')}
 export function validateReport(x,h){
  keys(x,'client_id,description,block_id,context,technical_only',h);
- if(typeof x.client_id!=='string'||!clientID.test(x.client_id)||typeof x.block_id!=='string'||!Object.hasOwn(REPORT_BLOCKS,x.block_id)||x.technical_only!==true)h.fail(400,'INVALID_REPORT');
+ if(typeof x.client_id!=='string'||!clientID.test(x.client_id)||typeof x.block_id!=='string'||!REPORT_BLOCK_IDS.includes(x.block_id)||x.technical_only!==true)h.fail(400,'INVALID_REPORT');
  const description=text(x.description,4000,true,h),c=x.context;keys(c,'route,version,viewport,error_code',h);keys(c.viewport,'width,height',h);
  if(!REPORT_ROUTES.includes(c.route)||typeof c.version!=='string'||! /^[a-zA-Z0-9._-]{1,80}$/.test(c.version)||![c.viewport.width,c.viewport.height].every(v=>Number.isInteger(v)&&v>0&&v<=10000)||!(c.error_code===''||REPORT_ERRORS.includes(c.error_code)))h.fail(400,'INVALID_REPORT');
  return {client_id:x.client_id,description,block_id:x.block_id,context:{route:c.route,version:c.version,viewport:{width:c.viewport.width,height:c.viewport.height},error_code:c.error_code}};

@@ -55,3 +55,10 @@ Keep imported provenance in the owning saved-recipe contract rather than losing 
 Regional integration reuses current Worker OFF APIs/shop review in a top-level flow, with a narrow origin callback into shared food-picker/own-dish/portion. No duplicated scanner, provider or nested forms. Fix available-carbohydrate composition at keto_core's owning arithmetic boundary and propagate through recipe snapshots/intake UI. Unknowns and total/net/available bases remain separate.
 
 One source writer implements serially: discovery/domain/import+arithmetic, then UI/regional return, then integrated focused/full gates. Root owns spec, review, actual provider evidence, mobile pixels, canonical Linear and existing Azure/Cloudflare release. No framework, generic URL proxy, new national database or unbounded autonomous recipe crawler.
+
+
+## C26 implementation decision — 2026-11-11
+
+Current native mobile screenshot confirms adjacent label/control spacing. Source diagnosis finds barcode fetch has no client deadline/cancel and an input-generation change can suppress its completion while preserving “Ищу…”. Fresh owner KETO-2 is new/revision1 with no fix history; status-change claim is unproven. Keep existing Quagga2 1.13.0 and Azure label service. Use one bounded controller per operation, immediate fallback and confirmed scanned digits. Reuse semantic fieldset/label/button HTML and shared spacing/grid classes, informed by Web Awesome field/form patterns; preserve current Animate UI license and icons. No component framework installation. Official GS1 restricted-code semantics and EAEU label basis are documented in the C26 research artifact. Decisions receipt1fdc6729-5229-4350-9655-7e073792412b recommends retaining the native stack; root accepts this against verified code/pixels.
+
+One source writer owns shop-scanner/shop-ui/shop lookup, the API signal seam, shared form styles and report microcopy/tests. Root owns spec, canonical issue, independent visual/functional acceptance and release decision. Research and exact read-only live diagnosis are complete independent inputs, not live fix proof.

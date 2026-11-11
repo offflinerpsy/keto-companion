@@ -78,3 +78,12 @@ C24 remains released and accepted. C25 is explicitly authorized by the owner's n
 
 
 C25 final technical checkpoint — 2026-11-11: regional normal-picker search/review is accepted on the hosted 402×873 UI; a full sourced recipe → calculation/save/intake is accepted on isolated actual components. The ordinary hosted ingredient query remains unaccepted after a handled failure; one separate public diagnostic returned incomplete/content_filter. Safe error handling is live in Azure48ac620; main remains accepted C25f86 with unchanged public bundle. Followup Worker promotion stopped before acceptancePOST, recovery setup was rejected, and private runner/app/pin were restored to compatible accepted published state. T-C25-8 stays unchecked. Evidence: docs/evidence/AGR_306_C25_FOLLOWUP_RELEASE_RECEIPT.json, AGR_306_C25_FOLLOWUP_PRIVATE_ROLLBACK.json and prepared AGR_306_C25_AZURE_SEARCH_CASE.md. Next required result is service-side diagnosis and actual ordinary hosted search acceptance; no automated retry, filter bypass or pending jobs.
+
+
+## C26 — barcode/label completion and form coherence
+
+- [x] T-C26-1 Inspect fresh owner report and actual mobile pixels; research official barcode/label and compatible maintained UI sources.
+- [x] T-C26-2 Implement bounded barcode/scan lifecycle, confirmed code, actionable label fallback and precise bug delivery/error context.
+- [x] T-C26-3 Unify form spacing, nutrition groups and primary actions across shop, own-dish and intake/report forms without breaking saved preferences.
+- [x] T-C26-4 Verify meaningful failure/cancellation/stale-response and synthetic save/reload cases, inspect mobile pixels and run project-required source gates.
+- [ ] T-C26-5 Release exact accepted candidate through existing supported gates; inspect live assets/workflow, reconcile KETO-2 and report device limitations.

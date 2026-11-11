@@ -517,6 +517,28 @@ details>summary[data-icon]::before{color:var(--accent)}
 
 #bug-exact p{margin-block:8px;white-space:pre-wrap;overflow-wrap:anywhere}#bug-inbox>summary{min-height:44px;padding-block:10px}
 
+/* C26: readable field groups share one rhythm across package, dish and diary forms. */
+.form-stack,.form-section{display:grid;gap:20px;min-width:0}
+.form-section{margin:0;padding:20px 0;border:0;border-top:1px solid var(--line)}
+.form-section legend{padding:0 0 12px;font-weight:600;font-size:1.02em}
+.form-section>p,.form-section>details,.form-stack>p{margin:0}
+.form-nutrients{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 16px;min-width:0}
+#shop-form label,#shop-search-form label,#shop-barcode-stage>label,#shop-next-options>label,#own-form>label,#own-portion-tools>label,#intake-form label,#bug-dialog label{display:flex;flex-direction:column;gap:8px;margin:0;min-width:0;line-height:1.45}
+#shop-form label.check,#shop-search-form label.check,#bug-dialog label.check{flex-direction:row;align-items:flex-start;min-height:44px;gap:12px}
+#shop-form input:not([type=checkbox]),#shop-form select,#shop-barcode,#shop-query,#own-form input,#own-form select,#own-form textarea,#intake-form input,#intake-form select,#bug-dialog input:not([type=checkbox]),#bug-dialog select,#bug-dialog textarea{width:100%;min-width:0;min-height:48px;margin:0;box-sizing:border-box}
+#shop-search-form,#shop-barcode-stage,#shop-photo-stage,#own-form,#intake-form,#bug-form{display:grid;gap:20px;min-width:0}
+#shop-search-form[hidden],#shop-barcode-stage[hidden],#shop-photo-stage[hidden],#shop-form[hidden],#shop-fallback[hidden]{display:none}
+#shop-form .button-row,#shop-fallback,.shop-photo-actions{gap:12px;flex-wrap:wrap}
+#shop-fallback{margin-block:12px 20px}#shop-fallback button{min-height:44px;max-width:100%;white-space:normal}
+#shop-status:empty{display:none}#shop-status{overflow-wrap:anywhere;line-height:1.5;margin-block:16px}
+#shop-form button,#own-form button,#intake-form button,#bug-dialog button{min-height:44px}
+#shop-candidate{overflow-wrap:anywhere;min-width:0}#shop-candidate details{margin-block:16px}#shop-candidate h3{margin-top:24px}
+#shop-portion-options[open],#shop-allergen-review[open]{display:grid;gap:16px}
+#own-form>label+label,#intake-form>label+label,#bug-dialog label+label{margin-top:0}
+#bug-dialog label{margin-block:16px}#bug-dialog .button-row{gap:12px;margin-top:20px}
+body.large .form-nutrients{grid-template-columns:1fr}
+@media(max-width:370px){.form-nutrients{gap:20px 12px}.form-section{padding-block:18px}}
+
 /* Compact overview keeps the meal map within easy reach on 402px screens. */
 .diary-date-picker{position:relative;min-height:50px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:8px;font-weight:500;font-size:.94em}
 .diary-date-picker input{position:absolute;inset:0;opacity:0;min-height:100%;cursor:pointer}

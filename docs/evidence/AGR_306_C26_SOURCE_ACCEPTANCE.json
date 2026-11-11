@@ -1,0 +1,36 @@
+{
+  "schema": "keto-c26-source-acceptance-v1",
+  "status": "source_accepted_release_pending",
+  "date": "2026-11-11T22:19:45.947207+00:00",
+  "base": "ae59c0a74d376653188e29105fbb42fcb4a7ab32",
+  "checks": {
+    "python_passed": 681,
+    "python_skipped": 1,
+    "python_subtests": 6,
+    "node_passed": 338,
+    "legacy_ui": true,
+    "oauth_ui": true,
+    "contracts": true,
+    "specification": true,
+    "repository": true,
+    "native_http": true,
+    "native_promotion_focused": true,
+    "independent_review": "no remaining blockers; two corrected data ownership/provenance defects"
+  },
+  "ui": "docs/evidence/AGR_306_C26_UI_ACCEPTANCE.json",
+  "live_label": "docs/evidence/AGR_306_C26_LIVE_LABEL.json",
+  "bundle_sha256": "06ec08e0d65b3206eb8718bd8c2c7ceba51a90c97d231b52a7b5bd2459bb624c",
+  "style_sha256": "1b823192035e8948058ca66336d57faf59b942e9365aec651f072509dd3764a2",
+  "packaging": "app.css54579<60000; Worker metadata109252<110000; bounds unchanged; CSS byte-identical to visual acceptance",
+  "failed_receipts_retained": [
+    "verification/C26/node.log artifact bounds",
+    "verification/C26/contracts.log generated UI selector drift; regenerated with exporter"
+  ],
+  "limitations": [
+    "No physical phone camera test",
+    "No real family product/profile/diary writes",
+    "Live existing backend label extraction accepted; C26 frontend release pending",
+    "C25 online recipe content_filter remains unresolved; no request replay"
+  ],
+  "next_action": "Freeze exact source then supported existing native image acceptance, accepted pin and ordinary staging release."
+}

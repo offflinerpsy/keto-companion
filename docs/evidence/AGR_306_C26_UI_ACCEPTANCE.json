@@ -1,0 +1,29 @@
+{
+  "schema": "keto-c26-ui-acceptance-v1",
+  "scope": "native Chrome background tab; loopback synthetic upstreams, actual label schema/Service/proposal/CAS/SQLite; not physical camera or live OCR",
+  "loaded_bundle": "e829152199ecb0beaa1b150a4851b12c627523e309d1c5bedea64d7a531b35cd",
+  "checks": [
+    "barcode miss→photo upload→validated label→explicit state/basis/allergen review→proposal→confirm save",
+    "reload→ordinary ingredient search→1 matching personal product",
+    "360px dark/large single-column fields; no horizontal overflow",
+    "402px light normal two-column nutrient fields; no horizontal overflow",
+    "430px dark/large own-dish spacing; no horizontal overflow"
+  ],
+  "known_values": {
+    "energy_kcal": 66.8,
+    "protein_g": 8,
+    "fat_g": 2,
+    "available_carbohydrate_g": 4.2,
+    "total_carbohydrate_g": null,
+    "fiber_g": null,
+    "source": "personal_label"
+  },
+  "images": [
+    "AFTER_NUTRIENTS_FINAL_402.jpg",
+    "SAVED_FINAL_402.jpg",
+    "RELOADED_PRODUCT_402.jpg",
+    "DARK_LARGE_360.jpg",
+    "OWN_DISH_430.jpg"
+  ],
+  "pending": "source packaging split preserves CSS bytes; actual live label + release checks pending"
+}
